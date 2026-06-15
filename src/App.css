@@ -1,0 +1,213 @@
+/* App.css - стили остаются такими же */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.mortgage-calculator {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  overflow: hidden;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h1 {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 25px 30px;
+  margin: 0;
+  font-size: 28px;
+}
+
+h2 {
+  color: #333;
+  font-size: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #667eea;
+}
+
+h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 0;
+}
+
+.input-section {
+  background: #f8f9fa;
+  padding: 25px;
+  border-right: 1px solid #e0e0e0;
+}
+
+.results-section {
+  padding: 25px;
+  background: white;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+  font-size: 14px;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-group.checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.input-group.checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+.input-group.checkbox input {
+  width: auto;
+  cursor: pointer;
+}
+
+.info-block {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.info-block strong {
+  display: inline-block;
+  min-width: 140px;
+}
+
+.bank-group {
+  margin-bottom: 30px;
+}
+
+.bank-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 15px;
+}
+
+.bank-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 15px;
+  border-left: 4px solid #667eea;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.bank-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.bank-card.error {
+  border-left-color: #dc3545;
+  background: #fff5f5;
+}
+
+.bank-name {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.bank-detail {
+  font-size: 13px;
+  color: #666;
+  margin: 5px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.bank-detail::before {
+  content: "•";
+  color: #667eea;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.error-message {
+  color: #dc3545;
+  text-align: center;
+  justify-content: center;
+}
+
+.error-message::before {
+  content: "⚠️";
+  color: #dc3545;
+  margin-right: 8px;
+}
+
+/* Адаптивность */
+@media (max-width: 900px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .input-section {
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .bank-grid {
+    grid-template-columns: 1fr;
+  }
+}

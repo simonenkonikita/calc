@@ -1,0 +1,247 @@
+/* Заголовок предложений банков */
+.banks-header {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid #667eea;
+}
+
+/* Группа банков */
+.bank-group {
+  margin-bottom: 2.5rem;
+}
+
+.bank-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 0.75rem;
+  color: white;
+}
+
+.bank-group-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.bank-group-count {
+  font-size: 0.875rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+}
+
+/* Категории внутри банка */
+.bank-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bank-categories .category-group {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: #f9fafb;
+}
+
+.bank-categories .category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.bank-categories .category-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.bank-categories .category-count {
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+}
+
+/* Сетка карточек внутри категории */
+.bank-categories .banks-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+}
+
+/* Карточка банка */
+.bank-categories .bank-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  cursor: pointer;
+  background: white;
+  transition: all 0.2s;
+}
+
+.bank-categories .bank-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.bank-categories .bank-card.selected {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-width: 2px;
+}
+
+/* Верхняя часть карточки */
+.bank-categories .bank-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.bank-categories .bank-info {
+  flex: 1;
+}
+
+.bank-categories .bank-info h4 {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.bank-categories .bank-program {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.bank-categories .bank-rate {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-top: 0.25rem;
+}
+
+.bank-categories .payment-info {
+  text-align: right;
+}
+
+.bank-categories .payment-label {
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.bank-categories .payment-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* Сетка деталей */
+.bank-categories .bank-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+  font-size: 0.75rem;
+}
+
+.bank-categories .bank-detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.bank-categories .bank-detail-label {
+  color: #6b7280;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.bank-categories .bank-detail-value {
+  font-weight: 500;
+  color: #1f2937;
+  text-align: right;
+  word-break: break-word;
+}
+
+.bank-categories .bank-detail-value.positive {
+  color: #16a34a;
+}
+
+.bank-categories .bank-detail-value.warning {
+  color: #ea580c;
+}
+
+/* Дополнительная информация */
+.bank-categories .bank-duration {
+  font-size: 0.7rem;
+  color: #3b82f6;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.bank-categories .bank-excess {
+  font-size: 0.7rem;
+  color: #ef4444;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f3f4f6;
+  font-weight: 500;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  .bank-categories .banks-list {
+    grid-template-columns: 1fr;
+    padding: 0.75rem;
+  }
+
+  .bank-group-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .bank-group-title {
+    font-size: 1rem;
+  }
+
+  .bank-categories .bank-card-header {
+    flex-direction: column;
+  }
+
+  .bank-categories .payment-info {
+    text-align: left;
+    margin-top: 0.5rem;
+  }
+
+  .bank-categories .bank-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bank-categories .category-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}

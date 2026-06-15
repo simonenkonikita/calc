@@ -1,0 +1,279 @@
+.coefficients-page {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #f3f4f6;
+  min-height: 100vh;
+}
+
+.coefficients-header {
+  margin-bottom: 2rem;
+}
+
+.coefficients-header h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.coefficients-header p {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Фильтры */
+.filters-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.filter-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.filter-group select,
+.filter-group input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  min-width: 200px;
+  outline: none;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.reset-btn {
+  padding: 0.5rem 1rem;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background 0.2s;
+}
+
+.reset-btn:hover {
+  background: #4b5563;
+}
+
+/* Информационная панель */
+.info-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+/* Секция банка */
+.bank-section {
+  margin-bottom: 1.5rem;
+  background: white;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.bank-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.bank-title:hover {
+  opacity: 0.95;
+}
+
+.bank-title-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bank-title h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.programs-count {
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.expand-icon {
+  font-size: 1rem;
+  transition: transform 0.2s;
+}
+
+/* Таблица */
+.table-wrapper {
+  overflow-x: auto;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.coefficients-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.7rem;
+  min-width: 1300px;
+}
+
+.coefficients-table th {
+  background: #f9fafb;
+  padding: 0.6rem 0.5rem;
+  text-align: center;
+  font-weight: 600;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.coefficients-table td {
+  padding: 0.6rem 0.5rem;
+  border: 1px solid #f3f4f6;
+  color: #4b5563;
+  text-align: center;
+}
+
+.coefficients-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.program-cell {
+  font-weight: 500;
+  color: #1f2937;
+  min-width: 180px;
+  text-align: left;
+}
+
+.rate-cell {
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.coeff-cell {
+  font-family: "Courier New", monospace;
+  font-size: 0.65rem;
+}
+
+.coeff-cell.highlight {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.coeff-cell.important {
+  background: #fef3c7;
+  color: #d97706;
+  font-weight: 700;
+}
+
+/* Бейджи */
+.type-badge {
+  display: inline-block;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+.type-full {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.type-short {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.type-family {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.type-it {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.duration-badge,
+.feature-badge {
+  display: inline-block;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.55rem;
+  font-weight: 500;
+  margin-left: 0.4rem;
+  background: #f3f4f6;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  .coefficients-page {
+    padding: 1rem;
+  }
+
+  .filters-bar {
+    flex-direction: column;
+  }
+
+  .filter-group select,
+  .filter-group input {
+    min-width: 100%;
+  }
+
+  .bank-title {
+    flex-direction: row;
+    padding: 0.75rem 1rem;
+  }
+
+  .bank-title-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .bank-title h2 {
+    font-size: 1rem;
+  }
+}

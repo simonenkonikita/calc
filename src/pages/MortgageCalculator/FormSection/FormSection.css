@@ -1,0 +1,81 @@
+/* FormSection.css */
+.form-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.form-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-block h2 {
+  color: #333;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #667eea;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: #555;
+}
+
+.field select,
+.field input[type="number"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.field input[type="range"] {
+  width: 100%;
+  cursor: pointer;
+}
+
+.range-value {
+  font-weight: 600;
+  color: #667eea;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-field input {
+  width: auto;
+  cursor: pointer;
+}
+
+.checkbox-field label {
+  font-size: 0.875rem;
+  color: #555;
+  cursor: pointer;
+}

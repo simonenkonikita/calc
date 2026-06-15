@@ -1,0 +1,4 @@
+*.json
+**/*.json
+dist
+node_modules
