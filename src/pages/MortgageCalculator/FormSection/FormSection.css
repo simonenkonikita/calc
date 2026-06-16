@@ -8,7 +8,7 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
 }
 
@@ -19,7 +19,7 @@
 
 .form-block h2 {
   color: #333;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
@@ -30,6 +30,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  flex: 1;
 }
 
 .field {
@@ -51,6 +52,14 @@
   border: 1px solid #ddd;
   border-radius: 0.375rem;
   font-size: 0.875rem;
+  transition: border-color 0.2s;
+}
+
+.field select:focus,
+.field input[type="number"]:focus {
+  border-color: #667eea;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
 .field input[type="range"] {
@@ -63,24 +72,75 @@
   color: #667eea;
 }
 
+/* Блок с чекбоксами */
+.form-block-checkboxes .form-fields {
+  gap: 0.75rem;
+}
+
 .checkbox-field {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.25rem 0;
 }
 
-.checkbox-field input {
-  width: auto;
+.checkbox-field input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
   cursor: pointer;
+  accent-color: #667eea;
+  flex-shrink: 0;
 }
 
 .checkbox-field label {
   font-size: 0.875rem;
-  color: #555;
+  color: #374151;
   cursor: pointer;
+  user-select: none;
+  line-height: 1.4;
+}
+
+.checkbox-field label:hover {
+  color: #1f2937;
 }
 
 .field input[type="number"]::placeholder {
   color: #9ca3af;
   font-size: 0.75rem;
+}
+
+/* Адаптив */
+@media (max-width: 1024px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-section {
+    padding: 1rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .form-block h2 {
+    font-size: 1rem;
+  }
+
+  .checkbox-field {
+    padding: 0.15rem 0;
+  }
+
+  .checkbox-field input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+  }
+
+  .checkbox-field label {
+    font-size: 0.8125rem;
+  }
 }

@@ -46,7 +46,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
                   const newComplex = e.target.value;
                   const types = getApartmentTypes(newComplex);
                   onInputChange("complex", newComplex);
-                  // Автоматически выбираем первый доступный тип квартиры
                   if (types.length > 0) {
                     onInputChange("apartmentType", types[0]);
                   }
@@ -106,20 +105,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 }
               />
             </div>
-
-            <div className="checkbox-field">
-              <input
-                type="checkbox"
-                id="considerDeposit"
-                checked={formData.considerDepositInCost}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  onInputChange("considerDepositInCost", e.target.checked)
-                }
-              />
-              <label htmlFor="considerDeposit">
-                Учитывать бронь в стоимости
-              </label>
-            </div>
           </div>
         </div>
 
@@ -174,6 +159,26 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 }
                 placeholder="30"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Блок: Другие параметры */}
+        <div className="form-block form-block-checkboxes">
+          <h2>Другие параметры</h2>
+          <div className="form-fields">
+            <div className="checkbox-field">
+              <input
+                type="checkbox"
+                id="considerDeposit"
+                checked={formData.considerDepositInCost}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  onInputChange("considerDepositInCost", e.target.checked)
+                }
+              />
+              <label htmlFor="considerDeposit">
+                Учитывать бронь в стоимости
+              </label>
             </div>
 
             <div className="checkbox-field">
