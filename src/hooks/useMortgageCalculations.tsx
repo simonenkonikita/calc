@@ -43,6 +43,7 @@ export const useMortgageCalculator = () => {
     considerDepositInCost: false,
     downPaymentPercent: 20.1,
     manualDownPayment: 0,
+    loanTerm: 30,
     noSubsidyInflate: false,
     mortgageWithoutDownPayment: false,
     applyMinDownPayment: false,

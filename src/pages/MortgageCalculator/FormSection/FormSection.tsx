@@ -158,6 +158,24 @@ export const FormSection: React.FC<FormSectionProps> = ({
               />
             </div>
 
+            <div className="field">
+              <label>Срок ипотеки (лет)</label>
+              <input
+                type="number"
+                min={1}
+                max={30}
+                step={1}
+                value={formData.loanTerm || ""}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  onInputChange(
+                    "loanTerm",
+                    e.target.value ? Number(e.target.value) : 30,
+                  )
+                }
+                placeholder="30"
+              />
+            </div>
+
             <div className="checkbox-field">
               <input
                 type="checkbox"
