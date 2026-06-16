@@ -61,13 +61,21 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
 }) => {
   const [showOverstatement, setShowOverstatement] = useState(true);
   const [selectedBankFilter, setSelectedBankFilter] = useState<string>("all");
+  const [selectedProgramTypeFilter, setSelectedProgramTypeFilter] =
+    useState<string>("all");
 
   // Получаем уникальные банки из результатов
   const uniqueBanks = useMemo(() => {
     return Array.from(new Set(bankResults.map((offer) => offer.bank)));
   }, [bankResults]);
 
-  // Фильтруем результаты по банку
+  // Получаем уникальные типы программ из результатов
+  const uniqueProgramTypes = useMemo(() => {
+    const types = new Set(bankResults.map((offer) => offer.type));
+    return Array.from(types);
+  }, [bankResults]);
+
+  // Фильтруем результаты по банку и типу программы
   const filteredBankResults = useMemo(() => {
     let filtered = bankResults;
 
@@ -75,8 +83,14 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
       filtered = filtered.filter((offer) => offer.bank === selectedBankFilter);
     }
 
+    if (selectedProgramTypeFilter !== "all") {
+      filtered = filtered.filter(
+        (offer) => offer.type === selectedProgramTypeFilter,
+      );
+    }
+
     return filtered;
-  }, [bankResults, selectedBankFilter]);
+  }, [bankResults, selectedBankFilter, selectedProgramTypeFilter]);
 
   // Группируем предложения по банкам и категориям
   const groupedData = useMemo(() => {
@@ -129,6 +143,18 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   // Сброс фильтров
   const resetFilters = () => {
     setSelectedBankFilter("all");
+    setSelectedProgramTypeFilter("all");
+  };
+
+  // Получение названия типа программы
+  const getProgramTypeLabel = (type: string): string => {
+    const labels: Record<string, string> = {
+      full: "Базовая",
+      short: "Короткий срок",
+      family: "Семейная",
+      it: "ИТ",
+    };
+    return labels[type] || type;
   };
 
   return (
@@ -154,8 +180,23 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
               ))}
             </select>
 
+            {/* Фильтр по типу программы */}
+            <select
+              className="bank-filter-select"
+              value={selectedProgramTypeFilter}
+              onChange={(e) => setSelectedProgramTypeFilter(e.target.value)}
+            >
+              <option value="all">Все типы</option>
+              {uniqueProgramTypes.map((type) => (
+                <option key={type} value={type}>
+                  {getProgramTypeLabel(type)}
+                </option>
+              ))}
+            </select>
+
             {/* Кнопка сброса */}
-            {selectedBankFilter !== "all" && (
+            {(selectedBankFilter !== "all" ||
+              selectedProgramTypeFilter !== "all") && (
               <button className="reset-filters-btn" onClick={resetFilters}>
                 ✕
               </button>
@@ -285,6 +326,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                   {formatMoney(offer.downPaymentAmount)}
                                 </span>
                               </div>
+                              {/* Дополнительные детали только для ипотеки без ПВ */}
                               {mortgageWithoutDownPayment && (
                                 <>
                                   <div className="bank-detail-item">
