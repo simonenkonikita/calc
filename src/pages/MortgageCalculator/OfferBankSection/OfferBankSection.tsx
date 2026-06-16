@@ -75,6 +75,10 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
     return Array.from(types);
   }, [bankResults]);
 
+  const isFiltersActive = useMemo(() => {
+    return selectedBankFilter !== "all" || selectedProgramTypeFilter !== "all";
+  }, [selectedBankFilter, selectedProgramTypeFilter]);
+
   // Фильтруем результаты по банку и типу программы
   const filteredBankResults = useMemo(() => {
     let filtered = bankResults;
@@ -194,13 +198,14 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
               ))}
             </select>
 
-            {/* Кнопка сброса */}
-            {(selectedBankFilter !== "all" ||
-              selectedProgramTypeFilter !== "all") && (
-              <button className="reset-filters-btn" onClick={resetFilters}>
-                ✕
-              </button>
-            )}
+            {/* Кнопка "Очистить" - всегда видна, но меняет цвет */}
+            <button
+              className={`reset-filters-btn ${isFiltersActive ? "active" : "inactive"}`}
+              onClick={resetFilters}
+              disabled={!isFiltersActive}
+            >
+              <span>✕</span> Очистить
+            </button>
 
             {/* Галочка для скрытия/показа строки "Завышение" */}
             <label className="toggle-overstatement">

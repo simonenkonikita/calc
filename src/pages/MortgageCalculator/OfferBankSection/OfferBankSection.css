@@ -45,17 +45,30 @@
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
+/* Кнопка сброса фильтров */
 .reset-filters-btn {
-  padding: 0.4rem 0.6rem;
-  background: #ef4444;
-  color: white;
-  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
-  cursor: pointer;
   font-size: 0.875rem;
+  transition: all 0.3s ease;
+  background: #f9fafb;
+  color: #9ca3af;
+  white-space: nowrap;
+  cursor: not-allowed;
 }
 
-.reset-filters-btn:hover {
+.reset-filters-btn.active {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+  cursor: pointer;
+}
+
+.reset-filters-btn.active:hover {
   background: #dc2626;
 }
 
@@ -314,7 +327,7 @@
   font-weight: 500;
 }
 
-/* Адаптив */
+/* Адаптив для мобильных */
 @media (max-width: 768px) {
   .banks-header-wrapper {
     flex-direction: column;
@@ -329,6 +342,11 @@
   .bank-filter-select {
     min-width: 100%;
     width: 100%;
+  }
+
+  .reset-filters-btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .toggle-overstatement {
