@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import type { BankProgramResult } from "../../../utils/types";
 import "./OfferBankSection.css";
+import { CATEGORY_ORDER, PROGRAM_TYPE_LABELS } from "../../../utils/constants";
 
 interface OfferBankSectionProps {
   bankResults: BankProgramResult[];
@@ -17,15 +18,6 @@ interface BankProgramResultWithIndex extends BankProgramResult {
 
 // Порядок банков для отображения
 const BANK_ORDER = ["Сбербанк", "Альфа-Банк", "ВТБ", "Совкомбанк", "Уралсиб"];
-
-// Порядок категорий для отображения
-const CATEGORY_ORDER = [
-  { key: "base", label: "🏠 Базовая ипотека", types: ["full"] },
-  { key: "long", label: "📈 Субсидии на длинный срок", types: ["full"] },
-  { key: "short", label: "⚡ Субсидии на короткий срок", types: ["short"] },
-  { key: "family", label: "👨‍👩‍👧‍👦 Семейная ипотека", types: ["family"] },
-  { key: "it", label: "💻 ИТ ипотека", types: ["it"] },
-];
 
 // Функция для определения категории программы
 const getProgramCategory = (offer: BankProgramResultWithIndex): string => {
@@ -152,13 +144,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
 
   // Получение названия типа программы
   const getProgramTypeLabel = (type: string): string => {
-    const labels: Record<string, string> = {
-      full: "Базовая",
-      short: "Короткий срок",
-      family: "Семейная",
-      it: "ИТ",
-    };
-    return labels[type] || type;
+    return PROGRAM_TYPE_LABELS[type] || type;
   };
 
   return (

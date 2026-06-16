@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import "./CoefficientsPage.css";
 import { bankOffers } from "../../data/bankOffers";
-import { calculateBankCoefficients } from "../../hooks/mortgageCalculations";
+import { calculateBankCoefficients } from "../../hooks/calculateBankCoefficients";
 
 export const CoefficientsPage: React.FC = () => {
   const [selectedBank, setSelectedBank] = useState<string>("all");

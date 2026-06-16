@@ -8,8 +8,13 @@ import type {
 import { bankOffers } from "../data/bankOffers";
 import { housingPrices } from "../data/calculatorData";
 import { variables } from "../data/limitdDate";
-import { calculateFullMortgage, formatMoney } from "./mortgageCalculations";
-
+import { calculateFullMortgage } from "./calculateFullMortgage";
+import { formatMoney } from "./formatMoney";
+import {
+  DEFAULT_LOAN_TERM_YEARS,
+  MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGE,
+  PRICE_PER_SQUARE_METER_DEFAULT,
+} from "../utils/constants";
 // Функция для получения цены за м2
 const getPricePerSquareMeter = (
   complexName: string,
@@ -28,7 +33,7 @@ const getPricePerSquareMeter = (
 
   if (!found) {
     console.warn(`Цена не найдена для ${complexName} - ${apartmentType}`);
-    return 140000;
+    return PRICE_PER_SQUARE_METER_DEFAULT;
   }
 
   return found.pricePerSquareMeter;
@@ -43,7 +48,7 @@ export const useMortgageCalculator = () => {
     considerDepositInCost: false,
     downPaymentPercent: 20.1,
     manualDownPayment: 0,
-    loanTerm: 30,
+    loanTerm: DEFAULT_LOAN_TERM_YEARS,
     noSubsidyInflate: false,
     mortgageWithoutDownPayment: false,
     applyMinDownPayment: false,
@@ -71,7 +76,7 @@ export const useMortgageCalculator = () => {
   const finalPricePerM2 = useMemo(() => {
     if (basePricePerM2 === null) return null;
     if (formData.mortgageWithoutDownPayment) {
-      return basePricePerM2 + 10000;
+      return basePricePerM2 + MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGE;
     }
     return basePricePerM2;
   }, [basePricePerM2, formData.mortgageWithoutDownPayment]);
@@ -142,7 +147,7 @@ export const useMortgageCalculator = () => {
         // Специальная обработка для связанных полей
         if (field === "mortgageWithoutDownPayment" && value === true) {
           console.log(
-            "Включена ипотека без ПВ - цена за м² увеличена на 10 000 ₽",
+            `Включена ипотека без ПВ - цена за м² увеличена на ${MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGE.toLocaleString()} ₽`,
           );
         }
         return { ...prev, [field]: value };

@@ -3,6 +3,15 @@ import type { ChangeEvent } from "react";
 import type { CalculatorFormData } from "../../../utils/types";
 import { housingPrices } from "../../../data/calculatorData";
 import "./FormSection.css";
+import {
+  DEFAULT_LOAN_TERM_YEARS,
+  MAX_AREA,
+  MAX_DOWN_PAYMENT_PERCENT,
+  MAX_LOAN_TERM,
+  MIN_AREA,
+  MIN_DOWN_PAYMENT_PERCENT,
+  MIN_LOAN_TERM,
+} from "../../../utils/constants";
 
 interface FormSectionProps {
   formData: CalculatorFormData;
@@ -79,14 +88,14 @@ export const FormSection: React.FC<FormSectionProps> = ({
               <label>Площадь (м²)</label>
               <input
                 type="number"
-                min={20}
-                max={150}
+                min={MIN_AREA}
+                max={MAX_AREA}
                 step={1}
                 value={formData.area || ""}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   onInputChange(
                     "area",
-                    e.target.value ? Number(e.target.value) : 20,
+                    e.target.value ? Number(e.target.value) : MIN_AREA,
                   )
                 }
               />
@@ -116,14 +125,16 @@ export const FormSection: React.FC<FormSectionProps> = ({
               <label>Первоначальный взнос (%)</label>
               <input
                 type="number"
-                min={5}
-                max={90}
+                min={MIN_DOWN_PAYMENT_PERCENT}
+                max={MAX_DOWN_PAYMENT_PERCENT}
                 step={0.1}
                 value={formData.downPaymentPercent || ""}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   onInputChange(
                     "downPaymentPercent",
-                    e.target.value ? Number(e.target.value) : 5,
+                    e.target.value
+                      ? Number(e.target.value)
+                      : MIN_DOWN_PAYMENT_PERCENT,
                   )
                 }
               />
@@ -147,14 +158,16 @@ export const FormSection: React.FC<FormSectionProps> = ({
               <label>Срок ипотеки (лет)</label>
               <input
                 type="number"
-                min={1}
-                max={30}
+                min={MIN_LOAN_TERM}
+                max={MAX_LOAN_TERM}
                 step={1}
                 value={formData.loanTerm || ""}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   onInputChange(
                     "loanTerm",
-                    e.target.value ? Number(e.target.value) : 30,
+                    e.target.value
+                      ? Number(e.target.value)
+                      : DEFAULT_LOAN_TERM_YEARS,
                   )
                 }
                 placeholder="30"
