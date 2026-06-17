@@ -27,8 +27,9 @@ export interface CalculatorFormData {
   // Параметры ипотеки
   downPaymentPercent: number; // Значение ПВ (%)
   manualDownPayment: number; // Ввести ПВ (часть ПВ) вручную
-  loanTerm: number; // срок ипоетки
-  // Переключатели
+  loanTerm: number; // срок ипотеки
+  // Другие параметры
+  projectFinancingBank: string;
   noSubsidyInflate: boolean; // Не завышать на субсидию
   mortgageWithoutDownPayment: boolean; // Ипотека без ПВ
   applyMinDownPayment: boolean; // Применить min ПВ

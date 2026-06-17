@@ -47,6 +47,8 @@ export const calculateFullMortgage = (
   // 3. Остаток от стоимости
   const remainingAmount = objectCost - downPayment;
 
+  const loanTermYears = formData.loanTerm || 30; // ← получаем срок из формы
+
   // 4. Расчет для каждого банка
   const bankResults: BankProgramResult[] = [];
 
@@ -57,6 +59,7 @@ export const calculateFullMortgage = (
         downPayment,
         remainingAmount,
         formData.downPaymentPercent,
+        loanTermYears,
         offer,
         variables,
         formData.noSubsidyInflate,

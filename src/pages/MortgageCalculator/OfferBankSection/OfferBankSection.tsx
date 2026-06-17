@@ -51,7 +51,8 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   formatMoney,
   mortgageWithoutDownPayment = false,
 }) => {
-  const [showOverstatement, setShowOverstatement] = useState(true);
+  // По умолчанию завышение СКРЫТО
+  const [showOverstatement, setShowOverstatement] = useState(false);
   const [selectedBankFilter, setSelectedBankFilter] = useState<string>("all");
   const [selectedProgramTypeFilter, setSelectedProgramTypeFilter] =
     useState<string>("all");
@@ -290,7 +291,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
 
                             {/* Сетка деталей - одна колонка */}
                             <div className="bank-details-list">
-                              {/* Показываем "Завышение" только если галочка включена */}
+                              {/* Показываем "Завышение" ТОЛЬКО если галочка включена */}
                               {showOverstatement && (
                                 <div className="bank-detail-item">
                                   <span className="bank-detail-label">

@@ -23,7 +23,7 @@ const getPricePerSquareMeter = (
   // Если нет данных, возвращаем значение по умолчанию
   if (!complexName || !apartmentType) {
     console.warn("Не указан ЖК или тип квартиры");
-    return 140000;
+    return PRICE_PER_SQUARE_METER_DEFAULT;
   }
 
   const found = housingPrices.find(
@@ -49,6 +49,7 @@ export const useMortgageCalculator = () => {
     downPaymentPercent: 20.1,
     manualDownPayment: 0,
     loanTerm: DEFAULT_LOAN_TERM_YEARS,
+    projectFinancingBank: "Сбербанк",
     noSubsidyInflate: false,
     mortgageWithoutDownPayment: false,
     applyMinDownPayment: false,

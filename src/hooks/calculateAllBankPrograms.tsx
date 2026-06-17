@@ -6,6 +6,7 @@ export const calculateAllBankPrograms = (
   objectCost: number,
   downPayment: number,
   remainingAmount: number, // Добавлен параметр
+  loanTermYears: number,
   downPaymentPercent: number, // Добавлен параметр
   bankOffers: BankOffer[],
   variables: Variables,
@@ -38,6 +39,7 @@ export const calculateAllBankPrograms = (
         downPayment,
         remainingAmount,
         downPaymentPercent,
+        loanTermYears,
         offer,
         variables,
         noSubsidyInflate,

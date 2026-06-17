@@ -10,7 +10,7 @@ export const calculateContractAmount = (
   bankOffer: BankOffer,
   variables: Variables,
   noSubsidyInflate: boolean, // $L$9 - не завышать на субсидию
-  mortgageWithoutDownPayment: boolean, // $L$10 - ипотека без ПВ
+  mortgageWithoutDownPayment: boolean /*  */, // $L$10 - ипотека без ПВ
   applyMinDownPayment: boolean, // $L$11 - применить мин ПВ
 ): number => {
   const coefficients = calculateBankCoefficients(bankOffer);

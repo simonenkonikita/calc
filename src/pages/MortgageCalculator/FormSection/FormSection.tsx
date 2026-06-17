@@ -4,13 +4,13 @@ import type { CalculatorFormData } from "../../../utils/types";
 import { housingPrices } from "../../../data/calculatorData";
 import "./FormSection.css";
 import {
-  DEFAULT_LOAN_TERM_YEARS,
   MAX_AREA,
   MAX_DOWN_PAYMENT_PERCENT,
   MAX_LOAN_TERM,
   MIN_AREA,
   MIN_DOWN_PAYMENT_PERCENT,
   MIN_LOAN_TERM,
+  PROJECT_FINANCING_BANKS,
 } from "../../../utils/constants";
 
 interface FormSectionProps {
@@ -25,20 +25,51 @@ export const FormSection: React.FC<FormSectionProps> = ({
   formData,
   onInputChange,
 }) => {
-  // Список ЖК для выбора (уникальные значения из housingPrices)
   const complexes = Array.from(
     new Set(housingPrices.map((item) => item.complexName)),
   );
 
-  // Функция для получения типов квартир из данных
   const getApartmentTypes = (complex: string): string[] => {
     return housingPrices
       .filter((item) => item.complexName === complex)
       .map((item) => item.apartmentType);
   };
 
-  // Получаем доступные типы для выбранного ЖК
   const availableTypes = getApartmentTypes(formData.complex);
+
+  // Обработчик для поля "Первоначальный взнос"
+  const handleDownPaymentChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    // Если поле пустое, ничего не делаем (ждём onBlur)
+    if (value === "") {
+      onInputChange("downPaymentPercent", value as any);
+      return;
+    }
+
+    const numValue = Number(value);
+
+    // Если значение больше максимума - корректируем сразу
+    if (numValue > MAX_DOWN_PAYMENT_PERCENT) {
+      onInputChange("downPaymentPercent", MAX_DOWN_PAYMENT_PERCENT);
+      return;
+    }
+
+    // Для значений меньше минимума - НЕ корректируем сразу,
+    // чтобы пользователь мог ввести "30" через "3"
+    onInputChange("downPaymentPercent", numValue);
+  };
+
+  // Обработчик потери фокуса для поля "Первоначальный взнос"
+  const handleDownPaymentBlur = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    if (value === "" || Number(value) < MIN_DOWN_PAYMENT_PERCENT) {
+      onInputChange("downPaymentPercent", MIN_DOWN_PAYMENT_PERCENT);
+    } else if (Number(value) > MAX_DOWN_PAYMENT_PERCENT) {
+      onInputChange("downPaymentPercent", MAX_DOWN_PAYMENT_PERCENT);
+    }
+  };
 
   return (
     <div className="form-section">
@@ -129,14 +160,8 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 max={MAX_DOWN_PAYMENT_PERCENT}
                 step={0.1}
                 value={formData.downPaymentPercent || ""}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  onInputChange(
-                    "downPaymentPercent",
-                    e.target.value
-                      ? Number(e.target.value)
-                      : MIN_DOWN_PAYMENT_PERCENT,
-                  )
-                }
+                onChange={handleDownPaymentChange}
+                onBlur={handleDownPaymentBlur}
               />
             </div>
 
@@ -165,9 +190,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   onInputChange(
                     "loanTerm",
-                    e.target.value
-                      ? Number(e.target.value)
-                      : DEFAULT_LOAN_TERM_YEARS,
+                    e.target.value ? Number(e.target.value) : MIN_LOAN_TERM,
                   )
                 }
                 placeholder="30"
@@ -180,6 +203,22 @@ export const FormSection: React.FC<FormSectionProps> = ({
         <div className="form-block form-block-checkboxes">
           <h2>Другие параметры</h2>
           <div className="form-fields">
+            <div className="field">
+              <label>Проектное финансирование</label>
+              <select
+                value={formData.projectFinancingBank || "Сбербанк"}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                  onInputChange("projectFinancingBank", e.target.value)
+                }
+              >
+                {PROJECT_FINANCING_BANKS.map((bank) => (
+                  <option key={bank} value={bank}>
+                    {bank}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="checkbox-field">
               <input
                 type="checkbox"

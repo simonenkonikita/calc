@@ -1,3 +1,4 @@
+import { DEFAULT_MIN_PV_PERCENT } from "../utils/constants";
 import { BankOffer, Variables, BankProgramResult } from "../utils/types";
 import { calculateContractAmount } from "./calculateContractAmount";
 import { calculateMonthlyPayment } from "./calculateMonthlyPayment";
@@ -7,7 +8,8 @@ export const calculateBankProgram = (
   objectCost: number, // $B$7 - стоимость объекта
   downPayment: number, // $B$13 - получивщаяся сумма ПВ от стоимость объекта
   remainingAmount: number, // $B$14 - сумма ипотеки (objectCost - downPayment)
-  userDownPaymentPercent: number, // $B$8 - процент ПВ из формы
+  userDownPaymentPercent: number, // сумма ПВ в %
+  loanTermYears: number, // $B$8 - процент ПВ из формы
   bankOffer: BankOffer,
   variables: Variables,
   noSubsidyInflate: boolean, // $L$9 - не завышать на субсидию
@@ -34,13 +36,15 @@ export const calculateBankProgram = (
   let downPaymentAmount: number;
   let ownFunds: number;
 
-  const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
+  const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100); // ПВ от стоимости объекта в указанных %
   const downPaymentFromContract =
-    contractAmount * (userDownPaymentPercent / 100);
+    contractAmount * (userDownPaymentPercent / 100); //  ПВ от найденой суммы в договоре
 
   // Cуммы ПВ
   if (downPayment < userDesiredDownPayment) {
     downPaymentAmount = contractAmount * (userDownPaymentPercent / 100);
+  } else if (downPayment >= userDesiredDownPayment) {
+    downPaymentAmount = contractAmount * (DEFAULT_MIN_PV_PERCENT / 100);
   } else if (downPayment >= downPaymentFromContract) {
     downPaymentAmount = downPayment;
   } else {
@@ -98,11 +102,17 @@ export const calculateBankProgram = (
     developerAccount = contractAmount - subsidyAmount;
   }
 
+  // Срок ипотеки
+  const loanTermMonths =
+    bankOffer.type === "short"
+      ? bankOffer.durationMonths || 12 // для коротких программ - фиксированный срок
+      : loanTermYears * 12; // для всех остальных - из поля "Срок ипотеки"
+
   // 10. Ежемесячный платеж (аннуитетный)
   const monthlyPayment = calculateMonthlyPayment(
     mortgageAmount,
     bankOffer.rate,
-    bankOffer.durationMonths || 360, // если не указан срок, то 30 лет
+    loanTermMonths, // если не указан срок, то 30 лет
   );
 
   return {
@@ -110,7 +120,7 @@ export const calculateBankProgram = (
     program: bankOffer.program,
     type: bankOffer.type,
     rate: bankOffer.rate,
-    durationMonths: bankOffer.durationMonths,
+    durationMonths: loanTermMonths,
     monthlyPayment: Math.ceil(monthlyPayment),
     overstatement: Math.ceil(overstatement),
     contractAmount: Math.ceil(contractAmount),

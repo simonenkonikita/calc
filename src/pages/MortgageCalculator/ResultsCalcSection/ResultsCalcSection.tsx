@@ -5,11 +5,13 @@ import "./ResultsSection.css";
 interface ResultsCalcSectionProps {
   objectResult: ObjectCalculationResult;
   formatMoney: (amount: number) => string;
+  isManualCost?: boolean;
 }
 
 export const ResultsCalcSection: React.FC<ResultsCalcSectionProps> = ({
   objectResult,
   formatMoney,
+  isManualCost = false,
 }) => {
   return (
     <div className="results-section">
@@ -28,13 +30,16 @@ export const ResultsCalcSection: React.FC<ResultsCalcSectionProps> = ({
             %)
           </div>
           <div>
-            <strong>Остаток:</strong>{" "}
+            <strong>Ипотека:</strong>{" "}
             {formatMoney(objectResult.remainingAmount)}
           </div>
-          <div>
-            <strong>Цена за м²:</strong>{" "}
-            {formatMoney(objectResult.pricePerSquareMeter)}
-          </div>
+          {/* Показываем цену за м² только если НЕ ручной ввод */}
+          {!isManualCost && (
+            <div>
+              <strong>Цена за м²:</strong>{" "}
+              {formatMoney(objectResult.pricePerSquareMeter)}
+            </div>
+          )}
         </div>
       </div>
     </div>
