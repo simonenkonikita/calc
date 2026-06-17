@@ -1,4 +1,4 @@
-import { DEFAULT_MIN_PV_PERCENT } from "../utils/constants";
+import { MIN_DOWN_PAYMENT_PERCENT } from "../utils/constants";
 import { BankOffer, Variables, BankProgramResult } from "../utils/types";
 import { calculateContractAmount } from "./calculateContractAmount";
 import { calculateMonthlyPayment } from "./calculateMonthlyPayment";
@@ -33,23 +33,23 @@ export const calculateBankProgram = (
   const overstatement = contractAmount - objectCost;
 
   // 2. Расчет суммы ПВ (как в Excel: =IF($B$13<$B$7*$B$8/100, C18*$B$8/100, IF($B$13>=C18*$B$8/100, $B$13, C18*$B$8/100)))
-  let downPaymentAmount: number;
-  let ownFunds: number;
-
-  const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100); // ПВ от стоимости объекта в указанных %
+  const contractAmountMinPV = contractAmount * (bankOffer.minPVPercent / 100);
   const downPaymentFromContract =
     contractAmount * (userDownPaymentPercent / 100); //  ПВ от найденой суммы в договоре
 
-  // Cуммы ПВ
-  if (downPayment < userDesiredDownPayment) {
-    downPaymentAmount = contractAmount * (userDownPaymentPercent / 100);
-  } else if (downPayment >= userDesiredDownPayment) {
-    downPaymentAmount = contractAmount * (DEFAULT_MIN_PV_PERCENT / 100);
-  } else if (downPayment >= downPaymentFromContract) {
+  let downPaymentAmount: number;
+  let ownFunds: number;
+
+  if (mortgageWithoutDownPayment) {
+    downPaymentAmount = contractAmountMinPV;
+  } else if (userDownPaymentPercent > MIN_DOWN_PAYMENT_PERCENT) {
+    downPaymentAmount = downPaymentFromContract;
+  } else if (downPayment >= contractAmountMinPV) {
     downPaymentAmount = downPayment;
   } else {
-    downPaymentAmount = downPaymentFromContract;
+    downPaymentAmount = contractAmountMinPV;
   }
+
   downPaymentAmount = Math.ceil(downPaymentAmount);
 
   // 3. Собственные средства (E = D - B13 в Excel)
