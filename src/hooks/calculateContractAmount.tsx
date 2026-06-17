@@ -7,6 +7,7 @@ export const calculateContractAmount = (
   downPayment: number, // $B$13 - сумма ПВ
   remainingAmount: number, // $B$14 - сумма ипотеки (objectCost - downPayment)
   userDownPaymentPercent: number, // $B$8 - процент ПВ из формы
+  manualDownPayment: number,
   bankOffer: BankOffer,
   variables: Variables,
   noSubsidyInflate: boolean, // $L$9 - не завышать на субсидию

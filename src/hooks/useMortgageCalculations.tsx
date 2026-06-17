@@ -147,7 +147,7 @@ export const useMortgageCalculator = () => {
     ) => {
       setFormData((prev) => {
         // Специальная обработка для связанных полей
-        const newData = { ...prev, [field]: value };
+        let newData = { ...prev, [field]: value };
 
         // ✅ Если включена "Ипотека без ПВ", сбрасываем ПВ до 20.1%
         if (field === "mortgageWithoutDownPayment" && value === true) {
@@ -156,6 +156,23 @@ export const useMortgageCalculator = () => {
             `🏷️ Ипотека без ПВ - ПВ сброшен до ${DEFAULT_MIN_PV_PERCENT}%`,
           );
         }
+
+        // ✅ Если ручной ввод ПВ больше 0, сбрасываем ПВ в % до 20.1%
+        if (
+          field === "manualDownPayment" &&
+          typeof value === "number" &&
+          value > 0
+        ) {
+          newData = {
+            ...newData,
+            downPaymentPercent: DEFAULT_MIN_PV_PERCENT,
+          };
+          console.log(
+            `✏️ Ручной ввод ПВ (${value} ₽) - ПВ в % сброшен до ${DEFAULT_MIN_PV_PERCENT}%`,
+          );
+        }
+
+        return newData;
 
         // ✅ Если включена "Ипотека без ПВ", логируем увеличение цены
         if (field === "mortgageWithoutDownPayment" && value === true) {

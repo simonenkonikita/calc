@@ -60,6 +60,7 @@ export const calculateFullMortgage = (
         remainingAmount,
         formData.downPaymentPercent,
         loanTermYears,
+        formData.manualDownPayment,
         offer,
         variables,
         formData.noSubsidyInflate,

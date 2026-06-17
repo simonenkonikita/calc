@@ -10,6 +10,7 @@ export const calculateBankProgram = (
   remainingAmount: number, // $B$14 - сумма ипотеки (objectCost - downPayment)
   userDownPaymentPercent: number, // сумма ПВ в %
   loanTermYears: number, // $B$8 - процент ПВ из формы
+  manualDownPayment: number,
   bankOffer: BankOffer,
   variables: Variables,
   noSubsidyInflate: boolean, // $L$9 - не завышать на субсидию
@@ -22,6 +23,7 @@ export const calculateBankProgram = (
     downPayment,
     remainingAmount,
     userDownPaymentPercent,
+    manualDownPayment,
     bankOffer,
     variables,
     noSubsidyInflate,
@@ -42,6 +44,8 @@ export const calculateBankProgram = (
 
   if (mortgageWithoutDownPayment) {
     downPaymentAmount = contractAmountMinPV;
+  } else if (manualDownPayment > 0) {
+    downPaymentAmount = Math.max(manualDownPayment, contractAmountMinPV);
   } else if (userDownPaymentPercent > MIN_DOWN_PAYMENT_PERCENT) {
     downPaymentAmount = downPaymentFromContract;
   } else if (downPayment >= contractAmountMinPV) {
