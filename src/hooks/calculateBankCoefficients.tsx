@@ -3,8 +3,9 @@ import { BankOffer, BankCoefficients } from "../utils/types";
 // ========== РАСЧЕТ КОЭФФИЦИЕНТОВ БАНКА ==========
 export const calculateBankCoefficients = (
   bankOffer: BankOffer,
+  userDownPaymentPercent: number,
 ): BankCoefficients => {
-  const downPaymentPercent = bankOffer.minPVPercent;
+  const downPaymentPercent = userDownPaymentPercent;
   const mortgagePercent = 100 - downPaymentPercent;
 
   const kefDownPayment = downPaymentPercent / mortgagePercent;

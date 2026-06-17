@@ -13,7 +13,10 @@ export const calculateContractAmount = (
   mortgageWithoutDownPayment: boolean /*  */, // $L$10 - ипотека без ПВ
   applyMinDownPayment: boolean, // $L$11 - применить мин ПВ
 ): number => {
-  const coefficients = calculateBankCoefficients(bankOffer);
+  const coefficients = calculateBankCoefficients(
+    bankOffer,
+    userDownPaymentPercent,
+  );
   // Желание пользователя (сколько он хочет внести в процентах)
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
   // Требование банка (минимальный ПВ для этой программы)

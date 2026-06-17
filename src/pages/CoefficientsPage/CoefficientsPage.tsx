@@ -2,11 +2,17 @@ import React, { useState, useMemo } from "react";
 import "./CoefficientsPage.css";
 import { bankOffers } from "../../data/bankOffers";
 import { calculateBankCoefficients } from "../../hooks/calculateBankCoefficients";
+import {
+  MIN_DOWN_PAYMENT_PERCENT,
+  MAX_DOWN_PAYMENT_PERCENT,
+} from "../../utils/constants";
 
 export const CoefficientsPage: React.FC = () => {
   const [selectedBank, setSelectedBank] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedBank, setExpandedBank] = useState<string | null>(null);
+  const [userDownPaymentPercent, setUserDownPaymentPercent] =
+    useState<number>(20.1); // ← Добавлено
 
   // Получаем уникальные банки
   const uniqueBanks = useMemo(() => {
@@ -29,9 +35,9 @@ export const CoefficientsPage: React.FC = () => {
 
     return filtered.map((offer) => ({
       ...offer,
-      coefficients: calculateBankCoefficients(offer),
+      coefficients: calculateBankCoefficients(offer, userDownPaymentPercent),
     }));
-  }, [selectedBank, searchTerm]);
+  }, [selectedBank, searchTerm, userDownPaymentPercent]);
 
   // Группировка по банкам
   const groupedByBank = useMemo(() => {
@@ -57,6 +63,31 @@ export const CoefficientsPage: React.FC = () => {
 
   const toggleBank = (bankName: string) => {
     setExpandedBank(expandedBank === bankName ? null : bankName);
+  };
+
+  // Обработчики для поля ПВ
+  const handleDownPaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "") {
+      setUserDownPaymentPercent(MIN_DOWN_PAYMENT_PERCENT);
+      return;
+    }
+    const numValue = Number(value);
+    if (
+      numValue >= MIN_DOWN_PAYMENT_PERCENT &&
+      numValue <= MAX_DOWN_PAYMENT_PERCENT
+    ) {
+      setUserDownPaymentPercent(numValue);
+    }
+  };
+
+  const handleDownPaymentBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || Number(value) < MIN_DOWN_PAYMENT_PERCENT) {
+      setUserDownPaymentPercent(MIN_DOWN_PAYMENT_PERCENT);
+    } else if (Number(value) > MAX_DOWN_PAYMENT_PERCENT) {
+      setUserDownPaymentPercent(MAX_DOWN_PAYMENT_PERCENT);
+    }
   };
 
   return (
@@ -98,6 +129,21 @@ export const CoefficientsPage: React.FC = () => {
             />
           </div>
 
+          {/* Поле для ввода ПВ */}
+          <div className="filter-group">
+            <label>ПВ для расчёта (%):</label>
+            <input
+              type="number"
+              min={MIN_DOWN_PAYMENT_PERCENT}
+              max={MAX_DOWN_PAYMENT_PERCENT}
+              step={0.1}
+              value={userDownPaymentPercent}
+              onChange={handleDownPaymentChange}
+              onBlur={handleDownPaymentBlur}
+              className="pv-input"
+            />
+          </div>
+
           <button
             className="reset-btn"
             onClick={() => {
@@ -113,6 +159,7 @@ export const CoefficientsPage: React.FC = () => {
         <div className="info-bar">
           <span>📋 Найдено программ: {filteredData.length}</span>
           <span>🏦 Банков: {Object.keys(groupedByBank).length}</span>
+          <span>📊 ПВ для расчёта: {userDownPaymentPercent}%</span>
         </div>
 
         {/* Таблицы по банкам */}

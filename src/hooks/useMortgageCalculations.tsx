@@ -12,6 +12,7 @@ import { calculateFullMortgage } from "./calculateFullMortgage";
 import { formatMoney } from "./formatMoney";
 import {
   DEFAULT_LOAN_TERM_YEARS,
+  DEFAULT_MIN_PV_PERCENT,
   MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGE,
   PRICE_PER_SQUARE_METER_DEFAULT,
 } from "../utils/constants";
@@ -146,12 +147,23 @@ export const useMortgageCalculator = () => {
     ) => {
       setFormData((prev) => {
         // Специальная обработка для связанных полей
+        const newData = { ...prev, [field]: value };
+
+        // ✅ Если включена "Ипотека без ПВ", сбрасываем ПВ до 20.1%
+        if (field === "mortgageWithoutDownPayment" && value === true) {
+          newData.downPaymentPercent = DEFAULT_MIN_PV_PERCENT;
+          console.log(
+            `🏷️ Ипотека без ПВ - ПВ сброшен до ${DEFAULT_MIN_PV_PERCENT}%`,
+          );
+        }
+
+        // ✅ Если включена "Ипотека без ПВ", логируем увеличение цены
         if (field === "mortgageWithoutDownPayment" && value === true) {
           console.log(
             `Включена ипотека без ПВ - цена за м² увеличена на ${MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGE.toLocaleString()} ₽`,
           );
         }
-        return { ...prev, [field]: value };
+        return newData;
       });
     },
     [],
