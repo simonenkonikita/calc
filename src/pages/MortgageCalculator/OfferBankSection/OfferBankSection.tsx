@@ -201,7 +201,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                 checked={showOverstatement}
                 onChange={(e) => setShowOverstatement(e.target.checked)}
               />
-              <span>Показать завышение</span>
+              <span>Показать завышение и субсидию</span>
             </label>
           </div>
         </div>
@@ -232,7 +232,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                     filteredBankResults.filter((o) => o.bank === bankName)
                       .length
                   }{" "}
-                  программ
                 </span>
               </div>
 
@@ -249,7 +248,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                       <div className="category-header">
                         <h3 className="category-title">{category.label}</h3>
                         <span className="category-count">
-                          {programs.length} программ
+                          {programs.length}
                         </span>
                       </div>
 
@@ -355,14 +354,17 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                   {formatMoney(offer.mortgageAmount)}
                                 </span>
                               </div>
-                              <div className="bank-detail-item">
-                                <span className="bank-detail-label">
-                                  Сумма субсидии:
-                                </span>
-                                <span className="bank-detail-value positive">
-                                  {formatMoney(offer.subsidyAmount)}
-                                </span>
-                              </div>
+                              {showOverstatement && (
+                                <div className="bank-detail-item">
+                                  <span className="bank-detail-label">
+                                    Сумма субсидии:
+                                  </span>
+                                  <span className="bank-detail-value positive">
+                                    {formatMoney(offer.subsidyAmount)}
+                                  </span>
+                                </div>
+                              )}
+
                               <div className="bank-detail-item">
                                 <span className="bank-detail-label">
                                   На счет застройщика:

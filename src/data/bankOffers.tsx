@@ -63,6 +63,15 @@ export const bankOffers: BankOffer[] = [
     minPVPercent: 20.1,
     durationMonths: 24,
   },
+  {
+    bank: "Сбербанк",
+    program: "9,9% на 24 мес",
+    type: "short",
+    rate: 9.9,
+    subsidyPercent: 13,
+    minPVPercent: 20.1,
+    durationMonths: 24,
+  },
 
   // Сбербанк Семейная ипотека
   {
@@ -254,10 +263,10 @@ export const bankOffers: BankOffer[] = [
   },
   {
     bank: "ВТБ",
-    program: "2,98% на 12 мес",
+    program: "2,99% на 12 мес",
     type: "short",
     rate: 2.98,
-    subsidyPercent: 10.96,
+    subsidyPercent: 15.49,
     minPVPercent: 20.1,
     durationMonths: 12,
   },
