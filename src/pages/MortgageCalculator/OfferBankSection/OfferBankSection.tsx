@@ -5,7 +5,6 @@ import { CATEGORY_ORDER, PROGRAM_TYPE_LABELS } from "../../../utils/constants";
 
 interface OfferBankSectionProps {
   bankResults: BankProgramResult[];
-  selectedOfferIndex: number | null;
   onSelectOffer: (index: number) => void;
   formatMoney: (amount: number) => string;
   mortgageWithoutDownPayment?: boolean;
@@ -21,48 +20,81 @@ const BANK_ORDER = ["Сбербанк", "Альфа-Банк", "ВТБ", "Сов
 
 // Функция для определения категории программы
 const getProgramCategory = (offer: BankProgramResultWithIndex): string => {
-  // Базовая ипотека (без субсидии)
   if (offer.type === "full" && offer.subsidyAmount === 0) {
     return "base";
   }
-  // Субсидии на длинный срок
   if (offer.type === "full" && offer.subsidyAmount > 0) {
     return "long";
   }
-  // Субсидии на короткий срок
   if (offer.type === "short") {
     return "short";
   }
-  // Семейная ипотека
   if (offer.type === "family") {
     return "family";
   }
-  // ИТ ипотека
   if (offer.type === "it") {
     return "it";
   }
   return "base";
 };
 
+// Форматирование предложения в текст
+const formatOfferToText = (
+  offer: BankProgramResult,
+  formatMoney: (amount: number) => string,
+  showOverstatement: boolean,
+  mortgageWithoutDownPayment: boolean,
+): string => {
+  const lines: string[] = [];
+
+  lines.push(`🏦 ${offer.bank}`);
+  lines.push(`📋 Программа: ${offer.program}`);
+  lines.push(`📊 Ставка: ${offer.rate}%`);
+  lines.push(`💰 Ежемесячный платёж: ${formatMoney(offer.monthlyPayment)}`);
+  lines.push(`📄 Сумма в договоре: ${formatMoney(offer.contractAmount)}`);
+  lines.push(
+    `💵 Первоначальный взнос: ${formatMoney(offer.downPaymentAmount)} (${offer.downPaymentPercent.toFixed(1)}%)`,
+  );
+  lines.push(`🏠 Ипотека: ${formatMoney(offer.mortgageAmount)}`);
+  lines.push(`🏗️ На счёт застройщика: ${formatMoney(offer.developerAccount)}`);
+  lines.push(`📅 Срок: ${offer.durationMonths || 360} месяцев`);
+
+  if (showOverstatement) {
+    lines.push(`📈 Завышение: ${formatMoney(offer.overstatement)}`);
+    lines.push(`📈 Сумма субсидии: ${formatMoney(offer.subsidyAmount)}`);
+  }
+
+  if (mortgageWithoutDownPayment) {
+    lines.push(`💳 Собственные средства: ${formatMoney(offer.ownFunds)}`);
+    lines.push(
+      `💳 Вносим за клиента: ${formatMoney(offer.clientContribution)}`,
+    );
+  }
+
+  if (offer.excessLimit && offer.excessLimit > 0) {
+    lines.push(`⚡ Сверхлимит: ${formatMoney(offer.excessLimit)}`);
+  }
+
+  return lines.join("\n");
+};
+
 export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   bankResults,
-  selectedOfferIndex,
   onSelectOffer,
   formatMoney,
   mortgageWithoutDownPayment = false,
 }) => {
-  // По умолчанию завышение СКРЫТО
   const [showOverstatement, setShowOverstatement] = useState(false);
   const [selectedBankFilter, setSelectedBankFilter] = useState<string>("all");
   const [selectedProgramTypeFilter, setSelectedProgramTypeFilter] =
     useState<string>("all");
+  const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set());
+  const [copySuccess, setCopySuccess] = useState(false);
 
-  // Получаем уникальные банки из результатов
   const uniqueBanks = useMemo(() => {
     return Array.from(new Set(bankResults.map((offer) => offer.bank)));
   }, [bankResults]);
 
-  // Получаем уникальные типы программ из результатов
   const uniqueProgramTypes = useMemo(() => {
     const types = new Set(bankResults.map((offer) => offer.type));
     return Array.from(types);
@@ -72,7 +104,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
     return selectedBankFilter !== "all" || selectedProgramTypeFilter !== "all";
   }, [selectedBankFilter, selectedProgramTypeFilter]);
 
-  // Фильтруем результаты по банку и типу программы
   const filteredBankResults = useMemo(() => {
     let filtered = bankResults;
 
@@ -89,7 +120,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
     return filtered;
   }, [bankResults, selectedBankFilter, selectedProgramTypeFilter]);
 
-  // Группируем предложения по банкам и категориям
   const groupedData = useMemo(() => {
     const banks: Record<
       string,
@@ -117,7 +147,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
     return banks;
   }, [filteredBankResults]);
 
-  // Сортируем банки согласно порядку
   const sortedBanks = useMemo(() => {
     return Object.keys(groupedData).sort((a, b) => {
       const indexA = BANK_ORDER.indexOf(a);
@@ -129,7 +158,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
     });
   }, [groupedData]);
 
-  // Проверка, есть ли в категории программы
   const hasProgramsInCategory = (
     bankData: Record<string, BankProgramResultWithIndex[]>,
     categoryKey: string,
@@ -137,15 +165,75 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
     return bankData[categoryKey] && bankData[categoryKey].length > 0;
   };
 
-  // Сброс фильтров
   const resetFilters = () => {
     setSelectedBankFilter("all");
     setSelectedProgramTypeFilter("all");
   };
 
-  // Получение названия типа программы
   const getProgramTypeLabel = (type: string): string => {
     return PROGRAM_TYPE_LABELS[type] || type;
+  };
+
+  const toggleCardSelection = (index: number) => {
+    setSelectedCards((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
+  const handleCardClick = (index: number) => {
+    toggleCardSelection(index);
+    onSelectOffer(index);
+  };
+
+  const copySelectedOffers = () => {
+    if (selectedCards.size === 0) return;
+
+    const selectedResults = filteredBankResults.filter((_, idx) =>
+      selectedCards.has(idx),
+    );
+
+    const texts = selectedResults.map((offer) =>
+      formatOfferToText(
+        offer,
+        formatMoney,
+        showOverstatement,
+        mortgageWithoutDownPayment,
+      ),
+    );
+
+    const fullText = texts.join("\n\n---\n\n");
+
+    navigator.clipboard
+      .writeText(fullText)
+      .then(() => {
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 3000);
+      })
+      .catch(() => {
+        const textarea = document.createElement("textarea");
+        textarea.value = fullText;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 3000);
+      });
+  };
+
+  const selectAllCards = () => {
+    const allIndices = filteredBankResults.map((_, idx) => idx);
+    setSelectedCards(new Set(allIndices));
+  };
+
+  const deselectAllCards = () => {
+    setSelectedCards(new Set());
   };
 
   return (
@@ -157,7 +245,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
           </h3>
 
           <div className="banks-filters">
-            {/* Фильтр по банку */}
             <select
               className="bank-filter-select"
               value={selectedBankFilter}
@@ -171,7 +258,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
               ))}
             </select>
 
-            {/* Фильтр по типу программы */}
             <select
               className="bank-filter-select"
               value={selectedProgramTypeFilter}
@@ -185,7 +271,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
               ))}
             </select>
 
-            {/* Кнопка "Очистить" - всегда видна, но меняет цвет */}
             <button
               className={`reset-filters-btn ${isFiltersActive ? "active" : "inactive"}`}
               onClick={resetFilters}
@@ -194,7 +279,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
               <span>✕</span> Очистить
             </button>
 
-            {/* Галочка для скрытия/показа строки "Завышение" */}
             <label className="toggle-overstatement">
               <input
                 type="checkbox"
@@ -216,7 +300,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
         sortedBanks.map((bankName) => {
           const bankData = groupedData[bankName];
 
-          // Проверяем, есть ли вообще программы в этом банке
           const hasAnyPrograms = Object.values(bankData).some(
             (arr) => arr.length > 0,
           );
@@ -231,8 +314,37 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                   {
                     filteredBankResults.filter((o) => o.bank === bankName)
                       .length
-                  }{" "}
+                  }
                 </span>
+                <button
+                  className="select-all-in-bank-btn"
+                  onClick={() => {
+                    const indicesInBank = filteredBankResults
+                      .map((offer, idx) => (offer.bank === bankName ? idx : -1))
+                      .filter((idx): idx is number => idx !== -1);
+                    const allSelected = indicesInBank.every((idx) =>
+                      selectedCards.has(idx),
+                    );
+                    setSelectedCards((prev) => {
+                      const newSet = new Set(prev);
+                      indicesInBank.forEach((idx) => {
+                        if (allSelected) {
+                          newSet.delete(idx);
+                        } else {
+                          newSet.add(idx);
+                        }
+                      });
+                      return newSet;
+                    });
+                  }}
+                >
+                  {filteredBankResults
+                    .map((offer, idx) => (offer.bank === bankName ? idx : -1))
+                    .filter((idx): idx is number => idx !== -1)
+                    .every((idx) => selectedCards.has(idx))
+                    ? "Снять все"
+                    : "Выбрать все"}
+                </button>
               </div>
 
               <div className="bank-categories">
@@ -253,141 +365,144 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                       </div>
 
                       <div className="banks-list">
-                        {programs.map((offer) => (
-                          <div
-                            key={offer._originalIndex}
-                            className={`bank-card ${
-                              selectedOfferIndex === offer._originalIndex
-                                ? "selected"
-                                : ""
-                            }`}
-                            onClick={() => onSelectOffer(offer._originalIndex)}
-                          >
-                            <div className="bank-card-header">
-                              <div className="bank-info">
-                                <h4>{offer.program}</h4>
-                                <p className="bank-program">
-                                  {offer.type === "full" && "Весь срок"}
-                                  {offer.type === "short" &&
-                                    `Короткий срок (${offer.durationMonths} мес)`}
-                                  {offer.type === "family" &&
-                                    "Семейная ипотека"}
-                                  {offer.type === "it" && "ИТ ипотека"}
-                                </p>
-                                {offer.rate && offer.rate > 0 && (
-                                  <p className="bank-rate">{offer.rate}%</p>
-                                )}
-                              </div>
-                              <div className="payment-info">
-                                <p className="payment-label">
-                                  Ежемесячный платёж
-                                </p>
-                                <p className="payment-value">
-                                  {formatMoney(offer.monthlyPayment)}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Сетка деталей - одна колонка */}
-                            <div className="bank-details-list">
-                              {/* Показываем "Завышение" ТОЛЬКО если галочка включена */}
-                              {showOverstatement && (
-                                <div className="bank-detail-item">
-                                  <span className="bank-detail-label">
-                                    Завышение:
-                                  </span>
-                                  <span className="bank-detail-value warning">
-                                    {formatMoney(offer.overstatement)}
-                                  </span>
+                        {programs.map((offer) => {
+                          const isSelected = selectedCards.has(
+                            offer._originalIndex,
+                          );
+                          return (
+                            <div
+                              key={offer._originalIndex}
+                              className={`bank-card ${
+                                isSelected ? "selected" : ""
+                              }`}
+                              onClick={() =>
+                                handleCardClick(offer._originalIndex)
+                              }
+                            >
+                              <div className="bank-card-header">
+                                <div className="bank-info">
+                                  <h4>{offer.program}</h4>
+                                  <p className="bank-program">
+                                    {offer.type === "full" && "Весь срок"}
+                                    {offer.type === "short" &&
+                                      `Короткий срок (${offer.durationMonths} мес)`}
+                                    {offer.type === "family" &&
+                                      "Семейная ипотека"}
+                                    {offer.type === "it" && "ИТ ипотека"}
+                                  </p>
+                                  {offer.rate && offer.rate > 0 && (
+                                    <p className="bank-rate">{offer.rate}%</p>
+                                  )}
                                 </div>
-                              )}
-                              <div className="bank-detail-item">
-                                <span className="bank-detail-label">
-                                  Сумма в договоре:
-                                </span>
-                                <span className="bank-detail-value">
-                                  {formatMoney(offer.contractAmount)}
-                                </span>
+                                <div className="payment-info">
+                                  <p className="payment-label">
+                                    Ежемесячный платёж
+                                  </p>
+                                  <p className="payment-value">
+                                    {formatMoney(offer.monthlyPayment)}
+                                  </p>
+                                </div>
                               </div>
-                              <div className="bank-detail-item">
-                                <span className="bank-detail-label">
-                                  Сумма ПВ:
-                                </span>
-                                <span className="bank-detail-value">
-                                  {formatMoney(offer.downPaymentAmount)}
-                                </span>
-                              </div>
-                              {/* Дополнительные детали только для ипотеки без ПВ */}
-                              {mortgageWithoutDownPayment && (
-                                <>
+
+                              <div className="bank-details-list">
+                                {showOverstatement && (
                                   <div className="bank-detail-item">
                                     <span className="bank-detail-label">
-                                      Собственные средства:
+                                      Завышение:
                                     </span>
-                                    <span className="bank-detail-value">
-                                      {formatMoney(offer.ownFunds)}
+                                    <span className="bank-detail-value warning">
+                                      {formatMoney(offer.overstatement)}
                                     </span>
                                   </div>
+                                )}
+                                <div className="bank-detail-item">
+                                  <span className="bank-detail-label">
+                                    Сумма в договоре:
+                                  </span>
+                                  <span className="bank-detail-value">
+                                    {formatMoney(offer.contractAmount)}
+                                  </span>
+                                </div>
+                                <div className="bank-detail-item">
+                                  <span className="bank-detail-label">
+                                    Сумма ПВ:
+                                  </span>
+                                  <span className="bank-detail-value">
+                                    {formatMoney(offer.downPaymentAmount)}
+                                  </span>
+                                </div>
+                                {mortgageWithoutDownPayment && (
+                                  <>
+                                    <div className="bank-detail-item">
+                                      <span className="bank-detail-label">
+                                        Собственные средства:
+                                      </span>
+                                      <span className="bank-detail-value">
+                                        {formatMoney(offer.ownFunds)}
+                                      </span>
+                                    </div>
+                                    <div className="bank-detail-item">
+                                      <span className="bank-detail-label">
+                                        Вносим за клиента:
+                                      </span>
+                                      <span className="bank-detail-value positive">
+                                        {formatMoney(offer.clientContribution)}
+                                      </span>
+                                    </div>
+                                  </>
+                                )}
+                                <div className="bank-detail-item">
+                                  <span className="bank-detail-label">
+                                    ПВ в %:
+                                  </span>
+                                  <span className="bank-detail-value">
+                                    {offer.downPaymentPercent.toFixed(1)}%
+                                  </span>
+                                </div>
+                                <div className="bank-detail-item">
+                                  <span className="bank-detail-label">
+                                    Ипотека:
+                                  </span>
+                                  <span className="bank-detail-value">
+                                    {formatMoney(offer.mortgageAmount)}
+                                  </span>
+                                </div>
+                                {showOverstatement && (
                                   <div className="bank-detail-item">
                                     <span className="bank-detail-label">
-                                      Вносим за клиента:
+                                      Сумма субсидии:
                                     </span>
                                     <span className="bank-detail-value positive">
-                                      {formatMoney(offer.clientContribution)}
+                                      {formatMoney(offer.subsidyAmount)}
                                     </span>
                                   </div>
-                                </>
-                              )}
-                              <div className="bank-detail-item">
-                                <span className="bank-detail-label">
-                                  ПВ в %:
-                                </span>
-                                <span className="bank-detail-value">
-                                  {offer.downPaymentPercent.toFixed(1)}%
-                                </span>
-                              </div>
-                              <div className="bank-detail-item">
-                                <span className="bank-detail-label">
-                                  Ипотека:
-                                </span>
-                                <span className="bank-detail-value">
-                                  {formatMoney(offer.mortgageAmount)}
-                                </span>
-                              </div>
-                              {showOverstatement && (
+                                )}
                                 <div className="bank-detail-item">
                                   <span className="bank-detail-label">
-                                    Сумма субсидии:
+                                    На счет застройщика:
                                   </span>
-                                  <span className="bank-detail-value positive">
-                                    {formatMoney(offer.subsidyAmount)}
+                                  <span className="bank-detail-value">
+                                    {formatMoney(offer.developerAccount)}
                                   </span>
                                 </div>
+                              </div>
+
+                              {offer.durationMonths &&
+                                offer.type === "short" && (
+                                  <div className="bank-duration">
+                                    Льготный период: {offer.durationMonths}{" "}
+                                    месяцев
+                                  </div>
+                                )}
+
+                              {offer.excessLimit && offer.excessLimit > 0 && (
+                                <div className="bank-excess">
+                                  Сверхлимит: {formatMoney(offer.excessLimit)}
+                                </div>
                               )}
-
-                              <div className="bank-detail-item">
-                                <span className="bank-detail-label">
-                                  На счет застройщика:
-                                </span>
-                                <span className="bank-detail-value">
-                                  {formatMoney(offer.developerAccount)}
-                                </span>
-                              </div>
                             </div>
-
-                            {offer.durationMonths && offer.type === "short" && (
-                              <div className="bank-duration">
-                                Льготный период: {offer.durationMonths} месяцев
-                              </div>
-                            )}
-
-                            {offer.excessLimit && offer.excessLimit > 0 && (
-                              <div className="bank-excess">
-                                Сверхлимит: {formatMoney(offer.excessLimit)}
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   );
@@ -396,6 +511,26 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
             </div>
           );
         })
+      )}
+
+      {/* Плавающий бар снизу */}
+      {selectedCards.size > 0 && (
+        <div className="floating-selection-bar">
+          <div className="floating-bar-content">
+            <span className="selection-count">
+              Выбрано: {selectedCards.size}
+            </span>
+            <button className="select-all-btn" onClick={selectAllCards}>
+              Выбрать все
+            </button>
+            <button className="select-all-btn" onClick={deselectAllCards}>
+              Снять все
+            </button>
+            <button className="copy-selected-btn" onClick={copySelectedOffers}>
+              {copySuccess ? "✅ Скопировано!" : "📋 Копировать выбранные"}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
