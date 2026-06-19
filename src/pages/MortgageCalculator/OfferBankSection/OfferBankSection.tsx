@@ -1,7 +1,12 @@
 import React, { useMemo, useState } from "react";
 import type { BankProgramResult } from "../../../utils/types";
 import "./OfferBankSection.css";
-import { CATEGORY_ORDER, PROGRAM_TYPE_LABELS } from "../../../utils/constants";
+import {
+  BANK_ORDER,
+  CATEGORY_ORDER,
+  PROGRAM_TYPE_LABELS,
+} from "../../../utils/constants";
+import { formatOfferToText } from "./formatOfferToText";
 
 interface OfferBankSectionProps {
   bankResults: BankProgramResult[];
@@ -14,9 +19,6 @@ interface OfferBankSectionProps {
 interface BankProgramResultWithIndex extends BankProgramResult {
   _originalIndex: number;
 }
-
-// Порядок банков для отображения
-const BANK_ORDER = ["Сбербанк", "Альфа-Банк", "ВТБ", "Совкомбанк", "Уралсиб"];
 
 // Функция для определения категории программы
 const getProgramCategory = (offer: BankProgramResultWithIndex): string => {
@@ -36,46 +38,6 @@ const getProgramCategory = (offer: BankProgramResultWithIndex): string => {
     return "it";
   }
   return "base";
-};
-
-// Форматирование предложения в текст
-const formatOfferToText = (
-  offer: BankProgramResult,
-  formatMoney: (amount: number) => string,
-  showOverstatement: boolean,
-  mortgageWithoutDownPayment: boolean,
-): string => {
-  const lines: string[] = [];
-
-  lines.push(`🏦 ${offer.bank}`);
-  lines.push(`📋 Программа: ${offer.program}`);
-  lines.push(`📊 Ставка: ${offer.rate}%`);
-  lines.push(`💰 Ежемесячный платёж: ${formatMoney(offer.monthlyPayment)}`);
-  lines.push(`📄 Сумма в договоре: ${formatMoney(offer.contractAmount)}`);
-  lines.push(
-    `💵 Первоначальный взнос: ${formatMoney(offer.downPaymentAmount)} (${offer.downPaymentPercent.toFixed(1)}%)`,
-  );
-  lines.push(`🏠 Ипотека: ${formatMoney(offer.mortgageAmount)}`);
-  lines.push(`🏗️ На счёт застройщика: ${formatMoney(offer.developerAccount)}`);
-  lines.push(`📅 Срок: ${offer.durationMonths || 360} месяцев`);
-
-  if (showOverstatement) {
-    lines.push(`📈 Завышение: ${formatMoney(offer.overstatement)}`);
-    lines.push(`📈 Сумма субсидии: ${formatMoney(offer.subsidyAmount)}`);
-  }
-
-  if (mortgageWithoutDownPayment) {
-    lines.push(`💳 Собственные средства: ${formatMoney(offer.ownFunds)}`);
-    lines.push(
-      `💳 Вносим за клиента: ${formatMoney(offer.clientContribution)}`,
-    );
-  }
-
-  if (offer.excessLimit && offer.excessLimit > 0) {
-    lines.push(`⚡ Сверхлимит: ${formatMoney(offer.excessLimit)}`);
-  }
-
-  return lines.join("\n");
 };
 
 export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
@@ -316,35 +278,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                       .length
                   }
                 </span>
-                <button
-                  className="select-all-in-bank-btn"
-                  onClick={() => {
-                    const indicesInBank = filteredBankResults
-                      .map((offer, idx) => (offer.bank === bankName ? idx : -1))
-                      .filter((idx): idx is number => idx !== -1);
-                    const allSelected = indicesInBank.every((idx) =>
-                      selectedCards.has(idx),
-                    );
-                    setSelectedCards((prev) => {
-                      const newSet = new Set(prev);
-                      indicesInBank.forEach((idx) => {
-                        if (allSelected) {
-                          newSet.delete(idx);
-                        } else {
-                          newSet.add(idx);
-                        }
-                      });
-                      return newSet;
-                    });
-                  }}
-                >
-                  {filteredBankResults
-                    .map((offer, idx) => (offer.bank === bankName ? idx : -1))
-                    .filter((idx): idx is number => idx !== -1)
-                    .every((idx) => selectedCards.has(idx))
-                    ? "Снять все"
-                    : "Выбрать все"}
-                </button>
               </div>
 
               <div className="bank-categories">
@@ -359,9 +292,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                     <div key={category.key} className="category-group">
                       <div className="category-header">
                         <h3 className="category-title">{category.label}</h3>
-                        <span className="category-count">
-                          {programs.length}
-                        </span>
                       </div>
 
                       <div className="banks-list">

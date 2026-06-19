@@ -13,6 +13,7 @@ export const MIN_LOAN_TERM = 1;
 export const MAX_LOAN_TERM = 30;
 
 // ========== БАНКИ ==========
+// Порядок банков для отображения
 export const BANK_ORDER = [
   "Сбербанк",
   "Альфа-Банк",
