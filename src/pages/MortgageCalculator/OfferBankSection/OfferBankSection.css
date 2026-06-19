@@ -156,6 +156,13 @@
   flex-shrink: 0;
 }
 
+/* Категории внутри банка */
+.bank-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .bank-categories .category-group {
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;

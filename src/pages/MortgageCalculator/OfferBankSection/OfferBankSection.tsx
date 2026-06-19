@@ -311,7 +311,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                             >
                               <div className="bank-card-header">
                                 <div className="bank-info">
-                                  <h4>{offer.program}</h4>
                                   <p className="bank-program">
                                     {offer.type === "full" && "Весь срок"}
                                     {offer.type === "short" &&
@@ -416,14 +415,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                   </span>
                                 </div>
                               </div>
-
-                              {offer.durationMonths &&
-                                offer.type === "short" && (
-                                  <div className="bank-duration">
-                                    Льготный период: {offer.durationMonths}{" "}
-                                    месяцев
-                                  </div>
-                                )}
 
                               {offer.excessLimit && offer.excessLimit > 0 && (
                                 <div className="bank-excess">

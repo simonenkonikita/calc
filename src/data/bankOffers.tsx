@@ -12,7 +12,7 @@ export const bankOffers: BankOffer[] = [
   },
   {
     bank: "Сбербанк",
-    program: "Акция 11,9%",
+    program: "11,9% на весь срок",
     type: "full",
     rate: 11.9,
     subsidyPercent: 18.5,
@@ -20,7 +20,7 @@ export const bankOffers: BankOffer[] = [
   },
   {
     bank: "Сбербанк",
-    program: "Акция 12,9%",
+    program: "12,9% на весь срок",
     type: "full",
     rate: 12.9,
     subsidyPercent: 14.5,
@@ -28,7 +28,7 @@ export const bankOffers: BankOffer[] = [
   },
   {
     bank: "Сбербанк",
-    program: "Акция 13,9%",
+    program: "13,9% на весь срок",
     type: "full",
     rate: 13.9,
     subsidyPercent: 11.5,
@@ -138,7 +138,7 @@ export const bankOffers: BankOffer[] = [
   },
   {
     bank: "Альфа-Банк",
-    program: "Акция 12,99%",
+    program: "12,99% на весь срок",
     type: "full",
     rate: 12.99,
     subsidyPercent: 14,
@@ -156,7 +156,7 @@ export const bankOffers: BankOffer[] = [
   },
   {
     bank: "Совкомбанк",
-    program: "Акция 12,49% на 20 лет",
+    program: "12,49% на весь срок",
     type: "full",
     rate: 12.49,
     subsidyPercent: 12.49,
@@ -246,7 +246,7 @@ export const bankOffers: BankOffer[] = [
   },
   {
     bank: "ВТБ",
-    program: "Акция 12,89%",
+    program: "12,89% на весь срок",
     type: "full",
     rate: 12.89,
     subsidyPercent: 14.3,
@@ -282,7 +282,7 @@ export const bankOffers: BankOffer[] = [
   },
   {
     bank: "Уралсиб",
-    program: "Акция 12,89%",
+    program: "12,89% на весь срок",
     type: "full",
     rate: 12.89,
     subsidyPercent: 18.6,
@@ -290,7 +290,7 @@ export const bankOffers: BankOffer[] = [
   },
   {
     bank: "Уралсиб",
-    program: "Акция 13,89%",
+    program: "13,89% на весь срок",
     type: "full",
     rate: 13.89,
     subsidyPercent: 13.8,
