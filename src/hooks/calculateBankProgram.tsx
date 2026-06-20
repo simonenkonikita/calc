@@ -151,7 +151,8 @@ export const calculateBankProgram = (
     type: bankOffer.type,
     rate: bankOffer.rate,
     shortRate: bankOffer.shortRate,
-    durationMonths: loanTermMonths,
+    durationMonths:
+      bankOffer.type === "short" ? bankOffer.durationMonths : loanTermMonths,
     monthlyPayment: Math.ceil(monthlyPayment),
     overstatement: Math.ceil(overstatement),
     contractAmount: Math.ceil(contractAmount),

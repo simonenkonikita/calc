@@ -326,7 +326,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                       "Семейная ипотека"}
                                     {offer.type === "it" && "ИТ ипотека"}
                                   </p>
-                                  {/* Ставки */}
                                   {/* Ставки - унифицированный стиль */}
                                   {isShortWithSubsidy ? (
                                     <div className="bank-rates">
