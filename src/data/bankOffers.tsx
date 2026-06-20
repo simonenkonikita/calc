@@ -8,7 +8,7 @@ const baseRateVTB = 19.9;
 const baseRateUralsib = 18.29;
 
 // ПВ
-const minPVPercent = 18.29;
+const minPVPercent = 20.1;
 
 export const bankOffers: BankOffer[] = [
   // ==================== СБЕРБАНК ====================

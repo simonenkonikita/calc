@@ -157,6 +157,19 @@ export const useMortgageCalculator = () => {
           );
         }
 
+        // ✅ Если поле downPaymentPercent изменяется вручную, но включена "Ипотека без ПВ" - отменяем изменение
+        if (
+          field === "downPaymentPercent" &&
+          newData.mortgageWithoutDownPayment
+        ) {
+          // Возвращаем предыдущее значение, не давая изменить ПВ
+          return {
+            ...prev,
+            [field]: prev.downPaymentPercent,
+            mortgageWithoutDownPayment: prev.mortgageWithoutDownPayment,
+          };
+        }
+
         // ✅ Если ручной ввод ПВ больше 0, сбрасываем ПВ в % до 20.1%
         if (
           field === "manualDownPayment" &&
