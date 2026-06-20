@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from "react";
 import "./CoefficientsPage.css";
 import { bankOffers } from "../../data/bankOffers";
-import { calculateBankCoefficients } from "../../hooks/contractAmount/calculateBankCoefficients";
+
 import {
   MIN_DOWN_PAYMENT_PERCENT,
   MAX_DOWN_PAYMENT_PERCENT,
 } from "../../utils/constants";
+import { calculateBankCoefficients } from "../../hooks/сoefficients/calculateBankCoefficients";
 
 export const CoefficientsPage: React.FC = () => {
   const [selectedBank, setSelectedBank] = useState<string>("all");
