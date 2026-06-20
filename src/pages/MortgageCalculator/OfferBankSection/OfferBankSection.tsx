@@ -6,8 +6,8 @@ import {
   CATEGORY_ORDER,
   PROGRAM_TYPE_LABELS,
 } from "../../../utils/constants";
-import { formatOfferToText } from "../../../hooks/formatOfferToText";
-import { safeFormatMoney } from "../../../hooks/formatMoney";
+import { formatOfferToText } from "../../../hooks/addHooks/formatOfferToText";
+import { safeFormatMoney } from "../../../hooks/addHooks/formatMoney";
 
 interface OfferBankSectionProps {
   bankResults: BankProgramResult[];

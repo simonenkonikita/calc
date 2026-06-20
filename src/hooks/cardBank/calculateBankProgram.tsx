@@ -1,9 +1,8 @@
-import { MIN_DOWN_PAYMENT_PERCENT } from "../utils/constants";
-import { BankOffer, Variables, BankProgramResult } from "../utils/types";
-import { calculateContractAmount } from "./calculateContractAmount";
-import { calculateMonthlyPayment } from "./calculateMonthlyPayment";
-
-import { calculateSubsidyPayments } from "./calculateSubsidyPayments";
+import { MIN_DOWN_PAYMENT_PERCENT } from "../../utils/constants";
+import { BankOffer, Variables, BankProgramResult } from "../../utils/types";
+import { calculateContractAmount } from "../contractAmount/calculateContractAmount";
+import { calculateMonthlyPayment } from "../payment/standartPayment/calculateMonthlyPayment";
+import { calculateSubsidyPayments } from "../payment/subsidy/calculateSubsidyPayments";
 
 // ========== РАСЧЕТ ВСЕХ ПАРАМЕТРОВ ПО БАНКОВСКОЙ ПРОГРАММЕ ==========
 export const calculateBankProgram = (

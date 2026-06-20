@@ -1,12 +1,12 @@
-import { DEFAULT_MIN_PV_PERCENT } from "../utils/constants";
+import { DEFAULT_MIN_PV_PERCENT } from "../../utils/constants";
 import {
   CalculatorFormData,
   ObjectCalculationResult,
   BankOffer,
   Variables,
   BankProgramResult,
-} from "../utils/types";
-import { calculateBankProgram } from "./calculateBankProgram";
+} from "../../utils/types";
+import { calculateBankProgram } from "../cardBank/calculateBankProgram";
 import { calculateDownPayment } from "./calculateDownPayment";
 
 // ========== ПОЛНЫЙ РАСЧЕТ ИПОТЕКИ ==========

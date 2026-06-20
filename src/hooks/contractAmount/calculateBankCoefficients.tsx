@@ -1,4 +1,4 @@
-import { BankOffer, BankCoefficients } from "../utils/types";
+import { BankOffer, BankCoefficients } from "../../utils/types";
 
 // ========== РАСЧЕТ КОЭФФИЦИЕНТОВ БАНКА ==========
 export const calculateBankCoefficients = (

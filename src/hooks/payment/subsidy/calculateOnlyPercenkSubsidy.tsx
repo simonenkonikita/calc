@@ -1,5 +1,6 @@
-import { SubsidyPaymentResult } from "../utils/types";
-import { calculateMonthlyPayment } from "./calculateMonthlyPayment";
+import { SubsidyPaymentResult } from "../../../utils/types";
+import { calculateFutureValue } from "../calculateFutureValue";
+import { calculateMonthlyPayment } from "../standartPayment/calculateMonthlyPayment";
 
 // ==========  РАСЧЕТ ПЛАТЕЖЕЙ С СУБСИДИЕЙ НА КОРОТКИЙ СРОК ПО МЕТОДОЛОГИИ СБЕРБАНКА ==========
 export const calculateOnlyPercenkSubsidy = (
@@ -9,7 +10,7 @@ export const calculateOnlyPercenkSubsidy = (
   loanTermMonths: number,
   durationMonths: number,
 ): SubsidyPaymentResult => {
-  const monthlyRate = rate / 100 / 12;
+  // const monthlyRate = rate / 100 / 12;
   const monthlyShortRate = shortRate / 100 / 12;
   const annuityCoeff = calculateAnnuityCoefficient(shortRate, durationMonths);
 
@@ -20,7 +21,7 @@ export const calculateOnlyPercenkSubsidy = (
     loanTermMonths,
   );
 
-  // 2. Рассчитываем остаток долга после льготного периода,  Сумма погашения ОД, Сумма процентов за 12 мес
+  /*   // 2. Рассчитываем остаток долга после льготного периода,  Сумма погашения ОД, Сумма процентов за 12 мес
   let remainingDebt = mortgageAmount;
   let totalPrincipalPaid = 0; // ← Сумма погашения ОД за 12 мес
   // let totalInterestPaid = 0; // ← Сумма процентов за 12 мес
@@ -35,7 +36,16 @@ export const calculateOnlyPercenkSubsidy = (
     remainingDebt -= principalPayment;
     totalPrincipalPaid += principalPayment; // ← Сумма погашения ОД за 12 мес
     // totalInterestPaid += interestPayment; // ← Сумма процентов за 12 мес
-  }
+  } */
+
+  // 2. Рассчитываем остаток долга после льготного периода,  Сумма погашения ОД, Сумма процентов за 12 мес
+  const remainingDebt = calculateFutureValue(
+    rate, // полная ставка
+    durationMonths, // количество месяцев
+    fullPayment, // ежемесячный платеж
+    mortgageAmount, // начальная сумма
+  );
+  const totalPrincipalPaid = mortgageAmount - remainingDebt;
 
   // 3. Платеж на льготном периоде = аннуитет по полной ставке
   const principalPaidDuringSubsidy = mortgageAmount - totalPrincipalPaid; // B3 - G3
@@ -47,11 +57,6 @@ export const calculateOnlyPercenkSubsidy = (
 
   // Итоговый платеж на льготном периоде
   const monthlyPaymentSubsidy = part1 + part2;
-
-  console.log("🏦 Расчет по методологии Сбербанка:", {
-    // Входные параметры
-    monthlyPaymentSubsidy,
-  });
 
   let monthlyPaymentAfter: number | null = null;
 

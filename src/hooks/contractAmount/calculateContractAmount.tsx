@@ -1,4 +1,4 @@
-import { BankOffer, Variables } from "../utils/types";
+import { BankOffer, Variables } from "../../utils/types";
 import { calculateBankCoefficients } from "./calculateBankCoefficients";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ==========

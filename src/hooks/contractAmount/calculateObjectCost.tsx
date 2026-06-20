@@ -1,4 +1,4 @@
-import { ObjectCalculationResult } from "../utils/types";
+import { ObjectCalculationResult } from "../../utils/types";
 
 // ========== РАСЧЕТ СТОИМОСТИ ОБЪЕКТА ==========
 export const calculateObjectCost = (

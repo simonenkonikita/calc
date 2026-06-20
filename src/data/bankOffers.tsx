@@ -5,7 +5,7 @@ const baseRateSber = 20.7;
 const baseRateAlfa = 19.09;
 const baseRateSovkom = 19.99;
 const baseRateVTB = 19.9;
-const baseRateUralsib = 18.29;
+const baseRateUralsib = 18.19;
 // ПВ
 const minPVPercent = 20.1;
 
@@ -337,7 +337,7 @@ export const bankOffers: BankOffer[] = [
     program: "7,89% на 12 мес",
     type: "short",
     rate: baseRateUralsib,
-    shortRate: 7.89,
+    shortRate: 8.19,
     subsidyPercent: 9.4,
     minPVPercent: minPVPercent,
     durationMonths: 12,

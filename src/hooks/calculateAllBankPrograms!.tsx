@@ -1,5 +1,5 @@
 import { BankOffer, Variables, BankProgramResult } from "../utils/types";
-import { calculateBankProgram } from "./calculateBankProgram";
+import { calculateBankProgram } from "./cardBank/calculateBankProgram";
 
 // ========== РАСЧЕТ ДЛЯ ВСЕХ ПРОГРАММ БАНКА ==========
 export const calculateAllBankPrograms = (

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import "./CoefficientsPage.css";
 import { bankOffers } from "../../data/bankOffers";
-import { calculateBankCoefficients } from "../../hooks/calculateBankCoefficients";
+import { calculateBankCoefficients } from "../../hooks/contractAmount/calculateBankCoefficients";
 import {
   MIN_DOWN_PAYMENT_PERCENT,
   MAX_DOWN_PAYMENT_PERCENT,
