@@ -6,7 +6,8 @@ import {
   CATEGORY_ORDER,
   PROGRAM_TYPE_LABELS,
 } from "../../../utils/constants";
-import { formatOfferToText } from "./formatOfferToText";
+import { formatOfferToText } from "../../../hooks/formatOfferToText";
+import { safeFormatMoney } from "../../../hooks/formatMoney";
 
 interface OfferBankSectionProps {
   bankResults: BankProgramResult[];
@@ -213,6 +214,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
               onChange={(e) => setSelectedBankFilter(e.target.value)}
             >
               <option value="all">Все банки ({uniqueBanks.length})</option>
+
               {uniqueBanks.map((bank) => (
                 <option key={bank} value={bank}>
                   {bank}
@@ -299,6 +301,11 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                           const isSelected = selectedCards.has(
                             offer._originalIndex,
                           );
+                          const isShortWithSubsidy =
+                            offer.type === "short" &&
+                            offer.monthlyPaymentAfter !== undefined &&
+                            offer.monthlyPaymentAfter !== null;
+
                           return (
                             <div
                               key={offer._originalIndex}
@@ -319,17 +326,45 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                       "Семейная ипотека"}
                                     {offer.type === "it" && "ИТ ипотека"}
                                   </p>
-                                  {offer.rate && offer.rate > 0 && (
-                                    <p className="bank-rate">{offer.rate}%</p>
+                                  {/* Ставки */}
+                                  {/* Ставки - унифицированный стиль */}
+                                  {isShortWithSubsidy ? (
+                                    <div className="bank-rates">
+                                      <span className="bank-rate">
+                                        {offer.shortRate || offer.rate}% →{" "}
+                                        {offer.rate}%
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    offer.rate &&
+                                    offer.rate > 0 && (
+                                      <p className="bank-rate">{offer.rate}%</p>
+                                    )
                                   )}
                                 </div>
+
+                                {/* Унифицированный блок платежей */}
                                 <div className="payment-info">
                                   <p className="payment-label">
                                     Ежемесячный платёж
                                   </p>
-                                  <p className="payment-value">
-                                    {formatMoney(offer.monthlyPayment)}
-                                  </p>
+                                  {isShortWithSubsidy ? (
+                                    <div className="payment-values-wrapper">
+                                      <p className="payment-value payment-with-subsidy">
+                                        {formatMoney(offer.monthlyPayment)}
+                                      </p>
+                                      <p className="payment-value payment-after-subsidy">
+                                        →{" "}
+                                        {safeFormatMoney(
+                                          offer.monthlyPaymentAfter,
+                                        )}
+                                      </p>
+                                    </div>
+                                  ) : (
+                                    <p className="payment-value">
+                                      {formatMoney(offer.monthlyPayment)}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
 

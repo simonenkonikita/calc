@@ -3,6 +3,8 @@ import { BankOffer, Variables, BankProgramResult } from "../utils/types";
 import { calculateContractAmount } from "./calculateContractAmount";
 import { calculateMonthlyPayment } from "./calculateMonthlyPayment";
 
+import { calculateSubsidyPayments } from "./calculateSubsidyPayments";
+
 // ========== РАСЧЕТ ВСЕХ ПАРАМЕТРОВ ПО БАНКОВСКОЙ ПРОГРАММЕ ==========
 export const calculateBankProgram = (
   objectCost: number, // $B$7 - стоимость объекта
@@ -31,10 +33,10 @@ export const calculateBankProgram = (
     applyMinDownPayment,
   );
 
-  // Завышение
+  // 2. Завышение
   const overstatement = contractAmount - objectCost;
 
-  // 2. Расчет суммы ПВ (как в Excel: =IF($B$13<$B$7*$B$8/100, C18*$B$8/100, IF($B$13>=C18*$B$8/100, $B$13, C18*$B$8/100)))
+  // 3. Расчет суммы ПВ (как в Excel: =IF($B$13<$B$7*$B$8/100, C18*$B$8/100, IF($B$13>=C18*$B$8/100, $B$13, C18*$B$8/100)))
   const contractAmountMinPV = contractAmount * (bankOffer.minPVPercent / 100);
   const downPaymentFromContract =
     contractAmount * (userDownPaymentPercent / 100); //  ПВ от найденой суммы в договоре
@@ -56,26 +58,26 @@ export const calculateBankProgram = (
 
   downPaymentAmount = Math.ceil(downPaymentAmount);
 
-  // 3. Собственные средства (E = D - B13 в Excel)
+  // 4. Собственные средства (E = D - B13 в Excel)
   if (mortgageWithoutDownPayment) {
     ownFunds = downPayment;
   } else {
     ownFunds = downPaymentAmount;
   }
 
-  // 4. Вносим за клиента (F = D - E в Excel)
+  // 5. Вносим за клиента (F = D - E в Excel)
   const clientContribution = downPaymentAmount - ownFunds;
 
-  // 5. ПВ в процентах (G = D / C * 100 в Excel)
+  // 6. ПВ в процентах (G = D / C * 100 в Excel)
   const downPaymentPercentCalc = (downPaymentAmount / contractAmount) * 100;
 
-  // 6. Сумма ипотеки (I = C - D в Excel)
+  // 7. Сумма ипотеки (I = C - D в Excel)
   const mortgageAmount = contractAmount - downPaymentAmount;
 
-  // 7. Сумма субсидии (J = I * subsidyPercent / 100 в Excel)
+  // 8. Сумма субсидии (J = I * subsidyPercent / 100 в Excel)
   let subsidyAmount = mortgageAmount * (bankOffer.subsidyPercent / 100);
 
-  // 8. Сверхлимит (H) и коррекция субсидии
+  // 9. Сверхлимит (H) и коррекция субсидии
   let excessLimit: number | undefined;
   if (bankOffer.excessLimit) {
     if (bankOffer.type === "family") {
@@ -97,7 +99,7 @@ export const calculateBankProgram = (
     }
   }
 
-  // 9. На счет застройщика (K в Excel: =IF($L$10=TRUE,E+I-J, C-J))
+  // 10. На счет застройщика (K в Excel: =IF($L$10=TRUE,E+I-J, C-J))
   let developerAccount: number;
 
   if (mortgageWithoutDownPayment) {
@@ -106,24 +108,49 @@ export const calculateBankProgram = (
     developerAccount = contractAmount - subsidyAmount;
   }
 
-  // Срок ипотеки
-  const loanTermMonths =
-    bankOffer.type === "short"
-      ? bankOffer.durationMonths || 12 // для коротких программ - фиксированный срок
-      : loanTermYears * 12; // для всех остальных - из поля "Срок ипотеки"
+  // 11. Срок ипотеки
+  const loanTermMonths = loanTermYears * 12;
 
-  // 10. Ежемесячный платеж (аннуитетный)
-  const monthlyPayment = calculateMonthlyPayment(
-    mortgageAmount,
-    bankOffer.rate,
-    loanTermMonths, // если не указан срок, то 30 лет
-  );
+  // 12. Расчет ежемесячного платежа
+  const isShortSubsidy = bankOffer.type === "short" && bankOffer.durationMonths;
+
+  let monthlyPayment: number;
+  let monthlyPaymentAfter: number | null = null;
+
+  if (isShortSubsidy && bankOffer.shortRate !== undefined) {
+    // 13. Субсидия на короткий срок
+    const result = calculateSubsidyPayments(
+      mortgageAmount,
+      bankOffer.shortRate,
+      bankOffer.rate,
+      loanTermMonths,
+      bankOffer.durationMonths || 12,
+    );
+
+    monthlyPayment = result.monthlyPaymentSubsidy;
+    monthlyPaymentAfter = result.monthlyPaymentAfter;
+    /*     console.log("🔍 SHORT PROGRAM RESULT:", {
+      program: bankOffer.program,
+      monthlyPayment,
+      monthlyPaymentAfter,
+      result,
+    }); */
+  } else {
+    // 13. Платеж на весь срок
+    monthlyPayment = calculateMonthlyPayment(
+      mortgageAmount,
+      bankOffer.rate,
+      loanTermMonths,
+    );
+    /*  console.log("🔍 REGULAR PROGRAM:", bankOffer.program, monthlyPayment); */
+  }
 
   return {
     bank: bankOffer.bank,
     program: bankOffer.program,
     type: bankOffer.type,
     rate: bankOffer.rate,
+    shortRate: bankOffer.shortRate,
     durationMonths: loanTermMonths,
     monthlyPayment: Math.ceil(monthlyPayment),
     overstatement: Math.ceil(overstatement),
@@ -137,5 +164,8 @@ export const calculateBankProgram = (
     mortgageAmount: Math.ceil(mortgageAmount),
     subsidyAmount: Math.ceil(subsidyAmount),
     developerAccount: Math.ceil(developerAccount),
+    monthlyPaymentAfter: monthlyPaymentAfter
+      ? Math.ceil(monthlyPaymentAfter)
+      : undefined,
   };
 };

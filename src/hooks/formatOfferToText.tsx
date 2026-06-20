@@ -1,4 +1,4 @@
-import { BankProgramResult } from "../../../utils/types";
+import { BankProgramResult } from "../utils/types";
 
 // Форматирование предложения в текст
 export const formatOfferToText = (

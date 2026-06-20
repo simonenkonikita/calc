@@ -1,3 +1,10 @@
+// ==========  функция-хелпер для безопасного форматирования==========
+
+export const safeFormatMoney = (amount: number | undefined | null): string => {
+  if (amount === undefined || amount === null) return "—";
+  return formatMoney(amount);
+};
+
 // ========== ФОРМАТИРОВАНИЕ ДЕНЕГ ==========
 export const formatMoney = (amount: number): string => {
   return new Intl.NumberFormat("ru-RU", {

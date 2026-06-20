@@ -250,17 +250,57 @@
 
 .bank-categories .payment-info {
   text-align: right;
+  min-width: 120px;
 }
 
 .bank-categories .payment-label {
   font-size: 0.7rem;
   color: #6b7280;
+  margin-bottom: 0.25rem;
 }
 
 .bank-categories .payment-value {
   font-size: 1.125rem;
   font-weight: 700;
   color: #1f2937;
+  margin: 0;
+}
+
+/* Ставки для short программ */
+.bank-rates {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.bank-rates .bank-rate {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+/* Обертка для платежей с субсидией */
+.payment-values-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+}
+
+.payment-values-wrapper .payment-value {
+  font-size: 1rem;
+}
+
+.payment-values-wrapper .payment-with-subsidy {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.payment-values-wrapper .payment-after-subsidy {
+  color: #ea580c;
+  font-weight: 700;
+  font-size: 1.125rem;
 }
 
 /* Список деталей */
@@ -454,6 +494,12 @@
   .bank-categories .payment-info {
     text-align: left;
     margin-top: 0.5rem;
+    min-width: auto;
+    width: 100%;
+  }
+
+  .payment-values-wrapper {
+    align-items: flex-start;
   }
 
   .bank-categories .category-header {

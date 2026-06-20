@@ -9,7 +9,6 @@ export const MortgageCalculator: React.FC = () => {
   const {
     formData,
     results,
-    selectedOfferIndex,
     isCalculating,
     error,
     handleInputChange,
@@ -72,7 +71,6 @@ export const MortgageCalculator: React.FC = () => {
             <div className="section-divider" />
             <OfferBankSection
               bankResults={results.bankResults}
-              selectedOfferIndex={selectedOfferIndex}
               onSelectOffer={handleSelectOffer}
               formatMoney={formatMoney}
               mortgageWithoutDownPayment={formData.mortgageWithoutDownPayment}

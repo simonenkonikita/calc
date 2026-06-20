@@ -50,12 +50,13 @@ export interface BankOffer {
   bank: string; // Название банка
   program: string; // Название программы
   type: ProgramType; // Тип программы
-  rate: number; // Процентная ставка (%)
   subsidyPercent: number; // Субсидия (%)
   minPVPercent: number; // Минимальный ПВ (%)
   durationMonths?: number; // Для short программ
   isTwoContracts?: boolean; // Для Совкомбанка (2 договора)
   excessLimit?: boolean; // Сверхлимит
+  rate: number; // Процентная ставка (%)
+  shortRate?: number; //
 }
 
 // ========== РЕЗУЛЬТАТ РАСЧЕТА ПО ОДНОЙ ПРОГРАММЕ ==========
@@ -63,7 +64,8 @@ export interface BankProgramResult {
   bank: string;
   program: string;
   type: ProgramType;
-  rate?: number; // Ставка на период
+  rate: number; // Ставка на период
+  shortRate?: number;
   durationMonths?: number; // Длительность программы
   // Расчет ежемесячного платежа
   monthlyPayment: number; // Ежемесячный платёж
@@ -81,6 +83,8 @@ export interface BankProgramResult {
   subsidyAmount: number; // Сумма субсидии
   developerAccount: number; // На счет застройщика
   // Дополнительно для short программ
+  monthlyPaymentAfter?: number; // Платёж после субсидирования
+  remainingDebt?: number; // Остаток долга после субсидирования
 }
 
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========
@@ -117,4 +121,10 @@ export interface DynamicSubsidyRule {
 
 export interface BankOfferWithDynamicSubsidy extends BankOffer {
   dynamicSubsidyRules?: DynamicSubsidyRule[]; // Например: ПВ > 30% → субсидия 12.5%
+}
+
+// ========== РЕЗУЛЬТАТ РАСЧЕТА СУБСИДИИ НА КОРОТКИЙ СРОК ==========
+export interface SubsidyPaymentResult {
+  monthlyPaymentSubsidy: number; // Платёж в период субсидирования
+  monthlyPaymentAfter: number | null; // Платёж после субсидирования (если есть)
 }
