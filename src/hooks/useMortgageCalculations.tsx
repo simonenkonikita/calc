@@ -107,14 +107,6 @@ export const useMortgageCalculator = () => {
       // Небольшая задержка для имитации загрузки (опционально)
       // await new Promise(resolve => setTimeout(resolve, 100));
 
-      console.log("Расчёт с параметрами:", {
-        complex: formData.complex,
-        apartmentType: formData.apartmentType,
-        area: formData.area,
-        pricePerM2: finalPricePerM2,
-        mortgageWithoutDownPayment: formData.mortgageWithoutDownPayment,
-      });
-
       const calculated = calculateFullMortgage(
         formData,
         bankOffers,

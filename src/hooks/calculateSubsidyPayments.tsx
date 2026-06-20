@@ -1,59 +1,31 @@
 import { SubsidyPaymentResult } from "../utils/types";
-import { calculateFutureValue } from "./calculateFutureValue";
-import { calculateMonthlyPayment } from "./calculateMonthlyPayment";
+import { calculateOnlyPercenkSubsidy } from "./calculateOnlyPercenkSubsidy";
+import { calculateStandardSubsidy } from "./calculateStandardSubsidy";
 
-// ========== РАСЧЕТ ПЛАТЕЖЕЙ С СУБСИДИЕЙ НА КОРОТКИЙ СРОК ==========
+// ========== УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ==========
 export const calculateSubsidyPayments = (
-  mortgageAmount: number, // Сумма кредита
-  shortRate: number, // Ставка в период субсидирования (%)
-  rate: number, // Полная ставка после субсидирования (%)
-  loanTermMonths: number, // Общий срок кредита (месяцы)
-  durationMonths: number, // Срок субсидирования (месяцы)
+  mortgageAmount: number,
+  shortRate: number,
+  rate: number,
+  loanTermMonths: number,
+  durationMonths: number,
+  method: "onlyPercent" | "standard" = "standard",
 ): SubsidyPaymentResult => {
-  // Платёж в период субсидирования (по льготной ставке на ВЕСЬ срок)
-  const monthlyPaymentSubsidy = calculateMonthlyPayment(
-    mortgageAmount,
-    shortRate,
-    loanTermMonths,
-  );
-
-  console.log("🔍 monthlyPaymentSubsidy:", {
-    durationMonths,
-    loanTermMonths,
-  });
-
-  let monthlyPaymentAfter: number | null = null;
-
-  // Если субсидия не на весь срок
-  if (durationMonths < loanTermMonths) {
-    // Остаток долга после окончания субсидирования
-    const remainingDebt = calculateFutureValue(
-      shortRate,
-      durationMonths,
-      monthlyPaymentSubsidy,
+  if (method === "onlyPercent") {
+    return calculateOnlyPercenkSubsidy(
       mortgageAmount,
+      shortRate,
+      rate,
+      loanTermMonths,
+      durationMonths,
     );
-
-    console.log("🔍 remainingDebt:", {
-      remainingDebt,
-    });
-
-    // Оставшиеся месяцы
-    const remainingMonths = loanTermMonths - durationMonths;
-
-    // Платёж после субсидирования (по полной ставке на ОСТАТОК долга)
-    if (remainingMonths > 0 && remainingDebt > 0) {
-      monthlyPaymentAfter = calculateMonthlyPayment(
-        remainingDebt,
-        rate,
-        remainingMonths,
-      );
-    }
   }
 
-  return {
-    monthlyPaymentSubsidy: Math.ceil(monthlyPaymentSubsidy),
-    monthlyPaymentAfter:
-      monthlyPaymentAfter !== null ? Math.ceil(monthlyPaymentAfter) : null,
-  };
+  return calculateStandardSubsidy(
+    mortgageAmount,
+    shortRate,
+    rate,
+    loanTermMonths,
+    durationMonths,
+  );
 };

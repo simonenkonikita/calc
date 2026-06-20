@@ -17,16 +17,5 @@ export const calculateFutureValue = (
   const result =
     amount * powerFactor - (payment * (powerFactor - 1)) / monthlyRate;
 
-  // Логируем для отладки
-  console.log("📊 calculateFutureValue:", {
-    rate,
-    months,
-    payment,
-    amount,
-    monthlyRate,
-    powerFactor,
-    result,
-  });
-
   return Math.max(0, result);
 };

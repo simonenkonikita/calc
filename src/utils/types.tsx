@@ -57,6 +57,7 @@ export interface BankOffer {
   excessLimit?: boolean; // Сверхлимит
   rate: number; // Процентная ставка (%)
   shortRate?: number; //
+  subsidyCalculationMethod?: "onlyPercent" | "standard";
 }
 
 // ========== РЕЗУЛЬТАТ РАСЧЕТА ПО ОДНОЙ ПРОГРАММЕ ==========

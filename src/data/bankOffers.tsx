@@ -6,7 +6,6 @@ const baseRateAlfa = 19.09;
 const baseRateSovkom = 19.99;
 const baseRateVTB = 19.9;
 const baseRateUralsib = 18.29;
-
 // ПВ
 const minPVPercent = 20.1;
 
@@ -43,8 +42,8 @@ export const bankOffers: BankOffer[] = [
     program: "13,9% на весь срок",
     type: "full",
     rate: 13.9,
-    subsidyPercent: minPVPercent,
-    minPVPercent: 20.1,
+    subsidyPercent: 11.5,
+    minPVPercent: minPVPercent,
   },
 
   // Короткий срок
@@ -57,6 +56,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 13,
     minPVPercent: minPVPercent,
     durationMonths: 12,
+    subsidyCalculationMethod: "onlyPercent",
   },
   {
     bank: "Сбербанк",
@@ -67,6 +67,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 19,
     minPVPercent: minPVPercent,
     durationMonths: 24,
+    subsidyCalculationMethod: "onlyPercent",
   },
   {
     bank: "Сбербанк",
@@ -77,6 +78,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 15.5,
     minPVPercent: minPVPercent,
     durationMonths: 24,
+    subsidyCalculationMethod: "onlyPercent",
   },
   {
     bank: "Сбербанк",
@@ -87,6 +89,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 13,
     minPVPercent: minPVPercent,
     durationMonths: 24,
+    subsidyCalculationMethod: "onlyPercent",
   },
 
   // Семейная ипотека
@@ -129,8 +132,7 @@ export const bankOffers: BankOffer[] = [
     bank: "Сбербанк",
     program: "ИТ ипотека 3,5%",
     type: "it",
-    rate: 6,
-    shortRate: 3.5,
+    rate: 3.5,
     subsidyPercent: 14.5,
     minPVPercent: minPVPercent,
   },
@@ -190,6 +192,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 14.7,
     minPVPercent: minPVPercent,
     durationMonths: 12,
+    subsidyCalculationMethod: "standard",
   },
   {
     bank: "Совкомбанк",
@@ -200,6 +203,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 12,
     minPVPercent: minPVPercent,
     durationMonths: 12,
+    subsidyCalculationMethod: "standard",
   },
   {
     bank: "Совкомбанк",
@@ -210,6 +214,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 24,
     minPVPercent: minPVPercent,
     durationMonths: 24,
+    subsidyCalculationMethod: "standard",
   },
   {
     bank: "Совкомбанк",
@@ -220,6 +225,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 12,
     minPVPercent: minPVPercent,
     durationMonths: 24,
+    subsidyCalculationMethod: "standard",
   },
   {
     bank: "Совкомбанк",
@@ -265,7 +271,7 @@ export const bankOffers: BankOffer[] = [
     type: "full",
     rate: baseRateVTB,
     subsidyPercent: 0,
-    minPVPercent: 20.1,
+    minPVPercent: minPVPercent,
   },
   {
     bank: "ВТБ",
@@ -285,6 +291,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 18.29,
     minPVPercent: minPVPercent,
     durationMonths: 12,
+    subsidyCalculationMethod: "standard",
   },
   {
     bank: "ВТБ",
@@ -295,6 +302,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 15.49,
     minPVPercent: minPVPercent,
     durationMonths: 12,
+    subsidyCalculationMethod: "standard",
   },
 
   // ==================== УРАЛСИБ ====================
@@ -333,6 +341,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 9.4,
     minPVPercent: minPVPercent,
     durationMonths: 12,
+    subsidyCalculationMethod: "standard",
   },
   {
     bank: "Уралсиб",
@@ -343,6 +352,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 15.2,
     minPVPercent: minPVPercent,
     durationMonths: 24,
+    subsidyCalculationMethod: "standard",
   },
   {
     bank: "Уралсиб",
@@ -353,5 +363,6 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 19.9,
     minPVPercent: minPVPercent,
     durationMonths: 36,
+    subsidyCalculationMethod: "standard",
   },
 ];

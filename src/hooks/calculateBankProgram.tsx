@@ -113,6 +113,7 @@ export const calculateBankProgram = (
 
   // 12. Расчет ежемесячного платежа
   const isShortSubsidy = bankOffer.type === "short" && bankOffer.durationMonths;
+  const method = bankOffer.subsidyCalculationMethod || "standard";
 
   let monthlyPayment: number;
   let monthlyPaymentAfter: number | null = null;
@@ -125,16 +126,11 @@ export const calculateBankProgram = (
       bankOffer.rate,
       loanTermMonths,
       bankOffer.durationMonths || 12,
+      method,
     );
 
     monthlyPayment = result.monthlyPaymentSubsidy;
     monthlyPaymentAfter = result.monthlyPaymentAfter;
-    /*     console.log("🔍 SHORT PROGRAM RESULT:", {
-      program: bankOffer.program,
-      monthlyPayment,
-      monthlyPaymentAfter,
-      result,
-    }); */
   } else {
     // 13. Платеж на весь срок
     monthlyPayment = calculateMonthlyPayment(
@@ -142,7 +138,6 @@ export const calculateBankProgram = (
       bankOffer.rate,
       loanTermMonths,
     );
-    /*  console.log("🔍 REGULAR PROGRAM:", bankOffer.program, monthlyPayment); */
   }
 
   return {
