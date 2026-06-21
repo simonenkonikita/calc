@@ -1,5 +1,8 @@
 import { BankOffer, Variables } from "../../utils/types";
 import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
+import { calculateFamilyContractAmount } from "./addContractAmount/calculateFamilyContractAmount";
+import { calculateItContractAmount } from "./addContractAmount/calculateItContractAmount";
+import { calculateStandardContractAmount } from "./addContractAmount/calculateStandardContractAmount";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ==========
 export const calculateContractAmount = (
@@ -19,49 +22,55 @@ export const calculateContractAmount = (
     userDownPaymentPercent,
   );
 
-  const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
-  const bankMinDownPayment = objectCost * (bankOffer.minPVPercent / 100);
-  const actualMinDownPayment = applyMinDownPayment
-    ? bankMinDownPayment
-    : userDesiredDownPayment;
-
-  // 1. НЕ ЗАВЫШАТЬ НА СУБСИДИЮ
-  if (noSubsidyInflate && !mortgageWithoutDownPayment) {
-    return Math.ceil(objectCost);
+  // ============================================================
+  // 1. СЕМЕЙНАЯ ИПОТЕКА
+  // ============================================================
+  if (bankOffer.type === "family") {
+    return calculateFamilyContractAmount(
+      objectCost,
+      downPayment,
+      remainingAmount,
+      userDownPaymentPercent,
+      bankOffer,
+      variables,
+      noSubsidyInflate,
+      mortgageWithoutDownPayment,
+      applyMinDownPayment,
+      coefficients,
+    );
   }
 
-  // 2. ИПОТЕКА БЕЗ ПВ
-  if (mortgageWithoutDownPayment) {
-    const threshold =
-      (remainingAmount * coefficients.requiredCoeffWithoutPV +
-        objectCost -
-        downPayment) *
-      (userDownPaymentPercent / 100);
-
-    if (downPayment < threshold) {
-      if (noSubsidyInflate && mortgageWithoutDownPayment) {
-        return Math.ceil((objectCost - downPayment) / 0.799);
-      } else {
-        return Math.ceil(
-          remainingAmount * coefficients.requiredCoeffWithoutPV +
-            objectCost -
-            downPayment,
-        );
-      }
-    }
+  // ============================================================
+  // 2. ИТ ИПОТЕКА
+  // ============================================================
+  if (bankOffer.type === "it") {
+    return calculateItContractAmount(
+      objectCost,
+      downPayment,
+      remainingAmount,
+      userDownPaymentPercent,
+      bankOffer,
+      variables,
+      noSubsidyInflate,
+      mortgageWithoutDownPayment,
+      applyMinDownPayment,
+      coefficients,
+    );
   }
 
-  let contractAmount: number;
-
-  // 3. РАСЧЕТ СУММЫ В ДОГОВОРЕ
-  // =ЕСЛИ($B$13<=$B$7*$B$8/100; $B$7/Сбербанк!J2; $B$14/Сбербанк!K2+$B$13)
-  if (downPayment <= actualMinDownPayment) {
-    // ✅ ПРАВИЛЬНАЯ ФОРМУЛА - используем requiredCoeffWithMinPV
-    contractAmount = objectCost / coefficients.requiredCoeffWithMinPV;
-  } else {
-    contractAmount =
-      remainingAmount / coefficients.requiredCoeffWithLargePV + downPayment;
-  }
-
-  return Math.ceil(contractAmount);
+  // ============================================================
+  // 3. СТАНДАРТНЫЙ РАСЧЕТ (full, short)
+  // ============================================================
+  return calculateStandardContractAmount(
+    objectCost,
+    downPayment,
+    remainingAmount,
+    userDownPaymentPercent,
+    bankOffer,
+    variables,
+    noSubsidyInflate,
+    mortgageWithoutDownPayment,
+    applyMinDownPayment,
+    coefficients,
+  );
 };

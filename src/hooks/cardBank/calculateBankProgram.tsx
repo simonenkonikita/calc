@@ -1,22 +1,22 @@
-import { MIN_DOWN_PAYMENT_PERCENT } from "../../utils/constants";
 import { BankOffer, Variables, BankProgramResult } from "../../utils/types";
+import { calculateDownPaymentAmount } from "../contractAmount/addContractAmount/alculateDownPaymentAmount";
 import { calculateContractAmount } from "../contractAmount/calculateContractAmount";
 import { calculateMonthlyPayment } from "../payment/standartPayment/calculateMonthlyPayment";
 import { calculateSubsidyPayments } from "../payment/subsidy/calculateSubsidyPayments";
 
 // ========== РАСЧЕТ ВСЕХ ПАРАМЕТРОВ ПО БАНКОВСКОЙ ПРОГРАММЕ ==========
 export const calculateBankProgram = (
-  objectCost: number, // $B$7 - стоимость объекта
-  downPayment: number, // $B$13 - получивщаяся сумма ПВ от стоимость объекта
-  remainingAmount: number, // $B$14 - сумма ипотеки (objectCost - downPayment)
-  userDownPaymentPercent: number, // сумма ПВ в %
-  loanTermYears: number, // $B$8 - процент ПВ из формы
+  objectCost: number,
+  downPayment: number,
+  remainingAmount: number,
+  userDownPaymentPercent: number,
+  loanTermYears: number,
   manualDownPayment: number,
   bankOffer: BankOffer,
   variables: Variables,
-  noSubsidyInflate: boolean, // $L$9 - не завышать на субсидию
-  mortgageWithoutDownPayment: boolean, // $L$10 - ипотека без ПВ
-  applyMinDownPayment: boolean, // $L$11 - применить мин ПВ
+  noSubsidyInflate: boolean,
+  mortgageWithoutDownPayment: boolean,
+  applyMinDownPayment: boolean,
 ): BankProgramResult => {
   // 1. Расчет суммы в договоре (завышение)
   const contractAmount = calculateContractAmount(
@@ -35,57 +35,34 @@ export const calculateBankProgram = (
   // 2. Завышение
   const overstatement = contractAmount - objectCost;
 
-  // ✅ Исправлено: используем обратные кавычки
-
-  // 3. Расчет суммы ПВ (как в Excel: =IF($B$13<$B$7*$B$8/100, C18*$B$8/100, IF($B$13>=C18*$B$8/100, $B$13, C18*$B$8/100)))
-  const contractAmountMinPV = contractAmount * (bankOffer.minPVPercent / 100);
-  const downPaymentFromContract =
-    contractAmount * (userDownPaymentPercent / 100); //  ПВ от найденой суммы в договоре
-
-  let downPaymentAmount: number;
-  let ownFunds: number;
-
-  if (mortgageWithoutDownPayment) {
-    downPaymentAmount = contractAmountMinPV;
-  } else if (manualDownPayment > 0) {
-    downPaymentAmount = Math.max(manualDownPayment, contractAmountMinPV);
-  } else if (userDownPaymentPercent > MIN_DOWN_PAYMENT_PERCENT) {
-    downPaymentAmount = downPaymentFromContract;
-  } else if (downPayment >= contractAmountMinPV) {
-    downPaymentAmount = downPayment;
-  } else {
-    downPaymentAmount = contractAmountMinPV;
-  }
-
-  downPaymentAmount = Math.ceil(downPaymentAmount);
-
-  console.log("🔍 Расчет банковской программы:", {
-    contractAmount,
-    overstatement,
+  // 3. Расчет суммы ПВ
+  const downPaymentAmount = calculateDownPaymentAmount({
     objectCost,
-    downPaymentAmount,
+    downPayment,
+    contractAmount,
+    userDownPaymentPercent,
+    manualDownPayment,
+    bankOffer,
+    variables,
+    mortgageWithoutDownPayment,
   });
 
-  // 4. Собственные средства (E = D - B13 в Excel)
-  if (mortgageWithoutDownPayment) {
-    ownFunds = downPayment;
-  } else {
-    ownFunds = downPaymentAmount;
-  }
+  // 4. Собственные средства
+  const ownFunds = mortgageWithoutDownPayment ? downPayment : downPaymentAmount;
 
-  // 5. Вносим за клиента (F = D - E в Excel)
+  // 5. Вносим за клиента
   const clientContribution = downPaymentAmount - ownFunds;
 
-  // 6. ПВ в процентах (G = D / C * 100 в Excel)
+  // 6. ПВ в процентах
   const downPaymentPercentCalc = (downPaymentAmount / contractAmount) * 100;
 
-  // 7. Сумма ипотеки (I = C - D в Excel)
+  // 7. Сумма ипотеки
   const mortgageAmount = contractAmount - downPaymentAmount;
 
-  // 8. Сумма субсидии (J = I * subsidyPercent / 100 в Excel)
+  // 8. Сумма субсидии
   let subsidyAmount = mortgageAmount * (bankOffer.subsidyPercent / 100);
 
-  // 9. Сверхлимит (H) и коррекция субсидии
+  // 9. Сверхлимит и коррекция субсидии
   let excessLimit: number | undefined;
   if (bankOffer.excessLimit) {
     if (bankOffer.type === "family") {
@@ -107,9 +84,8 @@ export const calculateBankProgram = (
     }
   }
 
-  // 10. На счет застройщика (K в Excel: =IF($L$10=TRUE,E+I-J, C-J))
+  // 10. На счет застройщика
   let developerAccount: number;
-
   if (mortgageWithoutDownPayment) {
     developerAccount = ownFunds + mortgageAmount - subsidyAmount;
   } else {
@@ -127,7 +103,6 @@ export const calculateBankProgram = (
   let monthlyPaymentAfter: number | null = null;
 
   if (isShortSubsidy && bankOffer.shortRate !== undefined) {
-    // 13. Субсидия на короткий срок
     const result = calculateSubsidyPayments(
       mortgageAmount,
       bankOffer.shortRate,
@@ -136,11 +111,9 @@ export const calculateBankProgram = (
       bankOffer.durationMonths || 12,
       method,
     );
-
     monthlyPayment = result.monthlyPaymentSubsidy;
     monthlyPaymentAfter = result.monthlyPaymentAfter;
   } else {
-    // 13. Платеж на весь срок
     monthlyPayment = calculateMonthlyPayment(
       mortgageAmount,
       bankOffer.rate,
