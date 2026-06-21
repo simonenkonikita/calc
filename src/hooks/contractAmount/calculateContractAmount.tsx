@@ -19,13 +19,6 @@ export const calculateContractAmount = (
     userDownPaymentPercent,
   );
 
-  console.log("🔍 calculateContractAmount - полученные коэффициенты:", {
-    program: bankOffer.program,
-    requiredCoeffWithMinPV: coefficients.requiredCoeffWithMinPV,
-    requiredCoeffWithLargePV: coefficients.requiredCoeffWithLargePV,
-    requiredCoeffWithoutPV: coefficients.requiredCoeffWithoutPV,
-  });
-
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
   const bankMinDownPayment = objectCost * (bankOffer.minPVPercent / 100);
   const actualMinDownPayment = applyMinDownPayment
@@ -65,26 +58,10 @@ export const calculateContractAmount = (
   if (downPayment <= actualMinDownPayment) {
     // ✅ ПРАВИЛЬНАЯ ФОРМУЛА - используем requiredCoeffWithMinPV
     contractAmount = objectCost / coefficients.requiredCoeffWithMinPV;
-
-    console.log("📊 Расчет с мин ПВ:", {
-      objectCost,
-      requiredCoeffWithMinPV: coefficients.requiredCoeffWithMinPV,
-      contractAmount,
-      "Проверка (10 000 000 / 0.852185)": 10000000 / 0.852185,
-    });
   } else {
     contractAmount =
       remainingAmount / coefficients.requiredCoeffWithLargePV + downPayment;
-
-    console.log("📊 Расчет с большим ПВ:", {
-      remainingAmount,
-      requiredCoeffWithLargePV: coefficients.requiredCoeffWithLargePV,
-      downPayment,
-      contractAmount,
-    });
   }
-
-  console.log(`🏦 Итоговый contractAmount: ${contractAmount}`);
 
   return Math.ceil(contractAmount);
 };
