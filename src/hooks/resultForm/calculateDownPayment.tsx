@@ -19,15 +19,15 @@ export const calculateDownPayment = (
 
   // Ипотека без ПВ
   if (mortgageWithoutDownPayment) {
-    // Если ручной ввод больше стоимости объекта
+    // Если ручной ввод больше чем минимальный
     if (manualDownPayment > minDownPayment) {
-      return Math.ceil(minDownPayment);
+      return minDownPayment;
     }
     return manualDownPayment;
   }
 
   if (applyMinDownPayment) {
-    return Math.ceil(minDownPayment);
+    return minDownPayment;
   }
 
   // Если есть ручной ввод ПВ
@@ -37,15 +37,15 @@ export const calculateDownPayment = (
       manualDownPayment >= minDownPayment &&
       manualDownPayment <= objectCost
     ) {
-      return Math.ceil(manualDownPayment);
+      return manualDownPayment;
     }
     // Если ручной ввод меньше минимального
     if (manualDownPayment < minDownPayment) {
-      return Math.ceil(minDownPayment);
+      return minDownPayment;
     }
     // Если ручной ввод больше стоимости объекта
     if (manualDownPayment > objectCost) {
-      return Math.ceil(minDownPayment);
+      return minDownPayment;
     }
   }
 
@@ -62,5 +62,5 @@ export const calculateDownPayment = (
     result = objectCost;
   }
 
-  return Math.ceil(result);
+  return result;
 };

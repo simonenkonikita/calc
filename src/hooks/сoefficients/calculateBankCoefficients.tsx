@@ -7,9 +7,19 @@ export const calculateBankCoefficients = (
 ): BankCoefficients => {
   const downPaymentPercent = userDownPaymentPercent;
   const mortgagePercent = 100 - downPaymentPercent;
+  const subsidyPercent = bankOffer.subsidyPercent;
+
+  console.log("🔍 calculateBankCoefficients:", {
+    program: bankOffer.program,
+    userDownPaymentPercent,
+    downPaymentPercent,
+    mortgagePercent,
+    subsidyPercent,
+    requiredCoeffWithMinPV:
+      1 - (subsidyPercent / 100) * (mortgagePercent / 100),
+  });
 
   const kefDownPayment = downPaymentPercent / mortgagePercent;
-  const subsidyPercent = bankOffer.subsidyPercent;
   const creditFromSubsidyPercent = 100 - subsidyPercent;
   const kefSubsidy = subsidyPercent / creditFromSubsidyPercent;
   // Каэффициент ипотеки: (сумма ипотеки) / 100

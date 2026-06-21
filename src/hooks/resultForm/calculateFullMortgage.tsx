@@ -9,7 +9,7 @@ import {
 import { calculateBankProgram } from "../cardBank/calculateBankProgram";
 import { calculateDownPayment } from "./calculateDownPayment";
 
-// ========== ПОЛНЫЙ РАСЧЕТ ИПОТЕКИ ==========
+// ========== ПОЛНЫЙ РАСЧЕТ ДЛЯ ПЕРВИЧНОГО РЕЗУЛЬТАТА ==========
 export const calculateFullMortgage = (
   formData: CalculatorFormData,
   bankOffers: BankOffer[],
@@ -26,6 +26,7 @@ export const calculateFullMortgage = (
   const deposit = variables.deposit;
 
   let objectCost: number;
+
   if (manualObjectCost && manualObjectCost > 0) {
     objectCost = manualObjectCost;
   } else {

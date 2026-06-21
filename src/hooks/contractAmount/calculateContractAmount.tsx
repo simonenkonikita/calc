@@ -3,37 +3,41 @@ import { calculateBankCoefficients } from "../сoefficients/calculateBankCoeffic
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ==========
 export const calculateContractAmount = (
-  objectCost: number, // $B$7 - стоимость объекта
-  downPayment: number, // $B$13 - сумма ПВ
-  remainingAmount: number, // $B$14 - сумма ипотеки (objectCost - downPayment)
-  userDownPaymentPercent: number, // $B$8 - процент ПВ из формы
+  objectCost: number,
+  downPayment: number,
+  remainingAmount: number,
+  userDownPaymentPercent: number,
   manualDownPayment: number,
   bankOffer: BankOffer,
   variables: Variables,
-  noSubsidyInflate: boolean, // $L$9 - не завышать на субсидию
-  mortgageWithoutDownPayment: boolean /*  */, // $L$10 - ипотека без ПВ
-  applyMinDownPayment: boolean, // $L$11 - применить мин ПВ
+  noSubsidyInflate: boolean,
+  mortgageWithoutDownPayment: boolean,
+  applyMinDownPayment: boolean,
 ): number => {
   const coefficients = calculateBankCoefficients(
     bankOffer,
     userDownPaymentPercent,
   );
-  // Желание пользователя (сколько он хочет внести в процентах)
+
+  console.log("🔍 calculateContractAmount - полученные коэффициенты:", {
+    program: bankOffer.program,
+    requiredCoeffWithMinPV: coefficients.requiredCoeffWithMinPV,
+    requiredCoeffWithLargePV: coefficients.requiredCoeffWithLargePV,
+    requiredCoeffWithoutPV: coefficients.requiredCoeffWithoutPV,
+  });
+
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
-  // Требование банка (минимальный ПВ для этой программы)
   const bankMinDownPayment = objectCost * (bankOffer.minPVPercent / 100);
-
-  // Фактический минимальный ПВ (с учётом флага "применить мин ПВ")
   const actualMinDownPayment = applyMinDownPayment
-    ? bankMinDownPayment // Используем требование банка
-    : userDesiredDownPayment; // Используем желание пользователя
+    ? bankMinDownPayment
+    : userDesiredDownPayment;
 
-  // =ЕСЛИ(И($L$9=ИСТИНА;$L$10=ЛОЖЬ);$B$7; ...)
+  // 1. НЕ ЗАВЫШАТЬ НА СУБСИДИЮ
   if (noSubsidyInflate && !mortgageWithoutDownPayment) {
     return Math.ceil(objectCost);
   }
 
-  // =ЕСЛИ(И($L$10=ИСТИНА;$B$13<($B$14*L2+$B$7-$B$13)*$B$8/100); ...)
+  // 2. ИПОТЕКА БЕЗ ПВ
   if (mortgageWithoutDownPayment) {
     const threshold =
       (remainingAmount * coefficients.requiredCoeffWithoutPV +
@@ -42,7 +46,6 @@ export const calculateContractAmount = (
       (userDownPaymentPercent / 100);
 
     if (downPayment < threshold) {
-      // =ЕСЛИ(И($L$9=ИСТИНА;$L$10=ИСТИНА);$B$7/79.9*100; $B$14*L2+$B$7-$B$13)
       if (noSubsidyInflate && mortgageWithoutDownPayment) {
         return Math.ceil((objectCost - downPayment) / 0.799);
       } else {
@@ -55,53 +58,33 @@ export const calculateContractAmount = (
     }
   }
 
-  // Проверяем лимиты для специальных программ
   let contractAmount: number;
 
+  // 3. РАСЧЕТ СУММЫ В ДОГОВОРЕ
   // =ЕСЛИ($B$13<=$B$7*$B$8/100; $B$7/Сбербанк!J2; $B$14/Сбербанк!K2+$B$13)
   if (downPayment <= actualMinDownPayment) {
+    // ✅ ПРАВИЛЬНАЯ ФОРМУЛА - используем requiredCoeffWithMinPV
     contractAmount = objectCost / coefficients.requiredCoeffWithMinPV;
+
+    console.log("📊 Расчет с мин ПВ:", {
+      objectCost,
+      requiredCoeffWithMinPV: coefficients.requiredCoeffWithMinPV,
+      contractAmount,
+      "Проверка (10 000 000 / 0.852185)": 10000000 / 0.852185,
+    });
   } else {
     contractAmount =
       remainingAmount / coefficients.requiredCoeffWithLargePV + downPayment;
+
+    console.log("📊 Расчет с большим ПВ:", {
+      remainingAmount,
+      requiredCoeffWithLargePV: coefficients.requiredCoeffWithLargePV,
+      downPayment,
+      contractAmount,
+    });
   }
 
-  // Проверка лимитов для семейной/ИТ ипотеки
-  if (bankOffer.type === "family") {
-    const limit = variables.familyMortgageLimit;
-    const maxAmount = variables.maxFamilyMortgageSum;
-
-    if (contractAmount > maxAmount) {
-      contractAmount = maxAmount;
-    }
-
-    if (bankOffer.excessLimit) {
-      const subsidyAmount =
-        (contractAmount - objectCost) * (bankOffer.subsidyPercent / 100);
-      if (subsidyAmount > limit) {
-        contractAmount =
-          (objectCost + limit) / coefficients.requiredCoeffWithLargePV;
-      }
-    }
-  }
-
-  if (bankOffer.type === "it") {
-    const limit = variables.itMortgageLimit;
-    const maxAmount = variables.maxItMortgageSum;
-
-    if (contractAmount > maxAmount) {
-      contractAmount = maxAmount;
-    }
-
-    if (bankOffer.excessLimit) {
-      const subsidyAmount =
-        (contractAmount - objectCost) * (bankOffer.subsidyPercent / 100);
-      if (subsidyAmount > limit) {
-        contractAmount =
-          (objectCost + limit) / coefficients.requiredCoeffWithLargePV;
-      }
-    }
-  }
+  console.log(`🏦 Итоговый contractAmount: ${contractAmount}`);
 
   return Math.ceil(contractAmount);
 };

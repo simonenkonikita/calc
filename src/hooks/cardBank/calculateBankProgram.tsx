@@ -35,6 +35,8 @@ export const calculateBankProgram = (
   // 2. Завышение
   const overstatement = contractAmount - objectCost;
 
+  // ✅ Исправлено: используем обратные кавычки
+
   // 3. Расчет суммы ПВ (как в Excel: =IF($B$13<$B$7*$B$8/100, C18*$B$8/100, IF($B$13>=C18*$B$8/100, $B$13, C18*$B$8/100)))
   const contractAmountMinPV = contractAmount * (bankOffer.minPVPercent / 100);
   const downPaymentFromContract =
@@ -56,6 +58,13 @@ export const calculateBankProgram = (
   }
 
   downPaymentAmount = Math.ceil(downPaymentAmount);
+
+  console.log("🔍 Расчет банковской программы:", {
+    contractAmount,
+    overstatement,
+    objectCost,
+    downPaymentAmount,
+  });
 
   // 4. Собственные средства (E = D - B13 в Excel)
   if (mortgageWithoutDownPayment) {
