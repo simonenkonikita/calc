@@ -48,6 +48,14 @@ export interface ObjectCalculationResult {
   pricePerSquareMeter: number; // Цена за м2 (из справочника)
 }
 
+export interface OfferBankSectionProps {
+  bankResults: BankProgramResult[];
+  onSelectOffer: (index: number) => void;
+  formatMoney: (amount: number) => string;
+  mortgageWithoutDownPayment?: boolean;
+  loanTermYears: number;
+}
+
 // ========== БАНКОВСКИЕ ПРОГРАММЫ (из JSON) ==========
 export type ProgramType = "full" | "short" | "family" | "it";
 
@@ -88,6 +96,7 @@ export interface BankProgramResult {
   program: string;
   type: ProgramType;
   rate: number; // Ставка на период
+  actualRate?: number;
   shortRate?: number;
   durationMonths?: number; // Длительность программы
   // Расчет ежемесячного платежа
@@ -108,6 +117,7 @@ export interface BankProgramResult {
   // Дополнительно для short программ
   monthlyPaymentAfter?: number; // Платёж после субсидирования
   remainingDebt?: number; // Остаток долга после субсидирования
+  subsidyPercent: number;
 }
 
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========

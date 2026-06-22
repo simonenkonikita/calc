@@ -74,6 +74,7 @@ export const MortgageCalculator: React.FC = () => {
               onSelectOffer={handleSelectOffer}
               formatMoney={formatMoney}
               mortgageWithoutDownPayment={formData.mortgageWithoutDownPayment}
+              loanTermYears={formData.loanTerm || 30}
             />
           </>
         )}

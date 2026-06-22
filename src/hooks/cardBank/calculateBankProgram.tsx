@@ -141,6 +141,7 @@ export const calculateBankProgram = (
     type: bankOffer.type,
     rate: actualRate,
     shortRate: bankOffer.shortRate,
+    subsidyPercent: bankOffer.subsidyPercent,
     durationMonths:
       bankOffer.type === "short" ? bankOffer.durationMonths : loanTermMonths,
     monthlyPayment: Math.ceil(monthlyPayment),
