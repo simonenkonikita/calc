@@ -1,6 +1,7 @@
 import { BankOffer, Variables, BankProgramResult } from "../../utils/types";
 import { calculateDownPaymentAmount } from "../contractAmount/addContractAmount/alculateDownPaymentAmount";
 import { calculateContractAmount } from "../contractAmount/calculateContractAmount";
+import { getDynamicRate } from "../dynamicRate/getDynamicRate";
 import { calculateMonthlyPayment } from "../payment/standartPayment/calculateMonthlyPayment";
 import { calculateSubsidyPayments } from "../payment/subsidy/calculateSubsidyPayments";
 
@@ -59,6 +60,19 @@ export const calculateBankProgram = (
   // 7. Сумма ипотеки
   const mortgageAmount = contractAmount - downPaymentAmount;
 
+  // ✅ 4. Получаем актуальную ставку через getDynamicRate
+  const pvForRate =
+    manualDownPayment > 0 && objectCost > 0
+      ? (manualDownPayment / objectCost) * 100
+      : userDownPaymentPercent;
+
+  const actualRate = getDynamicRate(
+    bankOffer,
+    pvForRate,
+    mortgageAmount,
+    loanTermYears,
+  );
+
   // 8. Сумма субсидии
   let subsidyAmount = mortgageAmount * (bankOffer.subsidyPercent / 100);
 
@@ -106,7 +120,7 @@ export const calculateBankProgram = (
     const result = calculateSubsidyPayments(
       mortgageAmount,
       bankOffer.shortRate,
-      bankOffer.rate,
+      actualRate,
       loanTermMonths,
       bankOffer.durationMonths || 12,
       method,
@@ -116,7 +130,7 @@ export const calculateBankProgram = (
   } else {
     monthlyPayment = calculateMonthlyPayment(
       mortgageAmount,
-      bankOffer.rate,
+      actualRate,
       loanTermMonths,
     );
   }
@@ -125,7 +139,7 @@ export const calculateBankProgram = (
     bank: bankOffer.bank,
     program: bankOffer.program,
     type: bankOffer.type,
-    rate: bankOffer.rate,
+    rate: actualRate,
     shortRate: bankOffer.shortRate,
     durationMonths:
       bankOffer.type === "short" ? bankOffer.durationMonths : loanTermMonths,

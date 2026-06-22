@@ -1,5 +1,10 @@
 // Типы данных
 
+// Расширенный тип для хранения оригинального индекса
+export interface BankProgramResultWithIndex extends BankProgramResult {
+  _originalIndex: number;
+}
+
 // ========== ПЕРЕМЕННЫЕ (ЛИМИТЫ) ==========
 export interface Variables {
   familyMortgageLimit: number;
@@ -46,6 +51,22 @@ export interface ObjectCalculationResult {
 // ========== БАНКОВСКИЕ ПРОГРАММЫ (из JSON) ==========
 export type ProgramType = "full" | "short" | "family" | "it";
 
+export interface DynamicRateRule {
+  // Для простых условий (JSON-совместимые)
+  type?: "pv" | "amount" | "term";
+  condition?: "gte" | "lte" | "lt" | "gt" | "eq";
+  value?: number;
+
+  // Для сложных условий (функции)
+  conditionFn?: (pv: number, amount: number, term: number) => boolean;
+  rateFn?: (baseRate: number, pv: number, amount: number) => number;
+
+  // Результат
+  rate?: number;
+  priority?: number;
+  description?: string;
+}
+
 export interface BankOffer {
   bank: string; // Название банка
   program: string; // Название программы
@@ -58,6 +79,7 @@ export interface BankOffer {
   rate: number; // Процентная ставка (%)
   shortRate?: number; //
   subsidyCalculationMethod?: "onlyPercent" | "standard";
+  dynamicRates?: DynamicRateRule[];
 }
 
 // ========== РЕЗУЛЬТАТ РАСЧЕТА ПО ОДНОЙ ПРОГРАММЕ ==========

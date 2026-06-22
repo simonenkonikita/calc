@@ -7,22 +7,22 @@ const Navigation = () => {
   return (
     <nav className="navigation">
       <div className="nav-container">
-        <div className="nav-brand">
+        {/*     <div className="nav-brand">
           <Link to="/">Ипотечный калькулятор</Link>
-        </div>
+        </div> */}
         <ul className="nav-menu">
-          <li className={location.pathname === "/" ? "active" : ""}>
+          {/*  <li className={location.pathname === "/" ? "active" : ""}>
             <Link to="/">Главная</Link>
-          </li>
+          </li> */}
           <li className={location.pathname === "/calculator" ? "active" : ""}>
             <Link to="/calculator">Калькулятор</Link>
           </li>
-          <li className={location.pathname === "/results" ? "active" : ""}>
+          {/*   <li className={location.pathname === "/results" ? "active" : ""}>
             <Link to="/results">Результаты</Link>
-          </li>
-          <li className={location.pathname === "/coefficients" ? "active" : ""}>
+          </li> */}
+          {/*      <li className={location.pathname === "/coefficients" ? "active" : ""}>
             <Link to="/coefficients">Коэффициенты</Link>
-          </li>
+          </li> */}
         </ul>
       </div>
     </nav>

@@ -1,6 +1,10 @@
 import React, { useMemo, useState } from "react";
-import type { BankProgramResult } from "../../../utils/types";
+import type {
+  BankProgramResult,
+  BankProgramResultWithIndex,
+} from "../../../utils/types";
 import "./OfferBankSection.css";
+import "./BankCardBadge.css";
 import {
   BANK_ORDER,
   CATEGORY_ORDER,
@@ -8,17 +12,13 @@ import {
 } from "../../../utils/constants";
 import { formatOfferToText } from "../../../hooks/addHooks/formatOfferToText";
 import { safeFormatMoney } from "../../../hooks/addHooks/formatMoney";
+import { getBadge } from "../../../utils/getBadge";
 
 interface OfferBankSectionProps {
   bankResults: BankProgramResult[];
   onSelectOffer: (index: number) => void;
   formatMoney: (amount: number) => string;
   mortgageWithoutDownPayment?: boolean;
-}
-
-// Расширенный тип для хранения оригинального индекса
-interface BankProgramResultWithIndex extends BankProgramResult {
-  _originalIndex: number;
 }
 
 // Функция для определения категории программы
@@ -306,6 +306,8 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                             offer.monthlyPaymentAfter !== undefined &&
                             offer.monthlyPaymentAfter !== null;
 
+                          const badge = getBadge(offer);
+
                           return (
                             <div
                               key={offer._originalIndex}
@@ -316,6 +318,14 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                 handleCardClick(offer._originalIndex)
                               }
                             >
+                              {/* ✅ Шильдик поверх карточки (правый верхний угол) */}
+                              {badge && (
+                                <div className="bank-card-badge badge-promo">
+                                  <span className="badge-icon">🎯</span>
+                                  <span className="badge-text">{badge}</span>
+                                </div>
+                              )}
+
                               <div className="bank-card-header">
                                 <div className="bank-info">
                                   <p className="bank-program">

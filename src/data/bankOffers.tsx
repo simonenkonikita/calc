@@ -2,7 +2,7 @@ import { BankOffer } from "../utils/types";
 
 // Базовые ставки
 const baseRateSber = 20.7;
-const baseRateAlfa = 19.09;
+const baseRateAlfa = 17.99;
 const baseRateSovkom = 19.99;
 const baseRateVTB = 19.9;
 const baseRateUralsib = 18.19;
@@ -16,9 +16,52 @@ export const bankOffers: BankOffer[] = [
     bank: "Сбербанк",
     program: "Базовая",
     type: "full",
-    rate: baseRateSber - 1,
+    rate: baseRateSber - 1, // 19.7%
     subsidyPercent: 0,
     minPVPercent: minPVPercent,
+    dynamicRates: [
+      // ПРИОРИТЕТ 5 (САМЫЙ ВЫСОКИЙ): ПВ ≥ 50.1% И сумма ≥ 10 000 000 → 17.0%
+      {
+        conditionFn: (pv, amount) => pv >= 50.1 && amount >= 10000000,
+        rate: 17.0,
+        priority: 5,
+        description: "ПВ ≥ 50.1% и сумма ≥ 10 млн ₽ → 17.0%",
+      },
+      // ПРИОРИТЕТ 4: ПВ ≥ 30.1% И сумма ≥ 10 000 000 → 17.7%
+      {
+        conditionFn: (pv, amount) => pv >= 30.1 && amount >= 10000000,
+        rate: 17.7,
+        priority: 4,
+        description: "ПВ ≥ 30.1% и сумма ≥ 10 млн ₽ → 17.7%",
+      },
+      // ПРИОРИТЕТ 3: ПВ ≥ 50.1% → 17.5%
+      {
+        type: "pv",
+        condition: "gte",
+        value: 50.1,
+        rate: 17.5,
+        priority: 3,
+        description: "ПВ ≥ 50.1% → 17.5%",
+      },
+      // ПРИОРИТЕТ 2: ПВ ≥ 30.1% → 18.2%
+      {
+        type: "pv",
+        condition: "gte",
+        value: 30.1,
+        rate: 18.2,
+        priority: 2,
+        description: "ПВ ≥ 30.1% → 18.2%",
+      },
+      // ПРИОРИТЕТ 1 (САМЫЙ НИЗКИЙ): Сумма ≥ 10 000 000 → 19.2%
+      {
+        type: "amount",
+        condition: "gte",
+        value: 10000000,
+        rate: 19.2,
+        priority: 1,
+        description: "Сумма ≥ 10 млн ₽ → 19.2%",
+      },
+    ],
   },
   {
     bank: "Сбербанк",
@@ -150,9 +193,36 @@ export const bankOffers: BankOffer[] = [
     bank: "Альфа-Банк",
     program: "Базовая",
     type: "full",
-    rate: baseRateAlfa,
+    rate: baseRateAlfa, // 19.09% (базовая)
     subsidyPercent: 0,
     minPVPercent: minPVPercent,
+    dynamicRates: [
+      // САМЫЙ ВЫСОКИЙ ПРИОРИТЕТ: ПВ ≥ 50% И сумма ≥ 10 000 000 → 16.59%
+      {
+        conditionFn: (pv, amount) => pv >= 50 && amount >= 10000000,
+        rate: 16.59,
+        priority: 3,
+        description: "ПВ ≥ 50% и сумма ≥ 10 млн ₽ → 16.59%",
+      },
+      // СРЕДНИЙ ПРИОРИТЕТ: ПВ ≥ 50% → 17.59%
+      {
+        type: "pv",
+        condition: "gte",
+        value: 50,
+        rate: 17.59,
+        priority: 2,
+        description: "ПВ ≥ 50% → 17.59%",
+      },
+      // НИЗКИЙ ПРИОРИТЕТ: Сумма ≥ 10 000 000 → 17.09%
+      {
+        type: "amount",
+        condition: "gte",
+        value: 10000000,
+        rate: 17.09,
+        priority: 1,
+        description: "Сумма ≥ 10 млн ₽ → 17.09%",
+      },
+    ],
   },
   {
     bank: "Альфа-Банк",
@@ -168,7 +238,7 @@ export const bankOffers: BankOffer[] = [
     bank: "Совкомбанк",
     program: "Базовая",
     type: "full",
-    rate: baseRateSovkom,
+    rate: baseRateSovkom, // 19.99%
     subsidyPercent: 0,
     minPVPercent: minPVPercent,
   },
@@ -266,7 +336,7 @@ export const bankOffers: BankOffer[] = [
     bank: "ВТБ",
     program: "Базовая",
     type: "full",
-    rate: baseRateVTB,
+    rate: baseRateVTB, // 19.9%
     subsidyPercent: 0,
     minPVPercent: minPVPercent,
   },
@@ -306,9 +376,20 @@ export const bankOffers: BankOffer[] = [
     bank: "Уралсиб",
     program: "Базовая",
     type: "full",
-    rate: baseRateUralsib,
+    rate: baseRateUralsib, // 18.19%
     subsidyPercent: 0,
     minPVPercent: minPVPercent,
+    dynamicRates: [
+      // Сумма ≥ 6 000 000 → 17.99%
+      {
+        type: "amount",
+        condition: "gte",
+        value: 6000000,
+        rate: 17.99,
+        priority: 1,
+        description: "Сумма ≥ 6 млн ₽ → 17.99%",
+      },
+    ],
   },
   {
     bank: "Уралсиб",

@@ -1,0 +1,31 @@
+.bank-card {
+  position: relative; /* ← Важно! Для позиционирования бейджа */
+  overflow: visible; /* ← Чтобы бейдж не обрезался */
+}
+
+/* Бейдж поверх карточки */
+.bank-card-badge {
+  position: absolute;
+  top: -12px;
+  left: -6px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 0.7rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+  max-width: 90%;
+  cursor: default;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* 🟢 Зеленый - промо/акция */
+.bank-card-badge.badge-promo {
+  background: #16a34a;
+  color: #ffffff;
+}
