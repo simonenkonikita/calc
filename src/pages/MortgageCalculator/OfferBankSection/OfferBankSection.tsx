@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import type {
-  BankProgramResult,
   BankProgramResultWithIndex,
+  OfferBankSectionProps,
 } from "../../../utils/types";
 import "./OfferBankSection.css";
 import "./BankCardBadge.css";
@@ -13,13 +13,6 @@ import {
 import { formatOfferToText } from "../../../hooks/addHooks/formatOfferToText";
 import { safeFormatMoney } from "../../../hooks/addHooks/formatMoney";
 import { getBadge } from "../../../utils/getBadge";
-
-interface OfferBankSectionProps {
-  bankResults: BankProgramResult[];
-  onSelectOffer: (index: number) => void;
-  formatMoney: (amount: number) => string;
-  mortgageWithoutDownPayment?: boolean;
-}
 
 // Функция для определения категории программы
 const getProgramCategory = (offer: BankProgramResultWithIndex): string => {
@@ -46,6 +39,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   onSelectOffer,
   formatMoney,
   mortgageWithoutDownPayment = false,
+  loanTermYears,
 }) => {
   const [showOverstatement, setShowOverstatement] = useState(false);
   const [selectedBankFilter, setSelectedBankFilter] = useState<string>("all");
@@ -167,6 +161,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
         formatMoney,
         showOverstatement,
         mortgageWithoutDownPayment,
+        loanTermYears,
       ),
     );
 
