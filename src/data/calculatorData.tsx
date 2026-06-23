@@ -58,12 +58,12 @@ export const housingPrices: HousingComplexPrice[] = [
   },
   {
     complexName: "ГК Морелло",
-    apartmentType: "Однокомнатные номера до 40 м2",
+    apartmentType: "Однокомнатные номера до 39 м2",
     pricePerSquareMeter: 355000,
   },
   {
     complexName: "ГК Морелло",
-    apartmentType: "Однокомнатные номера от 40 м2",
+    apartmentType: "Однокомнатные номера от 39 м2",
     pricePerSquareMeter: 300000,
   },
   {
