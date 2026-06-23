@@ -64,11 +64,11 @@ export const housingPrices: HousingComplexPrice[] = [
   {
     complexName: "ГК Морелло",
     apartmentType: "Однокомнатные номера от 40 м2",
-    pricePerSquareMeter: 290000,
+    pricePerSquareMeter: 300000,
   },
   {
     complexName: "ГК Морелло",
     apartmentType: "Двухкомнатные номера от 50 м2",
-    pricePerSquareMeter: 300000,
+    pricePerSquareMeter: 290000,
   },
 ];
