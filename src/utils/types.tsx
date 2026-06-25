@@ -37,6 +37,7 @@ export interface CalculatorFormData {
   projectFinancingBank: string;
   noSubsidyInflate: boolean; // Не завышать на субсидию
   mortgageWithoutDownPayment: boolean; // Ипотека без ПВ
+  mortgagePartialDownPayment: boolean; // Ипотека с частичным ПВ
   applyMinDownPayment: boolean; // Применить min ПВ
 }
 
@@ -53,6 +54,7 @@ export interface OfferBankSectionProps {
   onSelectOffer: (index: number) => void;
   formatMoney: (amount: number) => string;
   mortgageWithoutDownPayment?: boolean;
+  mortgagePartialDownPayment?: boolean;
   loanTermYears: number;
 }
 

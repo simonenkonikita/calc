@@ -1,6 +1,6 @@
 // src/hooks/payment/downPayment/calculateStandardDownPayment.ts
 
-import { MIN_DOWN_PAYMENT_PERCENT } from "../../../utils/constants";
+import { MIN_DOWN_PAYMENT_PERCENT } from "../../../../utils/constants";
 
 interface StandardDownPaymentParams {
   contractAmount: number;

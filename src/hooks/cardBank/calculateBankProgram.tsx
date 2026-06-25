@@ -1,6 +1,9 @@
 import { BankOffer, Variables, BankProgramResult } from "../../utils/types";
-import { calculateDownPaymentAmount } from "../contractAmount/addContractAmount/alculateDownPaymentAmount";
+import { calculateClientContribution } from "../contractAmount/calculateClientContribution";
 import { calculateContractAmount } from "../contractAmount/calculateContractAmount";
+import { calculateOwnFunds } from "../contractAmount/calculateOwnFunds";
+import { calculateDeveloperAccount } from "../contractAmount/developerAccount/calculateDeveloperAccount";
+import { calculateDownPaymentAmount } from "../contractAmount/сalculateDownPaymentAmount";
 import { getDynamicRate } from "../dynamicRate/getDynamicRate";
 import { calculateMonthlyPayment } from "../payment/standartPayment/calculateMonthlyPayment";
 import { calculateSubsidyPayments } from "../payment/subsidy/calculateSubsidyPayments";
@@ -17,8 +20,13 @@ export const calculateBankProgram = (
   variables: Variables,
   noSubsidyInflate: boolean,
   mortgageWithoutDownPayment: boolean,
+  mortgagePartialDownPayment: boolean,
   applyMinDownPayment: boolean,
 ): BankProgramResult => {
+  const isFamilyOrIt = bankOffer.type === "family" || bankOffer.type === "it";
+  const isSpecialMortgageMode =
+    mortgageWithoutDownPayment || mortgagePartialDownPayment;
+
   // 1. Расчет суммы в договоре (завышение)
   const contractAmount = calculateContractAmount(
     objectCost,
@@ -29,7 +37,7 @@ export const calculateBankProgram = (
     bankOffer,
     variables,
     noSubsidyInflate,
-    mortgageWithoutDownPayment,
+    isSpecialMortgageMode,
     applyMinDownPayment,
   );
 
@@ -45,14 +53,45 @@ export const calculateBankProgram = (
     manualDownPayment,
     bankOffer,
     variables,
-    mortgageWithoutDownPayment,
+    mortgageWithoutDownPayment: isSpecialMortgageMode,
   });
 
-  // 4. Собственные средства
-  const ownFunds = mortgageWithoutDownPayment ? downPayment : downPaymentAmount;
+  // Собственные средства
+  let ownFunds: number;
 
+  if (isFamilyOrIt) {
+    // СЕМЕЙНАЯ/ИТ — используем сложную формулу с лимитами
+    ownFunds = calculateOwnFunds({
+      objectCost,
+      downPayment,
+      downPaymentAmount,
+      userDownPaymentPercent,
+      bankOffer,
+      variables,
+      mortgageWithoutDownPayment: isSpecialMortgageMode,
+    });
+  } else {
+    // ОБЫЧНАЯ ИПОТЕКА (full, short) — простая формула
+    ownFunds = isSpecialMortgageMode ? downPayment : downPaymentAmount;
+  }
   // 5. Вносим за клиента
-  const clientContribution = downPaymentAmount - ownFunds;
+  let clientContribution: number;
+
+  if (isFamilyOrIt) {
+    // СЕМЕЙНАЯ/ИТ — используем сложную формулу с лимитами
+    clientContribution = calculateClientContribution({
+      objectCost,
+      downPaymentAmount,
+      ownFunds,
+      userDownPaymentPercent,
+      bankOffer,
+      variables,
+      mortgageWithoutDownPayment: isSpecialMortgageMode,
+    });
+  } else {
+    // ОБЫЧНАЯ ИПОТЕКА (full, short) — простая формула
+    clientContribution = downPaymentAmount;
+  }
 
   // 6. ПВ в процентах
   const downPaymentPercentCalc = (downPaymentAmount / contractAmount) * 100;
@@ -99,11 +138,31 @@ export const calculateBankProgram = (
   }
 
   // 10. На счет застройщика
+
   let developerAccount: number;
-  if (mortgageWithoutDownPayment) {
-    developerAccount = ownFunds + mortgageAmount - subsidyAmount;
+
+  if (isFamilyOrIt) {
+    // СЕМЕЙНАЯ ИЛИ ИТ ИПОТЕКА — используем сложную формулу с лимитами
+    developerAccount = calculateDeveloperAccount({
+      objectCost,
+      ownFunds,
+      mortgageAmount,
+      subsidyAmount,
+      contractAmount,
+      userDownPaymentPercent,
+      bankOffer,
+      variables,
+      mortgageWithoutDownPayment: isSpecialMortgageMode,
+      downPaymentAmount,
+      noSubsidyInflate,
+    });
   } else {
-    developerAccount = contractAmount - subsidyAmount;
+    // ОБЫЧНАЯ ИПОТЕКА (full, short) — простая формула
+    if (isSpecialMortgageMode) {
+      developerAccount = ownFunds + mortgageAmount - subsidyAmount;
+    } else {
+      developerAccount = contractAmount - subsidyAmount;
+    }
   }
 
   // 11. Срок ипотеки

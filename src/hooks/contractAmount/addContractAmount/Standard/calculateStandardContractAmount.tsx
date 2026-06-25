@@ -1,4 +1,8 @@
-import { BankCoefficients, BankOffer, Variables } from "../../../utils/types";
+import {
+  BankOffer,
+  Variables,
+  BankCoefficients,
+} from "../../../../utils/types";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ==========
 export const calculateStandardContractAmount = (

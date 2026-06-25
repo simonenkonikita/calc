@@ -37,11 +37,12 @@ export const FormSection: React.FC<FormSectionProps> = ({
 
   const availableTypes = getApartmentTypes(formData.complex);
 
-  // Обработчик для поля "Первоначальный взнос"
+  // ============================================================
+  // ОБРАБОТЧИКИ ДЛЯ ПОЛЯ "ПЕРВОНАЧАЛЬНЫЙ ВЗНОС"
+  // ============================================================
   const handleDownPaymentChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
-    // Если поле пустое, ничего не делаем (ждём onBlur)
     if (value === "") {
       onInputChange("downPaymentPercent", value as any);
       return;
@@ -49,18 +50,14 @@ export const FormSection: React.FC<FormSectionProps> = ({
 
     const numValue = Number(value);
 
-    // Если значение больше максимума - корректируем сразу
     if (numValue > MAX_DOWN_PAYMENT_PERCENT) {
       onInputChange("downPaymentPercent", MAX_DOWN_PAYMENT_PERCENT);
       return;
     }
 
-    // Для значений меньше минимума - НЕ корректируем сразу,
-    // чтобы пользователь мог ввести "30" через "3"
     onInputChange("downPaymentPercent", numValue);
   };
 
-  // Обработчик потери фокуса для поля "Первоначальный взнос"
   const handleDownPaymentBlur = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
@@ -70,6 +67,95 @@ export const FormSection: React.FC<FormSectionProps> = ({
       onInputChange("downPaymentPercent", MAX_DOWN_PAYMENT_PERCENT);
     }
   };
+
+  // ============================================================
+  // ОБРАБОТЧИКИ ДЛЯ ПОЛЯ "ПЛОЩАДЬ"
+  // ============================================================
+  const handleAreaChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    // Если поле пустое — сохраняем пустую строку
+    if (value === "") {
+      onInputChange("area", value as any);
+      return;
+    }
+
+    const numValue = Number(value);
+
+    // Если значение больше максимума — корректируем сразу
+    if (numValue > MAX_AREA) {
+      onInputChange("area", MAX_AREA);
+      return;
+    }
+
+    // Сохраняем как есть (пользователь может ввести "15" через "1")
+    onInputChange("area", numValue);
+  };
+
+  const handleAreaBlur = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    if (value === "") {
+      onInputChange("area", MIN_AREA);
+      return;
+    }
+
+    const numValue = Number(value);
+
+    if (numValue < MIN_AREA) {
+      onInputChange("area", MIN_AREA);
+    } else if (numValue > MAX_AREA) {
+      onInputChange("area", MAX_AREA);
+    }
+  };
+
+  // ============================================================
+  // ОБРАБОТЧИКИ ДЛЯ ПОЛЯ "СРОК ИПОТЕКИ"
+  // ============================================================
+  const handleLoanTermChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    // Если поле пустое — сохраняем пустую строку
+    if (value === "") {
+      onInputChange("loanTerm", value as any);
+      return;
+    }
+
+    const numValue = Number(value);
+
+    // Если значение больше максимума — корректируем сразу
+    if (numValue > MAX_LOAN_TERM) {
+      onInputChange("loanTerm", MAX_LOAN_TERM);
+      return;
+    }
+
+    // Сохраняем как есть (пользователь может ввести "25" через "2")
+    onInputChange("loanTerm", numValue);
+  };
+
+  const handleLoanTermBlur = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    if (value === "") {
+      onInputChange("loanTerm", MIN_LOAN_TERM);
+      return;
+    }
+
+    const numValue = Number(value);
+
+    if (numValue < MIN_LOAN_TERM) {
+      onInputChange("loanTerm", MIN_LOAN_TERM);
+    } else if (numValue > MAX_LOAN_TERM) {
+      onInputChange("loanTerm", MAX_LOAN_TERM);
+    }
+  };
+
+  // Проверка, что хотя бы один из вариантов включен
+  const isAnyMortgageTypeEnabled =
+    formData.mortgageWithoutDownPayment || formData.mortgagePartialDownPayment;
+
+  // Проверка, что поле ПВ должно быть disabled
+  const isDownPaymentDisabled = isAnyMortgageTypeEnabled;
 
   return (
     <div className="form-section">
@@ -123,12 +209,8 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 max={MAX_AREA}
                 step={1}
                 value={formData.area || ""}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  onInputChange(
-                    "area",
-                    e.target.value ? Number(e.target.value) : MIN_AREA,
-                  )
-                }
+                onChange={handleAreaChange}
+                onBlur={handleAreaBlur}
               />
             </div>
 
@@ -162,6 +244,11 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 value={formData.downPaymentPercent || ""}
                 onChange={handleDownPaymentChange}
                 onBlur={handleDownPaymentBlur}
+                disabled={isDownPaymentDisabled}
+                style={{
+                  opacity: isDownPaymentDisabled ? 0.6 : 1,
+                  cursor: isDownPaymentDisabled ? "not-allowed" : "text",
+                }}
               />
             </div>
 
@@ -187,12 +274,8 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 max={MAX_LOAN_TERM}
                 step={1}
                 value={formData.loanTerm || ""}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  onInputChange(
-                    "loanTerm",
-                    e.target.value ? Number(e.target.value) : MIN_LOAN_TERM,
-                  )
-                }
+                onChange={handleLoanTermChange}
+                onBlur={handleLoanTermBlur}
                 placeholder="30"
               />
             </div>
@@ -256,6 +339,29 @@ export const FormSection: React.FC<FormSectionProps> = ({
               />
               <label htmlFor="mortgageWithoutDownPayment">
                 Ипотека без первоначального взноса
+              </label>
+            </div>
+
+            <div className="checkbox-field">
+              <input
+                type="checkbox"
+                id="mortgagePartialDownPayment"
+                checked={formData.mortgagePartialDownPayment}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  onInputChange("mortgagePartialDownPayment", e.target.checked)
+                }
+                disabled={formData.mortgageWithoutDownPayment}
+              />
+              <label
+                htmlFor="mortgagePartialDownPayment"
+                style={{
+                  opacity: formData.mortgageWithoutDownPayment ? 0.5 : 1,
+                  cursor: formData.mortgageWithoutDownPayment
+                    ? "not-allowed"
+                    : "pointer",
+                }}
+              >
+                Ипотека с частичным первоначальным взносом
               </label>
             </div>
 

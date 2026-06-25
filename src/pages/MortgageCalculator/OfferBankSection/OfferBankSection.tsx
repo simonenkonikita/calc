@@ -39,6 +39,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   onSelectOffer,
   formatMoney,
   mortgageWithoutDownPayment = false,
+  mortgagePartialDownPayment = false,
   loanTermYears,
 }) => {
   const [showOverstatement, setShowOverstatement] = useState(false);
@@ -47,6 +48,10 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
     useState<string>("all");
   const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set());
   const [copySuccess, setCopySuccess] = useState(false);
+
+  const isSpecialMortgageMode = useMemo(() => {
+    return mortgageWithoutDownPayment || mortgagePartialDownPayment;
+  }, [mortgageWithoutDownPayment, mortgagePartialDownPayment]);
 
   const uniqueBanks = useMemo(() => {
     return Array.from(new Set(bankResults.map((offer) => offer.bank)));
@@ -160,7 +165,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
         offer,
         formatMoney,
         showOverstatement,
-        mortgageWithoutDownPayment,
+        isSpecialMortgageMode,
         loanTermYears,
       ),
     );
@@ -399,7 +404,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                     {formatMoney(offer.downPaymentAmount)}
                                   </span>
                                 </div>
-                                {mortgageWithoutDownPayment && (
+                                {isSpecialMortgageMode && (
                                   <>
                                     <div className="bank-detail-item">
                                       <span className="bank-detail-label">
