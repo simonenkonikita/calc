@@ -41,6 +41,8 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   mortgageWithoutDownPayment = false,
   mortgagePartialDownPayment = false,
   loanTermYears,
+  area,
+  complexName,
 }) => {
   const [showOverstatement, setShowOverstatement] = useState(false);
   const [selectedBankFilter, setSelectedBankFilter] = useState<string>("all");
@@ -160,18 +162,33 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
       selectedCards.has(idx),
     );
 
-    const texts = selectedResults.map((offer) =>
-      formatOfferToText(
+    // ============================================================
+    // ФОРМИРУЕМ ЗАГОЛОВОК (ЖК и площадь) ОДИН РАЗ
+    // ============================================================
+    const header = `🏢 ${complexName}\nПлощадь: ${area} м²\n`;
+    const separator = `\n---\n`;
+
+    // ============================================================
+    // ФОРМИРУЕМ ПРЕДЛОЖЕНИЯ (без дублирования ЖК и площади)
+    // ============================================================
+    const texts = selectedResults.map((offer) => {
+      const offerText = formatOfferToText(
         offer,
         formatMoney,
         showOverstatement,
         isSpecialMortgageMode,
         loanTermYears,
-      ),
-    );
+      );
+      // Добавляем номер предложения (опционально)
+      return `${offerText}`;
+    });
 
-    const fullText = texts.join("\n\n---\n\n");
+    // ============================================================
+    // СОБИРАЕМ ВСЕ ВМЕСТЕ
+    // ============================================================
+    const fullText = `${header}${texts.join(separator)}`;
 
+    // Копируем в буфер обмена
     navigator.clipboard
       .writeText(fullText)
       .then(() => {
@@ -456,6 +473,17 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                   </span>
                                   <span className="bank-detail-value">
                                     {formatMoney(offer.developerAccount)}
+                                  </span>
+                                </div>
+                                <div className="bank-detail-item">
+                                  <span className="bank-detail-label">
+                                    Получено за м²:
+                                  </span>
+                                  <span className="bank-detail-value">
+                                    {offer.pricePerM2 !== null &&
+                                    offer.pricePerM2 > 0
+                                      ? formatMoney(offer.pricePerM2)
+                                      : "—"}
                                   </span>
                                 </div>
                               </div>

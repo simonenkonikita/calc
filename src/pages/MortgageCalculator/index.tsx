@@ -76,6 +76,8 @@ export const MortgageCalculator: React.FC = () => {
               mortgageWithoutDownPayment={formData.mortgageWithoutDownPayment}
               mortgagePartialDownPayment={formData.mortgagePartialDownPayment}
               loanTermYears={formData.loanTerm || 30}
+              area={formData.area}
+              complexName={formData.complex}
             />
           </>
         )}

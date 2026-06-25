@@ -78,7 +78,6 @@ export const useMortgageCalculator = () => {
     noSubsidyInflate: false,
     mortgageWithoutDownPayment: false,
     mortgagePartialDownPayment: false,
-    applyMinDownPayment: false,
   });
 
   const [results, setResults] = useState<{

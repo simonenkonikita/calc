@@ -38,7 +38,6 @@ export interface CalculatorFormData {
   noSubsidyInflate: boolean; // Не завышать на субсидию
   mortgageWithoutDownPayment: boolean; // Ипотека без ПВ
   mortgagePartialDownPayment: boolean; // Ипотека с частичным ПВ
-  applyMinDownPayment: boolean; // Применить min ПВ
 }
 
 // ========== РЕЗУЛЬТАТЫ РАСЧЕТА ОБЪЕКТА ==========
@@ -56,6 +55,8 @@ export interface OfferBankSectionProps {
   mortgageWithoutDownPayment?: boolean;
   mortgagePartialDownPayment?: boolean;
   loanTermYears: number;
+  area: number;
+  complexName: string;
 }
 
 // ========== БАНКОВСКИЕ ПРОГРАММЫ (из JSON) ==========
@@ -120,6 +121,7 @@ export interface BankProgramResult {
   monthlyPaymentAfter?: number; // Платёж после субсидирования
   remainingDebt?: number; // Остаток долга после субсидирования
   subsidyPercent: number;
+  pricePerM2: number | null;
 }
 
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========

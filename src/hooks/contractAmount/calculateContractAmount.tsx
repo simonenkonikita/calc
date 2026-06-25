@@ -14,7 +14,6 @@ export const calculateContractAmount = (
   variables: Variables,
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,
-  applyMinDownPayment: boolean,
 ): number => {
   const coefficients = calculateBankCoefficients(
     bankOffer,
@@ -34,7 +33,6 @@ export const calculateContractAmount = (
       variables,
       noSubsidyInflate,
       isSpecialMortgageMode,
-      applyMinDownPayment,
       coefficients,
     );
   }
@@ -52,7 +50,6 @@ export const calculateContractAmount = (
       variables,
       noSubsidyInflate,
       mortgageWithoutDownPayment,
-      applyMinDownPayment,
       coefficients,
     );
   }
@@ -69,7 +66,6 @@ export const calculateContractAmount = (
     variables,
     noSubsidyInflate,
     isSpecialMortgageMode,
-    applyMinDownPayment,
     coefficients,
   );
 };

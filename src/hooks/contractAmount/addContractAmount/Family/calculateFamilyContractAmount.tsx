@@ -14,7 +14,6 @@ export const calculateFamilyContractAmount = (
   variables: Variables,
   noSubsidyInflate: boolean,
   mortgageWithoutDownPayment: boolean,
-  applyMinDownPayment: boolean,
   coefficients: BankCoefficients,
 ): number => {
   const limit = variables.familyMortgageLimit; // Переменные!$B$1 (6 000 000)
@@ -24,11 +23,6 @@ export const calculateFamilyContractAmount = (
 
   // Расчеты для условий
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
-  const bankMinDownPayment = objectCost * (minPVPercent / 100);
-  const actualMinDownPayment = applyMinDownPayment
-    ? bankMinDownPayment
-    : userDesiredDownPayment;
-
   let summCredit: number;
   let isWithinLimit: boolean;
 
@@ -147,7 +141,7 @@ export const calculateFamilyContractAmount = (
         downPayment;
     } else {
       // ЕСЛИ($B$13<=$B$7*$B$8/100; $B$7/Сбербанк!J16; $B$14/Сбербанк!K16+$B$13)
-      if (downPayment <= actualMinDownPayment) {
+      if (downPayment <= userDesiredDownPayment) {
         // $B$7/Сбербанк!J16
         contractAmount = objectCost / coefficients.requiredCoeffWithMinPV;
       } else {

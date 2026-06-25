@@ -6,16 +6,17 @@ export const formatOfferToText = (
   formatMoney: (amount: number) => string,
   showOverstatement: boolean,
   mortgageWithoutDownPayment: boolean,
-  loanTermYears: number, // ✅ Добавляем параметр с дефолтным значением
+  loanTermYears: number,
 ): string => {
   const lines: string[] = [];
 
+  lines.push(``);
   // Банк
   lines.push(`${offer.bank}`);
 
   // Формируем строку со ставкой
   if (offer.type === "short" && offer.shortRate) {
-    lines.push(`Ставка ${offer.shortRate}% на ${offer.durationMonths} мес`);
+    lines.push(`Ставка ${offer.shortRate}% на ${offer.durationMonths} мес.`);
   } else if (offer.subsidyPercent > 0 && offer.type === "full") {
     lines.push(`Ставка ${offer.rate}% на весь срок`);
   } else {
@@ -23,7 +24,13 @@ export const formatOfferToText = (
   }
 
   lines.push(`Стоимость: ${formatMoney(offer.contractAmount)}`);
+
   lines.push(`ПВ: ${formatMoney(offer.downPaymentAmount)}`);
+  if (mortgageWithoutDownPayment) {
+    lines.push(`Собственные средства: ${formatMoney(offer.ownFunds)}`);
+    lines.push(`Вносим за клиента: ${formatMoney(offer.clientContribution)}`);
+  }
+
   lines.push(`Ипотека: ${formatMoney(offer.mortgageAmount)}`);
 
   // Платеж
@@ -37,22 +44,7 @@ export const formatOfferToText = (
   }
 
   // ✅ Срок ипотеки из формы (loanTermYears)
-  lines.push(`Срок ${loanTermYears} лет`);
-
-  // Дополнительная информация
-  if (showOverstatement) {
-    lines.push(`Завышение: ${formatMoney(offer.overstatement)}`);
-    lines.push(`Субсидия: ${formatMoney(offer.subsidyAmount)}`);
-  }
-
-  if (mortgageWithoutDownPayment) {
-    lines.push(`Собственные средства: ${formatMoney(offer.ownFunds)}`);
-    lines.push(`Вносим за клиента: ${formatMoney(offer.clientContribution)}`);
-  }
-
-  if (offer.excessLimit && offer.excessLimit > 0) {
-    lines.push(`Сверхлимит: ${formatMoney(offer.excessLimit)}`);
-  }
+  lines.push(`Срок(лет): ${loanTermYears} `);
 
   return lines.join("\n");
 };

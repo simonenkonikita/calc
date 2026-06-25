@@ -21,7 +21,7 @@ export const calculateBankProgram = (
   noSubsidyInflate: boolean,
   mortgageWithoutDownPayment: boolean,
   mortgagePartialDownPayment: boolean,
-  applyMinDownPayment: boolean,
+  area: number,
 ): BankProgramResult => {
   const isFamilyOrIt = bankOffer.type === "family" || bankOffer.type === "it";
   const isSpecialMortgageMode =
@@ -38,7 +38,6 @@ export const calculateBankProgram = (
     variables,
     noSubsidyInflate,
     isSpecialMortgageMode,
-    applyMinDownPayment,
   );
 
   // 2. Завышение
@@ -165,6 +164,15 @@ export const calculateBankProgram = (
     }
   }
 
+  // ============================================================
+  // 12. РАСЧЕТ "ПОЛУЧЕНО ЗА М²"
+  // ============================================================
+  let pricePerM2: number | null = null;
+
+  if (area && area > 0) {
+    pricePerM2 = developerAccount / area;
+  }
+
   // 11. Срок ипотеки
   const loanTermMonths = loanTermYears * 12;
 
@@ -215,6 +223,7 @@ export const calculateBankProgram = (
     mortgageAmount: Math.ceil(mortgageAmount),
     subsidyAmount: Math.ceil(subsidyAmount),
     developerAccount: Math.ceil(developerAccount),
+    pricePerM2: pricePerM2 !== null ? Math.ceil(pricePerM2) : null,
     monthlyPaymentAfter: monthlyPaymentAfter
       ? Math.ceil(monthlyPaymentAfter)
       : undefined,

@@ -10,7 +10,6 @@ export const calculateDownPayment = (
   const {
     mortgageWithoutDownPayment,
     mortgagePartialDownPayment,
-    applyMinDownPayment,
     manualDownPayment,
     downPaymentPercent,
   } = formData;
@@ -25,10 +24,6 @@ export const calculateDownPayment = (
       return minDownPayment;
     }
     return manualDownPayment;
-  }
-
-  if (applyMinDownPayment) {
-    return minDownPayment;
   }
 
   // Если есть ручной ввод ПВ

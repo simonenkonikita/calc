@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import type { ChangeEvent } from "react";
 import type { CalculatorFormData } from "../../../utils/types";
 import { housingPrices } from "../../../data/calculatorData";
@@ -11,6 +11,7 @@ import {
   MIN_DOWN_PAYMENT_PERCENT,
   MIN_LOAN_TERM,
   PROJECT_FINANCING_BANKS,
+  PRICE_PER_SQUARE_METER_DEFAULT,
 } from "../../../utils/constants";
 
 interface FormSectionProps {
@@ -36,6 +37,43 @@ export const FormSection: React.FC<FormSectionProps> = ({
   };
 
   const availableTypes = getApartmentTypes(formData.complex);
+
+  // ============================================================
+  // РАСЧЕТ СТОИМОСТИ ОБЪЕКТА (для валидации ПВ)
+  // ============================================================
+  const calculateObjectCost = useMemo(() => {
+    if (formData.manualObjectCost && formData.manualObjectCost > 0) {
+      return formData.manualObjectCost;
+    }
+
+    const pricePerM2 =
+      housingPrices.find(
+        (item) =>
+          item.complexName === formData.complex &&
+          item.apartmentType === formData.apartmentType,
+      )?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT;
+
+    return formData.area * pricePerM2;
+  }, [
+    formData.manualObjectCost,
+    formData.complex,
+    formData.apartmentType,
+    formData.area,
+  ]);
+
+  // ============================================================
+  // ПРОВЕРКА: включена ли ипотека без ПВ или частичный ПВ
+  // ============================================================
+  const isAnyMortgageTypeEnabled = useMemo(() => {
+    return (
+      formData.mortgageWithoutDownPayment || formData.mortgagePartialDownPayment
+    );
+  }, [
+    formData.mortgageWithoutDownPayment,
+    formData.mortgagePartialDownPayment,
+  ]);
+
+  const isDownPaymentDisabled = isAnyMortgageTypeEnabled;
 
   // ============================================================
   // ОБРАБОТЧИКИ ДЛЯ ПОЛЯ "ПЕРВОНАЧАЛЬНЫЙ ВЗНОС"
@@ -69,12 +107,73 @@ export const FormSection: React.FC<FormSectionProps> = ({
   };
 
   // ============================================================
+  // ОБРАБОТЧИКИ ДЛЯ ПОЛЯ "РУЧНОЙ ВВОД ПВ"
+  // ============================================================
+  const handleManualDownPaymentChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    if (value === "") {
+      onInputChange("manualDownPayment", 0);
+      return;
+    }
+
+    const numValue = Number(value);
+
+    if (numValue < 0) {
+      onInputChange("manualDownPayment", 0);
+      return;
+    }
+
+    if (isNaN(numValue)) {
+      return;
+    }
+
+    const objectCost = calculateObjectCost;
+
+    if (numValue > objectCost) {
+      onInputChange("manualDownPayment", objectCost);
+      return;
+    }
+
+    onInputChange("manualDownPayment", numValue);
+  };
+
+  const handleManualDownPaymentBlur = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    if (value === "") {
+      onInputChange("manualDownPayment", 0);
+      return;
+    }
+
+    const numValue = Number(value);
+
+    if (numValue < 0) {
+      onInputChange("manualDownPayment", 0);
+      return;
+    }
+
+    if (isNaN(numValue)) {
+      onInputChange("manualDownPayment", 0);
+      return;
+    }
+
+    const objectCost = calculateObjectCost;
+
+    if (numValue > objectCost) {
+      onInputChange("manualDownPayment", objectCost);
+      return;
+    }
+
+    onInputChange("manualDownPayment", numValue);
+  };
+
+  // ============================================================
   // ОБРАБОТЧИКИ ДЛЯ ПОЛЯ "ПЛОЩАДЬ"
   // ============================================================
   const handleAreaChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
-    // Если поле пустое — сохраняем пустую строку
     if (value === "") {
       onInputChange("area", value as any);
       return;
@@ -82,13 +181,11 @@ export const FormSection: React.FC<FormSectionProps> = ({
 
     const numValue = Number(value);
 
-    // Если значение больше максимума — корректируем сразу
     if (numValue > MAX_AREA) {
       onInputChange("area", MAX_AREA);
       return;
     }
 
-    // Сохраняем как есть (пользователь может ввести "15" через "1")
     onInputChange("area", numValue);
   };
 
@@ -115,7 +212,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
   const handleLoanTermChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
-    // Если поле пустое — сохраняем пустую строку
     if (value === "") {
       onInputChange("loanTerm", value as any);
       return;
@@ -123,13 +219,11 @@ export const FormSection: React.FC<FormSectionProps> = ({
 
     const numValue = Number(value);
 
-    // Если значение больше максимума — корректируем сразу
     if (numValue > MAX_LOAN_TERM) {
       onInputChange("loanTerm", MAX_LOAN_TERM);
       return;
     }
 
-    // Сохраняем как есть (пользователь может ввести "25" через "2")
     onInputChange("loanTerm", numValue);
   };
 
@@ -149,13 +243,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
       onInputChange("loanTerm", MAX_LOAN_TERM);
     }
   };
-
-  // Проверка, что хотя бы один из вариантов включен
-  const isAnyMortgageTypeEnabled =
-    formData.mortgageWithoutDownPayment || formData.mortgagePartialDownPayment;
-
-  // Проверка, что поле ПВ должно быть disabled
-  const isDownPaymentDisabled = isAnyMortgageTypeEnabled;
 
   return (
     <div className="form-section">
@@ -257,12 +344,8 @@ export const FormSection: React.FC<FormSectionProps> = ({
               <input
                 type="number"
                 value={formData.manualDownPayment || ""}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  onInputChange(
-                    "manualDownPayment",
-                    e.target.value ? Number(e.target.value) : 0,
-                  )
-                }
+                onChange={handleManualDownPaymentChange}
+                onBlur={handleManualDownPaymentBlur}
               />
             </div>
 
@@ -362,20 +445,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 }}
               >
                 Ипотека с частичным первоначальным взносом
-              </label>
-            </div>
-
-            <div className="checkbox-field">
-              <input
-                type="checkbox"
-                id="applyMinDownPayment"
-                checked={formData.applyMinDownPayment}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  onInputChange("applyMinDownPayment", e.target.checked)
-                }
-              />
-              <label htmlFor="applyMinDownPayment">
-                Применить минимальный ПВ
               </label>
             </div>
           </div>

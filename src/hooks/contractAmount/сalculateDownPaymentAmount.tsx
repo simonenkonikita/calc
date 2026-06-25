@@ -108,5 +108,6 @@ export const calculateDownPaymentAmount = (
     manualDownPayment,
     mortgageWithoutDownPayment,
     userDownPaymentPercent,
+    objectCost,
   });
 };
