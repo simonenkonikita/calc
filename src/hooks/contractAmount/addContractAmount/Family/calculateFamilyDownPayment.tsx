@@ -38,10 +38,10 @@ export const calculateFamilyDownPayment = (
     contractAmount,
     userDownPaymentPercent,
     manualDownPayment,
-    mortgageWithoutDownPayment,
+    // mortgageWithoutDownPayment,
     contractAmountMinPV,
     downPaymentFromContract,
-    minPVPercent,
+    // minPVPercent,
     limit,
     isWithinLimit,
   } = params;

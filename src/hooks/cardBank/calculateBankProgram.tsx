@@ -1,6 +1,7 @@
 import { BankOffer, Variables, BankProgramResult } from "../../utils/types";
 import { calculateClientContribution } from "../contractAmount/calculateClientContribution";
 import { calculateContractAmount } from "../contractAmount/calculateContractAmount";
+import { calculateMortgageAmount } from "../contractAmount/calculateMortgageAmount";
 import { calculateOwnFunds } from "../contractAmount/calculateOwnFunds";
 import { calculateDeveloperAccount } from "../contractAmount/developerAccount/calculateDeveloperAccount";
 import { calculateDownPaymentAmount } from "../contractAmount/сalculateDownPaymentAmount";
@@ -96,7 +97,15 @@ export const calculateBankProgram = (
   const downPaymentPercentCalc = (downPaymentAmount / contractAmount) * 100;
 
   // 7. Сумма ипотеки
-  const mortgageAmount = contractAmount - downPaymentAmount;
+  const mortgageAmount = calculateMortgageAmount({
+    objectCost,
+    contractAmount,
+    downPaymentAmount,
+    userDownPaymentPercent,
+    bankOffer,
+    variables,
+    isFamilyOrIt,
+  });
 
   // ✅ 4. Получаем актуальную ставку через getDynamicRate
   const pvForRate =
