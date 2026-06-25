@@ -1,6 +1,6 @@
 // src/hooks/payment/downPayment/calculateStandardDownPayment.ts
 
-import { MIN_DOWN_PAYMENT_PERCENT } from "../../../utils/constants";
+import { MIN_DOWN_PAYMENT_PERCENT } from "../../../../utils/constants";
 
 interface StandardDownPaymentParams {
   contractAmount: number;
@@ -10,6 +10,7 @@ interface StandardDownPaymentParams {
   manualDownPayment: number;
   mortgageWithoutDownPayment: boolean;
   userDownPaymentPercent: number;
+  objectCost: number;
 }
 
 /**
@@ -25,6 +26,7 @@ export const calculateStandardDownPayment = (
     manualDownPayment,
     mortgageWithoutDownPayment,
     userDownPaymentPercent,
+    objectCost,
   } = params;
 
   let downPaymentAmount: number;
@@ -32,7 +34,23 @@ export const calculateStandardDownPayment = (
   if (mortgageWithoutDownPayment) {
     downPaymentAmount = contractAmountMinPV;
   } else if (manualDownPayment > 0) {
-    downPaymentAmount = Math.max(manualDownPayment, contractAmountMinPV);
+    // ============================================================
+    // РУЧНОЙ ВВОД ПВ — проверяем границы
+    // ============================================================
+
+    // 1. Проверяем, что ПВ не превышает стоимость объекта
+    if (manualDownPayment > objectCost) {
+      // Если превышает — возвращаем минимальный ПВ
+      downPaymentAmount = contractAmountMinPV;
+    }
+    // 2. Проверяем, что ПВ не меньше минимального
+    else if (manualDownPayment < contractAmountMinPV) {
+      downPaymentAmount = contractAmountMinPV;
+    }
+    // 3. Иначе возвращаем ручной ввод
+    else {
+      downPaymentAmount = manualDownPayment;
+    }
   } else if (userDownPaymentPercent > MIN_DOWN_PAYMENT_PERCENT) {
     downPaymentAmount = downPaymentFromContract;
   } else if (downPayment >= contractAmountMinPV) {

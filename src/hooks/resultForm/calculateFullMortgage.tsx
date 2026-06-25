@@ -66,7 +66,8 @@ export const calculateFullMortgage = (
         variables,
         formData.noSubsidyInflate,
         formData.mortgageWithoutDownPayment,
-        formData.applyMinDownPayment,
+        formData.mortgagePartialDownPayment,
+        formData.area,
       );
       bankResults.push(result);
     } catch (error) {
