@@ -1,7 +1,8 @@
 import { BankOffer, Variables } from "../../utils/types";
 import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
-import { calculateFamilyContractAmount } from "./addContractAmount/Family/calculateFamilyContractAmount";
-import { calculateStandardContractAmount } from "./addContractAmount/Standard/calculateStandardContractAmount";
+import { calculateFamilyContractAmount } from "./addContractAmount/calculateFamilyContractAmount";
+import { calculateItContractAmount } from "./addContractAmount/calculateItContractAmount";
+import { calculateStandardContractAmount } from "./addContractAmount/calculateStandardContractAmount";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ==========
 export const calculateContractAmount = (
@@ -13,7 +14,8 @@ export const calculateContractAmount = (
   bankOffer: BankOffer,
   variables: Variables,
   noSubsidyInflate: boolean,
-  isSpecialMortgageMode: boolean,
+  mortgageWithoutDownPayment: boolean,
+  applyMinDownPayment: boolean,
 ): number => {
   const coefficients = calculateBankCoefficients(
     bankOffer,
@@ -32,7 +34,8 @@ export const calculateContractAmount = (
       bankOffer,
       variables,
       noSubsidyInflate,
-      isSpecialMortgageMode,
+      mortgageWithoutDownPayment,
+      applyMinDownPayment,
       coefficients,
     );
   }
@@ -40,7 +43,7 @@ export const calculateContractAmount = (
   // ============================================================
   // 2. ИТ ИПОТЕКА
   // ============================================================
-  /*   if (bankOffer.type === "it") {
+  if (bankOffer.type === "it") {
     return calculateItContractAmount(
       objectCost,
       downPayment,
@@ -50,10 +53,11 @@ export const calculateContractAmount = (
       variables,
       noSubsidyInflate,
       mortgageWithoutDownPayment,
+      applyMinDownPayment,
       coefficients,
     );
   }
- */
+
   // ============================================================
   // 3. СТАНДАРТНЫЙ РАСЧЕТ (full, short)
   // ============================================================
@@ -65,7 +69,8 @@ export const calculateContractAmount = (
     bankOffer,
     variables,
     noSubsidyInflate,
-    isSpecialMortgageMode,
+    mortgageWithoutDownPayment,
+    applyMinDownPayment,
     coefficients,
   );
 };

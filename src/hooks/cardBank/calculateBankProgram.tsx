@@ -1,10 +1,6 @@
 import { BankOffer, Variables, BankProgramResult } from "../../utils/types";
-import { calculateClientContribution } from "../contractAmount/calculateClientContribution";
+import { calculateDownPaymentAmount } from "../contractAmount/addContractAmount/alculateDownPaymentAmount";
 import { calculateContractAmount } from "../contractAmount/calculateContractAmount";
-import { calculateMortgageAmount } from "../contractAmount/calculateMortgageAmount";
-import { calculateOwnFunds } from "../contractAmount/calculateOwnFunds";
-import { calculateDeveloperAccount } from "../contractAmount/developerAccount/calculateDeveloperAccount";
-import { calculateDownPaymentAmount } from "../contractAmount/сalculateDownPaymentAmount";
 import { getDynamicRate } from "../dynamicRate/getDynamicRate";
 import { calculateMonthlyPayment } from "../payment/standartPayment/calculateMonthlyPayment";
 import { calculateSubsidyPayments } from "../payment/subsidy/calculateSubsidyPayments";
@@ -21,13 +17,8 @@ export const calculateBankProgram = (
   variables: Variables,
   noSubsidyInflate: boolean,
   mortgageWithoutDownPayment: boolean,
-  mortgagePartialDownPayment: boolean,
-  area: number,
+  applyMinDownPayment: boolean,
 ): BankProgramResult => {
-  const isFamilyOrIt = bankOffer.type === "family" || bankOffer.type === "it";
-  const isSpecialMortgageMode =
-    mortgageWithoutDownPayment || mortgagePartialDownPayment;
-
   // 1. Расчет суммы в договоре (завышение)
   const contractAmount = calculateContractAmount(
     objectCost,
@@ -38,7 +29,8 @@ export const calculateBankProgram = (
     bankOffer,
     variables,
     noSubsidyInflate,
-    isSpecialMortgageMode,
+    mortgageWithoutDownPayment,
+    applyMinDownPayment,
   );
 
   // 2. Завышение
@@ -53,59 +45,20 @@ export const calculateBankProgram = (
     manualDownPayment,
     bankOffer,
     variables,
-    mortgageWithoutDownPayment: isSpecialMortgageMode,
+    mortgageWithoutDownPayment,
   });
 
-  // Собственные средства
-  let ownFunds: number;
+  // 4. Собственные средства
+  const ownFunds = mortgageWithoutDownPayment ? downPayment : downPaymentAmount;
 
-  if (isFamilyOrIt) {
-    // СЕМЕЙНАЯ/ИТ — используем сложную формулу с лимитами
-    ownFunds = calculateOwnFunds({
-      objectCost,
-      downPayment,
-      downPaymentAmount,
-      userDownPaymentPercent,
-      bankOffer,
-      variables,
-      mortgageWithoutDownPayment: isSpecialMortgageMode,
-    });
-  } else {
-    // ОБЫЧНАЯ ИПОТЕКА (full, short) — простая формула
-    ownFunds = isSpecialMortgageMode ? downPayment : downPaymentAmount;
-  }
   // 5. Вносим за клиента
-  let clientContribution: number;
-
-  if (isFamilyOrIt) {
-    // СЕМЕЙНАЯ/ИТ — используем сложную формулу с лимитами
-    clientContribution = calculateClientContribution({
-      objectCost,
-      downPaymentAmount,
-      ownFunds,
-      userDownPaymentPercent,
-      bankOffer,
-      variables,
-      mortgageWithoutDownPayment: isSpecialMortgageMode,
-    });
-  } else {
-    // ОБЫЧНАЯ ИПОТЕКА (full, short) — простая формула
-    clientContribution = downPaymentAmount;
-  }
+  const clientContribution = downPaymentAmount - ownFunds;
 
   // 6. ПВ в процентах
   const downPaymentPercentCalc = (downPaymentAmount / contractAmount) * 100;
 
   // 7. Сумма ипотеки
-  const mortgageAmount = calculateMortgageAmount({
-    objectCost,
-    contractAmount,
-    downPaymentAmount,
-    userDownPaymentPercent,
-    bankOffer,
-    variables,
-    isFamilyOrIt,
-  });
+  const mortgageAmount = contractAmount - downPaymentAmount;
 
   // ✅ 4. Получаем актуальную ставку через getDynamicRate
   const pvForRate =
@@ -146,40 +99,11 @@ export const calculateBankProgram = (
   }
 
   // 10. На счет застройщика
-
   let developerAccount: number;
-
-  if (isFamilyOrIt) {
-    // СЕМЕЙНАЯ ИЛИ ИТ ИПОТЕКА — используем сложную формулу с лимитами
-    developerAccount = calculateDeveloperAccount({
-      objectCost,
-      ownFunds,
-      mortgageAmount,
-      subsidyAmount,
-      contractAmount,
-      userDownPaymentPercent,
-      bankOffer,
-      variables,
-      mortgageWithoutDownPayment: isSpecialMortgageMode,
-      downPaymentAmount,
-      noSubsidyInflate,
-    });
+  if (mortgageWithoutDownPayment) {
+    developerAccount = ownFunds + mortgageAmount - subsidyAmount;
   } else {
-    // ОБЫЧНАЯ ИПОТЕКА (full, short) — простая формула
-    if (isSpecialMortgageMode) {
-      developerAccount = ownFunds + mortgageAmount - subsidyAmount;
-    } else {
-      developerAccount = contractAmount - subsidyAmount;
-    }
-  }
-
-  // ============================================================
-  // 12. РАСЧЕТ "ПОЛУЧЕНО ЗА М²"
-  // ============================================================
-  let pricePerM2: number | null = null;
-
-  if (area && area > 0) {
-    pricePerM2 = developerAccount / area;
+    developerAccount = contractAmount - subsidyAmount;
   }
 
   // 11. Срок ипотеки
@@ -232,7 +156,6 @@ export const calculateBankProgram = (
     mortgageAmount: Math.ceil(mortgageAmount),
     subsidyAmount: Math.ceil(subsidyAmount),
     developerAccount: Math.ceil(developerAccount),
-    pricePerM2: pricePerM2 !== null ? Math.ceil(pricePerM2) : null,
     monthlyPaymentAfter: monthlyPaymentAfter
       ? Math.ceil(monthlyPaymentAfter)
       : undefined,

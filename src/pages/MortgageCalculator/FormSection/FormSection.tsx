@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import type { ChangeEvent } from "react";
 import type { CalculatorFormData } from "../../../utils/types";
 import { housingPrices } from "../../../data/calculatorData";
@@ -11,7 +11,6 @@ import {
   MIN_DOWN_PAYMENT_PERCENT,
   MIN_LOAN_TERM,
   PROJECT_FINANCING_BANKS,
-  PRICE_PER_SQUARE_METER_DEFAULT,
 } from "../../../utils/constants";
 
 interface FormSectionProps {
@@ -38,49 +37,11 @@ export const FormSection: React.FC<FormSectionProps> = ({
 
   const availableTypes = getApartmentTypes(formData.complex);
 
-  // ============================================================
-  // РАСЧЕТ СТОИМОСТИ ОБЪЕКТА (для валидации ПВ)
-  // ============================================================
-  const calculateObjectCost = useMemo(() => {
-    if (formData.manualObjectCost && formData.manualObjectCost > 0) {
-      return formData.manualObjectCost;
-    }
-
-    const pricePerM2 =
-      housingPrices.find(
-        (item) =>
-          item.complexName === formData.complex &&
-          item.apartmentType === formData.apartmentType,
-      )?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT;
-
-    return formData.area * pricePerM2;
-  }, [
-    formData.manualObjectCost,
-    formData.complex,
-    formData.apartmentType,
-    formData.area,
-  ]);
-
-  // ============================================================
-  // ПРОВЕРКА: включена ли ипотека без ПВ или частичный ПВ
-  // ============================================================
-  const isAnyMortgageTypeEnabled = useMemo(() => {
-    return (
-      formData.mortgageWithoutDownPayment || formData.mortgagePartialDownPayment
-    );
-  }, [
-    formData.mortgageWithoutDownPayment,
-    formData.mortgagePartialDownPayment,
-  ]);
-
-  const isDownPaymentDisabled = isAnyMortgageTypeEnabled;
-
-  // ============================================================
-  // ОБРАБОТЧИКИ ДЛЯ ПОЛЯ "ПЕРВОНАЧАЛЬНЫЙ ВЗНОС"
-  // ============================================================
+  // Обработчик для поля "Первоначальный взнос"
   const handleDownPaymentChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
+    // Если поле пустое, ничего не делаем (ждём onBlur)
     if (value === "") {
       onInputChange("downPaymentPercent", value as any);
       return;
@@ -88,14 +49,18 @@ export const FormSection: React.FC<FormSectionProps> = ({
 
     const numValue = Number(value);
 
+    // Если значение больше максимума - корректируем сразу
     if (numValue > MAX_DOWN_PAYMENT_PERCENT) {
       onInputChange("downPaymentPercent", MAX_DOWN_PAYMENT_PERCENT);
       return;
     }
 
+    // Для значений меньше минимума - НЕ корректируем сразу,
+    // чтобы пользователь мог ввести "30" через "3"
     onInputChange("downPaymentPercent", numValue);
   };
 
+  // Обработчик потери фокуса для поля "Первоначальный взнос"
   const handleDownPaymentBlur = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
@@ -103,144 +68,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
       onInputChange("downPaymentPercent", MIN_DOWN_PAYMENT_PERCENT);
     } else if (Number(value) > MAX_DOWN_PAYMENT_PERCENT) {
       onInputChange("downPaymentPercent", MAX_DOWN_PAYMENT_PERCENT);
-    }
-  };
-
-  // ============================================================
-  // ОБРАБОТЧИКИ ДЛЯ ПОЛЯ "РУЧНОЙ ВВОД ПВ"
-  // ============================================================
-  const handleManualDownPaymentChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-
-    if (value === "") {
-      onInputChange("manualDownPayment", 0);
-      return;
-    }
-
-    const numValue = Number(value);
-
-    if (numValue < 0) {
-      onInputChange("manualDownPayment", 0);
-      return;
-    }
-
-    if (isNaN(numValue)) {
-      return;
-    }
-
-    const objectCost = calculateObjectCost;
-
-    if (numValue > objectCost) {
-      onInputChange("manualDownPayment", objectCost);
-      return;
-    }
-
-    onInputChange("manualDownPayment", numValue);
-  };
-
-  const handleManualDownPaymentBlur = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-
-    if (value === "") {
-      onInputChange("manualDownPayment", 0);
-      return;
-    }
-
-    const numValue = Number(value);
-
-    if (numValue < 0) {
-      onInputChange("manualDownPayment", 0);
-      return;
-    }
-
-    if (isNaN(numValue)) {
-      onInputChange("manualDownPayment", 0);
-      return;
-    }
-
-    const objectCost = calculateObjectCost;
-
-    if (numValue > objectCost) {
-      onInputChange("manualDownPayment", objectCost);
-      return;
-    }
-
-    onInputChange("manualDownPayment", numValue);
-  };
-
-  // ============================================================
-  // ОБРАБОТЧИКИ ДЛЯ ПОЛЯ "ПЛОЩАДЬ"
-  // ============================================================
-  const handleAreaChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-
-    if (value === "") {
-      onInputChange("area", value as any);
-      return;
-    }
-
-    const numValue = Number(value);
-
-    if (numValue > MAX_AREA) {
-      onInputChange("area", MAX_AREA);
-      return;
-    }
-
-    onInputChange("area", numValue);
-  };
-
-  const handleAreaBlur = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-
-    if (value === "") {
-      onInputChange("area", MIN_AREA);
-      return;
-    }
-
-    const numValue = Number(value);
-
-    if (numValue < MIN_AREA) {
-      onInputChange("area", MIN_AREA);
-    } else if (numValue > MAX_AREA) {
-      onInputChange("area", MAX_AREA);
-    }
-  };
-
-  // ============================================================
-  // ОБРАБОТЧИКИ ДЛЯ ПОЛЯ "СРОК ИПОТЕКИ"
-  // ============================================================
-  const handleLoanTermChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-
-    if (value === "") {
-      onInputChange("loanTerm", value as any);
-      return;
-    }
-
-    const numValue = Number(value);
-
-    if (numValue > MAX_LOAN_TERM) {
-      onInputChange("loanTerm", MAX_LOAN_TERM);
-      return;
-    }
-
-    onInputChange("loanTerm", numValue);
-  };
-
-  const handleLoanTermBlur = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-
-    if (value === "") {
-      onInputChange("loanTerm", MIN_LOAN_TERM);
-      return;
-    }
-
-    const numValue = Number(value);
-
-    if (numValue < MIN_LOAN_TERM) {
-      onInputChange("loanTerm", MIN_LOAN_TERM);
-    } else if (numValue > MAX_LOAN_TERM) {
-      onInputChange("loanTerm", MAX_LOAN_TERM);
     }
   };
 
@@ -296,8 +123,12 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 max={MAX_AREA}
                 step={1}
                 value={formData.area || ""}
-                onChange={handleAreaChange}
-                onBlur={handleAreaBlur}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  onInputChange(
+                    "area",
+                    e.target.value ? Number(e.target.value) : MIN_AREA,
+                  )
+                }
               />
             </div>
 
@@ -331,11 +162,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 value={formData.downPaymentPercent || ""}
                 onChange={handleDownPaymentChange}
                 onBlur={handleDownPaymentBlur}
-                disabled={isDownPaymentDisabled}
-                style={{
-                  opacity: isDownPaymentDisabled ? 0.6 : 1,
-                  cursor: isDownPaymentDisabled ? "not-allowed" : "text",
-                }}
               />
             </div>
 
@@ -344,8 +170,12 @@ export const FormSection: React.FC<FormSectionProps> = ({
               <input
                 type="number"
                 value={formData.manualDownPayment || ""}
-                onChange={handleManualDownPaymentChange}
-                onBlur={handleManualDownPaymentBlur}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  onInputChange(
+                    "manualDownPayment",
+                    e.target.value ? Number(e.target.value) : 0,
+                  )
+                }
               />
             </div>
 
@@ -357,8 +187,12 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 max={MAX_LOAN_TERM}
                 step={1}
                 value={formData.loanTerm || ""}
-                onChange={handleLoanTermChange}
-                onBlur={handleLoanTermBlur}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  onInputChange(
+                    "loanTerm",
+                    e.target.value ? Number(e.target.value) : MIN_LOAN_TERM,
+                  )
+                }
                 placeholder="30"
               />
             </div>
@@ -428,23 +262,14 @@ export const FormSection: React.FC<FormSectionProps> = ({
             <div className="checkbox-field">
               <input
                 type="checkbox"
-                id="mortgagePartialDownPayment"
-                checked={formData.mortgagePartialDownPayment}
+                id="applyMinDownPayment"
+                checked={formData.applyMinDownPayment}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  onInputChange("mortgagePartialDownPayment", e.target.checked)
+                  onInputChange("applyMinDownPayment", e.target.checked)
                 }
-                disabled={formData.mortgageWithoutDownPayment}
               />
-              <label
-                htmlFor="mortgagePartialDownPayment"
-                style={{
-                  opacity: formData.mortgageWithoutDownPayment ? 0.5 : 1,
-                  cursor: formData.mortgageWithoutDownPayment
-                    ? "not-allowed"
-                    : "pointer",
-                }}
-              >
-                Ипотека с частичным первоначальным взносом
+              <label htmlFor="applyMinDownPayment">
+                Применить минимальный ПВ
               </label>
             </div>
           </div>
