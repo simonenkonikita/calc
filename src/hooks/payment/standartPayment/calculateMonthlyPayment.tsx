@@ -20,6 +20,7 @@ export const calculateMonthlyPayment = (
   const powerFactor = Math.pow(1 + monthlyRate, months);
 
   if (powerFactor === Infinity) {
+    console.warn("Слишком большой срок или ставка для расчёта");
     return 0;
   }
 

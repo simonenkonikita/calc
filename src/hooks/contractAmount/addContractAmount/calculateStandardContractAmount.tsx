@@ -1,8 +1,4 @@
-import {
-  BankOffer,
-  Variables,
-  BankCoefficients,
-} from "../../../../utils/types";
+import { BankCoefficients, BankOffer, Variables } from "../../../utils/types";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ==========
 export const calculateStandardContractAmount = (
@@ -14,9 +10,14 @@ export const calculateStandardContractAmount = (
   variables: Variables,
   noSubsidyInflate: boolean,
   mortgageWithoutDownPayment: boolean,
+  applyMinDownPayment: boolean,
   coefficients: BankCoefficients,
 ): number => {
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
+  const bankMinDownPayment = objectCost * (bankOffer.minPVPercent / 100);
+  const actualMinDownPayment = applyMinDownPayment
+    ? bankMinDownPayment
+    : userDesiredDownPayment;
 
   // 1. НЕ ЗАВЫШАТЬ НА СУБСИДИЮ
   if (noSubsidyInflate && !mortgageWithoutDownPayment) {
@@ -48,7 +49,7 @@ export const calculateStandardContractAmount = (
 
   // 3. РАСЧЕТ СУММЫ В ДОГОВОРЕ
   // =ЕСЛИ($B$13<=$B$7*$B$8/100; $B$7/Сбербанк!J2; $B$14/Сбербанк!K2+$B$13)
-  if (downPayment <= userDesiredDownPayment) {
+  if (downPayment <= actualMinDownPayment) {
     // ✅ ПРАВИЛЬНАЯ ФОРМУЛА - используем requiredCoeffWithMinPV
     contractAmount = objectCost / coefficients.requiredCoeffWithMinPV;
   } else {

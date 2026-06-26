@@ -2,27 +2,7 @@
 export const DEFAULT_MIN_PV_PERCENT = 20.1;
 export const DEFAULT_LOAN_TERM_YEARS = 30;
 export const PRICE_PER_SQUARE_METER_DEFAULT = 140000;
-
-// ========== НАЦЕНКА ЗА ИПОТЕКУ БЕЗ ПВ ==========
-export const MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGES: Record<string, number> =
-  {
-    "ЖК Сады у моря": 35000,
-    "ЖК Лермонтов": 10000,
-    "ЖК Горы здесь": 10000,
-    "ГК Море тут": 10000,
-    "ГК Морелло": 20000,
-    // Добавьте остальные ЖК по мере необходимости
-  };
-
-// ========== НАЦЕНКА ЗА ИПОТЕКУ С ЧАСТИЧНЫМ ПВ ==========
-export const MORTGAGE_PARTIAL_DOWN_PAYMENT_SURCHARGES: Record<string, number> =
-  {
-    "ЖК Сады у моря": 15000,
-    "ЖК Лермонтов": 10000,
-    "ЖК Горы здесь": 10000,
-    "ГК Море тут": 10000,
-    "ГК Морелло": 20000,
-  };
+export const MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGE = 35000;
 
 // ========== ЛИМИТЫ ==========
 export const MIN_AREA = 1;
