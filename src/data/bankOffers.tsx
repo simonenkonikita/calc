@@ -134,7 +134,7 @@ export const bankOffers: BankOffer[] = [
     subsidyCalculationMethod: "onlyPercent",
   },
 
-  /* // Семейная ипотека
+  /*  // Семейная ипотека
   {
     bank: "Сбербанк",
     program: "Семейная базовая",

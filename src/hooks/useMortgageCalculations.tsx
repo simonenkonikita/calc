@@ -13,8 +13,7 @@ import { formatMoney } from "./addHooks/formatMoney";
 import {
   DEFAULT_LOAN_TERM_YEARS,
   DEFAULT_MIN_PV_PERCENT,
-  MORTGAGE_PARTIAL_DOWN_PAYMENT_SURCHARGES,
-  MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGES,
+  MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGE,
   PRICE_PER_SQUARE_METER_DEFAULT,
 } from "../utils/constants";
 // Функция для получения цены за м2
@@ -41,33 +40,10 @@ const getPricePerSquareMeter = (
   return found.pricePerSquareMeter;
 };
 
-// Функция для получения наценки за ипотеку без ПВ для конкретного ЖК
-// Функция для получения наценки в зависимости от типа ипотеки
-const getMortgageSurcharge = (
-  complexName: string,
-  mortgageWithoutDownPayment: boolean,
-  mortgagePartialDownPayment: boolean,
-): number => {
-  if (!complexName) return 0;
-
-  // Приоритет: сначала ипотека без ПВ, потом частичный ПВ
-  if (mortgageWithoutDownPayment) {
-    const surcharge = MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGES[complexName];
-    return surcharge ?? 0;
-  }
-
-  if (mortgagePartialDownPayment) {
-    const surcharge = MORTGAGE_PARTIAL_DOWN_PAYMENT_SURCHARGES[complexName];
-    return surcharge ?? 0;
-  }
-
-  return 0;
-};
-
 export const useMortgageCalculator = () => {
   const [formData, setFormData] = useState<CalculatorFormData>({
     complex: "ЖК Сады у моря",
-    apartmentType: "Студия",
+    apartmentType: "Двухкомнатная квартира",
     area: 30,
     manualObjectCost: null,
     considerDepositInCost: false,
@@ -77,7 +53,7 @@ export const useMortgageCalculator = () => {
     projectFinancingBank: "Сбербанк",
     noSubsidyInflate: false,
     mortgageWithoutDownPayment: false,
-    mortgagePartialDownPayment: false,
+    applyMinDownPayment: false,
   });
 
   const [results, setResults] = useState<{
@@ -98,38 +74,32 @@ export const useMortgageCalculator = () => {
     return getPricePerSquareMeter(formData.complex, formData.apartmentType);
   }, [formData.complex, formData.apartmentType]);
 
-  // Получаем наценку для текущего ЖК
-  const surchargePerM2 = useMemo(() => {
-    if (!formData.complex) return 0;
-    return getMortgageSurcharge(
-      formData.complex,
-      formData.mortgageWithoutDownPayment,
-      formData.mortgagePartialDownPayment,
-    );
-  }, [
-    formData.complex,
-    formData.mortgageWithoutDownPayment,
-    formData.mortgagePartialDownPayment,
-  ]);
-
-  // Финальная цена с учётом ипотеки без ПВ или частичного ПВ
+  // Финальная цена с учётом ипотеки без ПВ
   const finalPricePerM2 = useMemo(() => {
     if (basePricePerM2 === null) return null;
-    // Если включена ипотека без ПВ ИЛИ частичный ПВ
-    if (
-      formData.mortgageWithoutDownPayment ||
-      formData.mortgagePartialDownPayment
-    ) {
-      return basePricePerM2 + surchargePerM2;
+    if (formData.mortgageWithoutDownPayment) {
+      return basePricePerM2 + MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGE;
     }
     return basePricePerM2;
-  }, [
-    basePricePerM2,
-    formData.mortgageWithoutDownPayment,
-    formData.mortgagePartialDownPayment,
-    surchargePerM2,
-  ]);
+  }, [basePricePerM2, formData.mortgageWithoutDownPayment]);
+
   const calculateResults = useCallback(async () => {
+    // Валидация
+    if (formData.area <= 0) {
+      setError("Площадь должна быть больше 0");
+      return;
+    }
+
+    if (!formData.complex || !formData.apartmentType) {
+      setError("Выберите жилой комплекс и тип квартиры");
+      return;
+    }
+
+    if (finalPricePerM2 === null) {
+      setError("Не удалось определить цену за м²");
+      return;
+    }
+
     setIsCalculating(true);
     setError(null);
 
@@ -141,7 +111,7 @@ export const useMortgageCalculator = () => {
         formData,
         bankOffers,
         variables,
-        finalPricePerM2 ?? PRICE_PER_SQUARE_METER_DEFAULT,
+        finalPricePerM2,
       );
 
       setResults(calculated);
@@ -171,37 +141,24 @@ export const useMortgageCalculator = () => {
         // Специальная обработка для связанных полей
         let newData = { ...prev, [field]: value };
 
-        // ✅ Если включена "Ипотека без ПВ"
+        // ✅ Если включена "Ипотека без ПВ", сбрасываем ПВ до 20.1%
         if (field === "mortgageWithoutDownPayment" && value === true) {
           newData.downPaymentPercent = DEFAULT_MIN_PV_PERCENT;
-          // Если включена ипотека без ПВ, отключаем частичный ПВ
-          newData.mortgagePartialDownPayment = false;
           console.log(
             `🏷️ Ипотека без ПВ - ПВ сброшен до ${DEFAULT_MIN_PV_PERCENT}%`,
           );
         }
 
-        // ✅ Если включена "Ипотека с частичным ПВ"
-        if (field === "mortgagePartialDownPayment" && value === true) {
-          newData.downPaymentPercent = DEFAULT_MIN_PV_PERCENT;
-          // Если включен частичный ПВ, отключаем ипотеку без ПВ
-          newData.mortgageWithoutDownPayment = false;
-          console.log(
-            `🏷️ Ипотека с частичным ПВ - ПВ сброшен до ${DEFAULT_MIN_PV_PERCENT}%`,
-          );
-        }
-
-        // ✅ Если поле downPaymentPercent изменяется вручную, но включена "Ипотека без ПВ" или "Частичный ПВ" - отменяем изменение
+        // ✅ Если поле downPaymentPercent изменяется вручную, но включена "Ипотека без ПВ" - отменяем изменение
         if (
           field === "downPaymentPercent" &&
-          (newData.mortgageWithoutDownPayment ||
-            newData.mortgagePartialDownPayment)
+          newData.mortgageWithoutDownPayment
         ) {
+          // Возвращаем предыдущее значение, не давая изменить ПВ
           return {
             ...prev,
             [field]: prev.downPaymentPercent,
             mortgageWithoutDownPayment: prev.mortgageWithoutDownPayment,
-            mortgagePartialDownPayment: prev.mortgagePartialDownPayment,
           };
         }
 
@@ -220,6 +177,14 @@ export const useMortgageCalculator = () => {
           );
         }
 
+        return newData;
+
+        // ✅ Если включена "Ипотека без ПВ", логируем увеличение цены
+        if (field === "mortgageWithoutDownPayment" && value === true) {
+          console.log(
+            `Включена ипотека без ПВ - цена за м² увеличена на ${MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGE.toLocaleString()} ₽`,
+          );
+        }
         return newData;
       });
     },

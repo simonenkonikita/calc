@@ -9,7 +9,7 @@ export const calculateDownPayment = (
 ): number => {
   const {
     mortgageWithoutDownPayment,
-    mortgagePartialDownPayment,
+    applyMinDownPayment,
     manualDownPayment,
     downPaymentPercent,
   } = formData;
@@ -18,12 +18,16 @@ export const calculateDownPayment = (
   const calculatedPercentDown = objectCost * (downPaymentPercent / 100); // Мин ПВ указанный в  %
 
   // Ипотека без ПВ
-  if (mortgageWithoutDownPayment || mortgagePartialDownPayment) {
+  if (mortgageWithoutDownPayment) {
     // Если ручной ввод больше чем минимальный
     if (manualDownPayment > minDownPayment) {
       return minDownPayment;
     }
     return manualDownPayment;
+  }
+
+  if (applyMinDownPayment) {
+    return minDownPayment;
   }
 
   // Если есть ручной ввод ПВ
