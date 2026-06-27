@@ -10,8 +10,8 @@ import {
   CATEGORY_ORDER,
   PROGRAM_TYPE_LABELS,
 } from "../../../utils/constants";
-import { formatOfferToText } from "../../../hooks/addHooks/formatOfferToText";
-import { safeFormatMoney } from "../../../hooks/addHooks/formatMoney";
+import { formatOfferToText } from "../../../utils/formatOfferToText";
+import { safeFormatMoney } from "../../../utils/formatMoney";
 import { getBadge } from "../../../utils/getBadge";
 
 // Функция для определения категории программы

@@ -1,11 +1,11 @@
-import { DEFAULT_MIN_PV_PERCENT } from "../../utils/constants";
+import { DEFAULT_MIN_PV_PERCENT } from "../../../utils/constants";
 import {
   CalculatorFormData,
   ObjectCalculationResult,
   BankOffer,
   Variables,
   BankProgramResult,
-} from "../../utils/types";
+} from "../../../utils/types";
 import { calculateBankProgram } from "../cardBank/calculateBankProgram";
 import { calculateDownPayment } from "./calculateDownPayment";
 

@@ -1,7 +1,7 @@
-import { BankOffer, Variables } from "../../utils/types";
+import { BankOffer, Variables } from "../../../utils/types";
 import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
-import { calculateFamilyDownPayment } from "./addContractAmount/Family/calculateFamilyDownPayment";
-import { calculateStandardDownPayment } from "./addContractAmount/Standard/calculateStandardDownPayment";
+import { calculateFamilyDownPayment } from "./family/calculateFamilyDownPayment";
+import { calculateStandardDownPayment } from "./standard/calculateStandardDownPayment";
 
 // src/hooks/payment/downPayment/calculateDownPaymentAmount.ts
 interface DownPaymentAmountParams {

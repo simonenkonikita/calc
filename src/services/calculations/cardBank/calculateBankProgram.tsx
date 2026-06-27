@@ -1,12 +1,12 @@
-import { BankOffer, Variables, BankProgramResult } from "../../utils/types";
-import { calculateClientContribution } from "../contractAmount/calculateClientContribution";
+import { BankOffer, Variables, BankProgramResult } from "../../../utils/types";
+import { calculateClientContribution } from "../result/calculateClientContribution";
 import { calculateContractAmount } from "../contractAmount/calculateContractAmount";
-import { calculateMortgageAmount } from "../contractAmount/calculateMortgageAmount";
-import { calculateOwnFunds } from "../contractAmount/calculateOwnFunds";
-import { calculateDeveloperAccount } from "../contractAmount/developerAccount/calculateDeveloperAccount";
-import { calculateDownPaymentAmount } from "../contractAmount/сalculateDownPaymentAmount";
-import { getDynamicRate } from "../dynamicRate/getDynamicRate";
-import { calculateMonthlyPayment } from "../payment/standartPayment/calculateMonthlyPayment";
+import { calculateMortgageAmount } from "../result/calculateMortgageAmount";
+import { calculateOwnFunds } from "../result/calculateOwnFunds";
+import { calculateDeveloperAccount } from "../result/calculateDeveloperAccount";
+import { calculateDownPaymentAmount } from "../downPayment/сalculateDownPaymentAmount";
+import { getDynamicRate } from "../сoefficients/getDynamicRate";
+import { calculateMonthlyPayment } from "../payment/calculateMonthlyPayment";
 import { calculateSubsidyPayments } from "../payment/subsidy/calculateSubsidyPayments";
 
 // ========== РАСЧЕТ ВСЕХ ПАРАМЕТРОВ ПО БАНКОВСКОЙ ПРОГРАММЕ ==========

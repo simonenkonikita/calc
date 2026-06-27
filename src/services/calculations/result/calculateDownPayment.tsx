@@ -1,5 +1,5 @@
-import { DEFAULT_MIN_PV_PERCENT } from "../../utils/constants";
-import { CalculatorFormData } from "../../utils/types";
+import { DEFAULT_MIN_PV_PERCENT } from "../../../utils/constants";
+import { CalculatorFormData } from "../../../utils/types";
 
 // ========== РАСЧЕТ ПЕРВОНАЧАЛЬНОГО ВЗНОСА ==========
 export const calculateDownPayment = (

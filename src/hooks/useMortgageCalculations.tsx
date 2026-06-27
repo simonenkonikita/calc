@@ -8,8 +8,8 @@ import type {
 import { bankOffers } from "../data/bankOffers";
 import { housingPrices } from "../data/calculatorData";
 import { variables } from "../data/limitdDate";
-import { calculateFullMortgage } from "./resultForm/calculateFullMortgage";
-import { formatMoney } from "./addHooks/formatMoney";
+import { calculateFullMortgage } from "../services/calculations/result/calculateFullMortgage";
+import { formatMoney } from "../utils/formatMoney";
 import {
   DEFAULT_LOAN_TERM_YEARS,
   DEFAULT_MIN_PV_PERCENT,

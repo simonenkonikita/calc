@@ -1,7 +1,7 @@
-import { BankOffer, Variables } from "../../utils/types";
+import { BankOffer, Variables } from "../../../utils/types";
 import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
-import { calculateFamilyContractAmount } from "./addContractAmount/Family/calculateFamilyContractAmount";
-import { calculateStandardContractAmount } from "./addContractAmount/Standard/calculateStandardContractAmount";
+import { calculateFamilyContractAmount } from "./family/calculateFamilyContractAmount";
+import { calculateStandardContractAmount } from "./standard/calculateStandardContractAmount";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ==========
 export const calculateContractAmount = (
@@ -20,9 +20,6 @@ export const calculateContractAmount = (
     userDownPaymentPercent,
   );
 
-  // ============================================================
-  // 1. СЕМЕЙНАЯ ИПОТЕКА
-  // ============================================================
   if (bankOffer.type === "family") {
     return calculateFamilyContractAmount(
       objectCost,
@@ -37,26 +34,6 @@ export const calculateContractAmount = (
     );
   }
 
-  // ============================================================
-  // 2. ИТ ИПОТЕКА
-  // ============================================================
-  /*   if (bankOffer.type === "it") {
-    return calculateItContractAmount(
-      objectCost,
-      downPayment,
-      remainingAmount,
-      userDownPaymentPercent,
-      bankOffer,
-      variables,
-      noSubsidyInflate,
-      mortgageWithoutDownPayment,
-      coefficients,
-    );
-  }
- */
-  // ============================================================
-  // 3. СТАНДАРТНЫЙ РАСЧЕТ (full, short)
-  // ============================================================
   return calculateStandardContractAmount(
     objectCost,
     downPayment,

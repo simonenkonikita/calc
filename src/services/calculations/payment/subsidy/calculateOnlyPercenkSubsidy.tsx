@@ -1,6 +1,6 @@
-import { SubsidyPaymentResult } from "../../utils/types";
-import { calculateFutureValue } from "../payment/calculateFutureValue";
-import { calculateMonthlyPayment } from "../standartPayment/calculateMonthlyPayment";
+import { SubsidyPaymentResult } from "../../../../utils/types";
+import { calculateFutureValue } from "../calculateFutureValue";
+import { calculateMonthlyPayment } from "../calculateMonthlyPayment";
 
 // ==========  РАСЧЕТ ПЛАТЕЖЕЙ С СУБСИДИЕЙ НА КОРОТКИЙ СРОК ПО МЕТОДОЛОГИИ СБЕРБАНКА ==========
 export const calculateOnlyPercenkSubsidy = (

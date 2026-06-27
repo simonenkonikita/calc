@@ -6,7 +6,7 @@ import {
   MIN_DOWN_PAYMENT_PERCENT,
   MAX_DOWN_PAYMENT_PERCENT,
 } from "../../utils/constants";
-import { calculateBankCoefficients } from "../../hooks/сoefficients/calculateBankCoefficients";
+import { calculateBankCoefficients } from "../../services/calculations/сoefficients/calculateBankCoefficients";
 
 export const CoefficientsPage: React.FC = () => {
   const [selectedBank, setSelectedBank] = useState<string>("all");

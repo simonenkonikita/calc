@@ -1,4 +1,4 @@
-import { BankOffer, Variables } from "../../utils/types";
+import { BankOffer, Variables } from "../../../utils/types";
 import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
 
 interface CalculateOwnFundsParams {

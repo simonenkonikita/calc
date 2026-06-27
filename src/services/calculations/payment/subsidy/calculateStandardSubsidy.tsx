@@ -1,6 +1,6 @@
-import { SubsidyPaymentResult } from "../../../utils/types";
+import { SubsidyPaymentResult } from "../../../../utils/types";
 import { calculateFutureValue } from "../calculateFutureValue";
-import { calculateMonthlyPayment } from "../standartPayment/calculateMonthlyPayment";
+import { calculateMonthlyPayment } from "../calculateMonthlyPayment";
 
 // ========== РАСЧЕТ ПЛАТЕЖЕЙ С СУБСИДИЕЙ НА КОРОТКИЙ СРОК ==========
 export const calculateStandardSubsidy = (

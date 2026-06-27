@@ -1,6 +1,6 @@
 // src/hooks/сoefficients/getDynamicRate.ts
 
-import { BankOffer, DynamicRateRule } from "../../utils/types";
+import { BankOffer, DynamicRateRule } from "../../../utils/types";
 
 /**
  * Проверка условия правила

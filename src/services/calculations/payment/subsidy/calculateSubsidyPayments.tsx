@@ -1,4 +1,4 @@
-import { SubsidyPaymentResult } from "../../../utils/types";
+import { SubsidyPaymentResult } from "../../../../utils/types";
 import { calculateOnlyPercenkSubsidy } from "./calculateOnlyPercenkSubsidy";
 import { calculateStandardSubsidy } from "./calculateStandardSubsidy";
 
