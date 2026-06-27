@@ -16,15 +16,21 @@ export const calculateFamilyContractAmount = (
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
 ): number => {
-  // Расчеты для условий
-  const limit = variables.familyMortgageLimit; // Переменные!$B$1 (6 000 000)
+  const limit = variables.familyMortgageLimit; // Переменные!$B$1
   const subsidyPercent = bankOffer.subsidyPercent; // Сбербанк!E16
+  // ============================================================
+  // 1. ПРОВЕРКА: ВПИСЫВАЕТСЯ ЛИ В ЛИМИТ
+  // ============================================================
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
   const cafsummPV = userDownPaymentPercent / 100;
 
   const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
+  const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
 
+  // ============================================================
+  // 2. ПРОВЕРКА: ВПИСЫВАЕТСЯ ЛИ В ЛИМИТ
+  // ============================================================
   const summCreditLargePV =
     remainingAmount * coefficients.requiredCoeffWithLargePV + downPayment;
 
@@ -33,12 +39,10 @@ export const calculateFamilyContractAmount = (
     objectCost -
     downPayment;
 
-  const summPVWithoutPV =
+  /*   const summPVWithoutPV =
     remainingAmount * coefficients.requiredCoeffWithoutPV +
     objectCost -
-    downPayment;
-
-  const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
+    downPayment; */
 
   let summCredit: number;
   let isWithinLimit: boolean;
@@ -46,11 +50,9 @@ export const calculateFamilyContractAmount = (
   if (isSpecialMortgageMode) {
     summCredit = summCreditWithoutPV * cafsummCred;
     isWithinLimit = summCredit <= limit;
-    console.log(`'сумма кредита с ПВ'${summCredit}`);
   } else {
     summCredit = summCreditMinPV * cafsummCred;
     isWithinLimit = summCredit <= limit;
-    console.log(`'сумма кредита с ПВ'${summCredit}`);
   }
 
   let contractAmount: number;
@@ -59,30 +61,19 @@ export const calculateFamilyContractAmount = (
     isSpecialMortgageMode && downPayment < summCreditWithoutPV * cafsummPV;
 
   if (isThresholdCondition) {
-    contractAmount = summCreditWithoutPV;
-  } else {
-    if (downPayment <= userDesiredDownPayment) {
-      contractAmount = summCreditMinPV;
+    if (isWithinLimit) {
+      contractAmount = summCreditWithoutPV;
     } else {
-      contractAmount = summCreditLargePV;
+      contractAmount = (objectCost + limit * (subsidyPercent / 100)) / 0.799;
     }
-  }
-
-  if (isSpecialMortgageMode) {
-    if (!isWithinLimit) {
-      if (noSubsidyInflate) {
-        return objectCost;
-      }
-      return objectCost + limit * (subsidyPercent / 100);
-    }
-    if (downPayment < summPVWithoutPV * cafsummPV) {
-      if (noSubsidyInflate && isSpecialMortgageMode) {
-        return (objectCost - downPayment) / 0.799;
+  } else {
+    if (isWithinLimit) {
+      if (downPayment <= userDesiredDownPayment) {
+        contractAmount = summCreditMinPV;
       } else {
-        return objectCost / coefficients.requiredCoeffWithMinPV;
+        contractAmount = summCreditLargePV;
       }
     }
   }
-
   return Math.ceil(contractAmount);
 };

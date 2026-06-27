@@ -29,7 +29,6 @@ export const calculateDeveloperAccount = (
     variables,
     mortgageWithoutDownPayment,
     downPaymentAmount,
-    noSubsidyInflate,
   } = params;
 
   const coefficients = calculateBankCoefficients(
@@ -37,53 +36,27 @@ export const calculateDeveloperAccount = (
     userDownPaymentPercent,
   );
 
-  // ============================================================
-  // ОПРЕДЕЛЯЕМ ЛИМИТ В ЗАВИСИМОСТИ ОТ ТИПА ПРОГРАММЫ
-  // ============================================================
   const limit = variables.familyMortgageLimit;
+  const minPVPercent = coefficients.requiredCoeffWithMinPV;
 
-  const minPVPercent = coefficients.requiredCoeffWithMinPV; // Сбербанк!J16
-
-  // ============================================================
-  // ПРОВЕРКА: ВПИСЫВАЕМСЯ ЛИ В ЛИМИТ
-  // ($B$7/Сбербанк!J16)*(1-$B$8/100) <= Переменные!$B$1
-  // ============================================================
   const summCredit =
     (objectCost / minPVPercent) * (1 - userDownPaymentPercent / 100);
   const isWithinLimit = summCredit <= limit;
 
-  // ============================================================
-  // РАСЧЕТ СУММЫ НА СЧЕТ ЗАСТРОЙЩИКА
-  // ============================================================
   let developerAccount: number;
 
   if (isWithinLimit) {
-    // ВПИСЫВАЕМСЯ В ЛИМИТ
     if (mortgageWithoutDownPayment) {
-      // Ипотека без ПВ: E32 + I32 - J32
       developerAccount = ownFunds + mortgageAmount - subsidyAmount;
     } else {
       developerAccount = contractAmount - subsidyAmount;
     }
   } else {
     if (mortgageWithoutDownPayment) {
-      // Ипотека без ПВ: E32 + I32 - J32
       developerAccount = ownFunds + mortgageAmount - subsidyAmount;
     } else {
-      // НЕ ВПИСЫВАЕМСЯ В ЛИМИТ: D32 + I32 - J32
       developerAccount = downPaymentAmount + mortgageAmount - subsidyAmount;
     }
   }
   return Math.ceil(developerAccount);
 };
-
-/* 
-  let subsidyAmount = mortgageAmount * (bankOffer.subsidyPercent / 100); */
-
-/* // 10. На счет застройщика
-let developerAccount: number;
-if (mortgageWithoutDownPayment) {
-  developerAccount = ownFunds + mortgageAmount - subsidyAmount;
-} else {
-  developerAccount = contractAmount - subsidyAmount;
-} */
