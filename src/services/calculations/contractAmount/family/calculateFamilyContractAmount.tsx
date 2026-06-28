@@ -15,7 +15,7 @@ export const calculateFamilyContractAmount = (
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
-): number | null => {
+): number => {
   // 🔥 Меняем тип возврата, так как может быть null
   const limit = bankOffer.excessLimit
     ? variables.maxFamilyMortgageSum || 15000000 // Если excessLimit true → 15 млн
@@ -57,12 +57,12 @@ export const calculateFamilyContractAmount = (
       if (isWithinLimit) {
         contractAmount = Math.ceil((objectCost - downPayment) / 0.799);
       } else {
-        return null;
+        return 0;
       }
     } else if (isWithinLimit) {
       contractAmount = summCreditWithoutPV;
     } else {
-      return null;
+      return 0;
     }
   } else {
     if (noSubsidyInflate) {
