@@ -12,11 +12,13 @@ import {
   PROGRAM_TYPE_LABELS,
 } from "../../../utils/constants";
 
-import { getBadge } from "../../../utils/getBadge";
+import { getBadge } from "../../../utils/badge/getBadge";
 import { formatOfferToText } from "../../../utils/formatOfferToText";
 import { safeFormatMoney } from "../../../utils/formatMoney";
-import { getExcessBadge } from "../../../utils/getExcessBadge";
+import { getExcessBadge } from "../../../utils/badge/getExcessBadge";
+
 import { printSelectedOffers } from "../../../utils/printSelectedOffers";
+import { getTermYearsBadge } from "../../../utils/badge/getTermYearsBadge";
 
 // Функция для определения категории программы
 const getProgramCategory = (offer: BankProgramResultWithIndex): string => {
@@ -329,6 +331,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
 
                           const badge = getBadge(offer);
                           const excessBadge = getExcessBadge(offer);
+                          const termBadge = getTermYearsBadge(offer);
 
                           return (
                             <div
@@ -353,11 +356,19 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                 {/* Сверхлимит шильдик */}
                                 {excessBadge && (
                                   <div className="bank-card-badge badge-excess">
-                                    <span className="badge-icon">🎯</span>
+                                    <span className="badge-icon">⚡</span>
                                     <span className="badge-text">
                                       Сверхлимит / сумма ипотеки от{" "}
                                       {MIN_EXCESS_MORTGAGE_AMOUNT_SBER.toLocaleString()}{" "}
                                       ₽
+                                    </span>
+                                  </div>
+                                )}
+                                {termBadge && (
+                                  <div className="bank-card-badge badge-term">
+                                    <span className="badge-icon">⏰</span>
+                                    <span className="badge-text">
+                                      Максимальный срок ипотеки 20 лет
                                     </span>
                                   </div>
                                 )}

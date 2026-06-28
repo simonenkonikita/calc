@@ -1,6 +1,6 @@
 // src/utils/getExcessBadge.ts
-import { BankProgramResultWithIndex } from "./types";
-import { MIN_EXCESS_MORTGAGE_AMOUNT_SBER } from "./constants";
+import { BankProgramResultWithIndex } from "../types";
+import { MIN_EXCESS_MORTGAGE_AMOUNT_SBER } from "../constants";
 
 export const getExcessBadge = (
   offer: BankProgramResultWithIndex,
@@ -12,7 +12,7 @@ export const getExcessBadge = (
     offer.program === "ИТ ипотека сверхлимит"
   ) {
     return {
-      icon: "💰",
+      icon: "⚡",
       text: `Сумма от ${MIN_EXCESS_MORTGAGE_AMOUNT_SBER.toLocaleString()} ₽`,
     };
   }

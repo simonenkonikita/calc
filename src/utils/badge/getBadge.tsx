@@ -1,4 +1,4 @@
-import { BankProgramResultWithIndex } from "./types";
+import { BankProgramResultWithIndex } from "../types";
 
 // ✅ Функция для получения шильдика (бейджа) для банка
 export const getBadge = (offer: BankProgramResultWithIndex): string | null => {
