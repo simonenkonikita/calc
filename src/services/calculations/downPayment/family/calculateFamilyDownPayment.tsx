@@ -36,8 +36,10 @@ export const calculateFamilyDownPayment = (
     noSubsidyInflate,
   } = params;
 
-  const limit = variables.familyMortgageLimit;
-  const subsidyPercent = bankOffer.subsidyPercent;
+  // 🔥 ОПРЕДЕЛЯЕМ ЛИМИТ ПО ФЛАГУ excessLimit
+  const limit = bankOffer.excessLimit
+    ? variables.maxFamilyMortgageSum || 15000000 // Если excessLimit true → 15 млн
+    : variables.familyMortgageLimit || 6000000; // Иначе → 6 млн
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
   const cafsummPV = userDownPaymentPercent / 100;
@@ -48,9 +50,6 @@ export const calculateFamilyDownPayment = (
     contractAmount * (userDownPaymentPercent / 100);
 
   const contractAmountMinPV = contractAmount * (bankOffer.minPVPercent / 100);
-
-  const summCreditLargePV =
-    remainingAmount * coefficients.requiredCoeffWithLargePV + downPayment;
 
   const summCreditWithoutPV =
     remainingAmount * coefficients.requiredCoeffWithoutPV +
@@ -71,29 +70,37 @@ export const calculateFamilyDownPayment = (
   const isThresholdCondition =
     isSpecialMortgageMode && downPayment < summCreditWithoutPV * cafsummPV;
 
-  let downPaymentAmount: number;
-
-  if (manualDownPayment > 0) {
-    if (isWithinLimit) {
-      downPaymentAmount = Math.max(manualDownPayment, contractAmountMinPV);
-    } else {
-      downPaymentAmount = Math.max(manualDownPayment, contractAmount - limit);
-    }
-  } else {
-    if (isWithinLimit) {
-      if (downPayment < userDesiredDownPayment) {
-        downPaymentAmount = downPaymentFromContract;
-      } else {
-        if (downPayment >= downPaymentFromContract) {
-          downPaymentAmount = downPayment;
-        } else {
-          downPaymentAmount = downPaymentFromContract;
-        }
-      }
-    } else {
-      downPaymentAmount = contractAmount - limit;
-    }
+  // Ранний возврат для особого случая
+  if (isThresholdCondition && noSubsidyInflate) {
+    return Math.ceil((objectCost - downPayment) / 0.799);
   }
+
+  // Вспомогательная функция для расчета ПВ
+  const calculateDownPayment = (): number => {
+    // Если есть ручной ПВ
+    if (manualDownPayment > 0) {
+      if (isWithinLimit) {
+        return Math.max(manualDownPayment, contractAmountMinPV);
+      } else {
+        return Math.max(manualDownPayment, contractAmount - limit);
+      }
+    }
+
+    // Автоматический ПВ
+    if (!isWithinLimit) {
+      return contractAmount - limit;
+    }
+
+    if (downPayment < userDesiredDownPayment) {
+      return downPaymentFromContract;
+    }
+
+    return downPayment >= downPaymentFromContract
+      ? downPayment
+      : downPaymentFromContract;
+  };
+
+  const downPaymentAmount = calculateDownPayment();
 
   return Math.ceil(downPaymentAmount);
 };

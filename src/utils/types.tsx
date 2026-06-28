@@ -91,6 +91,7 @@ export interface BankOffer {
   shortRate?: number; //
   subsidyCalculationMethod?: "onlyPercent" | "standard";
   dynamicRates?: DynamicRateRule[];
+  dynamicRateCalculator?: (mortgageAmount: number) => number;
 }
 
 // ========== РЕЗУЛЬТАТ РАСЧЕТА ПО ОДНОЙ ПРОГРАММЕ ==========

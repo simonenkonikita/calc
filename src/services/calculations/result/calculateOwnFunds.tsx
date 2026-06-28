@@ -17,7 +17,6 @@ export const calculateOwnFunds = (params: CalculateOwnFundsParams): number => {
     objectCost,
     downPayment,
     remainingAmount,
-    contractAmount,
     downPaymentAmount,
     userDownPaymentPercent,
     bankOffer,
@@ -30,21 +29,13 @@ export const calculateOwnFunds = (params: CalculateOwnFundsParams): number => {
     userDownPaymentPercent,
   );
 
-  const limit = variables.familyMortgageLimit;
-  const subsidyPercent = bankOffer.subsidyPercent;
+  const limit = bankOffer.excessLimit
+    ? variables.maxFamilyMortgageSum || 15000000 // Если excessLimit true → 15 млн
+    : variables.familyMortgageLimit || 6000000; // Иначе → 6 млн
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
-  const cafsummPV = userDownPaymentPercent / 100;
+
   const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
-  const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
-
-  const downPaymentFromContract =
-    contractAmount * (userDownPaymentPercent / 100);
-
-  const contractAmountMinPV = contractAmount * (bankOffer.minPVPercent / 100);
-
-  const summCreditLargePV =
-    remainingAmount * coefficients.requiredCoeffWithLargePV + downPayment;
 
   const summCreditWithoutPV =
     remainingAmount * coefficients.requiredCoeffWithoutPV +

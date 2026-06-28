@@ -30,33 +30,22 @@ export const calculateMortgageAmount = (
     isSpecialMortgageMode,
   } = params;
 
-  // ============================================================
-  // 1. ДЛЯ ОБЫЧНОЙ ИПОТЕКИ (full, short) — простая формула
-  // ============================================================
   if (!isFamilyOrIt) {
     return contractAmount - downPaymentAmount;
   }
 
-  // ============================================================
-  // 2. ДЛЯ СЕМЕЙНОЙ/ИТ ИПОТЕКИ — с проверкой лимита
-  // ============================================================
-
-  // 2.1 Получаем коэффициенты
   const coefficients = calculateBankCoefficients(
     bankOffer,
     userDownPaymentPercent,
   );
 
-  const limit = variables.familyMortgageLimit;
-  const subsidyPercent = bankOffer.subsidyPercent;
+  const limit = bankOffer.excessLimit
+    ? variables.maxFamilyMortgageSum || 15000000 // Если excessLimit true → 15 млн
+    : variables.familyMortgageLimit || 6000000; // Иначе → 6 млн
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
-  const cafsummPV = userDownPaymentPercent / 100;
-  const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
-  const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
 
-  const summCreditLargePV =
-    remainingAmount * coefficients.requiredCoeffWithLargePV + downPayment;
+  const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
 
   const summCreditWithoutPV =
     remainingAmount * coefficients.requiredCoeffWithoutPV +
