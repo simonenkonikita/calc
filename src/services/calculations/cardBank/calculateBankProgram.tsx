@@ -25,6 +25,7 @@ export const calculateBankProgram = (
   area: number,
 ): BankProgramResult => {
   const isFamilyOrIt = bankOffer.type === "family" || bankOffer.type === "it";
+
   const isSpecialMortgageMode =
     mortgageWithoutDownPayment || mortgagePartialDownPayment;
 
@@ -53,7 +54,9 @@ export const calculateBankProgram = (
     manualDownPayment,
     bankOffer,
     variables,
-    mortgageWithoutDownPayment: isSpecialMortgageMode,
+    isSpecialMortgageMode: isSpecialMortgageMode,
+    remainingAmount,
+    noSubsidyInflate,
   });
 
   // Собственные средства
@@ -64,16 +67,19 @@ export const calculateBankProgram = (
     ownFunds = calculateOwnFunds({
       objectCost,
       downPayment,
+      remainingAmount,
+      contractAmount,
       downPaymentAmount,
       userDownPaymentPercent,
       bankOffer,
       variables,
-      mortgageWithoutDownPayment: isSpecialMortgageMode,
+      isSpecialMortgageMode: isSpecialMortgageMode,
     });
   } else {
     // ОБЫЧНАЯ ИПОТЕКА (full, short) — простая формула
     ownFunds = isSpecialMortgageMode ? downPayment : downPaymentAmount;
   }
+
   // 5. Вносим за клиента
   let clientContribution: number;
 
@@ -100,11 +106,14 @@ export const calculateBankProgram = (
   const mortgageAmount = calculateMortgageAmount({
     objectCost,
     contractAmount,
+    downPayment,
+    remainingAmount,
     downPaymentAmount,
     userDownPaymentPercent,
     bankOffer,
     variables,
     isFamilyOrIt,
+    isSpecialMortgageMode,
   });
 
   // ✅ 4. Получаем актуальную ставку через getDynamicRate
@@ -154,13 +163,15 @@ export const calculateBankProgram = (
     developerAccount = calculateDeveloperAccount({
       objectCost,
       ownFunds,
+      downPayment,
+      remainingAmount,
       mortgageAmount,
       subsidyAmount,
       contractAmount,
       userDownPaymentPercent,
       bankOffer,
       variables,
-      mortgageWithoutDownPayment: isSpecialMortgageMode,
+      isSpecialMortgageMode: isSpecialMortgageMode,
       downPaymentAmount,
       noSubsidyInflate,
     });

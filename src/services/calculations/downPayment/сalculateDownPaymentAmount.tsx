@@ -12,12 +12,11 @@ interface DownPaymentAmountParams {
   manualDownPayment: number;
   bankOffer: BankOffer;
   variables: Variables;
-  mortgageWithoutDownPayment: boolean;
+  isSpecialMortgageMode: boolean;
+  remainingAmount: number;
+  noSubsidyInflate: boolean;
 }
 
-/**
- * Расчет суммы ПВ в зависимости от типа программы
- */
 export const calculateDownPaymentAmount = (
   params: DownPaymentAmountParams,
 ): number => {
@@ -29,7 +28,9 @@ export const calculateDownPaymentAmount = (
     manualDownPayment,
     bankOffer,
     variables,
-    mortgageWithoutDownPayment,
+    isSpecialMortgageMode,
+    remainingAmount,
+    noSubsidyInflate,
   } = params;
 
   const coefficients = calculateBankCoefficients(
@@ -37,77 +38,32 @@ export const calculateDownPaymentAmount = (
     userDownPaymentPercent,
   );
 
-  const contractAmountMinPV = contractAmount * (bankOffer.minPVPercent / 100);
-  const downPaymentFromContract =
-    contractAmount * (userDownPaymentPercent / 100);
-
-  const isFamilyOrIt = bankOffer.type === "family" || bankOffer.type === "it";
-
-  if (isFamilyOrIt) {
-    // ============================================================
-    // СЕМЕЙНАЯ ИЛИ ИТ ИПОТЕКА
-    // ============================================================
-    const limit =
-      bankOffer.type === "family"
-        ? variables.familyMortgageLimit
-        : variables.itMortgageLimit;
-
-    const minPVPercent = bankOffer.minPVPercent;
-    const summCredit =
-      (objectCost / coefficients.requiredCoeffWithMinPV) *
-      (1 - userDownPaymentPercent / 100);
-    const isWithinLimit = summCredit <= limit;
-
-    // ============================================================
-    // 1. СЕМЕЙНАЯ ИПОТЕКА
-    // ============================================================
-    if (bankOffer.type === "family") {
-      return calculateFamilyDownPayment({
-        objectCost,
-        downPayment,
-        contractAmount,
-        userDownPaymentPercent,
-        manualDownPayment,
-        mortgageWithoutDownPayment,
-        contractAmountMinPV,
-        downPaymentFromContract,
-        minPVPercent,
-        limit,
-        isWithinLimit,
-      });
-    }
-
-    // ============================================================
-    // 2. ИТ ИПОТЕКА
-    // ============================================================
-    /*  if (bankOffer.type === "it") {
-      return calculateItDownPayment({
-        objectCost,
-        downPayment,
-        contractAmount,
-        userDownPaymentPercent,
-        manualDownPayment,
-        mortgageWithoutDownPayment,
-        contractAmountMinPV,
-        downPaymentFromContract,
-        minPVPercent,
-        limit,
-        isWithinLimit,
-      });
-    } */
+  if (bankOffer.type === "family") {
+    return calculateFamilyDownPayment({
+      objectCost,
+      downPayment,
+      contractAmount,
+      userDownPaymentPercent,
+      manualDownPayment,
+      isSpecialMortgageMode,
+      coefficients,
+      variables,
+      bankOffer,
+      remainingAmount,
+      noSubsidyInflate,
+    });
   }
-
-  // ============================================================
-  // СТАНДАРТНЫЙ РАСЧЕТ (full, short)
-  // ============================================================
   return calculateStandardDownPayment({
     contractAmount,
-    contractAmountMinPV,
-    downPaymentFromContract,
     downPayment,
     manualDownPayment,
-    mortgageWithoutDownPayment,
+    isSpecialMortgageMode,
     userDownPaymentPercent,
     objectCost,
+    bankOffer,
   });
 };
+
+// ============================================================
+// СТАНДАРТНЫЙ РАСЧЕТ (full, short)
+// ============================================================

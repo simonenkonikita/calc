@@ -4,21 +4,25 @@ import { calculateBankCoefficients } from "../сoefficients/calculateBankCoeffic
 interface CalculateOwnFundsParams {
   objectCost: number; // $B$7
   downPayment: number; // $B$13 / J32 (введенный ПВ)
+  remainingAmount: number;
+  contractAmount: number;
   downPaymentAmount: number; // D32 (рассчитанная сумма ПВ)
   userDownPaymentPercent: number; // $B$8
   bankOffer: BankOffer;
   variables: Variables;
-  mortgageWithoutDownPayment: boolean; // $L$10
+  isSpecialMortgageMode: boolean; // $L$10
 }
 export const calculateOwnFunds = (params: CalculateOwnFundsParams): number => {
   const {
     objectCost,
     downPayment,
+    remainingAmount,
+    contractAmount,
     downPaymentAmount,
     userDownPaymentPercent,
     bankOffer,
     variables,
-    mortgageWithoutDownPayment,
+    isSpecialMortgageMode,
   } = params;
 
   const coefficients = calculateBankCoefficients(
@@ -27,23 +31,47 @@ export const calculateOwnFunds = (params: CalculateOwnFundsParams): number => {
   );
 
   const limit = variables.familyMortgageLimit;
-  const minPVPercent = coefficients.requiredCoeffWithMinPV; // Сбербанк!J16
+  const subsidyPercent = bankOffer.subsidyPercent;
 
-  const summCredit =
-    (objectCost / minPVPercent) * (1 - userDownPaymentPercent / 100);
-  const isWithinLimit = summCredit <= limit;
+  const cafsummCred = 1 - userDownPaymentPercent / 100;
+  const cafsummPV = userDownPaymentPercent / 100;
+  const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
+  const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
+
+  const downPaymentFromContract =
+    contractAmount * (userDownPaymentPercent / 100);
+
+  const contractAmountMinPV = contractAmount * (bankOffer.minPVPercent / 100);
+
+  const summCreditLargePV =
+    remainingAmount * coefficients.requiredCoeffWithLargePV + downPayment;
+
+  const summCreditWithoutPV =
+    remainingAmount * coefficients.requiredCoeffWithoutPV +
+    objectCost -
+    downPayment;
+
+  let summCredit: number;
+  let isWithinLimit: boolean;
+
+  if (isSpecialMortgageMode) {
+    summCredit = summCreditWithoutPV * cafsummCred;
+    isWithinLimit = summCredit <= limit;
+  } else {
+    summCredit = summCreditMinPV * cafsummCred;
+    isWithinLimit = summCredit <= limit;
+  }
 
   let ownFunds: number;
 
-  if (isWithinLimit) {
-    if (mortgageWithoutDownPayment) {
+  if (isSpecialMortgageMode) {
+    if (isWithinLimit) {
       ownFunds = downPayment;
     } else {
       ownFunds = downPaymentAmount;
     }
   } else {
     ownFunds = downPaymentAmount;
-    console.log(`"ownFunds"${ownFunds}`);
   }
 
   return Math.ceil(ownFunds);

@@ -4,11 +4,14 @@ import { calculateBankCoefficients } from "../сoefficients/calculateBankCoeffic
 interface CalculateMortgageAmountParams {
   objectCost: number; // $B$7
   contractAmount: number; // C32
+  downPayment: number;
+  remainingAmount: number;
   downPaymentAmount: number; // D32
   userDownPaymentPercent: number; // $B$8
   bankOffer: BankOffer;
   variables: Variables;
   isFamilyOrIt: boolean;
+  isSpecialMortgageMode: boolean;
 }
 
 export const calculateMortgageAmount = (
@@ -17,11 +20,14 @@ export const calculateMortgageAmount = (
   const {
     objectCost,
     contractAmount,
+    downPayment,
+    remainingAmount,
     downPaymentAmount,
     userDownPaymentPercent,
     bankOffer,
     variables,
     isFamilyOrIt,
+    isSpecialMortgageMode,
   } = params;
 
   // ============================================================
@@ -41,29 +47,41 @@ export const calculateMortgageAmount = (
     userDownPaymentPercent,
   );
 
-  // 2.2 Определяем лимит в зависимости от типа программы
-  const limit =
-    bankOffer.type === "family"
-      ? variables.familyMortgageLimit
-      : bankOffer.type === "it"
-        ? variables.itMortgageLimit
-        : variables.familyMortgageLimit; // fallback
+  const limit = variables.familyMortgageLimit;
+  const subsidyPercent = bankOffer.subsidyPercent;
 
-  const minPVPercent = coefficients.requiredCoeffWithMinPV; // Сбербанк!J16
+  const cafsummCred = 1 - userDownPaymentPercent / 100;
+  const cafsummPV = userDownPaymentPercent / 100;
+  const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
+  const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
 
-  // 2.3 Проверяем, вписываемся ли в лимит
-  // ($B$7/Сбербанк!J16)*(1-$B$8/100) <= Переменные!$B$1
-  const summCredit =
-    (objectCost / (minPVPercent / 100)) * (1 - userDownPaymentPercent / 100);
-  const isWithinLimit = summCredit <= limit;
+  const summCreditLargePV =
+    remainingAmount * coefficients.requiredCoeffWithLargePV + downPayment;
 
-  // 2.4 Расчет суммы ипотеки
-  // =ЕСЛИ(...; C32-D32; Переменные!$B$1)
-  if (isWithinLimit) {
-    // ВПИСЫВАЕМСЯ В ЛИМИТ → C32 - D32
-    return contractAmount - downPaymentAmount;
+  const summCreditWithoutPV =
+    remainingAmount * coefficients.requiredCoeffWithoutPV +
+    objectCost -
+    downPayment;
+
+  let summCredit: number;
+  let isWithinLimit: boolean;
+
+  if (isSpecialMortgageMode) {
+    summCredit = summCreditWithoutPV * cafsummCred;
+    isWithinLimit = summCredit <= limit;
   } else {
-    // НЕ ВПИСЫВАЕМСЯ В ЛИМИТ → лимит
-    return limit;
+    summCredit = summCreditMinPV * cafsummCred;
+    isWithinLimit = summCredit <= limit;
   }
+
+  let mortgageAmount: number;
+
+  if (isSpecialMortgageMode) {
+    if (isWithinLimit) {
+      mortgageAmount = contractAmount - downPaymentAmount;
+    } else {
+      mortgageAmount = limit;
+    }
+  }
+  return contractAmount - downPaymentAmount;
 };

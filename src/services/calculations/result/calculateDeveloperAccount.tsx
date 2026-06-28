@@ -4,13 +4,15 @@ import { calculateBankCoefficients } from "../сoefficients/calculateBankCoeffic
 interface CalculateDeveloperAccountParams {
   objectCost: number; // $B$7 / E32
   ownFunds: number; // $B$13 / J32
+  downPayment: number;
+  remainingAmount: number;
   mortgageAmount: number; // $B$14 / D32
   subsidyAmount: number; // C32
   contractAmount: number; // I32
   userDownPaymentPercent: number; // $B$8
   bankOffer: BankOffer;
   variables: Variables;
-  mortgageWithoutDownPayment: boolean; // $L$10
+  isSpecialMortgageMode: boolean; // $L$10
   downPaymentAmount: number;
   noSubsidyInflate: boolean;
 }
@@ -21,13 +23,15 @@ export const calculateDeveloperAccount = (
   const {
     objectCost,
     ownFunds,
+    downPayment,
+    remainingAmount,
     mortgageAmount,
     subsidyAmount,
     contractAmount,
     userDownPaymentPercent,
     bankOffer,
     variables,
-    mortgageWithoutDownPayment,
+    isSpecialMortgageMode,
     downPaymentAmount,
   } = params;
 
@@ -35,27 +39,47 @@ export const calculateDeveloperAccount = (
     bankOffer,
     userDownPaymentPercent,
   );
-
   const limit = variables.familyMortgageLimit;
-  const minPVPercent = coefficients.requiredCoeffWithMinPV;
+  const subsidyPercent = bankOffer.subsidyPercent;
 
-  const summCredit =
-    (objectCost / minPVPercent) * (1 - userDownPaymentPercent / 100);
-  const isWithinLimit = summCredit <= limit;
+  const cafsummCred = 1 - userDownPaymentPercent / 100;
+  const cafsummPV = userDownPaymentPercent / 100;
+  const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
+  const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
+
+  const summCreditLargePV =
+    remainingAmount * coefficients.requiredCoeffWithLargePV + downPayment;
+
+  const summCreditWithoutPV =
+    remainingAmount * coefficients.requiredCoeffWithoutPV +
+    objectCost -
+    downPayment;
+
+  let summCredit: number;
+  let isWithinLimit: boolean;
+
+  if (isSpecialMortgageMode) {
+    summCredit = summCreditWithoutPV * cafsummCred;
+    isWithinLimit = summCredit <= limit;
+  } else {
+    summCredit = summCreditMinPV * cafsummCred;
+    isWithinLimit = summCredit <= limit;
+  }
 
   let developerAccount: number;
 
-  if (isWithinLimit) {
-    if (mortgageWithoutDownPayment) {
+  if (isSpecialMortgageMode) {
+    if (isWithinLimit) {
       developerAccount = ownFunds + mortgageAmount - subsidyAmount;
     } else {
       developerAccount = contractAmount - subsidyAmount;
     }
   } else {
-    if (mortgageWithoutDownPayment) {
-      developerAccount = ownFunds + mortgageAmount - subsidyAmount;
+    if (isWithinLimit) {
+      developerAccount = contractAmount - subsidyAmount;
+      console.log(contractAmount, subsidyAmount);
     } else {
-      developerAccount = downPaymentAmount + mortgageAmount - subsidyAmount;
+      developerAccount = contractAmount - subsidyAmount;
     }
   }
   return Math.ceil(developerAccount);

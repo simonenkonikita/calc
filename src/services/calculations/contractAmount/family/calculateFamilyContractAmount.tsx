@@ -4,7 +4,7 @@ import {
   Variables,
 } from "../../../../utils/types";
 
-// ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ДЛЯ СЕМЕЙНОЙ/ИТ ==========
+// ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ДЛЯ СЕМЕЙНОЙ ==========
 export const calculateFamilyContractAmount = (
   objectCost: number,
   downPayment: number,
@@ -15,22 +15,16 @@ export const calculateFamilyContractAmount = (
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
-): number => {
-  const limit = variables.familyMortgageLimit; // Переменные!$B$1
-  const subsidyPercent = bankOffer.subsidyPercent; // Сбербанк!E16
-  // ============================================================
-  // 1. ПРОВЕРКА: ВПИСЫВАЕТСЯ ЛИ В ЛИМИТ
-  // ============================================================
+): number | null => {
+  // 🔥 Меняем тип возврата, так как может быть null
+  const limit = variables.familyMortgageLimit;
+  const subsidyPercent = bankOffer.subsidyPercent;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
   const cafsummPV = userDownPaymentPercent / 100;
-
   const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
 
-  // ============================================================
-  // 2. ПРОВЕРКА: ВПИСЫВАЕТСЯ ЛИ В ЛИМИТ
-  // ============================================================
   const summCreditLargePV =
     remainingAmount * coefficients.requiredCoeffWithLargePV + downPayment;
 
@@ -38,11 +32,6 @@ export const calculateFamilyContractAmount = (
     remainingAmount * coefficients.requiredCoeffWithoutPV +
     objectCost -
     downPayment;
-
-  /*   const summPVWithoutPV =
-    remainingAmount * coefficients.requiredCoeffWithoutPV +
-    objectCost -
-    downPayment; */
 
   let summCredit: number;
   let isWithinLimit: boolean;
@@ -55,25 +44,33 @@ export const calculateFamilyContractAmount = (
     isWithinLimit = summCredit <= limit;
   }
 
-  let contractAmount: number;
-
   const isThresholdCondition =
     isSpecialMortgageMode && downPayment < summCreditWithoutPV * cafsummPV;
 
+  let contractAmount: number;
+
   if (isThresholdCondition) {
-    if (isWithinLimit) {
+    if (noSubsidyInflate) {
+      contractAmount = Math.ceil((objectCost - downPayment) / 0.799);
+    } else if (isWithinLimit) {
       contractAmount = summCreditWithoutPV;
     } else {
-      contractAmount = (objectCost + limit * (subsidyPercent / 100)) / 0.799;
+      return null;
     }
   } else {
-    if (isWithinLimit) {
+    if (noSubsidyInflate) {
+      contractAmount = Math.ceil(objectCost);
+    } else if (isWithinLimit) {
       if (downPayment <= userDesiredDownPayment) {
-        contractAmount = summCreditMinPV;
+        contractAmount = objectCost / coefficients.requiredCoeffWithMinPV;
       } else {
-        contractAmount = summCreditLargePV;
+        contractAmount =
+          remainingAmount / coefficients.requiredCoeffWithLargePV + downPayment;
       }
+    } else {
+      contractAmount = objectCost + limit * (subsidyPercent / 100);
     }
   }
+
   return Math.ceil(contractAmount);
 };
