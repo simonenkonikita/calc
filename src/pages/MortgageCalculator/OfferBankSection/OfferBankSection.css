@@ -442,6 +442,31 @@
   transform: scale(0.97);
 }
 
+/* 🔥 Кнопка печати с теми же стилями */
+.floating-bar-content .print-selected-btn {
+  padding: 0.4rem 1.5rem;
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.floating-bar-content .print-selected-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.floating-bar-content .print-selected-btn:active {
+  transform: scale(0.97);
+}
+
 /* Адаптив для мобильных */
 @media (max-width: 768px) {
   .banks-header-wrapper {

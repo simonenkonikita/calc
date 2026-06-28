@@ -33,7 +33,6 @@ export const calculateFamilyDownPayment = (
     variables,
     bankOffer,
     remainingAmount,
-    noSubsidyInflate,
   } = params;
 
   // 🔥 ОПРЕДЕЛЯЕМ ЛИМИТ ПО ФЛАГУ excessLimit
@@ -70,37 +69,33 @@ export const calculateFamilyDownPayment = (
   const isThresholdCondition =
     isSpecialMortgageMode && downPayment < summCreditWithoutPV * cafsummPV;
 
-  // Ранний возврат для особого случая
-  if (isThresholdCondition && noSubsidyInflate) {
-    return Math.ceil((objectCost - downPayment) / 0.799);
-  }
+  let downPaymentAmount: number;
 
-  // Вспомогательная функция для расчета ПВ
-  const calculateDownPayment = (): number => {
-    // Если есть ручной ПВ
+  // Если есть ручной ПВ
+  if (isThresholdCondition) {
     if (manualDownPayment > 0) {
       if (isWithinLimit) {
-        return Math.max(manualDownPayment, contractAmountMinPV);
+        downPaymentAmount = Math.max(manualDownPayment, contractAmountMinPV);
       } else {
-        return Math.max(manualDownPayment, contractAmount - limit);
+        downPaymentAmount = Math.max(manualDownPayment, contractAmount - limit);
+      }
+    } else {
+      if (isWithinLimit) {
+        downPaymentAmount = downPaymentFromContract;
+      } else {
+        downPaymentAmount = contractAmount - limit;
       }
     }
-
-    // Автоматический ПВ
-    if (!isWithinLimit) {
-      return contractAmount - limit;
+  } else {
+    if (isWithinLimit) {
+      if (downPayment < userDesiredDownPayment) {
+        return downPaymentFromContract;
+      }
+      return downPayment >= downPaymentFromContract
+        ? downPayment
+        : downPaymentFromContract;
     }
-
-    if (downPayment < userDesiredDownPayment) {
-      return downPaymentFromContract;
-    }
-
-    return downPayment >= downPaymentFromContract
-      ? downPayment
-      : downPaymentFromContract;
-  };
-
-  const downPaymentAmount = calculateDownPayment();
-
+    downPaymentAmount = Math.max(manualDownPayment, contractAmount - limit);
+  }
   return Math.ceil(downPaymentAmount);
 };

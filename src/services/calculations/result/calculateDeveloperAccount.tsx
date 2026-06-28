@@ -39,8 +39,8 @@ export const calculateDeveloperAccount = (
     userDownPaymentPercent,
   );
   const limit = bankOffer.excessLimit
-    ? variables.maxFamilyMortgageSum || 15000000 // Если excessLimit true → 15 млн
-    : variables.familyMortgageLimit || 6000000; // Иначе → 6 млн
+    ? variables.maxFamilyMortgageSum || 15000000
+    : variables.familyMortgageLimit || 6000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
   const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
@@ -72,7 +72,6 @@ export const calculateDeveloperAccount = (
   } else {
     if (isWithinLimit) {
       developerAccount = contractAmount - subsidyAmount;
-      console.log(contractAmount, subsidyAmount);
     } else {
       developerAccount = contractAmount - subsidyAmount;
     }

@@ -1,4 +1,3 @@
-// src/hooks/payment/downPayment/addContractAmount/Family/calculateFamilyContractAmount.ts
 import {
   BankCoefficients,
   BankOffer,
@@ -17,7 +16,7 @@ export const calculateFamilyContractAmount = (
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
 ): number | null => {
-  // 🔥 ОПРЕДЕЛЯЕМ ЛИМИТ ПО ФЛАГУ excessLimit
+  // 🔥 Меняем тип возврата, так как может быть null
   const limit = bankOffer.excessLimit
     ? variables.maxFamilyMortgageSum || 15000000 // Если excessLimit true → 15 млн
     : variables.familyMortgageLimit || 6000000; // Иначе → 6 млн
@@ -28,9 +27,6 @@ export const calculateFamilyContractAmount = (
   const cafsummPV = userDownPaymentPercent / 100;
   const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
-
-  const summCreditLargePV =
-    remainingAmount * coefficients.requiredCoeffWithLargePV + downPayment;
 
   const summCreditWithoutPV =
     remainingAmount * coefficients.requiredCoeffWithoutPV +
@@ -51,25 +47,27 @@ export const calculateFamilyContractAmount = (
   const isThresholdCondition =
     isSpecialMortgageMode && downPayment < summCreditWithoutPV * cafsummPV;
 
-  // Ранний возврат: если ипотека без ПВ невозможна
-  if (isThresholdCondition && !isWithinLimit) {
-    return null;
-  }
-
-  // Ранний возврат: если не завышаем на субсидию
-  if (noSubsidyInflate) {
-    if (isThresholdCondition) {
-      return Math.ceil((objectCost - downPayment) / 0.799);
-    }
-    return Math.ceil(objectCost);
-  }
+  const baseContractAmount = objectCost + limit * (subsidyPercent / 100);
+  const subsidyRate = subsidyPercent / 100;
 
   let contractAmount: number;
 
   if (isThresholdCondition) {
-    contractAmount = summCreditWithoutPV;
+    if (noSubsidyInflate) {
+      if (isWithinLimit) {
+        contractAmount = Math.ceil((objectCost - downPayment) / 0.799);
+      } else {
+        return null;
+      }
+    } else if (isWithinLimit) {
+      contractAmount = summCreditWithoutPV;
+    } else {
+      return null;
+    }
   } else {
-    if (isWithinLimit) {
+    if (noSubsidyInflate) {
+      contractAmount = Math.ceil(objectCost);
+    } else if (isWithinLimit) {
       if (downPayment <= userDesiredDownPayment) {
         contractAmount = objectCost / coefficients.requiredCoeffWithMinPV;
       } else {
@@ -77,7 +75,14 @@ export const calculateFamilyContractAmount = (
           remainingAmount / coefficients.requiredCoeffWithLargePV + downPayment;
       }
     } else {
-      contractAmount = objectCost + limit * (subsidyPercent / 100);
+      if (downPayment <= userDesiredDownPayment) {
+        contractAmount = objectCost + limit * (subsidyPercent / 100);
+      } else if (downPayment > baseContractAmount - limit) {
+        contractAmount =
+          (objectCost - downPayment * subsidyRate) / (1 - subsidyRate);
+      } else {
+        contractAmount = baseContractAmount;
+      }
     }
   }
 

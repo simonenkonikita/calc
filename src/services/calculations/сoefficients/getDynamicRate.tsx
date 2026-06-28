@@ -163,7 +163,6 @@ export const isDynamicRate = (bankOffer: BankOffer): boolean => {
 export const getAllPossibleRates = (
   bankOffer: BankOffer,
   pvPercent: number = 20.1,
-  loanTerm: number = 30,
 ): { amount: number; rate: number; description?: string }[] => {
   if (!bankOffer.dynamicRates || bankOffer.dynamicRates.length === 0) {
     return [];

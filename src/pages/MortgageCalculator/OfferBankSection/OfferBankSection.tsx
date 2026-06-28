@@ -8,11 +8,15 @@ import "./BankCardBadge.css";
 import {
   BANK_ORDER,
   CATEGORY_ORDER,
+  MIN_EXCESS_MORTGAGE_AMOUNT_SBER,
   PROGRAM_TYPE_LABELS,
 } from "../../../utils/constants";
+
+import { getBadge } from "../../../utils/getBadge";
 import { formatOfferToText } from "../../../utils/formatOfferToText";
 import { safeFormatMoney } from "../../../utils/formatMoney";
-import { getBadge } from "../../../utils/getBadge";
+import { getExcessBadge } from "../../../utils/getExcessBadge";
+import { printSelectedOffers } from "../../../utils/printSelectedOffers";
 
 // Функция для определения категории программы
 const getProgramCategory = (offer: BankProgramResultWithIndex): string => {
@@ -324,6 +328,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                             offer.monthlyPaymentAfter !== null;
 
                           const badge = getBadge(offer);
+                          const excessBadge = getExcessBadge(offer);
 
                           return (
                             <div
@@ -335,13 +340,28 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                 handleCardClick(offer._originalIndex)
                               }
                             >
-                              {/* ✅ Шильдик поверх карточки (правый верхний угол) */}
-                              {badge && (
-                                <div className="bank-card-badge badge-promo">
-                                  <span className="badge-icon">🎯</span>
-                                  <span className="badge-text">{badge}</span>
-                                </div>
-                              )}
+                              {/* Контейнер для шильдиков */}
+                              <div className="bank-card-badges">
+                                {/* Промо шильдик */}
+                                {badge && (
+                                  <div className="bank-card-badge badge-promo">
+                                    <span className="badge-icon">🎯</span>
+                                    <span className="badge-text">{badge}</span>
+                                  </div>
+                                )}
+
+                                {/* Сверхлимит шильдик */}
+                                {excessBadge && (
+                                  <div className="bank-card-badge badge-excess">
+                                    <span className="badge-icon">🎯</span>
+                                    <span className="badge-text">
+                                      Сверхлимит / сумма ипотеки от{" "}
+                                      {MIN_EXCESS_MORTGAGE_AMOUNT_SBER.toLocaleString()}{" "}
+                                      ₽
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
 
                               <div className="bank-card-header">
                                 <div className="bank-info">
@@ -521,6 +541,23 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
             </button>
             <button className="copy-selected-btn" onClick={copySelectedOffers}>
               {copySuccess ? "✅ Скопировано!" : "📋 Копировать выбранные"}
+            </button>
+            <button
+              className="print-selected-btn"
+              onClick={() =>
+                printSelectedOffers({
+                  selectedCards,
+                  filteredBankResults,
+                  complexName,
+                  area,
+                  formatMoney,
+                  showOverstatement,
+                  isSpecialMortgageMode,
+                  loanTermYears,
+                })
+              }
+            >
+              🖨️ Печать
             </button>
           </div>
         </div>

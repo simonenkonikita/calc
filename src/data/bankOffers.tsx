@@ -1,4 +1,3 @@
-import { getSberbankFamilyExcessRate } from "../services/calculations/сoefficients/sberbankFamilyExcessRates";
 import { BankOffer } from "../utils/types";
 
 // Базовые ставки
@@ -7,6 +6,8 @@ const baseRateAlfa = 17.99;
 const baseRateSovkom = 19.99;
 const baseRateVTB = 19.9;
 const baseRateUralsib = 18.19;
+const baseRateDomRF = 17.3;
+
 // ПВ
 const minPVPercent = 20.1;
 
@@ -297,7 +298,7 @@ export const bankOffers: BankOffer[] = [
   },
 
   // ИТ ипотека
-  {
+  /* {
     bank: "Сбербанк",
     program: "ИТ базовая",
     type: "it",
@@ -321,7 +322,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: minPVPercent,
     excessLimit: true,
-  },
+  }, */
 
   // ==================== АЛЬФА-БАНК ====================
   {
@@ -573,6 +574,45 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 19.9,
     minPVPercent: minPVPercent,
     durationMonths: 36,
+    subsidyCalculationMethod: "standard",
+  },
+  // ==================== ДОМ.РФ БАНК ====================
+  {
+    bank: "Дом.РФ Банк",
+    program: "Базовая",
+    type: "full",
+    rate: baseRateDomRF, // 17.3%
+    subsidyPercent: 0,
+    minPVPercent: minPVPercent,
+  },
+  {
+    bank: "Дом.РФ Банк",
+    program: "11.9% на весь срок",
+    type: "full",
+    rate: 11.9,
+    subsidyPercent: 15.46,
+    minPVPercent: minPVPercent,
+  },
+  {
+    bank: "Дом.РФ Банк",
+    program: "0.1% на 12 мес",
+    type: "short",
+    rate: baseRateDomRF,
+    shortRate: 0.1,
+    subsidyPercent: 16.31,
+    minPVPercent: minPVPercent,
+    durationMonths: 12,
+    subsidyCalculationMethod: "standard",
+  },
+  {
+    bank: "Дом.РФ Банк",
+    program: "2.8% на 24 мес",
+    type: "short",
+    rate: baseRateDomRF,
+    shortRate: 2.8,
+    subsidyPercent: 23.66,
+    minPVPercent: minPVPercent,
+    durationMonths: 24,
     subsidyCalculationMethod: "standard",
   },
 ];
