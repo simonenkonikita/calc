@@ -5,6 +5,7 @@ import type {
 } from "../../../utils/types";
 import "./OfferBankSection.css";
 import "./BankCardBadge.css";
+import "./BankExcessWarning.css";
 import {
   BANK_ORDER,
   CATEGORY_ORDER,
@@ -524,6 +525,26 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                   Сверхлимит: {formatMoney(offer.excessLimit)}
                                 </div>
                               )}
+
+                              {/* Показываем предупреждение поверх карточки */}
+                              {offer.type === "family" &&
+                                offer.isLimitExceeded && (
+                                  <div className="bank-excess-warning-overlay">
+                                    <div className="excess-overlay-title">
+                                      Превышение лимита семейной ипотеки
+                                    </div>
+                                    <div className="excess-overlay-amount">
+                                      {formatMoney(0)}
+                                    </div>
+                                    <div className="excess-overlay-hint">
+                                      Добавьте{" "}
+                                      <strong>собственные средства</strong>{" "}
+                                      клиента
+                                      <br />
+                                      или уменьшите стоимость выбранного объекта
+                                    </div>
+                                  </div>
+                                )}
                             </div>
                           );
                         })}

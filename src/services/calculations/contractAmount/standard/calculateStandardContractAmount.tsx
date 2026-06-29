@@ -2,6 +2,7 @@ import {
   BankOffer,
   Variables,
   BankCoefficients,
+  ContractAmountResult,
 } from "../../../../utils/types";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ==========
@@ -15,12 +16,15 @@ export const calculateStandardContractAmount = (
   noSubsidyInflate: boolean,
   mortgageWithoutDownPayment: boolean,
   coefficients: BankCoefficients,
-): number => {
+): ContractAmountResult => {
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
 
   // 1. НЕ ЗАВЫШАТЬ НА СУБСИДИЮ
   if (noSubsidyInflate && !mortgageWithoutDownPayment) {
-    return Math.ceil(objectCost);
+    return {
+      contractAmount: Math.ceil(objectCost),
+      isLimitExceeded: false,
+    };
   }
 
   // 2. ИПОТЕКА БЕЗ ПВ
@@ -33,13 +37,19 @@ export const calculateStandardContractAmount = (
 
     if (downPayment < threshold) {
       if (noSubsidyInflate && mortgageWithoutDownPayment) {
-        return Math.ceil((objectCost - downPayment) / 0.799);
+        return {
+          contractAmount: Math.ceil((objectCost - downPayment) / 0.799),
+          isLimitExceeded: false,
+        };
       } else {
-        return Math.ceil(
-          remainingAmount * coefficients.requiredCoeffWithoutPV +
-            objectCost -
-            downPayment,
-        );
+        return {
+          contractAmount: Math.ceil(
+            remainingAmount * coefficients.requiredCoeffWithoutPV +
+              objectCost -
+              downPayment,
+          ),
+          isLimitExceeded: false,
+        };
       }
     }
   }
@@ -56,5 +66,8 @@ export const calculateStandardContractAmount = (
       remainingAmount / coefficients.requiredCoeffWithLargePV + downPayment;
   }
 
-  return Math.ceil(contractAmount);
+  return {
+    contractAmount: Math.ceil(contractAmount),
+    isLimitExceeded: false,
+  };
 };

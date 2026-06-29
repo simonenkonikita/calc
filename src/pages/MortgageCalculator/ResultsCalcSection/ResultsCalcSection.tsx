@@ -6,13 +6,16 @@ interface ResultsCalcSectionProps {
   objectResult: ObjectCalculationResult;
   formatMoney: (amount: number) => string;
   isManualCost?: boolean;
+  area: number;
 }
 
 export const ResultsCalcSection: React.FC<ResultsCalcSectionProps> = ({
   objectResult,
   formatMoney,
-  isManualCost = false,
+  area = 0,
 }) => {
+  const calculatedPricePerM2 = area > 0 ? objectResult.objectCost / area : null;
+
   return (
     <div className="results-section">
       <div className="object-cost-block">
@@ -33,13 +36,12 @@ export const ResultsCalcSection: React.FC<ResultsCalcSectionProps> = ({
             <strong>Ипотека:</strong>{" "}
             {formatMoney(objectResult.remainingAmount)}
           </div>
-          {/* Показываем цену за м² только если НЕ ручной ввод */}
-          {!isManualCost && (
-            <div>
-              <strong>Цена за м²:</strong>{" "}
-              {formatMoney(objectResult.pricePerSquareMeter)}
-            </div>
-          )}
+          <div>
+            <strong>Цена за м²:</strong>{" "}
+            {calculatedPricePerM2 !== null && calculatedPricePerM2 > 0
+              ? formatMoney(calculatedPricePerM2)
+              : "—"}
+          </div>
         </div>
       </div>
     </div>

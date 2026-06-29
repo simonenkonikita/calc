@@ -30,7 +30,7 @@ export const calculateBankProgram = (
     mortgageWithoutDownPayment || mortgagePartialDownPayment;
 
   // 1. Расчет суммы в договоре (завышение)
-  const contractAmount = calculateContractAmount(
+  const contractResult = calculateContractAmount(
     objectCost,
     downPayment,
     remainingAmount,
@@ -41,6 +41,9 @@ export const calculateBankProgram = (
     noSubsidyInflate,
     isSpecialMortgageMode,
   );
+
+  const contractAmount = contractResult.contractAmount;
+  const isLimitExceeded = contractResult.isLimitExceeded;
 
   // 2. Завышение
   const overstatement = contractAmount - objectCost;
@@ -247,5 +250,6 @@ export const calculateBankProgram = (
     monthlyPaymentAfter: monthlyPaymentAfter
       ? Math.ceil(monthlyPaymentAfter)
       : undefined,
+    isLimitExceeded: isLimitExceeded,
   };
 };

@@ -123,6 +123,7 @@ export interface BankProgramResult {
   remainingDebt?: number; // Остаток долга после субсидирования
   subsidyPercent: number;
   pricePerM2: number | null;
+  isLimitExceeded?: boolean;
 }
 
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========
@@ -133,6 +134,11 @@ export interface CalculatorResult {
     pricePerSquareMeter: number;
   };
   bankResults: BankProgramResult[];
+}
+
+export interface ContractAmountResult {
+  contractAmount: number;
+  isLimitExceeded: boolean;
 }
 
 // ========== КОЭФФИЦИЕНТЫ БАНКОВ (для внутренних расчетов) ==========

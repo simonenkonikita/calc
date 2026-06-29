@@ -1,4 +1,8 @@
-import { BankOffer, Variables } from "../../../utils/types";
+import {
+  BankOffer,
+  ContractAmountResult,
+  Variables,
+} from "../../../utils/types";
 import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
 import { calculateFamilyContractAmount } from "./family/calculateFamilyContractAmount";
 import { calculateStandardContractAmount } from "./standard/calculateStandardContractAmount";
@@ -14,7 +18,7 @@ export const calculateContractAmount = (
   variables: Variables,
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,
-): number => {
+): ContractAmountResult => {
   const coefficients = calculateBankCoefficients(
     bankOffer,
     userDownPaymentPercent,
