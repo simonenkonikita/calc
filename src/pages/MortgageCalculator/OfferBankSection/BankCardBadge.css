@@ -1,31 +1,66 @@
+/* BankCardBadge.css */
+
 .bank-card {
-  position: relative; /* ← Важно! Для позиционирования бейджа */
-  overflow: visible; /* ← Чтобы бейдж не обрезался */
+  position: relative;
+  overflow: visible;
 }
 
-/* Бейдж поверх карточки */
-.bank-card-badge {
+.bank-card-badges {
   position: absolute;
   top: -12px;
   left: -6px;
+  right: -6px; /* 🔥 Растягиваем вправо */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   z-index: 10;
+  width: calc(100% + 12px); /* 🔥 На всю ширину + выступы */
+}
+
+.bank-card-badge {
   display: flex;
   align-items: center;
+  justify-content: center; /* 🔥 Центрируем содержимое */
   gap: 0.4rem;
   padding: 0.35rem 0.8rem;
-  border-radius: 0.7rem;
   font-size: 0.7rem;
   font-weight: 700;
   line-height: 1.4;
   white-space: nowrap;
-  max-width: 90%;
   cursor: default;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  width: 100%; /* 🔥 На всю ширину */
 }
 
-/* 🟢 Зеленый - промо/акция */
+/* Первый шильдик - скругление сверху */
+.bank-card-badge:first-child {
+  border-top-left-radius: 0.7rem;
+  border-top-right-radius: 0.7rem;
+}
+
+/* Последний шильдик - скругление снизу */
+.bank-card-badge:last-child {
+  border-bottom-left-radius: 0.7rem;
+  border-bottom-right-radius: 0.7rem;
+}
+
+/* Если только один шильдик */
+.bank-card-badge:only-child {
+  border-radius: 0.7rem;
+}
+
 .bank-card-badge.badge-promo {
   background: #16a34a;
+  color: #ffffff;
+}
+
+.bank-card-badge.badge-excess {
+  background: #7c4dff;
+  color: #ffffff;
+}
+
+.bank-card-badge.badge-term {
+  background: #ff0000;
   color: #ffffff;
 }

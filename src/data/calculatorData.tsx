@@ -47,6 +47,21 @@ export const housingPrices: HousingComplexPrice[] = [
     pricePerSquareMeter: 474000,
   },
   {
+    complexName: "ЖК Два адмирала",
+    apartmentType: "Студия",
+    pricePerSquareMeter: 200000,
+  },
+  {
+    complexName: "ЖК Два адмирала",
+    apartmentType: "Однокомнатная квартира",
+    pricePerSquareMeter: 200000,
+  },
+  {
+    complexName: "ЖК Два адмирала",
+    apartmentType: "Двухкомнатная квартира",
+    pricePerSquareMeter: 200000,
+  },
+  {
     complexName: "ГК Море тут",
     apartmentType: "Однокомнатные номера",
     pricePerSquareMeter: 270000,

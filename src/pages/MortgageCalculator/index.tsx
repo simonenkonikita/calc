@@ -16,10 +16,6 @@ export const MortgageCalculator: React.FC = () => {
     formatMoney,
   } = useMortgageCalculator();
 
-  // Проверяем, заполнен ли ручной ввод стоимости объекта
-  const isManualCost =
-    formData.manualObjectCost !== null && formData.manualObjectCost > 0;
-
   return (
     <div className="mortgage-calculator-page">
       <h1>Ипотечный калькулятор</h1>
@@ -33,7 +29,7 @@ export const MortgageCalculator: React.FC = () => {
               <ResultsCalcSection
                 objectResult={results.objectResult}
                 formatMoney={formatMoney}
-                isManualCost={isManualCost}
+                area={formData.area}
               />
             </div>
           )}

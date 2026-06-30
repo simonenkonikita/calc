@@ -5,14 +5,21 @@ import type {
 } from "../../../utils/types";
 import "./OfferBankSection.css";
 import "./BankCardBadge.css";
+import "./BankExcessWarning.css";
 import {
   BANK_ORDER,
   CATEGORY_ORDER,
+  MIN_EXCESS_MORTGAGE_AMOUNT_SBER,
   PROGRAM_TYPE_LABELS,
 } from "../../../utils/constants";
-import { formatOfferToText } from "../../../hooks/addHooks/formatOfferToText";
-import { safeFormatMoney } from "../../../hooks/addHooks/formatMoney";
-import { getBadge } from "../../../utils/getBadge";
+
+import { getBadge } from "../../../utils/badge/getBadge";
+import { formatOfferToText } from "../../../utils/formatOfferToText";
+import { safeFormatMoney } from "../../../utils/formatMoney";
+import { getExcessBadge } from "../../../utils/badge/getExcessBadge";
+
+import { printSelectedOffers } from "../../../utils/printSelectedOffers";
+import { getTermYearsBadge } from "../../../utils/badge/getTermYearsBadge";
 
 // Функция для определения категории программы
 const getProgramCategory = (offer: BankProgramResultWithIndex): string => {
@@ -324,6 +331,8 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                             offer.monthlyPaymentAfter !== null;
 
                           const badge = getBadge(offer);
+                          const excessBadge = getExcessBadge(offer);
+                          const termBadge = getTermYearsBadge(offer);
 
                           return (
                             <div
@@ -335,13 +344,36 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                 handleCardClick(offer._originalIndex)
                               }
                             >
-                              {/* ✅ Шильдик поверх карточки (правый верхний угол) */}
-                              {badge && (
-                                <div className="bank-card-badge badge-promo">
-                                  <span className="badge-icon">🎯</span>
-                                  <span className="badge-text">{badge}</span>
-                                </div>
-                              )}
+                              {/* Контейнер для шильдиков */}
+                              <div className="bank-card-badges">
+                                {/* Промо шильдик */}
+                                {badge && (
+                                  <div className="bank-card-badge badge-promo">
+                                    <span className="badge-icon">🎯</span>
+                                    <span className="badge-text">{badge}</span>
+                                  </div>
+                                )}
+
+                                {/* Сверхлимит шильдик */}
+                                {excessBadge && (
+                                  <div className="bank-card-badge badge-excess">
+                                    <span className="badge-icon">⚡</span>
+                                    <span className="badge-text">
+                                      Сверхлимит / сумма ипотеки от{" "}
+                                      {MIN_EXCESS_MORTGAGE_AMOUNT_SBER.toLocaleString()}{" "}
+                                      ₽
+                                    </span>
+                                  </div>
+                                )}
+                                {termBadge && (
+                                  <div className="bank-card-badge badge-term">
+                                    <span className="badge-icon">⏰</span>
+                                    <span className="badge-text">
+                                      Максимальный срок ипотеки 20 лет
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
 
                               <div className="bank-card-header">
                                 <div className="bank-info">
@@ -493,6 +525,26 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                   Сверхлимит: {formatMoney(offer.excessLimit)}
                                 </div>
                               )}
+
+                              {/* Показываем предупреждение поверх карточки */}
+                              {offer.type === "family" &&
+                                offer.isLimitExceeded && (
+                                  <div className="bank-excess-warning-overlay">
+                                    <div className="excess-overlay-title">
+                                      Превышение лимита семейной ипотеки
+                                    </div>
+                                    <div className="excess-overlay-amount">
+                                      {formatMoney(0)}
+                                    </div>
+                                    <div className="excess-overlay-hint">
+                                      Добавьте{" "}
+                                      <strong>собственные средства</strong>{" "}
+                                      клиента
+                                      <br />
+                                      или уменьшите стоимость выбранного объекта
+                                    </div>
+                                  </div>
+                                )}
                             </div>
                           );
                         })}
@@ -521,6 +573,23 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
             </button>
             <button className="copy-selected-btn" onClick={copySelectedOffers}>
               {copySuccess ? "✅ Скопировано!" : "📋 Копировать выбранные"}
+            </button>
+            <button
+              className="print-selected-btn"
+              onClick={() =>
+                printSelectedOffers({
+                  selectedCards,
+                  filteredBankResults,
+                  complexName,
+                  area,
+                  formatMoney,
+                  showOverstatement,
+                  isSpecialMortgageMode,
+                  loanTermYears,
+                })
+              }
+            >
+              🖨️ Печать
             </button>
           </div>
         </div>

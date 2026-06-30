@@ -8,8 +8,8 @@ import type {
 import { bankOffers } from "../data/bankOffers";
 import { housingPrices } from "../data/calculatorData";
 import { variables } from "../data/limitdDate";
-import { calculateFullMortgage } from "./resultForm/calculateFullMortgage";
-import { formatMoney } from "./addHooks/formatMoney";
+import { calculateFullMortgage } from "../services/calculations/result/calculateFullMortgage";
+import { formatMoney } from "../utils/formatMoney";
 import {
   DEFAULT_LOAN_TERM_YEARS,
   DEFAULT_MIN_PV_PERCENT,
@@ -176,9 +176,6 @@ export const useMortgageCalculator = () => {
           newData.downPaymentPercent = DEFAULT_MIN_PV_PERCENT;
           // Если включена ипотека без ПВ, отключаем частичный ПВ
           newData.mortgagePartialDownPayment = false;
-          console.log(
-            `🏷️ Ипотека без ПВ - ПВ сброшен до ${DEFAULT_MIN_PV_PERCENT}%`,
-          );
         }
 
         // ✅ Если включена "Ипотека с частичным ПВ"
@@ -186,9 +183,6 @@ export const useMortgageCalculator = () => {
           newData.downPaymentPercent = DEFAULT_MIN_PV_PERCENT;
           // Если включен частичный ПВ, отключаем ипотеку без ПВ
           newData.mortgageWithoutDownPayment = false;
-          console.log(
-            `🏷️ Ипотека с частичным ПВ - ПВ сброшен до ${DEFAULT_MIN_PV_PERCENT}%`,
-          );
         }
 
         // ✅ Если поле downPaymentPercent изменяется вручную, но включена "Ипотека без ПВ" или "Частичный ПВ" - отменяем изменение
@@ -215,9 +209,6 @@ export const useMortgageCalculator = () => {
             ...newData,
             downPaymentPercent: DEFAULT_MIN_PV_PERCENT,
           };
-          console.log(
-            `✏️ Ручной ввод ПВ (${value} ₽) - ПВ в % сброшен до ${DEFAULT_MIN_PV_PERCENT}%`,
-          );
         }
 
         return newData;
