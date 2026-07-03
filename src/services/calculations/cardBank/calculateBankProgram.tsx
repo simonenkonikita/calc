@@ -6,7 +6,10 @@ import { calculateOwnFunds } from "../result/calculateOwnFunds";
 import { calculateDeveloperAccount } from "../result/calculateDeveloperAccount";
 import { calculateDownPaymentAmount } from "../downPayment/сalculateDownPaymentAmount";
 import { getDynamicRate } from "../сoefficients/getDynamicRate";
-import { calculateMonthlyPayment } from "../payment/calculateMonthlyPayment";
+import {
+  calculateMonthlyPayment,
+  calculateTwoContractsMonthlyPayment,
+} from "../payment/calculateMonthlyPayment";
 import { calculateSubsidyPayments } from "../payment/subsidy/calculateSubsidyPayments";
 
 // ========== РАСЧЕТ ВСЕХ ПАРАМЕТРОВ ПО БАНКОВСКОЙ ПРОГРАММЕ ==========
@@ -203,8 +206,15 @@ export const calculateBankProgram = (
   const isShortSubsidy = bankOffer.type === "short" && bankOffer.durationMonths;
   const method = bankOffer.subsidyCalculationMethod || "standard";
 
+  const isTwoContracts =
+    bankOffer.type === "family" && bankOffer.isTwoContracts;
+
   let monthlyPayment: number;
   let monthlyPaymentAfter: number | null = null;
+
+  let firstContractPayment: number = 0;
+  let secondContractPayment: number = 0;
+  let totalMonthlyPayment: number = 0;
 
   if (isShortSubsidy && bankOffer.shortRate !== undefined) {
     const result = calculateSubsidyPayments(
@@ -217,6 +227,19 @@ export const calculateBankProgram = (
     );
     monthlyPayment = result.monthlyPaymentSubsidy;
     monthlyPaymentAfter = result.monthlyPaymentAfter;
+  } else if (isTwoContracts && bankOffer.twoRate !== undefined) {
+    // Используем новую функцию для расчета двух договоров
+    const result = calculateTwoContractsMonthlyPayment(
+      mortgageAmount,
+      bankOffer.twoRate,
+      actualRate,
+      loanTermMonths,
+    );
+
+    firstContractPayment = result.firstContractPayment;
+    secondContractPayment = result.secondContractPayment;
+    totalMonthlyPayment = result.totalMonthlyPayment;
+    monthlyPayment = totalMonthlyPayment;
   } else {
     monthlyPayment = calculateMonthlyPayment(
       mortgageAmount,
@@ -230,11 +253,16 @@ export const calculateBankProgram = (
     program: bankOffer.program,
     type: bankOffer.type,
     rate: actualRate,
+    twoRate: bankOffer.twoRate,
+    isTwoContracts: isTwoContracts,
     shortRate: bankOffer.shortRate,
     subsidyPercent: bankOffer.subsidyPercent,
     durationMonths:
       bankOffer.type === "short" ? bankOffer.durationMonths : loanTermMonths,
     monthlyPayment: Math.ceil(monthlyPayment),
+    firstContractPayment: firstContractPayment,
+    secondContractPayment: secondContractPayment,
+    totalMonthlyPayment: totalMonthlyPayment,
     overstatement: Math.ceil(overstatement),
     contractAmount: Math.ceil(contractAmount),
     downPaymentAmount: Math.ceil(downPaymentAmount),

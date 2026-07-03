@@ -35,6 +35,8 @@ export const calculateMortgageAmount = (
   }
 
   const coefficients = calculateBankCoefficients(
+    variables,
+    objectCost,
     bankOffer,
     userDownPaymentPercent,
   );

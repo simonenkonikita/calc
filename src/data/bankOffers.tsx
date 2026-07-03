@@ -386,12 +386,13 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 12.49,
     minPVPercent: minPVPercent,
   },
-  /*  {
+  {
     bank: "Совкомбанк",
     program: "Семейная ипотека (2 договора)",
     type: "family",
     rate: 6,
-    subsidyPercent: 9.5,
+    twoRate: 19.99,
+    subsidyPercent: 0.1,
     minPVPercent: minPVPercent,
     isTwoContracts: true,
   },
@@ -404,7 +405,7 @@ export const bankOffers: BankOffer[] = [
     minPVPercent: minPVPercent,
     excessLimit: true,
   },
-  {
+  /*  {
     bank: "Совкомбанк",
     program: "ИТ ипотека (2 договора)",
     type: "it",

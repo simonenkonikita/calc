@@ -35,6 +35,8 @@ export const calculateDeveloperAccount = (
   } = params;
 
   const coefficients = calculateBankCoefficients(
+    variables,
+    objectCost,
     bankOffer,
     userDownPaymentPercent,
   );

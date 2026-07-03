@@ -560,3 +560,10 @@
     padding: 0.35rem 0.8rem;
   }
 }
+
+.bank-rates-two-contracts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}

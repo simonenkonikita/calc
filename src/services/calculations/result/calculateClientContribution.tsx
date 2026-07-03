@@ -45,6 +45,8 @@ export const calculateClientContribution = (
   // ПОЛУЧАЕМ КОЭФФИЦИЕНТЫ
   // ============================================================
   const coefficients = calculateBankCoefficients(
+    variables,
+    objectCost,
     bankOffer,
     userDownPaymentPercent,
   );

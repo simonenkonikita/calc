@@ -330,6 +330,8 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                             offer.monthlyPaymentAfter !== undefined &&
                             offer.monthlyPaymentAfter !== null;
 
+                          const isTwoContracts = offer.isTwoContracts === true;
+
                           const badge = getBadge(offer);
                           const excessBadge = getExcessBadge(offer);
                           const termBadge = getTermYearsBadge(offer);
@@ -393,6 +395,15 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                         {offer.rate}%
                                       </span>
                                     </div>
+                                  ) : isTwoContracts ? (
+                                    <div className="bank-rates-two-contracts">
+                                      <span className="bank-rate">
+                                        {offer.rate}%
+                                      </span>
+                                      <span className="bank-rate">
+                                        {offer.twoRate}%
+                                      </span>
+                                    </div>
                                   ) : (
                                     offer.rate &&
                                     offer.rate > 0 && (
@@ -415,6 +426,19 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                         →{" "}
                                         {safeFormatMoney(
                                           offer.monthlyPaymentAfter,
+                                        )}
+                                      </p>
+                                    </div>
+                                  ) : isTwoContracts ? (
+                                    <div className="payment-values-wrapper">
+                                      <p className="payment-value payment-with-subsidy">
+                                        {formatMoney(
+                                          offer.firstContractPayment,
+                                        )}
+                                      </p>
+                                      <p className="payment-value payment-with-subsidy">
+                                        {formatMoney(
+                                          offer.secondContractPayment,
                                         )}
                                       </p>
                                     </div>

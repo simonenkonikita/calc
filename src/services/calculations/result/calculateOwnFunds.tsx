@@ -25,6 +25,8 @@ export const calculateOwnFunds = (params: CalculateOwnFundsParams): number => {
   } = params;
 
   const coefficients = calculateBankCoefficients(
+    variables,
+    objectCost,
     bankOffer,
     userDownPaymentPercent,
   );

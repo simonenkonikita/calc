@@ -5,6 +5,7 @@ import {
 } from "../../../utils/types";
 import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
 import { calculateFamilyContractAmount } from "./family/calculateFamilyContractAmount";
+import { calculateFamilyTwoContractAmount } from "./family/calculateFamilyTwoContractAmount";
 import { calculateStandardContractAmount } from "./standard/calculateStandardContractAmount";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ==========
@@ -20,9 +21,25 @@ export const calculateContractAmount = (
   isSpecialMortgageMode: boolean,
 ): ContractAmountResult => {
   const coefficients = calculateBankCoefficients(
+    variables,
+    objectCost,
     bankOffer,
     userDownPaymentPercent,
   );
+
+  if (bankOffer.type === "family" && bankOffer.isTwoContracts === true) {
+    return calculateFamilyTwoContractAmount(
+      objectCost,
+      downPayment,
+      remainingAmount,
+      userDownPaymentPercent,
+      bankOffer,
+      variables,
+      noSubsidyInflate,
+      isSpecialMortgageMode,
+      coefficients,
+    );
+  }
 
   if (bankOffer.type === "family") {
     return calculateFamilyContractAmount(

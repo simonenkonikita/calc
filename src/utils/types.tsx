@@ -88,6 +88,7 @@ export interface BankOffer {
   isTwoContracts?: boolean; // Для Совкомбанка (2 договора)
   excessLimit?: boolean; // Сверхлимит
   rate: number; // Процентная ставка (%)
+  twoRate?: number;
   shortRate?: number; //
   subsidyCalculationMethod?: "onlyPercent" | "standard";
   dynamicRates?: DynamicRateRule[];
@@ -100,6 +101,7 @@ export interface BankProgramResult {
   program: string;
   type: ProgramType;
   rate: number; // Ставка на период
+  twoRate?: number;
   actualRate?: number;
   shortRate?: number;
   durationMonths?: number; // Длительность программы
@@ -120,10 +122,21 @@ export interface BankProgramResult {
   developerAccount: number; // На счет застройщика
   // Дополнительно для short программ
   monthlyPaymentAfter?: number; // Платёж после субсидирования
+
   remainingDebt?: number; // Остаток долга после субсидирования
   subsidyPercent: number;
   pricePerM2: number | null;
+  // Платёж 2 договора
+  firstContractPayment: number;
+  secondContractPayment: number;
+
+  // Флаги
   isLimitExceeded?: boolean;
+  isTwoContracts?: boolean;
+  // Для 2 договоров (Совкомбанк)
+  firstContract?: number;
+  secondContract?: number;
+  totalMonthlyPayment?: number;
 }
 
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========
@@ -139,6 +152,10 @@ export interface CalculatorResult {
 export interface ContractAmountResult {
   contractAmount: number;
   isLimitExceeded: boolean;
+  subsidyAmount?: number;
+  // Для 2 договоров
+  firstContractAmount?: number;
+  secondContractAmount?: number;
 }
 
 // ========== КОЭФФИЦИЕНТЫ БАНКОВ (для внутренних расчетов) ==========
@@ -155,6 +172,7 @@ export interface BankCoefficients {
   requiredCoeffWithMinPV: number; // Искомый каэф с мин ПВ
   requiredCoeffWithLargePV: number; // Искомый каэф с большим ПВ
   requiredCoeffWithoutPV: number; // Искомый каэф без ПВ
+  requiredCoeffFamilyTwo: number;
 }
 
 // Для динамических субсидий (как в Совкомбанке)

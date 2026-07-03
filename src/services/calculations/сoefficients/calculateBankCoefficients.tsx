@@ -1,7 +1,9 @@
-import { BankOffer, BankCoefficients } from "../../../utils/types";
+import { BankOffer, BankCoefficients, Variables } from "../../../utils/types";
 
 // ========== РАСЧЕТ КОЭФФИЦИЕНТОВ БАНКА ==========
 export const calculateBankCoefficients = (
+  variables: Variables,
+  objectCost: number,
   bankOffer: BankOffer,
   userDownPaymentPercent: number,
 ): BankCoefficients => {
@@ -25,6 +27,17 @@ export const calculateBankCoefficients = (
   // Искомый каэф без  ПВ
   const requiredCoeffWithoutPV = overstatementCoefficient / mortgageCoefficient;
 
+  const pvRate = userDownPaymentPercent / 100;
+  const subsidyRate = subsidyPercent / 100;
+  const M10 = variables.familyMortgageLimit / objectCost;
+
+  const requiredCoeffFamilyTwo =
+    subsidyRate *
+      (((1 - pvRate) * (1 - subsidyRate * M10)) /
+        (1 - (1 - pvRate) * subsidyRate) -
+        M10) +
+    1;
+
   return {
     programName: bankOffer.program,
     downPaymentPercent,
@@ -38,5 +51,6 @@ export const calculateBankCoefficients = (
     requiredCoeffWithMinPV,
     requiredCoeffWithLargePV,
     requiredCoeffWithoutPV,
+    requiredCoeffFamilyTwo,
   };
 };

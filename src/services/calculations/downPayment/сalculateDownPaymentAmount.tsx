@@ -34,6 +34,8 @@ export const calculateDownPaymentAmount = (
   } = params;
 
   const coefficients = calculateBankCoefficients(
+    variables,
+    objectCost,
     bankOffer,
     userDownPaymentPercent,
   );
