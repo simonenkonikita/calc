@@ -41,7 +41,6 @@ const getPricePerSquareMeter = (
   return found.pricePerSquareMeter;
 };
 
-// Функция для получения наценки за ипотеку без ПВ для конкретного ЖК
 // Функция для получения наценки в зависимости от типа ипотеки
 const getMortgageSurcharge = (
   complexName: string,

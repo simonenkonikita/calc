@@ -1,7 +1,7 @@
 // src/hooks/payment/downPayment/calculateStandardDownPayment.ts
 
-import { MIN_DOWN_PAYMENT_PERCENT } from "../../../../utils/constants";
-import { BankOffer } from "../../../../utils/types";
+import { MIN_DOWN_PAYMENT_PERCENT } from "../../../../../utils/constants";
+import { BankOffer } from "../../../../../utils/types";
 
 interface StandardDownPaymentParams {
   contractAmount: number;
@@ -33,7 +33,11 @@ export const calculateStandardDownPayment = (
   let downPaymentAmount: number;
 
   if (isSpecialMortgageMode) {
-    downPaymentAmount = contractAmountMinPV;
+    if (manualDownPayment >= objectCost) {
+      downPaymentAmount = contractAmountMinPV;
+    } else {
+      downPaymentAmount = contractAmountMinPV;
+    }
   } else if (manualDownPayment > 0) {
     if (manualDownPayment > objectCost) {
       downPaymentAmount = contractAmountMinPV;

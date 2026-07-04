@@ -1,5 +1,5 @@
-import { BankOffer, Variables } from "../../../utils/types";
-import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
+import { BankOffer, Variables } from "../../../../utils/types";
+import { calculateBankCoefficients } from "../../сoefficients/calculateBankCoefficients";
 
 interface CalculateOwnFundsParams {
   objectCost: number; // $B$7

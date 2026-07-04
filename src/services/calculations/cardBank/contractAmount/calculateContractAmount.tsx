@@ -2,9 +2,10 @@ import {
   BankOffer,
   ContractAmountResult,
   Variables,
-} from "../../../utils/types";
-import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
+} from "../../../../utils/types";
+import { calculateBankCoefficients } from "../../сoefficients/calculateBankCoefficients";
 import { calculateFamilyContractAmount } from "./family/calculateFamilyContractAmount";
+import { calculateFamilyExcessLimitContractAmount } from "./family/calculateFamilyExcessLimitContractAmount";
 import { calculateFamilyTwoContractAmount } from "./family/calculateFamilyTwoContractAmount";
 import { calculateStandardContractAmount } from "./standard/calculateStandardContractAmount";
 
@@ -29,6 +30,20 @@ export const calculateContractAmount = (
 
   if (bankOffer.type === "family" && bankOffer.isTwoContracts === true) {
     return calculateFamilyTwoContractAmount(
+      objectCost,
+      downPayment,
+      remainingAmount,
+      userDownPaymentPercent,
+      bankOffer,
+      variables,
+      noSubsidyInflate,
+      isSpecialMortgageMode,
+      coefficients,
+    );
+  }
+
+  if (bankOffer.type === "family" && bankOffer.excessLimit === true) {
+    return calculateFamilyExcessLimitContractAmount(
       objectCost,
       downPayment,
       remainingAmount,

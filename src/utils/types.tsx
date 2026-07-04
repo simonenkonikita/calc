@@ -151,7 +151,6 @@ export interface CalculatorResult {
 
 export interface ContractAmountResult {
   contractAmount: number;
-  isLimitExceeded: boolean;
   subsidyAmount?: number;
   // Для 2 договоров
   firstContractAmount?: number;
@@ -189,4 +188,13 @@ export interface BankOfferWithDynamicSubsidy extends BankOffer {
 export interface SubsidyPaymentResult {
   monthlyPaymentSubsidy: number; // Платёж в период субсидирования
   monthlyPaymentAfter: number | null; // Платёж после субсидирования (если есть)
+}
+
+export interface MortgageAmountResult {
+  mortgageAmount: number;
+  isLimitExceeded?: boolean;
+}
+export interface DownAmountResult {
+  downPaymentAmount: number;
+  isNoSpecialMortgageMode: boolean;
 }

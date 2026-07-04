@@ -1,6 +1,8 @@
-import { BankOffer, Variables } from "../../../utils/types";
-import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
+import { BankOffer, Variables } from "../../../../utils/types";
+import { calculateBankCoefficients } from "../../сoefficients/calculateBankCoefficients";
 import { calculateFamilyDownPayment } from "./family/calculateFamilyDownPayment";
+import { calculateFamilyExcessLimitDownPayment } from "./family/calculateFamilyExcessLimitDownPayment";
+import { calculateFamilyTwoContractsDownPayment } from "./family/calculateFamilyTwoContractsDownPayment";
 import { calculateStandardDownPayment } from "./standard/calculateStandardDownPayment";
 
 // src/hooks/payment/downPayment/calculateDownPaymentAmount.ts
@@ -40,6 +42,38 @@ export const calculateDownPaymentAmount = (
     userDownPaymentPercent,
   );
 
+  if (bankOffer.type === "family" && bankOffer.isTwoContracts === true) {
+    return calculateFamilyTwoContractsDownPayment({
+      objectCost,
+      downPayment,
+      contractAmount,
+      userDownPaymentPercent,
+      manualDownPayment,
+      isSpecialMortgageMode,
+      coefficients,
+      variables,
+      bankOffer,
+      remainingAmount,
+      noSubsidyInflate,
+    });
+  }
+
+  if (bankOffer.type === "family" && bankOffer.excessLimit === true) {
+    return calculateFamilyExcessLimitDownPayment({
+      objectCost,
+      downPayment,
+      contractAmount,
+      userDownPaymentPercent,
+      manualDownPayment,
+      isSpecialMortgageMode,
+      coefficients,
+      variables,
+      bankOffer,
+      remainingAmount,
+      noSubsidyInflate,
+    });
+  }
+
   if (bankOffer.type === "family") {
     return calculateFamilyDownPayment({
       objectCost,
@@ -55,6 +89,7 @@ export const calculateDownPaymentAmount = (
       noSubsidyInflate,
     });
   }
+
   return calculateStandardDownPayment({
     contractAmount,
     downPayment,
@@ -65,7 +100,3 @@ export const calculateDownPaymentAmount = (
     bankOffer,
   });
 };
-
-// ============================================================
-// СТАНДАРТНЫЙ РАСЧЕТ (full, short)
-// ============================================================

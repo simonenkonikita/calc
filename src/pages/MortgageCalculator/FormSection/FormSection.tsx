@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
 import type { CalculatorFormData } from "../../../utils/types";
 import { housingPrices } from "../../../data/calculatorData";
@@ -13,6 +13,9 @@ import {
   PROJECT_FINANCING_BANKS,
   PRICE_PER_SQUARE_METER_DEFAULT,
 } from "../../../utils/constants";
+
+// 🔥 Константа суммы брони
+const DEPOSIT_AMOUNT = 30000;
 
 interface FormSectionProps {
   formData: CalculatorFormData;
@@ -39,9 +42,9 @@ export const FormSection: React.FC<FormSectionProps> = ({
   const availableTypes = getApartmentTypes(formData.complex);
 
   // ============================================================
-  // РАСЧЕТ СТОИМОСТИ ОБЪЕКТА (для валидации ПВ)
+  // РАСЧЕТ БАЗОВОЙ СТОИМОСТИ ОБЪЕКТА (без учета брони)
   // ============================================================
-  const calculateObjectCost = useMemo(() => {
+  const baseObjectCost = useMemo(() => {
     if (formData.manualObjectCost && formData.manualObjectCost > 0) {
       return formData.manualObjectCost;
     }
@@ -62,6 +65,24 @@ export const FormSection: React.FC<FormSectionProps> = ({
   ]);
 
   // ============================================================
+  // РАСЧЕТ ФИНАЛЬНОЙ СТОИМОСТИ ОБЪЕКТА (с учетом брони)
+  // ============================================================
+  const calculateObjectCost = useMemo(() => {
+    // Если учитываем бронь - вычитаем сумму брони
+    if (formData.considerDepositInCost) {
+      return Math.max(0, baseObjectCost - DEPOSIT_AMOUNT);
+    }
+    return baseObjectCost;
+  }, [baseObjectCost, formData.considerDepositInCost]);
+
+  // ============================================================
+  // ПРОВЕРКА: достаточно ли ПВ для полной оплаты
+  // ============================================================
+  const isFullPayment = useMemo(() => {
+    return formData.manualDownPayment >= calculateObjectCost;
+  }, [formData.manualDownPayment, calculateObjectCost]);
+
+  // ============================================================
   // ПРОВЕРКА: включена ли ипотека без ПВ или частичный ПВ
   // ============================================================
   const isAnyMortgageTypeEnabled = useMemo(() => {
@@ -73,7 +94,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
     formData.mortgagePartialDownPayment,
   ]);
 
-  const isDownPaymentDisabled = isAnyMortgageTypeEnabled;
+  const isDownPaymentDisabled = isAnyMortgageTypeEnabled || isFullPayment;
 
   // ============================================================
   // ОБРАБОТЧИКИ ДЛЯ ПОЛЯ "ПЕРВОНАЧАЛЬНЫЙ ВЗНОС"
@@ -130,8 +151,12 @@ export const FormSection: React.FC<FormSectionProps> = ({
 
     const objectCost = calculateObjectCost;
 
-    if (numValue > objectCost) {
+    // Если сумма >= стоимости объекта
+    if (numValue >= objectCost) {
+      // Отключаем флаги ипотеки и устанавливаем ПВ = стоимость объекта
       onInputChange("manualDownPayment", objectCost);
+      onInputChange("mortgageWithoutDownPayment", false);
+      onInputChange("mortgagePartialDownPayment", false);
       return;
     }
 
@@ -160,12 +185,33 @@ export const FormSection: React.FC<FormSectionProps> = ({
 
     const objectCost = calculateObjectCost;
 
-    if (numValue > objectCost) {
+    if (numValue >= objectCost) {
       onInputChange("manualDownPayment", objectCost);
+      onInputChange("mortgageWithoutDownPayment", false);
+      onInputChange("mortgagePartialDownPayment", false);
       return;
     }
 
     onInputChange("manualDownPayment", numValue);
+  };
+
+  // ============================================================
+  // ОБРАБОТЧИК ДЛЯ ЧЕКБОКСА "УЧИТЫВАТЬ БРОНЬ"
+  // ============================================================
+  const handleConsiderDepositChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    const objectCost = checked
+      ? baseObjectCost - DEPOSIT_AMOUNT
+      : baseObjectCost;
+
+    // Если текущий ПВ больше новой стоимости - корректируем
+    if (formData.manualDownPayment > objectCost) {
+      onInputChange("manualDownPayment", objectCost);
+      onInputChange("mortgageWithoutDownPayment", false);
+      onInputChange("mortgagePartialDownPayment", false);
+    }
+
+    onInputChange("considerDepositInCost", checked);
   };
 
   // ============================================================
@@ -346,7 +392,16 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 value={formData.manualDownPayment || ""}
                 onChange={handleManualDownPaymentChange}
                 onBlur={handleManualDownPaymentBlur}
+                style={{
+                  borderColor: isFullPayment ? "#22c55e" : undefined,
+                }}
               />
+              {isFullPayment && (
+                <div className="full-payment-message">
+                  ✅ Ипотека не требуется. Вы покрываете полную стоимость
+                  объекта.
+                </div>
+              )}
             </div>
 
             <div className="field">
@@ -390,12 +445,11 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 type="checkbox"
                 id="considerDeposit"
                 checked={formData.considerDepositInCost}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  onInputChange("considerDepositInCost", e.target.checked)
-                }
+                onChange={handleConsiderDepositChange}
               />
               <label htmlFor="considerDeposit">
-                Учитывать бронь в стоимости
+                Учитывать бронь в стоимости (-{DEPOSIT_AMOUNT.toLocaleString()}{" "}
+                ₽)
               </label>
             </div>
 
@@ -419,8 +473,15 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   onInputChange("mortgageWithoutDownPayment", e.target.checked)
                 }
+                disabled={isFullPayment}
               />
-              <label htmlFor="mortgageWithoutDownPayment">
+              <label
+                htmlFor="mortgageWithoutDownPayment"
+                style={{
+                  opacity: isFullPayment ? 0.5 : 1,
+                  cursor: isFullPayment ? "not-allowed" : "pointer",
+                }}
+              >
                 Ипотека без первоначального взноса
               </label>
             </div>
@@ -433,15 +494,19 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   onInputChange("mortgagePartialDownPayment", e.target.checked)
                 }
-                disabled={formData.mortgageWithoutDownPayment}
+                disabled={formData.mortgageWithoutDownPayment || isFullPayment}
               />
               <label
                 htmlFor="mortgagePartialDownPayment"
                 style={{
-                  opacity: formData.mortgageWithoutDownPayment ? 0.5 : 1,
-                  cursor: formData.mortgageWithoutDownPayment
-                    ? "not-allowed"
-                    : "pointer",
+                  opacity:
+                    formData.mortgageWithoutDownPayment || isFullPayment
+                      ? 0.5
+                      : 1,
+                  cursor:
+                    formData.mortgageWithoutDownPayment || isFullPayment
+                      ? "not-allowed"
+                      : "pointer",
                 }}
               >
                 Ипотека с частичным первоначальным взносом

@@ -1,11 +1,10 @@
-// src/hooks/payment/downPayment/addContractAmount/Family/calculateFamilyDownPayment.ts
 import {
   BankCoefficients,
   BankOffer,
   Variables,
-} from "../../../../utils/types";
+} from "../../../../../utils/types";
 
-interface CalculateFamilyDownPaymentParams {
+interface calculateFamilyExcessLimitDownPayment {
   objectCost: number;
   downPayment: number;
   contractAmount: number;
@@ -19,8 +18,8 @@ interface CalculateFamilyDownPaymentParams {
   noSubsidyInflate: boolean;
 }
 
-export const calculateFamilyDownPayment = (
-  params: CalculateFamilyDownPaymentParams,
+export const calculateFamilyExcessLimitDownPayment = (
+  params: calculateFamilyExcessLimitDownPayment,
 ): number => {
   const {
     objectCost,
@@ -35,10 +34,7 @@ export const calculateFamilyDownPayment = (
     remainingAmount,
   } = params;
 
-  // 🔥 ОПРЕДЕЛЯЕМ ЛИМИТ ПО ФЛАГУ excessLimit
-  const limit = bankOffer.excessLimit
-    ? variables.maxFamilyMortgageSum || 15000000 // Если excessLimit true → 15 млн
-    : variables.familyMortgageLimit || 6000000; // Иначе → 6 млн
+  const limit = variables.maxFamilyMortgageSum || 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
   const cafsummPV = userDownPaymentPercent / 100;
@@ -71,19 +67,18 @@ export const calculateFamilyDownPayment = (
 
   let downPaymentAmount: number;
 
-  // Если есть ручной ПВ
   if (isThresholdCondition) {
     if (manualDownPayment > 0) {
       if (isWithinLimit) {
         downPaymentAmount = Math.max(manualDownPayment, contractAmountMinPV);
       } else {
-        downPaymentAmount = Math.max(manualDownPayment, contractAmount - limit);
+        downPaymentAmount = Math.max(manualDownPayment, contractAmountMinPV);
       }
     } else {
       if (isWithinLimit) {
         downPaymentAmount = downPaymentFromContract;
       } else {
-        downPaymentAmount = contractAmount - limit;
+        downPaymentAmount = contractAmountMinPV;
       }
     }
   } else {

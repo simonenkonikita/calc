@@ -1,33 +1,31 @@
-import { BankOffer, Variables } from "../../../utils/types";
-import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
+import {
+  BankOffer,
+  MortgageAmountResult,
+  Variables,
+} from "../../../../../utils/types";
+import { calculateBankCoefficients } from "../../../сoefficients/calculateBankCoefficients";
 
-interface CalculateDeveloperAccountParams {
-  objectCost: number; // $B$7 / E32
-  ownFunds: number; // $B$13 / J32
+interface calculateFamilyTwoContractsMortgageAmount {
+  objectCost: number; // $B$7
+  contractAmount: number; // C32
   downPayment: number;
   remainingAmount: number;
-  mortgageAmount: number; // $B$14 / D32
-  subsidyAmount: number; // C32
-  contractAmount: number; // I32
+  downPaymentAmount: number; // D32
   userDownPaymentPercent: number; // $B$8
   bankOffer: BankOffer;
   variables: Variables;
-  isSpecialMortgageMode: boolean; // $L$10
-  downPaymentAmount: number;
-  noSubsidyInflate: boolean;
+  isSpecialMortgageMode: boolean;
 }
 
-export const calculateDeveloperAccount = (
-  params: CalculateDeveloperAccountParams,
-): number => {
+export const calculateFamilyTwoContractsMortgageAmount = (
+  params: calculateFamilyTwoContractsMortgageAmount,
+): MortgageAmountResult => {
   const {
     objectCost,
-    ownFunds,
+    contractAmount,
     downPayment,
     remainingAmount,
-    mortgageAmount,
-    subsidyAmount,
-    contractAmount,
+    downPaymentAmount,
     userDownPaymentPercent,
     bankOffer,
     variables,
@@ -40,11 +38,11 @@ export const calculateDeveloperAccount = (
     bankOffer,
     userDownPaymentPercent,
   );
-  const limit = bankOffer.excessLimit
-    ? variables.maxFamilyMortgageSum || 15000000
-    : variables.familyMortgageLimit || 6000000;
+
+  const limit = variables.familyMortgageLimit || 6000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
+
   const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
 
   const summCreditWithoutPV =
@@ -63,20 +61,27 @@ export const calculateDeveloperAccount = (
     isWithinLimit = summCredit <= limit;
   }
 
-  let developerAccount: number;
+  let mortgageAmount: number;
+  let isLimitExceeded: boolean = false;
 
   if (isSpecialMortgageMode) {
     if (isWithinLimit) {
-      developerAccount = ownFunds + mortgageAmount - subsidyAmount;
+      mortgageAmount = contractAmount - downPaymentAmount;
+      isLimitExceeded = true;
     } else {
-      developerAccount = contractAmount - subsidyAmount;
+      mortgageAmount = contractAmount - downPaymentAmount;
     }
   } else {
     if (isWithinLimit) {
-      developerAccount = contractAmount - subsidyAmount;
+      mortgageAmount = contractAmount - downPaymentAmount;
+      isLimitExceeded = true;
     } else {
-      developerAccount = contractAmount - subsidyAmount;
+      mortgageAmount = contractAmount - downPaymentAmount;
     }
   }
-  return Math.ceil(developerAccount);
+
+  return {
+    mortgageAmount: Math.ceil(mortgageAmount),
+    isLimitExceeded,
+  };
 };

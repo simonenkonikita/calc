@@ -3,7 +3,7 @@ import {
   Variables,
   BankCoefficients,
   ContractAmountResult,
-} from "../../../../utils/types";
+} from "../../../../../utils/types";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ==========
 export const calculateStandardContractAmount = (
@@ -14,21 +14,20 @@ export const calculateStandardContractAmount = (
   bankOffer: BankOffer,
   variables: Variables,
   noSubsidyInflate: boolean,
-  mortgageWithoutDownPayment: boolean,
+  isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
 ): ContractAmountResult => {
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
 
-  // 1. НЕ ЗАВЫШАТЬ НА СУБСИДИЮ
-  if (noSubsidyInflate && !mortgageWithoutDownPayment) {
+  let contractAmount: number;
+
+  if (noSubsidyInflate && !isSpecialMortgageMode) {
     return {
       contractAmount: Math.ceil(objectCost),
-      isLimitExceeded: false,
     };
   }
 
-  // 2. ИПОТЕКА БЕЗ ПВ
-  if (mortgageWithoutDownPayment) {
+  if (isSpecialMortgageMode) {
     const threshold =
       (remainingAmount * coefficients.requiredCoeffWithoutPV +
         objectCost -
@@ -36,10 +35,9 @@ export const calculateStandardContractAmount = (
       (userDownPaymentPercent / 100);
 
     if (downPayment < threshold) {
-      if (noSubsidyInflate && mortgageWithoutDownPayment) {
+      if (noSubsidyInflate && isSpecialMortgageMode) {
         return {
           contractAmount: Math.ceil((objectCost - downPayment) / 0.799),
-          isLimitExceeded: false,
         };
       } else {
         return {
@@ -48,18 +46,12 @@ export const calculateStandardContractAmount = (
               objectCost -
               downPayment,
           ),
-          isLimitExceeded: false,
         };
       }
     }
   }
 
-  let contractAmount: number;
-
-  // 3. РАСЧЕТ СУММЫ В ДОГОВОРЕ
-  // =ЕСЛИ($B$13<=$B$7*$B$8/100; $B$7/Сбербанк!J2; $B$14/Сбербанк!K2+$B$13)
   if (downPayment <= userDesiredDownPayment) {
-    // ✅ ПРАВИЛЬНАЯ ФОРМУЛА - используем requiredCoeffWithMinPV
     contractAmount = objectCost / coefficients.requiredCoeffWithMinPV;
   } else {
     contractAmount =
@@ -68,6 +60,5 @@ export const calculateStandardContractAmount = (
 
   return {
     contractAmount: Math.ceil(contractAmount),
-    isLimitExceeded: false,
   };
 };

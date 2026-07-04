@@ -1,4 +1,4 @@
-import { SubsidyPaymentResult } from "../../../../utils/types";
+import { SubsidyPaymentResult } from "../../../../../utils/types";
 import { calculateFutureValue } from "../calculateFutureValue";
 import { calculateMonthlyPayment } from "../calculateMonthlyPayment";
 

@@ -1,7 +1,11 @@
-import { BankOffer, Variables } from "../../../utils/types";
-import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
+import {
+  BankOffer,
+  MortgageAmountResult,
+  Variables,
+} from "../../../../../utils/types";
+import { calculateBankCoefficients } from "../../../сoefficients/calculateBankCoefficients";
 
-interface CalculateMortgageAmountParams {
+interface calculateFamilyMortgageAmount {
   objectCost: number; // $B$7
   contractAmount: number; // C32
   downPayment: number;
@@ -10,13 +14,12 @@ interface CalculateMortgageAmountParams {
   userDownPaymentPercent: number; // $B$8
   bankOffer: BankOffer;
   variables: Variables;
-  isFamilyOrIt: boolean;
   isSpecialMortgageMode: boolean;
 }
 
-export const calculateMortgageAmount = (
-  params: CalculateMortgageAmountParams,
-): number => {
+export const calculateFamilyMortgageAmount = (
+  params: calculateFamilyMortgageAmount,
+): MortgageAmountResult => {
   const {
     objectCost,
     contractAmount,
@@ -26,13 +29,8 @@ export const calculateMortgageAmount = (
     userDownPaymentPercent,
     bankOffer,
     variables,
-    isFamilyOrIt,
     isSpecialMortgageMode,
   } = params;
-
-  if (!isFamilyOrIt) {
-    return contractAmount - downPaymentAmount;
-  }
 
   const coefficients = calculateBankCoefficients(
     variables,
@@ -41,9 +39,7 @@ export const calculateMortgageAmount = (
     userDownPaymentPercent,
   );
 
-  const limit = bankOffer.excessLimit
-    ? variables.maxFamilyMortgageSum || 15000000 // Если excessLimit true → 15 млн
-    : variables.familyMortgageLimit || 6000000; // Иначе → 6 млн
+  const limit = variables.familyMortgageLimit || 6000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
 
@@ -66,13 +62,27 @@ export const calculateMortgageAmount = (
   }
 
   let mortgageAmount: number;
+  let isLimitExceeded: boolean = false;
 
   if (isSpecialMortgageMode) {
     if (isWithinLimit) {
       mortgageAmount = contractAmount - downPaymentAmount;
+      isLimitExceeded = false;
     } else {
-      mortgageAmount = limit;
+      mortgageAmount = contractAmount - downPaymentAmount;
+      isLimitExceeded = true;
+    }
+  } else {
+    if (isWithinLimit) {
+      mortgageAmount = contractAmount - downPaymentAmount;
+      isLimitExceeded = false;
+    } else {
+      mortgageAmount = contractAmount - downPaymentAmount;
+      isLimitExceeded = false;
     }
   }
-  return contractAmount - downPaymentAmount;
+  return {
+    mortgageAmount: Math.ceil(mortgageAmount),
+    isLimitExceeded,
+  };
 };
