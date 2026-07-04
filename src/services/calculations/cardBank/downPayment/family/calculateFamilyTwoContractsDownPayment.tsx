@@ -37,9 +37,7 @@ export const calculateFamilyTwoContractsDownPayment = (
   } = params;
 
   // 🔥 ОПРЕДЕЛЯЕМ ЛИМИТ ПО ФЛАГУ excessLimit
-  const limit = bankOffer.excessLimit
-    ? variables.maxFamilyMortgageSum || 15000000 // Если excessLimit true → 15 млн
-    : variables.familyMortgageLimit || 6000000; // Иначе → 6 млн
+  const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
   const cafsummPV = userDownPaymentPercent / 100;
@@ -61,10 +59,10 @@ export const calculateFamilyTwoContractsDownPayment = (
 
   if (isSpecialMortgageMode) {
     summCredit = summCreditWithoutPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+    isWithinLimit = summCredit <= maxLimit;
   } else {
     summCredit = summCreditMinPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+    isWithinLimit = summCredit <= maxLimit;
   }
 
   const isThresholdCondition =
@@ -72,19 +70,18 @@ export const calculateFamilyTwoContractsDownPayment = (
 
   let downPaymentAmount: number;
 
-  // Если есть ручной ПВ
   if (isThresholdCondition) {
     if (manualDownPayment > 0) {
       if (isWithinLimit) {
         downPaymentAmount = Math.max(manualDownPayment, contractAmountMinPV);
       } else {
-        downPaymentAmount = Math.max(manualDownPayment, contractAmount - limit);
+        downPaymentAmount = Math.max(manualDownPayment, contractAmountMinPV);
       }
     } else {
       if (isWithinLimit) {
         downPaymentAmount = downPaymentFromContract;
       } else {
-        downPaymentAmount = contractAmount - limit;
+        downPaymentAmount = contractAmountMinPV;
       }
     }
   } else {
@@ -96,7 +93,7 @@ export const calculateFamilyTwoContractsDownPayment = (
         ? downPayment
         : downPaymentFromContract;
     }
-    downPaymentAmount = Math.max(manualDownPayment, contractAmount - limit);
+    downPaymentAmount = Math.max(manualDownPayment, contractAmount - maxLimit);
   }
   return Math.ceil(downPaymentAmount);
 };

@@ -17,7 +17,7 @@ export const calculateFamilyExcessLimitContractAmount = (
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
 ): ContractAmountResult => {
-  const limit = variables.maxFamilyMortgageSum || 15000000;
+  const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
   const subsidyPercent = bankOffer.subsidyPercent;
 
@@ -36,16 +36,16 @@ export const calculateFamilyExcessLimitContractAmount = (
 
   if (isSpecialMortgageMode) {
     summCredit = summCreditWithoutPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+    isWithinLimit = summCredit <= maxLimit;
   } else {
     summCredit = summCreditMinPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+    isWithinLimit = summCredit <= maxLimit;
   }
 
   const isThresholdCondition =
     isSpecialMortgageMode && downPayment < summCreditWithoutPV * cafsummPV;
 
-  const baseContractAmount = objectCost + limit * (subsidyPercent / 100);
+  const baseContractAmount = objectCost + maxLimit * (subsidyPercent / 100);
   const subsidyRate = subsidyPercent / 100;
 
   let contractAmount: number;
@@ -76,8 +76,8 @@ export const calculateFamilyExcessLimitContractAmount = (
       }
     } else {
       if (downPayment <= userDesiredDownPayment) {
-        contractAmount = objectCost + limit * (subsidyPercent / 100);
-      } else if (downPayment > baseContractAmount - limit) {
+        contractAmount = objectCost + maxLimit * (subsidyPercent / 100);
+      } else if (downPayment > baseContractAmount - maxLimit) {
         contractAmount =
           (objectCost - downPayment * subsidyRate) / (1 - subsidyRate);
       } else {

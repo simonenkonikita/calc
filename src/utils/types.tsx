@@ -107,7 +107,6 @@ export interface BankProgramResult {
   durationMonths?: number; // Длительность программы
   // Расчет ежемесячного платежа
   monthlyPayment: number; // Ежемесячный платёж
-
   // Основные параметры
   overstatement: number; // Завышение (сумма в договоре - стоимость объекта)
   contractAmount: number; // Сумма в договоре
@@ -122,14 +121,9 @@ export interface BankProgramResult {
   developerAccount: number; // На счет застройщика
   // Дополнительно для short программ
   monthlyPaymentAfter?: number; // Платёж после субсидирования
-
   remainingDebt?: number; // Остаток долга после субсидирования
   subsidyPercent: number;
   pricePerM2: number | null;
-  // Платёж 2 договора
-  firstContractPayment: number;
-  secondContractPayment: number;
-
   // Флаги
   isLimitExceeded?: boolean;
   isTwoContracts?: boolean;
@@ -137,6 +131,11 @@ export interface BankProgramResult {
   firstContract?: number;
   secondContract?: number;
   totalMonthlyPayment?: number;
+  // Платёж 2 договора
+  firstContractPayment: number;
+  secondContractPayment: number;
+  firstContractAmount?: number; // Сумма по первому договору
+  secondContractAmount?: number; // Сумма по второму договору
 }
 
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========

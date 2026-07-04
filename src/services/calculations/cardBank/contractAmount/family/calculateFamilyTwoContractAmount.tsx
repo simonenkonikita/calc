@@ -39,19 +39,18 @@ export const calculateFamilyTwoContractAmount = (
 
   if (isSpecialMortgageMode) {
     summCredit = summCreditWithoutPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+    isWithinLimit = summCredit <= maxLimit;
   } else {
     summCredit = summCreditMinPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+    isWithinLimit = summCredit <= maxLimit;
   }
 
   const isThresholdCondition =
     isSpecialMortgageMode && downPayment < summCreditWithoutPV * cafsummPV;
 
-  const baseContractAmount = objectCost + limit * subsidyRate;
+  const baseContractAmount = objectCost + maxLimit * subsidyRate;
 
   let contractAmount: number;
-  let isLimitExceeded: boolean = false;
 
   if (isThresholdCondition) {
     if (noSubsidyInflate) {
@@ -60,37 +59,34 @@ export const calculateFamilyTwoContractAmount = (
       } else {
         contractAmount = Math.ceil((objectCost - downPayment) / 0.799);
       }
-    } else if (isWithinLimit) {
-      isLimitExceeded = true;
     } else {
-      contractAmount =
-        (objectCost * coefficients.requiredCoeffFamilyTwo) / 0.799;
+      if (isWithinLimit) {
+        contractAmount = summCreditFamilyTwo / 0.799;
+      } else {
+        contractAmount = summCreditFamilyTwo / 0.799;
+      }
     }
   } else {
     if (noSubsidyInflate) {
       contractAmount = Math.ceil(objectCost);
     } else if (isWithinLimit) {
       if (downPayment <= userDesiredDownPayment) {
-        isLimitExceeded = true;
+        contractAmount = summCreditFamilyTwo;
       } else {
-        isLimitExceeded = true;
+        contractAmount = summCreditFamilyTwo;
       }
     } else {
       if (downPayment <= userDesiredDownPayment) {
-        contractAmount = objectCost + limit * (subsidyPercent / 100);
-      } else if (downPayment > baseContractAmount - limit) {
-        contractAmount =
-          (objectCost - downPayment * subsidyRate) / (1 - subsidyRate);
+        contractAmount = summCreditFamilyTwo;
+      } else if (downPayment > baseContractAmount - maxLimit) {
+        contractAmount = summCreditFamilyTwo;
       } else {
-        contractAmount = baseContractAmount;
+        contractAmount = summCreditFamilyTwo;
       }
     }
   }
 
-  //РАБОТАЕМ НАД СУММАМИ В ДОГОВОРЕ
-
   return {
     contractAmount: Math.ceil(contractAmount),
-    isLimitExceeded,
   };
 };

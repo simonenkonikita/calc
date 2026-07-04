@@ -29,6 +29,9 @@ export const calculateBankProgram = (
 ): BankProgramResult => {
   const isFamilyOrIt = bankOffer.type === "family" || bankOffer.type === "it";
 
+  const isTwoContracts =
+    bankOffer.type === "family" && bankOffer.isTwoContracts === true;
+
   const isSpecialMortgageMode =
     mortgageWithoutDownPayment || mortgagePartialDownPayment;
 
@@ -121,6 +124,14 @@ export const calculateBankProgram = (
     isSpecialMortgageMode,
   });
 
+  const firstContractAmount = isTwoContracts
+    ? Math.min(mortgageAmount.mortgageAmount, 6000000)
+    : undefined;
+
+  const secondContractAmount = isTwoContracts
+    ? Math.max(0, mortgageAmount.mortgageAmount - 6000000)
+    : undefined;
+
   const isLimitExceeded = mortgageAmount.isLimitExceeded;
 
   // ✅ 4. Получаем актуальную ставку через getDynamicRate
@@ -136,10 +147,17 @@ export const calculateBankProgram = (
     loanTermYears,
   );
 
-  // 8. Сумма субсидии
-  let subsidyAmount =
-    mortgageAmount.mortgageAmount * (bankOffer.subsidyPercent / 100);
+  let subsidyAmount: number;
 
+  // 8. Сумма субсидии
+  if (isTwoContracts) {
+    subsidyAmount =
+      (mortgageAmount.mortgageAmount - 6000000) *
+      (bankOffer.subsidyPercent / 100);
+  } else {
+    subsidyAmount =
+      mortgageAmount.mortgageAmount * (bankOffer.subsidyPercent / 100);
+  }
   // 9. Сверхлимит и коррекция субсидии
   let excessLimit: number | undefined;
   if (bankOffer.excessLimit) {
@@ -209,9 +227,6 @@ export const calculateBankProgram = (
   // 12. Расчет ежемесячного платежа
   const isShortSubsidy = bankOffer.type === "short" && bankOffer.durationMonths;
   const method = bankOffer.subsidyCalculationMethod || "standard";
-
-  const isTwoContracts =
-    bankOffer.type === "family" && bankOffer.isTwoContracts;
 
   let monthlyPayment: number;
   let monthlyPaymentAfter: number | null = null;
@@ -283,5 +298,7 @@ export const calculateBankProgram = (
       ? Math.ceil(monthlyPaymentAfter)
       : undefined,
     isLimitExceeded: isLimitExceeded,
+    firstContractAmount,
+    secondContractAmount,
   };
 };

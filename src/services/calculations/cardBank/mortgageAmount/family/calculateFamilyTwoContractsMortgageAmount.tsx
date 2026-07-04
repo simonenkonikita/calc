@@ -40,6 +40,7 @@ export const calculateFamilyTwoContractsMortgageAmount = (
   );
 
   const limit = variables.familyMortgageLimit || 6000000;
+  const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
 
@@ -55,28 +56,37 @@ export const calculateFamilyTwoContractsMortgageAmount = (
 
   if (isSpecialMortgageMode) {
     summCredit = summCreditWithoutPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+    isWithinLimit = summCredit <= maxLimit;
   } else {
     summCredit = summCreditMinPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+    isWithinLimit = summCredit <= maxLimit;
   }
 
-  let mortgageAmount: number;
+  let mortgageAmount: number = contractAmount - downPaymentAmount;
+  // eslint-disable-next-line no-useless-assignment
   let isLimitExceeded: boolean = false;
 
   if (isSpecialMortgageMode) {
-    if (isWithinLimit) {
+    if (mortgageAmount < limit) {
       mortgageAmount = contractAmount - downPaymentAmount;
       isLimitExceeded = true;
+    } else if (isWithinLimit) {
+      mortgageAmount = contractAmount - downPaymentAmount;
+      isLimitExceeded = false;
     } else {
       mortgageAmount = contractAmount - downPaymentAmount;
+      isLimitExceeded = true;
     }
   } else {
-    if (isWithinLimit) {
+    if (mortgageAmount < limit) {
       mortgageAmount = contractAmount - downPaymentAmount;
       isLimitExceeded = true;
+    } else if (isWithinLimit) {
+      mortgageAmount = contractAmount - downPaymentAmount;
+      isLimitExceeded = false;
     } else {
       mortgageAmount = contractAmount - downPaymentAmount;
+      isLimitExceeded = false;
     }
   }
 

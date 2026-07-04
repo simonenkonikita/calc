@@ -34,7 +34,7 @@ export const calculateFamilyExcessLimitDownPayment = (
     remainingAmount,
   } = params;
 
-  const limit = variables.maxFamilyMortgageSum || 15000000;
+  const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
   const cafsummPV = userDownPaymentPercent / 100;
@@ -56,10 +56,10 @@ export const calculateFamilyExcessLimitDownPayment = (
 
   if (isSpecialMortgageMode) {
     summCredit = summCreditWithoutPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+    isWithinLimit = summCredit <= maxLimit;
   } else {
     summCredit = summCreditMinPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+    isWithinLimit = summCredit <= maxLimit;
   }
 
   const isThresholdCondition =
@@ -90,7 +90,7 @@ export const calculateFamilyExcessLimitDownPayment = (
         ? downPayment
         : downPaymentFromContract;
     }
-    downPaymentAmount = Math.max(manualDownPayment, contractAmount - limit);
+    downPaymentAmount = Math.max(manualDownPayment, contractAmount - maxLimit);
   }
   return Math.ceil(downPaymentAmount);
 };

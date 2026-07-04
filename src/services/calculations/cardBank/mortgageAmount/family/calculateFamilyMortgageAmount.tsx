@@ -62,6 +62,7 @@ export const calculateFamilyMortgageAmount = (
   }
 
   let mortgageAmount: number;
+  // eslint-disable-next-line no-useless-assignment
   let isLimitExceeded: boolean = false;
 
   if (isSpecialMortgageMode) {

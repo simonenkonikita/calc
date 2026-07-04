@@ -513,6 +513,31 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                     {formatMoney(offer.mortgageAmount)}
                                   </span>
                                 </div>
+                                {isTwoContracts && (
+                                  <>
+                                    <div className="bank-detail-item">
+                                      <span className="bank-detail-label">
+                                        Ипотека (договор 1):
+                                      </span>
+                                      <span className="bank-detail-value">
+                                        {formatMoney(
+                                          offer.firstContractAmount ||
+                                            offer.mortgageAmount,
+                                        )}
+                                      </span>
+                                    </div>
+                                    <div className="bank-detail-item">
+                                      <span className="bank-detail-label">
+                                        Ипотека (договор 2):
+                                      </span>
+                                      <span className="bank-detail-value">
+                                        {formatMoney(
+                                          offer.secondContractAmount || 0,
+                                        )}
+                                      </span>
+                                    </div>
+                                  </>
+                                )}
                                 {showOverstatement && (
                                   <div className="bank-detail-item">
                                     <span className="bank-detail-label">

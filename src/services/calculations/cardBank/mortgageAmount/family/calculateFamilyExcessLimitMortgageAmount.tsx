@@ -63,6 +63,7 @@ export const calculateFamilyExcessLimitMortgageAmount = (
   }
 
   let mortgageAmount: number = contractAmount - downPaymentAmount;
+  // eslint-disable-next-line no-useless-assignment
   let isLimitExceeded: boolean = false;
 
   if (isSpecialMortgageMode) {
