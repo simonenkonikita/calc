@@ -29,10 +29,8 @@ export const calculateBankProgram = (
   area: number,
 ): BankProgramResult => {
   const isFamilyOrIt = bankOffer.type === "family" || bankOffer.type === "it";
-
   const isTwoContracts =
     bankOffer.type === "family" && bankOffer.isTwoContracts === true;
-
   const isSpecialMortgageMode =
     mortgageWithoutDownPayment || mortgagePartialDownPayment;
 
@@ -53,6 +51,10 @@ export const calculateBankProgram = (
 
   // 2. Завышение
   const overstatement = contractAmount - objectCost;
+
+  if (isTwoContracts) {
+    console.log(contractAmount, objectCost, overstatement);
+  }
 
   // 3. Расчет суммы ПВ
   const downPaymentAmount = calculateDownPaymentAmount({
