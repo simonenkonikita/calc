@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import "./CoefficientsPage.css";
-import { bankOffers } from "../../data/bankOffers";
+import { bankOffers } from "../../data/banks";
 
 import {
   MIN_DOWN_PAYMENT_PERCENT,

@@ -1,4 +1,4 @@
-import { BankOffer } from "../utils/types";
+/* import { BankOffer } from "../utils/types";
 
 // Базовые ставки
 const baseRateSber = 20.7;
@@ -298,7 +298,7 @@ export const bankOffers: BankOffer[] = [
   },
 
   // ИТ ипотека
-  /* {
+  {
     bank: "Сбербанк",
     program: "ИТ базовая",
     type: "it",
@@ -322,7 +322,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: minPVPercent,
     excessLimit: true,
-  }, */
+  },
 
   // ==================== АЛЬФА-БАНК ====================
   {
@@ -531,7 +531,7 @@ export const bankOffers: BankOffer[] = [
       },
     ],
   },
-  /*   {
+    {
     bank: "Совкомбанк",
     program: "Семейная ипотека сверхлимит 6%",
     type: "family",
@@ -539,8 +539,8 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 65,
     minPVPercent: minPVPercent,
     excessLimit: true,
-  }, */
-  /*  {
+  },
+   {
     bank: "Совкомбанк",
     program: "ИТ ипотека (2 договора)",
     type: "it",
@@ -558,7 +558,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 65,
     minPVPercent: minPVPercent,
     excessLimit: true,
-  }, */
+  },
 
   // ==================== ВТБ ====================
   {
@@ -878,3 +878,4 @@ export const bankOffers: BankOffer[] = [
     subsidyCalculationMethod: "standard",
   },
 ];
+ */
