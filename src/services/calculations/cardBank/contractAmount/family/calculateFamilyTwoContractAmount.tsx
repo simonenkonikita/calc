@@ -20,9 +20,7 @@ export const calculateFamilyTwoContractAmount = (
 ): ContractAmountResult => {
   const limit = variables.familyMortgageLimit || 6000000;
   const maxLimit = variables.maxFamilyMortgageSum || 15000000;
-
-  // 🔥 ИСПРАВЛЕНО: используем субсидию из coefficients (она уже динамическая)
-  const subsidyPercent = coefficients.subsidyPercent;
+  const subsidyPercent = bankOffer.subsidyPercent;
   const subsidyRate = subsidyPercent / 100;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
@@ -81,7 +79,8 @@ export const calculateFamilyTwoContractAmount = (
         }
       } else {
         if (downPayment <= userDesiredDownPayment) {
-          contractAmount = objectCost + (maxLimit - limit) * subsidyRate;
+          contractAmount =
+            objectCost + (maxLimit - limit) * (subsidyPercent / 100);
         } else if (downPayment > baseContractAmount - maxLimit) {
           contractAmount = summCreditFamilyTwo;
         } else {
@@ -91,15 +90,16 @@ export const calculateFamilyTwoContractAmount = (
     }
   }
 
-  // 🔥 ВЫЧИСЛЯЕМ ВТОРОЙ ДОГОВОР
-  const firstContractAmount = Math.min(limit, contractAmount - downPayment);
-  const secondContractAmount = Math.max(
-    0,
-    contractAmount - downPayment - limit,
+  const firstContractAmount = 6000000;
+
+  const secondContractAmount =
+    contractAmount * cafsummCred - firstContractAmount;
+
+  console.log(
+    `"2 договора"${contractAmount * cafsummCred}  ${secondContractAmount}`,
   );
 
-  // 🔥 ПЕРЕСЧИТЫВАЕМ КОЭФФИЦИЕНТЫ С ДИНАМИЧЕСКОЙ СУБСИДИЕЙ (второй проход)
-  const actualCoefficients = calculateBankCoefficients(
+  const actyalCoefficients = calculateBankCoefficients(
     variables,
     objectCost,
     bankOffer,
@@ -107,67 +107,52 @@ export const calculateFamilyTwoContractAmount = (
     secondContractAmount,
   );
 
-  // 🔥 ИСПРАВЛЕНО: используем динамическую субсидию из actualCoefficients
-  const actualSubsidyPercent = actualCoefficients.subsidyPercent;
-  const actualSubsidyRate = actualSubsidyPercent / 100;
-  const actualSummCreditFamilyTwo =
-    objectCost * actualCoefficients.requiredCoeffFamilyTwo;
+  let contractAmount1: number;
 
-  let finalContractAmount: number;
+  const summCreditFamilyTwo2 =
+    objectCost * actyalCoefficients.requiredCoeffFamilyTwo;
 
   if (isThresholdCondition) {
     if (noSubsidyInflate) {
       if (isWithinLimit) {
-        finalContractAmount = Math.ceil((objectCost - downPayment) / 0.799);
+        contractAmount1 = Math.ceil((objectCost - downPayment) / 0.799);
       } else {
-        finalContractAmount = Math.ceil((objectCost - downPayment) / 0.799);
+        contractAmount1 = Math.ceil((objectCost - downPayment) / 0.799);
       }
     } else {
       if (isWithinLimit) {
-        finalContractAmount = actualSummCreditFamilyTwo / 0.799;
+        contractAmount1 = summCreditFamilyTwo2 / 0.799;
       } else {
-        finalContractAmount = actualSummCreditFamilyTwo / 0.799;
+        contractAmount1 = summCreditFamilyTwo2 / 0.799;
       }
     }
   } else {
     if (noSubsidyInflate) {
-      finalContractAmount = Math.ceil(objectCost);
+      contractAmount1 = Math.ceil(objectCost);
     } else {
       if (isWithinLimit) {
         if (downPayment <= userDesiredDownPayment) {
-          finalContractAmount = actualSummCreditFamilyTwo;
+          contractAmount1 = summCreditFamilyTwo2;
         } else {
-          finalContractAmount = actualSummCreditFamilyTwo;
+          contractAmount1 = summCreditFamilyTwo2;
         }
       } else {
         if (downPayment <= userDesiredDownPayment) {
-          finalContractAmount =
-            objectCost + (maxLimit - limit) * actualSubsidyRate;
+          contractAmount1 =
+            objectCost + (maxLimit - limit) * (subsidyPercent / 100);
         } else if (downPayment > baseContractAmount - maxLimit) {
-          finalContractAmount = actualSummCreditFamilyTwo;
+          contractAmount1 = summCreditFamilyTwo2;
         } else {
-          finalContractAmount = actualSummCreditFamilyTwo;
+          contractAmount1 = summCreditFamilyTwo2;
         }
       }
     }
   }
-
-  // 🔥 Пересчитываем суммы договоров для финального результата
-  const finalFirstContract = Math.min(limit, finalContractAmount - downPayment);
-  const finalSecondContract = Math.max(
-    0,
-    finalContractAmount - downPayment - limit,
+  console.log(
+    `"2 договора"${contractAmount1 * cafsummCred}  ${secondContractAmount}`,
   );
 
-  console.log(`"2 договора" финальный результат:`, {
-    contractAmount: finalContractAmount,
-    firstContract: finalFirstContract,
-    secondContract: finalSecondContract,
-    subsidyPercent: actualSubsidyPercent,
-    requiredCoeffFamilyTwo: actualCoefficients.requiredCoeffFamilyTwo,
-  });
-
   return {
-    contractAmount: Math.ceil(finalContractAmount),
+    contractAmount: Math.ceil(contractAmount1),
   };
 };

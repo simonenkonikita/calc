@@ -368,6 +368,15 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 14,
     minPVPercent: minPVPercent,
   },
+  // Семейная ипотека
+  {
+    bank: "Альфа-Банк",
+    program: "Семейная базовая",
+    type: "family",
+    rate: 6,
+    subsidyPercent: 0,
+    minPVPercent: minPVPercent,
+  },
 
   // ==================== СОВКОМБАНК ====================
   {
@@ -395,9 +404,7 @@ export const bankOffers: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: minPVPercent,
     isTwoContracts: true,
-    // 🔥 Динамические субсидии в зависимости от суммы кредита
     dynamicSubsidyPercent: [
-      // Сумма от 8 млн и выше
       {
         conditionFn: (pv, amount) => amount >= 8000000,
         subsidyPercent: 0.1, // 0.10%
@@ -455,6 +462,75 @@ export const bankOffers: BankOffer[] = [
       },
     ],
   },
+  {
+    bank: "Совкомбанк",
+    program: "Семейная ипотека (2 договора)",
+    type: "family",
+    rate: 6,
+    twoRate: 11.9,
+    subsidyPercent: 0,
+    minPVPercent: minPVPercent,
+    isTwoContracts: true,
+    // 🔥 Динамические субсидии в зависимости от суммы кредита
+    dynamicSubsidyPercent: [
+      // Сумма от 8 млн и выше
+      {
+        conditionFn: (pv, amount) => amount >= 8000000,
+        subsidyPercent: 23.5, // 0.10%
+        priority: 8,
+        description: "Сумма ≥ 8 млн → 0.10%",
+      },
+      // Сумма от 7 до 8 млн
+      {
+        conditionFn: (pv, amount) => amount >= 7000000 && amount < 8000000,
+        subsidyPercent: 24,
+        priority: 7,
+        description: "Сумма от 7 до 8 млн → 0.10%",
+      },
+      // Сумма от 6 до 7 млн
+      {
+        conditionFn: (pv, amount) => amount >= 6000000 && amount < 7000000,
+        subsidyPercent: 24.5,
+        priority: 6,
+        description: "Сумма от 6 до 7 млн → 0.10%",
+      },
+      // Сумма от 5 до 6 млн
+      {
+        conditionFn: (pv, amount) => amount >= 5000000 && amount < 6000000,
+        subsidyPercent: 25.5,
+        priority: 5,
+        description: "Сумма от 5 до 6 млн → 0.10%",
+      },
+      // Сумма от 4 до 5 млн
+      {
+        conditionFn: (pv, amount) => amount >= 4000000 && amount < 5000000,
+        subsidyPercent: 27.5, // 0.50%
+        priority: 4,
+        description: "Сумма от 4 до 5 млн → 0.50%",
+      },
+      // Сумма от 3 до 4 млн
+      {
+        conditionFn: (pv, amount) => amount >= 3000000 && amount < 4000000,
+        subsidyPercent: 30.5, // 4.00%
+        priority: 3,
+        description: "Сумма от 3 до 4 млн → 4.00%",
+      },
+      // Сумма от 2 до 3 млн
+      {
+        conditionFn: (pv, amount) => amount >= 2000000 && amount < 3000000,
+        subsidyPercent: 37.5, // 9.50%
+        priority: 2,
+        description: "Сумма от 2 до 3 млн → 9.50%",
+      },
+      // Сумма от 1.5 до 2 млн
+      {
+        conditionFn: (pv, amount) => amount >= 1500000 && amount < 2000000,
+        subsidyPercent: 46, // 16.00%
+        priority: 1,
+        description: "Сумма от 1.5 до 2 млн → 16.00%",
+      },
+    ],
+  },
   /*   {
     bank: "Совкомбанк",
     program: "Семейная ипотека сверхлимит 6%",
@@ -489,7 +565,7 @@ export const bankOffers: BankOffer[] = [
     bank: "ВТБ",
     program: "Базовая",
     type: "full",
-    rate: baseRateVTB, // 19.9%
+    rate: baseRateVTB,
     subsidyPercent: 0,
     minPVPercent: minPVPercent,
   },
@@ -523,7 +599,176 @@ export const bankOffers: BankOffer[] = [
     durationMonths: 12,
     subsidyCalculationMethod: "standard",
   },
-
+  // Семейная ипотека
+  {
+    bank: "ВТБ",
+    program: "Семейная базовая",
+    type: "family",
+    rate: 6,
+    subsidyPercent: 0,
+    minPVPercent: minPVPercent,
+  },
+  {
+    bank: "ВТБ",
+    program: "Семейная ипотека сверхлимит",
+    type: "family",
+    rate: 7.17,
+    subsidyPercent: 0,
+    minPVPercent: minPVPercent,
+    excessLimit: true,
+    dynamicRates: [
+      {
+        conditionFn: (pv, amount) => amount >= 6150000 && amount < 6200000,
+        rate: 7.17,
+        priority: 1,
+        description: "Сумма 6.15–6.2 млн → 7.17%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 6200000 && amount < 6300000,
+        rate: 7.55,
+        priority: 1,
+        description: "Сумма 6.2–6.3 млн → 7.55%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 6300000 && amount < 6400000,
+        rate: 7.71,
+        priority: 1,
+        description: "Сумма 6.3–6.4 млн → 7.71%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 6400000 && amount < 6500000,
+        rate: 8.06,
+        priority: 1,
+        description: "Сумма 6.4–6.5 млн → 8.06%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 6500000 && amount < 6600000,
+        rate: 8.44,
+        priority: 1,
+        description: "Сумма 6.5–6.6 млн → 8.44%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 6600000 && amount < 6700000,
+        rate: 8.8,
+        priority: 1,
+        description: "Сумма 6.6–6.7 млн → 8.80%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 6700000 && amount < 6800000,
+        rate: 9.15,
+        priority: 1,
+        description: "Сумма 6.7–6.8 млн → 9.15%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 6800000 && amount < 6900000,
+        rate: 9.5,
+        priority: 1,
+        description: "Сумма 6.8–6.9 млн → 9.50%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 6900000 && amount < 7000000,
+        rate: 9.19,
+        priority: 1,
+        description: "Сумма 6.9–7.0 млн → 9.19%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 7000000 && amount < 7500000,
+        rate: 9.96,
+        priority: 1,
+        description: "Сумма 7.0–7.5 млн → 9.96%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 7500000 && amount < 8000000,
+        rate: 10.63,
+        priority: 1,
+        description: "Сумма 7.5–8.0 млн → 10.63%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 8000000 && amount < 8500000,
+        rate: 11.24,
+        priority: 1,
+        description: "Сумма 8.0–8.5 млн → 11.24%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 8500000 && amount < 9000000,
+        rate: 11.77,
+        priority: 1,
+        description: "Сумма 8.5–9.0 млн → 11.77%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 9000000 && amount < 9500000,
+        rate: 12.23,
+        priority: 1,
+        description: "Сумма 9.0–9.5 млн → 12.23%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 9500000 && amount < 10000000,
+        rate: 12.64,
+        priority: 1,
+        description: "Сумма 9.5–10.0 млн → 12.64%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 10000000 && amount < 10500000,
+        rate: 13.03,
+        priority: 1,
+        description: "Сумма 10.0–10.5 млн → 13.03%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 10500000 && amount < 11000000,
+        rate: 13.41,
+        priority: 1,
+        description: "Сумма 10.5–11.0 млн → 13.41%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 11000000 && amount < 11500000,
+        rate: 13.7,
+        priority: 1,
+        description: "Сумма 11.0–11.5 млн → 13.70%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 11500000 && amount < 12000000,
+        rate: 14.0,
+        priority: 1,
+        description: "Сумма 11.5–12.0 млн → 14.00%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 12000000 && amount < 12500000,
+        rate: 14.27,
+        priority: 1,
+        description: "Сумма 12.0–12.5 млн → 14.27%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 12500000 && amount < 13000000,
+        rate: 14.51,
+        priority: 1,
+        description: "Сумма 12.5–13.0 млн → 14.51%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 13000000 && amount < 13500000,
+        rate: 14.78,
+        priority: 1,
+        description: "Сумма 13.0–13.5 млн → 14.78%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 13500000 && amount < 14000000,
+        rate: 14.97,
+        priority: 1,
+        description: "Сумма 13.5–14.0 млн → 14.97%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 14000000 && amount < 14500000,
+        rate: 15.14,
+        priority: 1,
+        description: "Сумма 14.0–14.5 млн → 15.14%",
+      },
+      {
+        conditionFn: (pv, amount) => amount >= 14500000 && amount < 15000000,
+        rate: 15.36,
+        priority: 1,
+        description: "Сумма 14.5–15.0 млн → 15.36%",
+      },
+    ],
+  },
   // ==================== УРАЛСИБ ====================
   {
     bank: "Уралсиб",

@@ -2,21 +2,6 @@ import { HousingComplexPrice } from "../utils/types";
 
 export const housingPrices: HousingComplexPrice[] = [
   {
-    complexName: "ЖК Сады у моря 1/2 (Акция 130 000)",
-    apartmentType: "Студия",
-    pricePerSquareMeter: 130000,
-  },
-  {
-    complexName: "ЖК Сады у моря 1/2 (Акция 130 000)",
-    apartmentType: "Однокомнатная квартира",
-    pricePerSquareMeter: 130000,
-  },
-  {
-    complexName: "ЖК Сады у моря 1/2 (Акция 130 000)",
-    apartmentType: "Двухкомнатная квартира",
-    pricePerSquareMeter: 130000,
-  },
-  {
     complexName: "ЖК Сады у моря 3",
     apartmentType: "Студия",
     pricePerSquareMeter: 140000,
@@ -30,6 +15,21 @@ export const housingPrices: HousingComplexPrice[] = [
     complexName: "ЖК Сады у моря 3",
     apartmentType: "Двухкомнатная квартира",
     pricePerSquareMeter: 140000,
+  },
+  {
+    complexName: "ЖК Сады у моря 1/2 (Акция 130 000)",
+    apartmentType: "Студия",
+    pricePerSquareMeter: 130000,
+  },
+  {
+    complexName: "ЖК Сады у моря 1/2 (Акция 130 000)",
+    apartmentType: "Однокомнатная квартира",
+    pricePerSquareMeter: 130000,
+  },
+  {
+    complexName: "ЖК Сады у моря 1/2 (Акция 130 000)",
+    apartmentType: "Двухкомнатная квартира",
+    pricePerSquareMeter: 130000,
   },
   {
     complexName: "ЖК Лермонтов",
