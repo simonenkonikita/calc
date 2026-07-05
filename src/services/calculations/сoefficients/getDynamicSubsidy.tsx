@@ -63,11 +63,6 @@ export const getDynamicSubsidy = (
   mortgageAmount: number,
   loanTerm: number = 30,
 ): number => {
-  // 🔥 1. Проверяем наличие dynamicSubsidyCalculator
-  if (bankOffer.dynamicSubsidyCalculator) {
-    return bankOffer.dynamicSubsidyCalculator(mortgageAmount);
-  }
-
   // 🔥 2. Проверяем наличие dynamicSubsidyPercent
   if (
     bankOffer.dynamicSubsidyPercent &&
