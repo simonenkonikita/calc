@@ -1,4 +1,5 @@
 import { BankOffer, BankCoefficients, Variables } from "../../../utils/types";
+import { getDynamicSubsidy } from "./getDynamicSubsidy";
 
 // ========== РАСЧЕТ КОЭФФИЦИЕНТОВ БАНКА ==========
 export const calculateBankCoefficients = (
@@ -6,10 +7,25 @@ export const calculateBankCoefficients = (
   objectCost: number,
   bankOffer: BankOffer,
   userDownPaymentPercent: number,
+  secondContractAmount?: number,
 ): BankCoefficients => {
   const downPaymentPercent = userDownPaymentPercent;
   const mortgagePercent = 100 - downPaymentPercent;
-  const subsidyPercent = bankOffer.subsidyPercent;
+  let subsidyPercent = bankOffer.subsidyPercent;
+
+  // Если есть второй договор (для Совкомбанка) - используем динамическую субсидию
+  if (secondContractAmount !== undefined && secondContractAmount > 0) {
+    // Субсидия зависит от суммы второго договора (рыночной части)
+    const dynamicSubsidy = getDynamicSubsidy(
+      bankOffer,
+      userDownPaymentPercent,
+      secondContractAmount,
+      30, // срок в годах
+    );
+    if (dynamicSubsidy !== undefined) {
+      subsidyPercent = dynamicSubsidy;
+    }
+  }
 
   const kefDownPayment = downPaymentPercent / mortgagePercent;
   const creditFromSubsidyPercent = 100 - subsidyPercent;

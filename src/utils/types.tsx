@@ -67,12 +67,11 @@ export interface DynamicRateRule {
   type?: "pv" | "amount" | "term";
   condition?: "gte" | "lte" | "lt" | "gt" | "eq";
   value?: number;
-
   // Для сложных условий (функции)
   conditionFn?: (pv: number, amount: number, term: number) => boolean;
   rateFn?: (baseRate: number, pv: number, amount: number) => number;
-
   // Результат
+  subsidyPercent?: number;
   rate?: number;
   priority?: number;
   description?: string;
@@ -92,7 +91,7 @@ export interface BankOffer {
   shortRate?: number; //
   subsidyCalculationMethod?: "onlyPercent" | "standard";
   dynamicRates?: DynamicRateRule[];
-  dynamicRateCalculator?: (mortgageAmount: number) => number;
+  dynamicSubsidyPercent?: DynamicRateRule[];
 }
 
 // ========== РЕЗУЛЬТАТ РАСЧЕТА ПО ОДНОЙ ПРОГРАММЕ ==========

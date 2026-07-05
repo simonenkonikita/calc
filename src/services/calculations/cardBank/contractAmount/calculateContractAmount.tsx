@@ -9,7 +9,6 @@ import { calculateFamilyExcessLimitContractAmount } from "./family/calculateFami
 import { calculateFamilyTwoContractAmount } from "./family/calculateFamilyTwoContractAmount";
 import { calculateStandardContractAmount } from "./standard/calculateStandardContractAmount";
 
-// ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ==========
 export const calculateContractAmount = (
   objectCost: number,
   downPayment: number,

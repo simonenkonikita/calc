@@ -11,6 +11,7 @@ import {
   calculateTwoContractsMonthlyPayment,
 } from "./payment/calculateMonthlyPayment";
 import { calculateSubsidyPayments } from "./payment/subsidy/calculateSubsidyPayments";
+import { getDynamicSubsidy } from "../сoefficients/getDynamicSubsidy";
 
 // ========== РАСЧЕТ ВСЕХ ПАРАМЕТРОВ ПО БАНКОВСКОЙ ПРОГРАММЕ ==========
 export const calculateBankProgram = (
@@ -147,23 +148,55 @@ export const calculateBankProgram = (
     loanTermYears,
   );
 
+  // 🔥 8. ОПРЕДЕЛЯЕМ АКТУАЛЬНУЮ СУБСИДИЮ
+  let actualSubsidyPercent = bankOffer.subsidyPercent;
+
+  // Для 2 договоров - субсидия зависит от суммы второго договора (рыночной части)
+  if (isTwoContracts && secondContractAmount && secondContractAmount > 0) {
+    const dynamicSubsidy = getDynamicSubsidy(
+      bankOffer,
+      pvForRate,
+      secondContractAmount,
+      loanTermYears,
+    );
+    if (dynamicSubsidy !== undefined) {
+      actualSubsidyPercent = dynamicSubsidy;
+    }
+  }
+  // Если есть dynamicSubsidyPercent и это не 2 договора
+  else if (
+    bankOffer.dynamicSubsidyPercent &&
+    bankOffer.dynamicSubsidyPercent.length > 0
+  ) {
+    const dynamicSubsidy = getDynamicSubsidy(
+      bankOffer,
+      pvForRate,
+      mortgageAmount.mortgageAmount,
+      loanTermYears,
+    );
+    if (dynamicSubsidy !== undefined) {
+      actualSubsidyPercent = dynamicSubsidy;
+    }
+  }
+
   let subsidyAmount: number;
 
   // 8. Сумма субсидии
   if (isTwoContracts) {
-    subsidyAmount =
-      (mortgageAmount.mortgageAmount - 6000000) *
-      (bankOffer.subsidyPercent / 100);
+    // Для 2 договоров субсидия только на рыночную часть (второй договор)
+    const secondContract = secondContractAmount || 0;
+    subsidyAmount = secondContract * (actualSubsidyPercent / 100); // ✅ Используем actualSubsidyPercent
   } else {
     subsidyAmount =
-      mortgageAmount.mortgageAmount * (bankOffer.subsidyPercent / 100);
+      mortgageAmount.mortgageAmount * (actualSubsidyPercent / 100); // ✅ Используем actualSubsidyPercent
   }
+
   // 9. Сверхлимит и коррекция субсидии
   let excessLimit: number | undefined;
   if (bankOffer.excessLimit) {
     if (bankOffer.type === "family") {
       const maxSubsidy =
-        variables.familyMortgageLimit * (bankOffer.subsidyPercent / 100);
+        variables.familyMortgageLimit * (actualSubsidyPercent / 100);
       if (subsidyAmount > maxSubsidy) {
         subsidyAmount = maxSubsidy;
         excessLimit =
@@ -172,7 +205,7 @@ export const calculateBankProgram = (
       }
     } else if (bankOffer.type === "it") {
       const maxSubsidy =
-        variables.itMortgageLimit * (bankOffer.subsidyPercent / 100);
+        variables.itMortgageLimit * (actualSubsidyPercent / 100);
       if (subsidyAmount > maxSubsidy) {
         subsidyAmount = maxSubsidy;
         excessLimit = mortgageAmount.mortgageAmount - variables.itMortgageLimit;
@@ -275,7 +308,7 @@ export const calculateBankProgram = (
     twoRate: bankOffer.twoRate,
     isTwoContracts: isTwoContracts,
     shortRate: bankOffer.shortRate,
-    subsidyPercent: bankOffer.subsidyPercent,
+    subsidyPercent: actualSubsidyPercent,
     durationMonths:
       bankOffer.type === "short" ? bankOffer.durationMonths : loanTermMonths,
     monthlyPayment: Math.ceil(monthlyPayment),

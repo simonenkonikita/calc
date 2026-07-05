@@ -16,10 +16,11 @@ export const calculateFamilyTwoContractAmount = (
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
+  actualSubsidyPercent?: number,
 ): ContractAmountResult => {
   const limit = variables.familyMortgageLimit || 6000000;
   const maxLimit = variables.maxFamilyMortgageSum || 15000000;
-  const subsidyPercent = bankOffer.subsidyPercent;
+  const subsidyPercent = actualSubsidyPercent ?? bankOffer.subsidyPercent;
   const subsidyRate = subsidyPercent / 100;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
