@@ -1,13 +1,17 @@
 import { BankOffer, Variables, BankProgramResult } from "../../../utils/types";
-import { calculateClientContribution } from "../result/calculateClientContribution";
-import { calculateContractAmount } from "../contractAmount/calculateContractAmount";
-import { calculateMortgageAmount } from "../result/calculateMortgageAmount";
-import { calculateOwnFunds } from "../result/calculateOwnFunds";
-import { calculateDeveloperAccount } from "../result/calculateDeveloperAccount";
-import { calculateDownPaymentAmount } from "../downPayment/сalculateDownPaymentAmount";
+import { calculateClientContribution } from "./clientContribution/calculateClientContribution";
+import { calculateContractAmount } from "./contractAmount/calculateContractAmount";
+import { calculateMortgageAmount } from "./mortgageAmount/calculateMortgageAmount";
+import { calculateOwnFunds } from "./ownFunds/calculateOwnFunds";
+import { calculateDeveloperAccount } from "./developerAccount/calculateDeveloperAccount";
+import { calculateDownPaymentAmount } from "./downPayment/сalculateDownPaymentAmount";
 import { getDynamicRate } from "../сoefficients/getDynamicRate";
-import { calculateMonthlyPayment } from "../payment/calculateMonthlyPayment";
-import { calculateSubsidyPayments } from "../payment/subsidy/calculateSubsidyPayments";
+import {
+  calculateMonthlyPayment,
+  calculateTwoContractsMonthlyPayment,
+} from "./payment/calculateMonthlyPayment";
+import { calculateSubsidyPayments } from "./payment/subsidy/calculateSubsidyPayments";
+import { getDynamicSubsidy } from "../сoefficients/getDynamicSubsidy";
 
 // ========== РАСЧЕТ ВСЕХ ПАРАМЕТРОВ ПО БАНКОВСКОЙ ПРОГРАММЕ ==========
 export const calculateBankProgram = (
@@ -25,7 +29,8 @@ export const calculateBankProgram = (
   area: number,
 ): BankProgramResult => {
   const isFamilyOrIt = bankOffer.type === "family" || bankOffer.type === "it";
-
+  const isTwoContracts =
+    bankOffer.type === "family" && bankOffer.isTwoContracts === true;
   const isSpecialMortgageMode =
     mortgageWithoutDownPayment || mortgagePartialDownPayment;
 
@@ -43,10 +48,13 @@ export const calculateBankProgram = (
   );
 
   const contractAmount = contractResult.contractAmount;
-  const isLimitExceeded = contractResult.isLimitExceeded;
 
   // 2. Завышение
   const overstatement = contractAmount - objectCost;
+
+  if (isTwoContracts) {
+    console.log(contractAmount, objectCost, overstatement);
+  }
 
   // 3. Расчет суммы ПВ
   const downPaymentAmount = calculateDownPaymentAmount({
@@ -90,7 +98,7 @@ export const calculateBankProgram = (
     // СЕМЕЙНАЯ/ИТ — используем сложную формулу с лимитами
     clientContribution = calculateClientContribution({
       objectCost,
-      downPaymentAmount,
+      downPaymentAmount: downPaymentAmount,
       ownFunds,
       userDownPaymentPercent,
       bankOffer,
@@ -99,7 +107,7 @@ export const calculateBankProgram = (
     });
   } else {
     // ОБЫЧНАЯ ИПОТЕКА (full, short) — простая формула
-    clientContribution = downPaymentAmount;
+    clientContribution = downPaymentAmount - ownFunds;
   }
 
   // 6. ПВ в процентах
@@ -111,13 +119,23 @@ export const calculateBankProgram = (
     contractAmount,
     downPayment,
     remainingAmount,
-    downPaymentAmount,
+    downPaymentAmount: downPaymentAmount,
     userDownPaymentPercent,
     bankOffer,
     variables,
     isFamilyOrIt,
     isSpecialMortgageMode,
   });
+
+  const firstContractAmount = isTwoContracts
+    ? Math.min(mortgageAmount.mortgageAmount, 6000000)
+    : undefined;
+
+  const secondContractAmount = isTwoContracts
+    ? Math.max(0, mortgageAmount.mortgageAmount - 6000000)
+    : undefined;
+
+  const isLimitExceeded = mortgageAmount.isLimitExceeded;
 
   // ✅ 4. Получаем актуальную ставку через getDynamicRate
   const pvForRate =
@@ -128,30 +146,71 @@ export const calculateBankProgram = (
   const actualRate = getDynamicRate(
     bankOffer,
     pvForRate,
-    mortgageAmount,
+    mortgageAmount.mortgageAmount,
     loanTermYears,
   );
 
+  // 🔥 8. ОПРЕДЕЛЯЕМ АКТУАЛЬНУЮ СУБСИДИЮ
+  let actualSubsidyPercent = bankOffer.subsidyPercent;
+
+  // Для 2 договоров - субсидия зависит от суммы второго договора (рыночной части)
+  if (isTwoContracts && secondContractAmount && secondContractAmount > 0) {
+    const dynamicSubsidy = getDynamicSubsidy(
+      bankOffer,
+      pvForRate,
+      secondContractAmount,
+      loanTermYears,
+    );
+    if (dynamicSubsidy !== undefined) {
+      actualSubsidyPercent = dynamicSubsidy;
+    }
+  }
+  // Если есть dynamicSubsidyPercent и это не 2 договора
+  else if (
+    bankOffer.dynamicSubsidyPercent &&
+    bankOffer.dynamicSubsidyPercent.length > 0
+  ) {
+    const dynamicSubsidy = getDynamicSubsidy(
+      bankOffer,
+      pvForRate,
+      mortgageAmount.mortgageAmount,
+      loanTermYears,
+    );
+    if (dynamicSubsidy !== undefined) {
+      actualSubsidyPercent = dynamicSubsidy;
+    }
+  }
+
+  let subsidyAmount: number;
+
   // 8. Сумма субсидии
-  let subsidyAmount = mortgageAmount * (bankOffer.subsidyPercent / 100);
+  if (isTwoContracts) {
+    // Для 2 договоров субсидия только на рыночную часть (второй договор)
+    const secondContract = secondContractAmount || 0;
+    subsidyAmount = secondContract * (actualSubsidyPercent / 100); // ✅ Используем actualSubsidyPercent
+  } else {
+    subsidyAmount =
+      mortgageAmount.mortgageAmount * (actualSubsidyPercent / 100); // ✅ Используем actualSubsidyPercent
+  }
 
   // 9. Сверхлимит и коррекция субсидии
   let excessLimit: number | undefined;
   if (bankOffer.excessLimit) {
     if (bankOffer.type === "family") {
       const maxSubsidy =
-        variables.familyMortgageLimit * (bankOffer.subsidyPercent / 100);
+        variables.familyMortgageLimit * (actualSubsidyPercent / 100);
       if (subsidyAmount > maxSubsidy) {
         subsidyAmount = maxSubsidy;
-        excessLimit = mortgageAmount - variables.familyMortgageLimit;
+        excessLimit =
+          mortgageAmount.mortgageAmount - variables.familyMortgageLimit;
         if (excessLimit < 0) excessLimit = 0;
       }
     } else if (bankOffer.type === "it") {
       const maxSubsidy =
-        variables.itMortgageLimit * (bankOffer.subsidyPercent / 100);
+        variables.itMortgageLimit * (actualSubsidyPercent / 100);
       if (subsidyAmount > maxSubsidy) {
         subsidyAmount = maxSubsidy;
-        excessLimit = mortgageAmount - variables.itMortgageLimit;
+        excessLimit = mortgageAmount.mortgageAmount - variables.itMortgageLimit;
         if (excessLimit < 0) excessLimit = 0;
       }
     }
@@ -168,20 +227,21 @@ export const calculateBankProgram = (
       ownFunds,
       downPayment,
       remainingAmount,
-      mortgageAmount,
+      mortgageAmount: mortgageAmount.mortgageAmount,
       subsidyAmount,
       contractAmount,
       userDownPaymentPercent,
       bankOffer,
       variables,
       isSpecialMortgageMode: isSpecialMortgageMode,
-      downPaymentAmount,
+      downPaymentAmount: downPaymentAmount,
       noSubsidyInflate,
     });
   } else {
     // ОБЫЧНАЯ ИПОТЕКА (full, short) — простая формула
     if (isSpecialMortgageMode) {
-      developerAccount = ownFunds + mortgageAmount - subsidyAmount;
+      developerAccount =
+        ownFunds + mortgageAmount.mortgageAmount - subsidyAmount;
     } else {
       developerAccount = contractAmount - subsidyAmount;
     }
@@ -206,9 +266,13 @@ export const calculateBankProgram = (
   let monthlyPayment: number;
   let monthlyPaymentAfter: number | null = null;
 
+  let firstContractPayment: number = 0;
+  let secondContractPayment: number = 0;
+  let totalMonthlyPayment: number = 0;
+
   if (isShortSubsidy && bankOffer.shortRate !== undefined) {
     const result = calculateSubsidyPayments(
-      mortgageAmount,
+      mortgageAmount.mortgageAmount,
       bankOffer.shortRate,
       actualRate,
       loanTermMonths,
@@ -217,9 +281,22 @@ export const calculateBankProgram = (
     );
     monthlyPayment = result.monthlyPaymentSubsidy;
     monthlyPaymentAfter = result.monthlyPaymentAfter;
+  } else if (isTwoContracts && bankOffer.twoRate !== undefined) {
+    // Используем новую функцию для расчета двух договоров
+    const result = calculateTwoContractsMonthlyPayment(
+      mortgageAmount.mortgageAmount,
+      bankOffer.twoRate,
+      actualRate,
+      loanTermMonths,
+    );
+
+    firstContractPayment = result.firstContractPayment;
+    secondContractPayment = result.secondContractPayment;
+    totalMonthlyPayment = result.totalMonthlyPayment;
+    monthlyPayment = totalMonthlyPayment;
   } else {
     monthlyPayment = calculateMonthlyPayment(
-      mortgageAmount,
+      mortgageAmount.mortgageAmount,
       actualRate,
       loanTermMonths,
     );
@@ -230,11 +307,16 @@ export const calculateBankProgram = (
     program: bankOffer.program,
     type: bankOffer.type,
     rate: actualRate,
+    twoRate: bankOffer.twoRate,
+    isTwoContracts: isTwoContracts,
     shortRate: bankOffer.shortRate,
-    subsidyPercent: bankOffer.subsidyPercent,
+    subsidyPercent: actualSubsidyPercent,
     durationMonths:
       bankOffer.type === "short" ? bankOffer.durationMonths : loanTermMonths,
     monthlyPayment: Math.ceil(monthlyPayment),
+    firstContractPayment: firstContractPayment,
+    secondContractPayment: secondContractPayment,
+    totalMonthlyPayment: totalMonthlyPayment,
     overstatement: Math.ceil(overstatement),
     contractAmount: Math.ceil(contractAmount),
     downPaymentAmount: Math.ceil(downPaymentAmount),
@@ -243,7 +325,7 @@ export const calculateBankProgram = (
     downPaymentPercent: Number(downPaymentPercentCalc.toFixed(1)),
     minPVPercent: bankOffer.minPVPercent,
     excessLimit: excessLimit ? Math.ceil(excessLimit) : undefined,
-    mortgageAmount: Math.ceil(mortgageAmount),
+    mortgageAmount: Math.ceil(mortgageAmount.mortgageAmount),
     subsidyAmount: Math.ceil(subsidyAmount),
     developerAccount: Math.ceil(developerAccount),
     pricePerM2: pricePerM2 !== null ? Math.ceil(pricePerM2) : null,
@@ -251,5 +333,7 @@ export const calculateBankProgram = (
       ? Math.ceil(monthlyPaymentAfter)
       : undefined,
     isLimitExceeded: isLimitExceeded,
+    firstContractAmount,
+    secondContractAmount,
   };
 };

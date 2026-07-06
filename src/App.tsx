@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Navigation from "./components/Navigation";
 import MortgageCalculator from "./pages/MortgageCalculator";
-import { CoefficientsPage } from "./pages/CoefficientsPage/CoefficientsPage";
 
 const Home = () => {
   return (
@@ -29,7 +28,6 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/calculator" element={<MortgageCalculator />} />
         <Route path="/results" element={<Results />} />
-        <Route path="/coefficients" element={<CoefficientsPage />} />
       </Routes>
     </>
   );

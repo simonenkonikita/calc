@@ -14,11 +14,14 @@ export const calculateDownPayment = (
     downPaymentPercent,
   } = formData;
 
-  const minDownPayment = objectCost * (minPVPercent / 100); // Мин ПВ в рублях
-  const calculatedPercentDown = objectCost * (downPaymentPercent / 100); // Мин ПВ указанный в  %
+  const minDownPayment = objectCost * (minPVPercent / 100);
+  const calculatedPercentDown = objectCost * (downPaymentPercent / 100);
 
   // Ипотека без ПВ
   if (mortgageWithoutDownPayment || mortgagePartialDownPayment) {
+    if (manualDownPayment >= objectCost) {
+      return objectCost;
+    }
     // Если ручной ввод больше чем минимальный
     if (manualDownPayment > minDownPayment) {
       return minDownPayment;
@@ -28,6 +31,9 @@ export const calculateDownPayment = (
 
   // Если есть ручной ввод ПВ
   if (manualDownPayment && manualDownPayment > 0) {
+    if (manualDownPayment >= objectCost) {
+      return objectCost;
+    }
     // Проверяем, что ручной ввод в допустимых пределах
     if (
       manualDownPayment >= minDownPayment &&

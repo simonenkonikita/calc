@@ -62,11 +62,6 @@ export const getDynamicRate = (
   mortgageAmount: number,
   loanTerm: number = 30,
 ): number => {
-  // 🔥 1. Проверяем наличие dynamicRateCalculator (для сверхлимита и сложных расчетов)
-  if (bankOffer.dynamicRateCalculator) {
-    return bankOffer.dynamicRateCalculator(mortgageAmount);
-  }
-
   // 🔥 2. Проверяем наличие dynamicRates
   if (bankOffer.dynamicRates && bankOffer.dynamicRates.length > 0) {
     // Сортируем по приоритету (от большего к меньшему)
@@ -108,13 +103,6 @@ export const getDynamicRateInfo = (
   matchedRule?: DynamicRateRule;
 } => {
   // Проверяем calculator
-  if (bankOffer.dynamicRateCalculator) {
-    return {
-      rate: bankOffer.dynamicRateCalculator(mortgageAmount),
-      source: "calculator",
-      description: "Динамический калькулятор ставок",
-    };
-  }
 
   // Проверяем dynamicRates
   if (bankOffer.dynamicRates && bankOffer.dynamicRates.length > 0) {
@@ -149,14 +137,6 @@ export const getDynamicRateInfo = (
     source: "base",
     description: "Базовая ставка",
   };
-};
-
-// 🔥 Функция для проверки, является ли ставка динамической
-export const isDynamicRate = (bankOffer: BankOffer): boolean => {
-  return !!(
-    bankOffer.dynamicRateCalculator ||
-    (bankOffer.dynamicRates && bankOffer.dynamicRates.length > 0)
-  );
 };
 
 // 🔥 Функция для получения всех возможных ставок (для отображения матрицы)

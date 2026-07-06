@@ -5,7 +5,7 @@ import type {
   ObjectCalculationResult,
   BankProgramResult,
 } from "../utils/types";
-import { bankOffers } from "../data/bankOffers";
+import { bankOffers } from "../data/banks";
 import { housingPrices } from "../data/calculatorData";
 import { variables } from "../data/limitdDate";
 import { calculateFullMortgage } from "../services/calculations/result/calculateFullMortgage";
@@ -41,7 +41,6 @@ const getPricePerSquareMeter = (
   return found.pricePerSquareMeter;
 };
 
-// Функция для получения наценки за ипотеку без ПВ для конкретного ЖК
 // Функция для получения наценки в зависимости от типа ипотеки
 const getMortgageSurcharge = (
   complexName: string,
@@ -66,7 +65,7 @@ const getMortgageSurcharge = (
 
 export const useMortgageCalculator = () => {
   const [formData, setFormData] = useState<CalculatorFormData>({
-    complex: "ЖК Сады у моря",
+    complex: "ЖК Сады у моря 3",
     apartmentType: "Студия",
     area: 30,
     manualObjectCost: null,
