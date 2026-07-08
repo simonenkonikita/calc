@@ -1,4 +1,5 @@
 import {
+  BankCoefficients,
   BankOffer,
   MortgageAmountResult,
   Variables,
@@ -19,6 +20,7 @@ interface CalculateMortgageAmountParams {
   variables: Variables;
   isFamilyOrIt: boolean;
   isSpecialMortgageMode: boolean;
+  coefficients: BankCoefficients;
 }
 
 export const calculateMortgageAmount = (
@@ -34,6 +36,7 @@ export const calculateMortgageAmount = (
     bankOffer,
     variables,
     isSpecialMortgageMode,
+    coefficients,
   } = params;
 
   if (bankOffer.type === "family" && bankOffer.isTwoContracts === true) {
@@ -47,6 +50,7 @@ export const calculateMortgageAmount = (
       bankOffer,
       variables,
       isSpecialMortgageMode,
+      coefficients,
     });
   }
 
@@ -61,6 +65,7 @@ export const calculateMortgageAmount = (
       bankOffer,
       variables,
       isSpecialMortgageMode,
+      coefficients,
     });
   }
 
@@ -75,6 +80,7 @@ export const calculateMortgageAmount = (
       bankOffer,
       variables,
       isSpecialMortgageMode,
+      coefficients,
     });
   }
 

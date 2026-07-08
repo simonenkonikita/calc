@@ -15,7 +15,10 @@ import {
 import { getBadge } from "../../../utils/badge/getBadge";
 import { formatOfferToText } from "../../../utils/formatOfferToText";
 import { safeFormatMoney } from "../../../utils/formatMoney";
-import { getExcessBadge } from "../../../utils/badge/getExcessBadge";
+import {
+  getExcessBadge,
+  getLimitBadge,
+} from "../../../utils/badge/getExcessBadge";
 
 import { printSelectedOffers } from "../../../utils/printSelectedOffers";
 import { getTermYearsBadge } from "../../../utils/badge/getTermYearsBadge";
@@ -333,6 +336,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
 
                           const badge = getBadge(offer);
                           const excessBadge = getExcessBadge(offer);
+                          const limitBadge = getLimitBadge(offer);
                           const termBadge = getTermYearsBadge(offer);
 
                           return (
@@ -354,7 +358,16 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                     <span className="badge-text">{badge}</span>
                                   </div>
                                 )}
-
+                                {limitBadge && (
+                                  <div className="bank-card-badge badge-excess">
+                                    <span className="badge-icon">
+                                      {limitBadge.icon}
+                                    </span>
+                                    <span className="badge-text">
+                                      {limitBadge.text}
+                                    </span>
+                                  </div>
+                                )}
                                 {/* Сверхлимит шильдик */}
                                 {excessBadge && (
                                   <div className="bank-card-badge badge-excess">
@@ -544,6 +557,16 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                     </span>
                                     <span className="bank-detail-value positive">
                                       {formatMoney(offer.subsidyAmount)}
+                                    </span>
+                                  </div>
+                                )}
+                                {showOverstatement && (
+                                  <div className="bank-detail-item">
+                                    <span className="bank-detail-label">
+                                      Субсидия в %:
+                                    </span>
+                                    <span className="bank-detail-value positive">
+                                      {offer.subsidyPercent.toFixed(1)}%
                                     </span>
                                   </div>
                                 )}

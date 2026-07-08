@@ -1,9 +1,9 @@
 import {
+  BankCoefficients,
   BankOffer,
   MortgageAmountResult,
   Variables,
 } from "../../../../../utils/types";
-import { calculateBankCoefficients } from "../../../сoefficients/calculateBankCoefficients";
 
 interface calculateFamilyExcessLimitMortgageAmount {
   objectCost: number; // $B$7
@@ -15,6 +15,7 @@ interface calculateFamilyExcessLimitMortgageAmount {
   bankOffer: BankOffer;
   variables: Variables;
   isSpecialMortgageMode: boolean;
+  coefficients: BankCoefficients;
 }
 
 export const calculateFamilyExcessLimitMortgageAmount = (
@@ -30,14 +31,8 @@ export const calculateFamilyExcessLimitMortgageAmount = (
     bankOffer,
     variables,
     isSpecialMortgageMode,
+    coefficients,
   } = params;
-
-  const coefficients = calculateBankCoefficients(
-    variables,
-    objectCost,
-    bankOffer,
-    userDownPaymentPercent,
-  );
 
   const limit = variables.minExcessAmounts?.[bankOffer.bank] || 6000000;
   const maxLimit = variables.maxFamilyMortgageSum || 15000000;
