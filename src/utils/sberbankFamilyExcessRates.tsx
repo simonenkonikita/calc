@@ -1,14 +1,48 @@
-import { MIN_EXCESS_MORTGAGE_AMOUNT_SBER } from "./constants";
+import { variables } from "../data/limitdDate";
+import { getMinExcessAmount } from "./badge/getMinExcessAmount";
 
-// 🔥 Функция проверки валидности суммы для сверхлимита
-export const isValidExcessAmount = (mortgageAmount: number): boolean => {
-  return mortgageAmount >= MIN_EXCESS_MORTGAGE_AMOUNT_SBER;
+
+export const getMaxExcessAmount = (): number => {
+  return variables.maxFamilyMortgageSum || 15000000;
 };
 
-// 🔥 Получение сообщения об ошибке
-export const getExcessAmountError = (mortgageAmount: number): string | null => {
-  if (mortgageAmount < MIN_EXCESS_MORTGAGE_AMOUNT_SBER) {
-    return `⚠️ Минимальная сумма ипотеки для сверхлимитной программы ${MIN_EXCESS_MORTGAGE_AMOUNT_SBER.toLocaleString()} ₽`;
+export const isValidExcessAmount = (
+  mortgageAmount: number,
+  bankName: string,
+): boolean => {
+  const minAmount = getMinExcessAmount(bankName);
+  const maxAmount = getMaxExcessAmount();
+  return mortgageAmount >= minAmount && mortgageAmount <= maxAmount;
+};
+
+export const getExcessAmountError = (
+  mortgageAmount: number,
+  bankName: string,
+): string | null => {
+  const minAmount = getMinExcessAmount(bankName);
+  const maxAmount = getMaxExcessAmount();
+
+  if (mortgageAmount < minAmount) {
+    return `⚠️ Минимальная сумма ипотеки для сверхлимитной программы ${minAmount.toLocaleString()} ₽`;
   }
+
+  if (mortgageAmount > maxAmount) {
+    return `⚠️ Максимальная сумма ипотеки для сверхлимитной программы ${maxAmount.toLocaleString()} ₽`;
+  }
+
   return null;
+};
+
+export const getExcessLimitInfo = (bankName: string) => {
+  const minAmount = getMinExcessAmount(bankName);
+  const maxAmount = getMaxExcessAmount();
+
+  return {
+    minAmount,
+    maxAmount,
+    isBankSpecific: !!variables.minExcessAmounts?.[bankName],
+    displayText: variables.minExcessAmounts?.[bankName]
+      ? `Сверхлимит (от ${minAmount.toLocaleString()} ₽)`
+      : `Сумма от ${minAmount.toLocaleString()} ₽`,
+  };
 };
