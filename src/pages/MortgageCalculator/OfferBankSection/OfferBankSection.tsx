@@ -40,6 +40,9 @@ const getProgramCategory = (offer: BankProgramResultWithIndex): string => {
   if (offer.type === "it") {
     return "it";
   }
+  if (offer.type === "tranche") {
+    return "tranche";
+  }
   return "base";
 };
 
@@ -399,6 +402,8 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                     {offer.type === "family" &&
                                       "Семейная ипотека"}
                                     {offer.type === "it" && "ИТ ипотека"}
+                                    {offer.type === "tranche" &&
+                                      "Траншевая ипотека"}
                                   </p>
                                   {/* Ставки - унифицированный стиль */}
                                   {isShortWithSubsidy ? (
@@ -439,6 +444,20 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                         →{" "}
                                         {safeFormatMoney(
                                           offer.monthlyPaymentAfter,
+                                        )}
+                                      </p>
+                                    </div>
+                                  ) : offer.isTranche ? (
+                                    <div className="payment-values-wrapper">
+                                      <p className="payment-value payment-with-subsidy">
+                                        {formatMoney(
+                                          offer.firstTranchePayment || 0,
+                                        )}
+                                      </p>
+                                      <p className="payment-value payment-after-subsidy">
+                                        →{" "}
+                                        {formatMoney(
+                                          offer.secondTranchePayment || 0,
                                         )}
                                       </p>
                                     </div>
@@ -550,6 +569,31 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                     </div>
                                   </>
                                 )}
+                                {offer.type === "tranche" &&
+                                  offer.isTranche && (
+                                    <>
+                                      <div className="bank-detail-item tranche-detail">
+                                        <span className="bank-detail-label">
+                                          Первый транш:
+                                        </span>
+                                        <span className="bank-detail-value">
+                                          {formatMoney(
+                                            offer.firstTrancheAmount || 0,
+                                          )}
+                                        </span>
+                                      </div>
+                                      <div className="bank-detail-item tranche-detail">
+                                        <span className="bank-detail-label">
+                                          Второй транш:
+                                        </span>
+                                        <span className="bank-detail-value">
+                                          {formatMoney(
+                                            offer.secondTrancheAmount || 0,
+                                          )}
+                                        </span>
+                                      </div>
+                                    </>
+                                  )}
                                 {showOverstatement && (
                                   <div className="bank-detail-item">
                                     <span className="bank-detail-label">

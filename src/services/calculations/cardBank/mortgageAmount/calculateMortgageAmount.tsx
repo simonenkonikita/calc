@@ -8,6 +8,7 @@ import { calculateFamilyExcessLimitMortgageAmount } from "./family/calculateFami
 import { calculateFamilyMortgageAmount } from "./family/calculateFamilyMortgageAmount";
 import { calculateFamilyTwoContractsMortgageAmount } from "./family/calculateFamilyTwoContractsMortgageAmount";
 import { calculateStandartMortgageAmount } from "./standard/calculateStandartMortgageAmount";
+import { calculateTrancheMortgageAmount } from "./tranche/calculateTrancheMortgageAmount";
 
 interface CalculateMortgageAmountParams {
   objectCost: number;
@@ -38,6 +39,20 @@ export const calculateMortgageAmount = (
     isSpecialMortgageMode,
     coefficients,
   } = params;
+
+  if (bankOffer.type === "tranche" || bankOffer.isTranche === true) {
+    return calculateTrancheMortgageAmount({
+      objectCost,
+      contractAmount,
+      downPayment,
+      remainingAmount,
+      downPaymentAmount,
+      userDownPaymentPercent,
+      bankOffer,
+      variables,
+      isSpecialMortgageMode,
+    });
+  }
 
   if (bankOffer.type === "family" && bankOffer.isTwoContracts === true) {
     return calculateFamilyTwoContractsMortgageAmount({

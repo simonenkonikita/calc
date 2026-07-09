@@ -63,7 +63,7 @@ export interface OfferBankSectionProps {
 }
 
 // ========== БАНКОВСКИЕ ПРОГРАММЫ (из JSON) ==========
-export type ProgramType = "full" | "short" | "family" | "it";
+export type ProgramType = "full" | "short" | "family" | "it" | "tranche";
 
 export interface DynamicRateRule {
   // Для простых условий (JSON-совместимые)
@@ -95,6 +95,15 @@ export interface BankOffer {
   subsidyCalculationMethod?: "onlyPercent" | "standard";
   dynamicRates?: DynamicRateRule[];
   dynamicSubsidyPercent?: DynamicRateRule[];
+  isTranche?: boolean;
+  trancheFirstPercent?: number; // % от стоимости объекта для первого транша (например, 19.9%)
+  trancheSecondDate?: string; // дата выдачи второго транша (например, "2027-02-01")
+}
+
+export interface TranchePaymentsResult {
+  firstTranchePayment: number;
+  secondTranchePayment: number;
+  monthlyPayment: number;
 }
 
 // ========== РЕЗУЛЬТАТ РАСЧЕТА ПО ОДНОЙ ПРОГРАММЕ ==========
@@ -138,8 +147,13 @@ export interface BankProgramResult {
   secondContractPayment: number;
   firstContractAmount?: number; // Сумма по первому договору
   secondContractAmount?: number; // Сумма по второму договору
+  // ===== НОВЫЕ ПОЛЯ ДЛЯ ТРАНШЕВОЙ ИПОТЕКИ =====
+  isTranche?: boolean;
+  firstTrancheAmount?: number;
+  secondTrancheAmount?: number;
+  firstTranchePayment?: number;
+  secondTranchePayment?: number;
 }
-
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========
 export interface CalculatorResult {
   objectResult: {
@@ -193,6 +207,8 @@ export interface SubsidyPaymentResult {
 
 export interface MortgageAmountResult {
   mortgageAmount: number;
+  firstTrancheAmount?: number;
+  secondTrancheAmount?: number;
   isLimitExceeded?: boolean;
 }
 export interface DownAmountResult {

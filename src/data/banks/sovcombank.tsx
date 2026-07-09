@@ -1,7 +1,10 @@
 // src/config/banks/sovcombank.ts
 
 import { BankOffer } from "../../utils/types";
-import { SOVCOMBANK_SUBSIDIES_V1, SOVCOMBANK_SUBSIDIES_V2 } from "../subsidies/sovcombankSubsidies";
+import {
+  SOVCOMBANK_SUBSIDIES_V1,
+  SOVCOMBANK_SUBSIDIES_V2,
+} from "../subsidies/sovcombankTwoContractSubsidies";
 /* import {
   SOVCOMBANK_SUBSIDIES_V1,
   SOVCOMBANK_SUBSIDIES_V2,

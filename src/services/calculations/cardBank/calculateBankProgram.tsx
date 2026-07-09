@@ -1,4 +1,9 @@
-import { BankOffer, Variables, BankProgramResult } from "../../../utils/types";
+import {
+  BankOffer,
+  Variables,
+  BankProgramResult,
+  TranchePaymentsResult,
+} from "../../../utils/types";
 import { calculateClientContribution } from "./clientContribution/calculateClientContribution";
 import { calculateContractAmount } from "./contractAmount/calculateContractAmount";
 import { calculateMortgageAmount } from "./mortgageAmount/calculateMortgageAmount";
@@ -6,13 +11,12 @@ import { calculateOwnFunds } from "./ownFunds/calculateOwnFunds";
 import { calculateDeveloperAccount } from "./developerAccount/calculateDeveloperAccount";
 import { calculateDownPaymentAmount } from "./downPayment/сalculateDownPaymentAmount";
 import { getDynamicRate } from "../сoefficients/getDynamicRate";
-import {
-  calculateMonthlyPayment,
-  calculateTwoContractsMonthlyPayment,
-} from "./payment/calculateMonthlyPayment";
+import { calculateMonthlyPayment } from "./payment/calculateMonthlyPayment";
 import { calculateSubsidyPayments } from "./payment/subsidy/calculateSubsidyPayments";
 import { getDynamicSubsidy } from "../сoefficients/getDynamicSubsidy";
 import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
+import { calculateTwoContractsMonthlyPayment } from "./payment/family/calculateTwoContractsMonthlyPayment";
+import { calculateTranchePayments } from "./payment/tranche/calculateTranchePayments";
 
 // ========== РАСЧЕТ ВСЕХ ПАРАМЕТРОВ ПО БАНКОВСКОЙ ПРОГРАММЕ ==========
 export const calculateBankProgram = (
@@ -32,6 +36,8 @@ export const calculateBankProgram = (
   const isFamilyOrIt = bankOffer.type === "family" || bankOffer.type === "it";
   const isTwoContracts =
     bankOffer.type === "family" && bankOffer.isTwoContracts === true;
+  const isTranche =
+    bankOffer.type === "tranche" && bankOffer.isTranche === true;
   const isSpecialMortgageMode =
     mortgageWithoutDownPayment || mortgagePartialDownPayment;
 
@@ -61,10 +67,6 @@ export const calculateBankProgram = (
 
   // 2. Завышение
   const overstatement = contractAmount - objectCost;
-
-  if (isTwoContracts) {
-    console.log(contractAmount, objectCost, overstatement);
-  }
 
   // 3. Расчет суммы ПВ
   const downPaymentAmount = calculateDownPaymentAmount({
@@ -274,7 +276,6 @@ export const calculateBankProgram = (
   // 11. Срок ипотеки
   const loanTermMonths = loanTermYears * 12;
 
-  // 12. Расчет ежемесячного платежа
   const isShortSubsidy = bankOffer.type === "short" && bankOffer.durationMonths;
   const method = bankOffer.subsidyCalculationMethod || "standard";
 
@@ -284,6 +285,13 @@ export const calculateBankProgram = (
   let firstContractPayment: number = 0;
   let secondContractPayment: number = 0;
   let totalMonthlyPayment: number = 0;
+
+  // ✅ ИНИЦИАЛИЗИРУЕМ trancheSchedule со значениями по умолчанию
+  let trancheSchedule: TranchePaymentsResult = {
+    firstTranchePayment: 0,
+    secondTranchePayment: 0,
+    monthlyPayment: 0,
+  };
 
   if (isShortSubsidy && bankOffer.shortRate !== undefined) {
     const result = calculateSubsidyPayments(
@@ -297,7 +305,6 @@ export const calculateBankProgram = (
     monthlyPayment = result.monthlyPaymentSubsidy;
     monthlyPaymentAfter = result.monthlyPaymentAfter;
   } else if (isTwoContracts && bankOffer.twoRate !== undefined) {
-    // Используем новую функцию для расчета двух договоров
     const result = calculateTwoContractsMonthlyPayment(
       mortgageAmount.mortgageAmount,
       bankOffer.twoRate,
@@ -309,7 +316,32 @@ export const calculateBankProgram = (
     secondContractPayment = result.secondContractPayment;
     totalMonthlyPayment = result.totalMonthlyPayment;
     monthlyPayment = totalMonthlyPayment;
-  } else {
+  }
+  // ✅ ТРАНШЕВАЯ ИПОТЕКА
+  else if (isTranche) {
+    const result = calculateTranchePayments(
+      bankOffer,
+      mortgageAmount.firstTrancheAmount || 0,
+      mortgageAmount.secondTrancheAmount || 0,
+      mortgageAmount.mortgageAmount,
+      loanTermMonths,
+    );
+
+    // Сохраняем результаты для отображения
+    firstContractPayment = result.firstTranchePayment;
+    secondContractPayment = result.secondTranchePayment;
+    monthlyPayment = result.monthlyPayment;
+    totalMonthlyPayment = result.monthlyPayment;
+
+    // ✅ Сохраняем траншевый график для UI с полными данными
+    trancheSchedule = {
+      firstTranchePayment: result.firstTranchePayment,
+      secondTranchePayment: result.secondTranchePayment,
+      monthlyPayment: result.monthlyPayment,
+    };
+  }
+  // СТАНДАРТНАЯ ИПОТЕКА
+  else {
     monthlyPayment = calculateMonthlyPayment(
       mortgageAmount.mortgageAmount,
       actualRate,
@@ -350,5 +382,10 @@ export const calculateBankProgram = (
     isLimitExceeded: isLimitExceeded,
     firstContractAmount,
     secondContractAmount,
+    isTranche: isTranche,
+    firstTrancheAmount: mortgageAmount.firstTrancheAmount,
+    secondTrancheAmount: mortgageAmount.secondTrancheAmount,
+    firstTranchePayment: trancheSchedule.firstTranchePayment,
+    secondTranchePayment: trancheSchedule.secondTranchePayment,
   };
 };

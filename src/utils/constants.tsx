@@ -56,6 +56,7 @@ export const PROGRAM_TYPES = {
   SHORT: "short",
   FAMILY: "family",
   IT: "it",
+  TRANSHE: "tranche",
 } as const;
 
 export const PROGRAM_TYPE_LABELS: Record<string, string> = {
@@ -63,6 +64,7 @@ export const PROGRAM_TYPE_LABELS: Record<string, string> = {
   short: "Короткий срок",
   family: "Семейная ипотека",
   it: "ИТ ипотека",
+  tranche: "Траншевая ипотека",
 };
 
 export const CATEGORY_ORDER = [
@@ -71,4 +73,5 @@ export const CATEGORY_ORDER = [
   { key: "short", label: "⚡ Субсидии на короткий срок", types: ["short"] },
   { key: "family", label: "👨‍👩‍👧‍👦 Семейная ипотека", types: ["family"] },
   { key: "it", label: "💻 ИТ ипотека", types: ["it"] },
+  { key: "tranche", label: "Траншевая ипотека", types: ["tranche"] },
 ];
