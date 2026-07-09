@@ -12,6 +12,9 @@ export interface Variables {
   itMortgageLimit: number;
   maxItMortgageSum: number;
   deposit: number;
+  minExcessAmounts?: {
+    [bankName: string]: number;
+  };
 }
 
 // ========== ЦЕНЫ НА ЖК ==========

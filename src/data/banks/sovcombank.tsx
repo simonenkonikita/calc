@@ -1,10 +1,10 @@
 // src/config/banks/sovcombank.ts
 
 import { BankOffer } from "../../utils/types";
-import {
+/* import {
   SOVCOMBANK_SUBSIDIES_V1,
   SOVCOMBANK_SUBSIDIES_V2,
-} from "../subsidies/sovcombankSubsidies";
+} from "../subsidies/sovcombankSubsidies"; */
 import { BASE_RATES, MIN_PV_PERCENT } from "./constants";
 
 export const SOVCOMBANK_OFFERS: BankOffer[] = [
@@ -24,7 +24,7 @@ export const SOVCOMBANK_OFFERS: BankOffer[] = [
     subsidyPercent: 12.49,
     minPVPercent: MIN_PV_PERCENT,
   },
-  {
+  /* {
     bank: "Совкомбанк",
     program: "Семейная ипотека (2 договора)",
     type: "family",
@@ -45,7 +45,7 @@ export const SOVCOMBANK_OFFERS: BankOffer[] = [
     minPVPercent: MIN_PV_PERCENT,
     isTwoContracts: true,
     dynamicSubsidyPercent: SOVCOMBANK_SUBSIDIES_V2,
-  },
+  }, */
   /*   {
     bank: "Совкомбанк",
     program: "Семейная ипотека сверхлимит 6%",

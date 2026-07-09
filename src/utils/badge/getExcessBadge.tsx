@@ -1,20 +1,72 @@
-// src/utils/getExcessBadge.ts
+// src/utils/badge/getExcessBadge.ts
 import { BankProgramResultWithIndex } from "../types";
-import { MIN_EXCESS_MORTGAGE_AMOUNT_SBER } from "../constants";
+import { getMinExcessAmount } from "./getMinExcessAmount";
+import { variables } from "../../data/limitdDate";
 
 export const getExcessBadge = (
   offer: BankProgramResultWithIndex,
 ): { text: string; icon: string } | null => {
-  // Проверяем по наличию поля excessLimit или по названию программы
-  if (
+  // Проверяем, что это сверхлимитная программа
+  const isExcessProgram =
     offer.program?.toLowerCase().includes("сверхлимит") ||
     offer.program === "Семейная ипотека сверхлимит" ||
-    offer.program === "ИТ ипотека сверхлимит"
-  ) {
+    offer.program === "ИТ ипотека сверхлимит";
+
+  if (!isExcessProgram) {
+    return null;
+  }
+
+  const minExcessAmount = getMinExcessAmount(offer.bank);
+  const maxExcessAmount = variables.maxFamilyMortgageSum || 15000000;
+  const mortgageAmount = offer.mortgageAmount || 0;
+
+  // 🔥 Разные сообщения в зависимости от суммы
+  if (mortgageAmount < minExcessAmount) {
     return {
-      icon: "⚡",
-      text: `Сумма от ${MIN_EXCESS_MORTGAGE_AMOUNT_SBER.toLocaleString()} ₽`,
+      icon: "⚠️",
+      text: `Минимальная сумма ${minExcessAmount.toLocaleString()} ₽`,
     };
   }
-  return null;
+
+  if (mortgageAmount > maxExcessAmount) {
+    return {
+      icon: "⚠️",
+      text: `Максимальная сумма ${maxExcessAmount.toLocaleString()} ₽`,
+    };
+  }
+
+  // Сумма в допустимом диапазоне - показываем обычный шильдик
+  return {
+    icon: "⚡",
+    text: `Cерхлимит`,
+  };
+};
+
+export const getLimitBadge = (
+  offer: BankProgramResultWithIndex,
+): { text: string; icon: string } | null => {
+  // Проверяем, что это сверхлимитная программа
+  const isExcessProgram =
+    offer.program === "Семейная базовая" ||
+    offer.program === "Семейная ипотека 3,5%";
+
+  if (!isExcessProgram) {
+    return null;
+  }
+
+  const familyMortgageLimit = variables.familyMortgageLimit || 6000000;
+  const mortgageAmount = offer.mortgageAmount || 0;
+
+  if (mortgageAmount > familyMortgageLimit) {
+    return {
+      icon: "⚠️",
+      text: `Максимальная сумма ипотеки ${familyMortgageLimit.toLocaleString()} ₽`,
+    };
+  }
+
+  // Сумма в допустимом диапазоне - показываем обычный шильдик
+  return {
+    icon: "⚡",
+    text: `Максимальная сумма ипотеки ${familyMortgageLimit.toLocaleString()} ₽`,
+  };
 };

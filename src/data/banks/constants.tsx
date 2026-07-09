@@ -3,7 +3,7 @@
 // Базовые ставки
 export const BASE_RATES = {
   SBER: 20.7,
-  ALFA: 17.99,
+  ALFA: 19.09,
   SOVKOM: 19.99,
   VTB: 19.9,
   URALSIB: 18.19,

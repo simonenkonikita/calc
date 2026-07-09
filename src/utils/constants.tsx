@@ -3,8 +3,6 @@ export const DEFAULT_MIN_PV_PERCENT = 20.1;
 export const DEFAULT_LOAN_TERM_YEARS = 30;
 export const PRICE_PER_SQUARE_METER_DEFAULT = 140000;
 
-export const MIN_EXCESS_MORTGAGE_AMOUNT_SBER = 6300000;
-
 // ========== НАЦЕНКА ЗА ИПОТЕКУ БЕЗ ПВ ==========
 export const MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGES: Record<string, number> =
   {

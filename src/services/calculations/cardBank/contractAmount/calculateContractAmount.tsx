@@ -1,9 +1,9 @@
 import {
+  BankCoefficients,
   BankOffer,
   ContractAmountResult,
   Variables,
 } from "../../../../utils/types";
-import { calculateBankCoefficients } from "../../сoefficients/calculateBankCoefficients";
 import { calculateFamilyContractAmount } from "./family/calculateFamilyContractAmount";
 import { calculateFamilyExcessLimitContractAmount } from "./family/calculateFamilyExcessLimitContractAmount";
 import { calculateFamilyTwoContractAmount } from "./family/calculateFamilyTwoContractAmount";
@@ -19,14 +19,8 @@ export const calculateContractAmount = (
   variables: Variables,
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,
+  coefficients: BankCoefficients,
 ): ContractAmountResult => {
-  const coefficients = calculateBankCoefficients(
-    variables,
-    objectCost,
-    bankOffer,
-    userDownPaymentPercent,
-  );
-
   if (bankOffer.type === "family" && bankOffer.isTwoContracts === true) {
     return calculateFamilyTwoContractAmount(
       objectCost,
