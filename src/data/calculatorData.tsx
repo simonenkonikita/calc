@@ -34,17 +34,17 @@ export const housingPrices: HousingComplexPrice[] = [
   {
     complexName: "ЖК Лермонтов",
     apartmentType: "Студия",
-    pricePerSquareMeter: 180000,
+    pricePerSquareMeter: 160000,
   },
   {
     complexName: "ЖК Лермонтов",
     apartmentType: "Однокомнатная квартира",
-    pricePerSquareMeter: 180000,
+    pricePerSquareMeter: 160000,
   },
   {
     complexName: "ЖК Лермонтов",
     apartmentType: "Двухкомнатная квартира",
-    pricePerSquareMeter: 180000,
+    pricePerSquareMeter: 160000,
   },
   {
     complexName: "ЖК Горы здесь",
