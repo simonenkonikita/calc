@@ -1,5 +1,8 @@
-import { BankOffer, Variables } from "../../../../utils/types";
-import { calculateBankCoefficients } from "../../сoefficients/calculateBankCoefficients";
+import {
+  BankCoefficients,
+  BankOffer,
+  Variables,
+} from "../../../../utils/types";
 
 interface CalculateClientContributionParams {
   objectCost: number; // $B$7
@@ -9,6 +12,7 @@ interface CalculateClientContributionParams {
   bankOffer: BankOffer;
   variables: Variables;
   mortgageWithoutDownPayment: boolean; // $L$10 (не используется в расчете, но может понадобиться)
+  coefficients: BankCoefficients;
 }
 
 export const calculateClientContribution = (
@@ -21,14 +25,8 @@ export const calculateClientContribution = (
     userDownPaymentPercent,
     bankOffer,
     variables,
+    coefficients,
   } = params;
-
-  const coefficients = calculateBankCoefficients(
-    variables,
-    objectCost,
-    bankOffer,
-    userDownPaymentPercent,
-  );
 
   const limit = bankOffer.excessLimit
     ? variables.maxFamilyMortgageSum || 15000000

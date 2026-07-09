@@ -88,15 +88,6 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.bank-card .excess-overlay-amount {
-  font-weight: 800;
-  font-size: 1.4rem;
-  color: #fbbf24;
-  text-align: center;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
-}
-
 .bank-card .excess-overlay-hint {
   font-size: 0.8rem;
   color: #d1d5db;

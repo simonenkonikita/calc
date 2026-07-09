@@ -1,5 +1,8 @@
-import { BankOffer, Variables } from "../../../../utils/types";
-import { calculateBankCoefficients } from "../../сoefficients/calculateBankCoefficients";
+import {
+  BankCoefficients,
+  BankOffer,
+  Variables,
+} from "../../../../utils/types";
 import { calculateFamilyDownPayment } from "./family/calculateFamilyDownPayment";
 import { calculateFamilyExcessLimitDownPayment } from "./family/calculateFamilyExcessLimitDownPayment";
 import { calculateFamilyTwoContractsDownPayment } from "./family/calculateFamilyTwoContractsDownPayment";
@@ -17,6 +20,7 @@ interface DownPaymentAmountParams {
   isSpecialMortgageMode: boolean;
   remainingAmount: number;
   noSubsidyInflate: boolean;
+  coefficients: BankCoefficients;
 }
 
 export const calculateDownPaymentAmount = (
@@ -33,14 +37,8 @@ export const calculateDownPaymentAmount = (
     isSpecialMortgageMode,
     remainingAmount,
     noSubsidyInflate,
+    coefficients,
   } = params;
-
-  const coefficients = calculateBankCoefficients(
-    variables,
-    objectCost,
-    bankOffer,
-    userDownPaymentPercent,
-  );
 
   if (bankOffer.type === "family" && bankOffer.isTwoContracts === true) {
     return calculateFamilyTwoContractsDownPayment({

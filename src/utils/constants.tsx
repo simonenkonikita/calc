@@ -3,12 +3,10 @@ export const DEFAULT_MIN_PV_PERCENT = 20.1;
 export const DEFAULT_LOAN_TERM_YEARS = 30;
 export const PRICE_PER_SQUARE_METER_DEFAULT = 140000;
 
-export const MIN_EXCESS_MORTGAGE_AMOUNT_SBER = 6300000;
-
 // ========== НАЦЕНКА ЗА ИПОТЕКУ БЕЗ ПВ ==========
 export const MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGES: Record<string, number> =
   {
-    "ЖК Сады у моря": 35000,
+    "ЖК Сады у моря 3": 35000,
     "ЖК Лермонтов": 10000,
     "ЖК Горы здесь": 10000,
     "ЖК Два адмирала": 0,
@@ -20,7 +18,7 @@ export const MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGES: Record<string, number> =
 // ========== НАЦЕНКА ЗА ИПОТЕКУ С ЧАСТИЧНЫМ ПВ ==========
 export const MORTGAGE_PARTIAL_DOWN_PAYMENT_SURCHARGES: Record<string, number> =
   {
-    "ЖК Сады у моря": 15000,
+    "ЖК Сады у моря 3": 15000,
     "ЖК Лермонтов": 10000,
     "ЖК Горы здесь": 10000,
     "ЖК Два адмирала": 0,
@@ -40,10 +38,11 @@ export const MAX_LOAN_TERM = 30;
 // Порядок банков для отображения
 export const BANK_ORDER = [
   "Сбербанк",
+  "Дом.РФ Банк",
+  "Уралсиб",
   "Альфа-Банк",
   "ВТБ",
   "Совкомбанк",
-  "Уралсиб",
 ];
 
 // ========== БАНКИ ДЛЯ ПРОЕКТНОГО ФИНАНСИРОВАНИЯ ==========

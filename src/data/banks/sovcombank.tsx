@@ -1,10 +1,11 @@
 // src/config/banks/sovcombank.ts
 
 import { BankOffer } from "../../utils/types";
-import {
+import { SOVCOMBANK_SUBSIDIES_V1, SOVCOMBANK_SUBSIDIES_V2 } from "../subsidies/sovcombankSubsidies";
+/* import {
   SOVCOMBANK_SUBSIDIES_V1,
   SOVCOMBANK_SUBSIDIES_V2,
-} from "../subsidies/sovcombankSubsidies";
+} from "../subsidies/sovcombankSubsidies"; */
 import { BASE_RATES, MIN_PV_PERCENT } from "./constants";
 
 export const SOVCOMBANK_OFFERS: BankOffer[] = [

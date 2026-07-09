@@ -4,7 +4,6 @@ import {
   ContractAmountResult,
   Variables,
 } from "../../../../../utils/types";
-import { calculateBankCoefficients } from "../../../сoefficients/calculateBankCoefficients";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ ДЛЯ 2 ДОГОВОРОВ ==========
 export const calculateFamilyTwoContractAmount = (
@@ -20,8 +19,9 @@ export const calculateFamilyTwoContractAmount = (
 ): ContractAmountResult => {
   const limit = variables.familyMortgageLimit || 6000000;
   const maxLimit = variables.maxFamilyMortgageSum || 15000000;
-  const subsidyPercent = bankOffer.subsidyPercent;
-  const subsidyRate = subsidyPercent / 100;
+
+  // 🔥 Получаем базовую субсидию из коэффициентов
+  const subsidyPercent = coefficients.subsidyPercent;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
   const cafsummPV = userDownPaymentPercent / 100;
@@ -44,14 +44,15 @@ export const calculateFamilyTwoContractAmount = (
     isWithinLimit = summCredit <= maxLimit;
   }
 
+  const effectiveSubsidyRate = subsidyPercent / 100;
+  const summCreditFamilyTwo = objectCost * coefficients.requiredCoeffFamilyTwo;
+
   const isThresholdCondition =
     isSpecialMortgageMode && downPayment < summCreditWithoutPV * cafsummPV;
 
-  const baseContractAmount = objectCost + maxLimit * subsidyRate;
+  const baseContractAmount = objectCost + maxLimit * effectiveSubsidyRate;
 
   let contractAmount: number;
-
-  const summCreditFamilyTwo = objectCost * coefficients.requiredCoeffFamilyTwo;
 
   if (isThresholdCondition) {
     if (noSubsidyInflate) {
@@ -80,7 +81,7 @@ export const calculateFamilyTwoContractAmount = (
       } else {
         if (downPayment <= userDesiredDownPayment) {
           contractAmount =
-            objectCost + (maxLimit - limit) * (subsidyPercent / 100);
+            objectCost + (maxLimit - limit) * effectiveSubsidyRate;
         } else if (downPayment > baseContractAmount - maxLimit) {
           contractAmount = summCreditFamilyTwo;
         } else {
@@ -89,70 +90,8 @@ export const calculateFamilyTwoContractAmount = (
       }
     }
   }
-
-  const firstContractAmount = 6000000;
-
-  const secondContractAmount =
-    contractAmount * cafsummCred - firstContractAmount;
-
-  console.log(
-    `"2 договора"${contractAmount * cafsummCred}  ${secondContractAmount}`,
-  );
-
-  const actyalCoefficients = calculateBankCoefficients(
-    variables,
-    objectCost,
-    bankOffer,
-    userDownPaymentPercent,
-    secondContractAmount,
-  );
-
-  let contractAmount1: number;
-
-  const summCreditFamilyTwo2 =
-    objectCost * actyalCoefficients.requiredCoeffFamilyTwo;
-
-  if (isThresholdCondition) {
-    if (noSubsidyInflate) {
-      if (isWithinLimit) {
-        contractAmount1 = Math.ceil((objectCost - downPayment) / 0.799);
-      } else {
-        contractAmount1 = Math.ceil((objectCost - downPayment) / 0.799);
-      }
-    } else {
-      if (isWithinLimit) {
-        contractAmount1 = summCreditFamilyTwo2 / 0.799;
-      } else {
-        contractAmount1 = summCreditFamilyTwo2 / 0.799;
-      }
-    }
-  } else {
-    if (noSubsidyInflate) {
-      contractAmount1 = Math.ceil(objectCost);
-    } else {
-      if (isWithinLimit) {
-        if (downPayment <= userDesiredDownPayment) {
-          contractAmount1 = summCreditFamilyTwo2;
-        } else {
-          contractAmount1 = summCreditFamilyTwo2;
-        }
-      } else {
-        if (downPayment <= userDesiredDownPayment) {
-          contractAmount1 =
-            objectCost + (maxLimit - limit) * (subsidyPercent / 100);
-        } else if (downPayment > baseContractAmount - maxLimit) {
-          contractAmount1 = summCreditFamilyTwo2;
-        } else {
-          contractAmount1 = summCreditFamilyTwo2;
-        }
-      }
-    }
-  }
-  console.log(
-    `"2 договора"${contractAmount1 * cafsummCred}  ${secondContractAmount}`,
-  );
 
   return {
-    contractAmount: Math.ceil(contractAmount1),
+    contractAmount: Math.ceil(contractAmount),
   };
 };

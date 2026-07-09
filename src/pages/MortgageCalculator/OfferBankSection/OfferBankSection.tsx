@@ -9,14 +9,16 @@ import "./BankExcessWarning.css";
 import {
   BANK_ORDER,
   CATEGORY_ORDER,
-  MIN_EXCESS_MORTGAGE_AMOUNT_SBER,
   PROGRAM_TYPE_LABELS,
 } from "../../../utils/constants";
 
 import { getBadge } from "../../../utils/badge/getBadge";
 import { formatOfferToText } from "../../../utils/formatOfferToText";
 import { safeFormatMoney } from "../../../utils/formatMoney";
-import { getExcessBadge } from "../../../utils/badge/getExcessBadge";
+import {
+  getExcessBadge,
+  getLimitBadge,
+} from "../../../utils/badge/getExcessBadge";
 
 import { printSelectedOffers } from "../../../utils/printSelectedOffers";
 import { getTermYearsBadge } from "../../../utils/badge/getTermYearsBadge";
@@ -334,6 +336,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
 
                           const badge = getBadge(offer);
                           const excessBadge = getExcessBadge(offer);
+                          const limitBadge = getLimitBadge(offer);
                           const termBadge = getTermYearsBadge(offer);
 
                           return (
@@ -355,28 +358,38 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                     <span className="badge-text">{badge}</span>
                                   </div>
                                 )}
-
+                                {limitBadge && (
+                                  <div className="bank-card-badge badge-excess">
+                                    <span className="badge-icon">
+                                      {limitBadge.icon}
+                                    </span>
+                                    <span className="badge-text">
+                                      {limitBadge.text}
+                                    </span>
+                                  </div>
+                                )}
                                 {/* Сверхлимит шильдик */}
                                 {excessBadge && (
                                   <div className="bank-card-badge badge-excess">
-                                    <span className="badge-icon">⚡</span>
+                                    <span className="badge-icon">
+                                      {excessBadge.icon}
+                                    </span>
                                     <span className="badge-text">
-                                      Сверхлимит / сумма ипотеки от{" "}
-                                      {MIN_EXCESS_MORTGAGE_AMOUNT_SBER.toLocaleString()}{" "}
-                                      ₽
+                                      {excessBadge.text}
                                     </span>
                                   </div>
                                 )}
                                 {termBadge && (
                                   <div className="bank-card-badge badge-term">
-                                    <span className="badge-icon">⏰</span>
+                                    <span className="badge-icon">
+                                      {termBadge.icon}
+                                    </span>
                                     <span className="badge-text">
-                                      Максимальный срок ипотеки 20 лет
+                                      {termBadge.text}
                                     </span>
                                   </div>
                                 )}
                               </div>
-
                               <div className="bank-card-header">
                                 <div className="bank-info">
                                   <p className="bank-program">
@@ -449,7 +462,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                   )}
                                 </div>
                               </div>
-
                               <div className="bank-details-list">
                                 {showOverstatement && (
                                   <div className="bank-detail-item">
@@ -548,6 +560,16 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                     </span>
                                   </div>
                                 )}
+                                {showOverstatement && (
+                                  <div className="bank-detail-item">
+                                    <span className="bank-detail-label">
+                                      Субсидия в %:
+                                    </span>
+                                    <span className="bank-detail-value positive">
+                                      {offer.subsidyPercent.toFixed(1)}%
+                                    </span>
+                                  </div>
+                                )}
                                 <div className="bank-detail-item">
                                   <span className="bank-detail-label">
                                     На счет застройщика:
@@ -568,29 +590,18 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                   </span>
                                 </div>
                               </div>
-
                               {offer.excessLimit && offer.excessLimit > 0 && (
                                 <div className="bank-excess">
                                   Сверхлимит: {formatMoney(offer.excessLimit)}
                                 </div>
                               )}
-
                               {/* Показываем предупреждение поверх карточки */}
                               {offer.type === "family" &&
                                 offer.isLimitExceeded && (
                                   <div className="bank-excess-warning-overlay">
                                     <div className="excess-overlay-title">
-                                      Превышение лимита семейной ипотеки
-                                    </div>
-                                    <div className="excess-overlay-amount">
-                                      {formatMoney(0)}
-                                    </div>
-                                    <div className="excess-overlay-hint">
-                                      Добавьте{" "}
-                                      <strong>собственные средства</strong>{" "}
-                                      клиента
-                                      <br />
-                                      или уменьшите стоимость выбранного объекта
+                                      Ипотека с выбранными параметрами
+                                      невозможна
                                     </div>
                                   </div>
                                 )}

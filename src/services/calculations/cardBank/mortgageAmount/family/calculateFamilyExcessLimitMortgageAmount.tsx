@@ -1,9 +1,9 @@
 import {
+  BankCoefficients,
   BankOffer,
   MortgageAmountResult,
   Variables,
 } from "../../../../../utils/types";
-import { calculateBankCoefficients } from "../../../сoefficients/calculateBankCoefficients";
 
 interface calculateFamilyExcessLimitMortgageAmount {
   objectCost: number; // $B$7
@@ -15,6 +15,7 @@ interface calculateFamilyExcessLimitMortgageAmount {
   bankOffer: BankOffer;
   variables: Variables;
   isSpecialMortgageMode: boolean;
+  coefficients: BankCoefficients;
 }
 
 export const calculateFamilyExcessLimitMortgageAmount = (
@@ -30,16 +31,10 @@ export const calculateFamilyExcessLimitMortgageAmount = (
     bankOffer,
     variables,
     isSpecialMortgageMode,
+    coefficients,
   } = params;
 
-  const coefficients = calculateBankCoefficients(
-    variables,
-    objectCost,
-    bankOffer,
-    userDownPaymentPercent,
-  );
-
-  const limit = variables.familyMortgageLimit || 6000000;
+  const limit = variables.minExcessAmounts?.[bankOffer.bank] || 6000000;
   const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
@@ -67,7 +62,7 @@ export const calculateFamilyExcessLimitMortgageAmount = (
   let isLimitExceeded: boolean = false;
 
   if (isSpecialMortgageMode) {
-    if (mortgageAmount < limit) {
+    if (mortgageAmount <= limit) {
       mortgageAmount = contractAmount - downPaymentAmount;
       isLimitExceeded = true;
     } else if (isWithinLimit) {
@@ -78,7 +73,7 @@ export const calculateFamilyExcessLimitMortgageAmount = (
       isLimitExceeded = true;
     }
   } else {
-    if (mortgageAmount < limit) {
+    if (mortgageAmount <= limit) {
       mortgageAmount = contractAmount - downPaymentAmount;
       isLimitExceeded = true;
     } else if (isWithinLimit) {

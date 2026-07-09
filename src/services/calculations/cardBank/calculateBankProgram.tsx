@@ -12,6 +12,7 @@ import {
 } from "./payment/calculateMonthlyPayment";
 import { calculateSubsidyPayments } from "./payment/subsidy/calculateSubsidyPayments";
 import { getDynamicSubsidy } from "../сoefficients/getDynamicSubsidy";
+import { calculateBankCoefficients } from "../сoefficients/calculateBankCoefficients";
 
 // ========== РАСЧЕТ ВСЕХ ПАРАМЕТРОВ ПО БАНКОВСКОЙ ПРОГРАММЕ ==========
 export const calculateBankProgram = (
@@ -34,6 +35,14 @@ export const calculateBankProgram = (
   const isSpecialMortgageMode =
     mortgageWithoutDownPayment || mortgagePartialDownPayment;
 
+  const coefficients = calculateBankCoefficients(
+    variables,
+    objectCost,
+    bankOffer,
+    userDownPaymentPercent,
+    loanTermYears,
+  );
+
   // 1. Расчет суммы в договоре (завышение)
   const contractResult = calculateContractAmount(
     objectCost,
@@ -45,6 +54,7 @@ export const calculateBankProgram = (
     variables,
     noSubsidyInflate,
     isSpecialMortgageMode,
+    coefficients,
   );
 
   const contractAmount = contractResult.contractAmount;
@@ -68,6 +78,7 @@ export const calculateBankProgram = (
     isSpecialMortgageMode: isSpecialMortgageMode,
     remainingAmount,
     noSubsidyInflate,
+    coefficients,
   });
 
   // Собственные средства
@@ -85,6 +96,7 @@ export const calculateBankProgram = (
       bankOffer,
       variables,
       isSpecialMortgageMode: isSpecialMortgageMode,
+      coefficients,
     });
   } else {
     // ОБЫЧНАЯ ИПОТЕКА (full, short) — простая формула
@@ -104,6 +116,7 @@ export const calculateBankProgram = (
       bankOffer,
       variables,
       mortgageWithoutDownPayment: isSpecialMortgageMode,
+      coefficients,
     });
   } else {
     // ОБЫЧНАЯ ИПОТЕКА (full, short) — простая формула
@@ -125,6 +138,7 @@ export const calculateBankProgram = (
     variables,
     isFamilyOrIt,
     isSpecialMortgageMode,
+    coefficients,
   });
 
   const firstContractAmount = isTwoContracts
@@ -236,6 +250,7 @@ export const calculateBankProgram = (
       isSpecialMortgageMode: isSpecialMortgageMode,
       downPaymentAmount: downPaymentAmount,
       noSubsidyInflate,
+      coefficients,
     });
   } else {
     // ОБЫЧНАЯ ИПОТЕКА (full, short) — простая формула

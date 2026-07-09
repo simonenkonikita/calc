@@ -7,16 +7,36 @@ export const calculateBankCoefficients = (
   objectCost: number,
   bankOffer: BankOffer,
   userDownPaymentPercent: number,
-  secondContractAmount?: number,
   loanTermYears?: number,
 ): BankCoefficients => {
   const downPaymentPercent = userDownPaymentPercent;
   const mortgagePercent = 100 - downPaymentPercent;
   const pvRate = userDownPaymentPercent / 100;
 
+  const summCredit = objectCost * mortgagePercent;
+
   let subsidyPercent = bankOffer.subsidyPercent;
 
   // Если есть второй договор (для Совкомбанка) - используем динамическую субсидию
+  if (
+    bankOffer.dynamicSubsidyPercent &&
+    bankOffer.dynamicSubsidyPercent.length > 0
+  ) {
+    // Субсидия зависит от суммы второго договора (рыночной части)
+    const dynamicSubsidy = getDynamicSubsidy(
+      bankOffer,
+      userDownPaymentPercent,
+      summCredit,
+      loanTermYears,
+    );
+    if (dynamicSubsidy !== undefined) {
+      subsidyPercent = dynamicSubsidy;
+    }
+  }
+
+  console.log(`loanTermYears ${loanTermYears}`);
+
+  /*   // Если есть второй договор (для Совкомбанка) - используем динамическую субсидию
   if (secondContractAmount !== undefined && secondContractAmount > 0) {
     // Субсидия зависит от суммы второго договора (рыночной части)
     const dynamicSubsidy = getDynamicSubsidy(
@@ -28,7 +48,7 @@ export const calculateBankCoefficients = (
     if (dynamicSubsidy !== undefined) {
       subsidyPercent = dynamicSubsidy;
     }
-  }
+  } */
 
   const kefDownPayment = downPaymentPercent / mortgagePercent;
   const creditFromSubsidyPercent = 100 - subsidyPercent;

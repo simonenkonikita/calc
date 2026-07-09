@@ -22,6 +22,9 @@ export const formatOfferToText = (
   } else {
     lines.push(`Ставка ${offer.rate}%`);
   }
+  if (offer.isTwoContracts === true) {
+    lines.push(`Ставка по второму договору ${offer.twoRate}%`);
+  }
 
   lines.push(`Стоимость: ${formatMoney(offer.contractAmount)}`);
 
@@ -33,6 +36,13 @@ export const formatOfferToText = (
 
   lines.push(`Ипотека: ${formatMoney(offer.mortgageAmount)}`);
 
+  if (offer.isTwoContracts === true) {
+    lines.push(
+      `1 договор: ${formatMoney(offer.firstContractAmount || offer.mortgageAmount)}`,
+    );
+    lines.push(`2 договор: ${formatMoney(offer.secondContractAmount || 0)}`);
+  }
+
   // Платеж
   if (offer.type === "short" && offer.monthlyPaymentAfter) {
     lines.push(`Платеж: ${formatMoney(offer.monthlyPayment)}`);
@@ -41,6 +51,11 @@ export const formatOfferToText = (
     );
   } else {
     lines.push(`Платеж: ${formatMoney(offer.monthlyPayment)}`);
+  }
+  if (offer.isTwoContracts === true) {
+    lines.push(
+      `Платеж по второму договору ${formatMoney(offer.secondContractPayment)}`,
+    );
   }
 
   // ✅ Срок ипотеки из формы (loanTermYears)
