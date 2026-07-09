@@ -54,7 +54,13 @@ export const formatOfferToText = (
   }
   if (offer.isTwoContracts === true) {
     lines.push(
+      `Платеж по второму договору ${formatMoney(offer.firstContractPayment)}`,
+    );
+    lines.push(
       `Платеж по второму договору ${formatMoney(offer.secondContractPayment)}`,
+    );
+    lines.push(
+      `Размер субсидии за снижение ставки ${formatMoney(offer.subsidyAmount)}`,
     );
   }
 
