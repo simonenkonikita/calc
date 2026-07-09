@@ -17,17 +17,17 @@ export const housingPrices: HousingComplexPrice[] = [
     pricePerSquareMeter: 140000,
   },
   {
-    complexName: "ЖК Сады у моря 1/2 (Акция 130 000)",
+    complexName: "ЖК Сады у моря 2 (Акция 130 000)",
     apartmentType: "Студия",
     pricePerSquareMeter: 130000,
   },
   {
-    complexName: "ЖК Сады у моря 1/2 (Акция 130 000)",
+    complexName: "ЖК Сады у моря 2 (Акция 130 000)",
     apartmentType: "Однокомнатная квартира",
     pricePerSquareMeter: 130000,
   },
   {
-    complexName: "ЖК Сады у моря 1/2 (Акция 130 000)",
+    complexName: "ЖК Сады у моря 2 (Акция 130 000)",
     apartmentType: "Двухкомнатная квартира",
     pricePerSquareMeter: 130000,
   },
@@ -88,17 +88,17 @@ export const housingPrices: HousingComplexPrice[] = [
   },
   {
     complexName: "ГК Морелло",
-    apartmentType: "Однокомнатные номера до 40 м2",
+    apartmentType: "Однокомнатные номера до 39 м2",
     pricePerSquareMeter: 355000,
   },
   {
     complexName: "ГК Морелло",
-    apartmentType: "Однокомнатные номера от 40 м2",
-    pricePerSquareMeter: 290000,
+    apartmentType: "Однокомнатные номера от 39 м2",
+    pricePerSquareMeter: 300000,
   },
   {
     complexName: "ГК Морелло",
     apartmentType: "Двухкомнатные номера от 50 м2",
-    pricePerSquareMeter: 300000,
+    pricePerSquareMeter: 290000,
   },
 ];
