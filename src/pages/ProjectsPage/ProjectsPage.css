@@ -1,0 +1,553 @@
+/* ProjectsPage.css */
+
+.projects-page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0f4f8 0%, #e8edf5 100%);
+}
+
+/* ===== ХЕДЕР ===== */
+.projects-header {
+  margin-bottom: 2.5rem;
+}
+
+.projects-header h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--domrf-gray-900);
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.projects-header h1::before {
+  content: "🏘️";
+  font-size: 2rem;
+}
+
+.projects-header .subtitle {
+  color: var(--domrf-gray-500);
+  font-size: 1.05rem;
+  margin-left: 3rem;
+}
+
+/* ===== ОСНОВНАЯ СЕТКА ===== */
+.projects-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* ===== СПИСОК ПРОЕКТОВ ===== */
+.projects-list {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 1.25rem;
+  padding: 1.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px rgba(0, 84, 166, 0.08);
+  position: sticky;
+  top: 2rem;
+}
+
+.projects-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding: 0 0.5rem 0.75rem 0.5rem;
+  border-bottom: 2px solid var(--domrf-gray-200);
+}
+
+.projects-list-header h2 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--domrf-gray-500);
+  margin: 0;
+}
+
+.projects-list-header .count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--domrf-white);
+  background: var(--domrf-blue);
+  padding: 0.15rem 0.6rem;
+  border-radius: 1rem;
+}
+
+.project-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--domrf-gray-600);
+  position: relative;
+  margin-bottom: 0.25rem;
+}
+
+.project-item:hover {
+  background: rgba(0, 84, 166, 0.06);
+  transform: translateX(4px);
+  color: var(--domrf-gray-800);
+}
+
+.project-item.active {
+  background: linear-gradient(135deg, #e8f0fe 0%, #d6e4ff 100%);
+  color: var(--domrf-blue);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 84, 166, 0.1);
+}
+
+.project-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20%;
+  height: 60%;
+  width: 3px;
+  background: var(--domrf-blue);
+  border-radius: 0 4px 4px 0;
+}
+
+.project-item .project-icon {
+  font-size: 1.3rem;
+  width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.project-item .project-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.project-item .project-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.project-item .project-status-dot.dot-sdan {
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+}
+
+.project-item .project-status-dot.dot-stroitsya {
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+}
+
+.project-item .project-status-dot.dot-proekt {
+  background: #3b82f6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+
+/* ===== ДЕТАЛИ ПРОЕКТА ===== */
+.project-details {
+  background: var(--domrf-white);
+  border-radius: 1.25rem;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px rgba(0, 84, 166, 0.08);
+  overflow: hidden;
+  min-height: 500px;
+}
+
+.details-card {
+  padding: 1.75rem;
+}
+
+/* ===== ХЕДЕР ДЕТАЛЕЙ ===== */
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--domrf-gray-100);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.details-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.details-title .project-icon-large {
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--domrf-gray-50);
+  border-radius: 1rem;
+}
+
+.details-title h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--domrf-gray-900);
+  margin: 0;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 1.25rem;
+  border-radius: 2rem;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.status-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-sdan {
+  background: #d1fae5;
+  color: #065f46;
+}
+.status-sdan::before {
+  background: #22c55e;
+}
+
+.status-stroitsya {
+  background: #fef3c7;
+  color: #92400e;
+}
+.status-stroitsya::before {
+  background: #f59e0b;
+}
+
+.status-proekt {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.status-proekt::before {
+  background: #3b82f6;
+}
+
+/* ===== СЕКЦИИ ===== */
+.details-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  background: var(--domrf-gray-50);
+  transition: all 0.3s;
+}
+
+.details-section:hover {
+  background: #f5f7fa;
+}
+
+.details-section:last-child {
+  margin-bottom: 0;
+}
+
+.details-section .description {
+  color: var(--domrf-gray-600);
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.section-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--domrf-gray-400);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.section-value.price {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--domrf-blue);
+  background: linear-gradient(135deg, var(--domrf-blue), #2563eb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== СПИСКИ ===== */
+.info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-list li {
+  font-size: 0.9rem;
+  padding: 0.3rem 0;
+  color: var(--domrf-gray-700);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  line-height: 1.4;
+}
+
+.info-list li::before {
+  content: "▸";
+  color: var(--domrf-blue);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.info-list.promotions li {
+  color: var(--domrf-blue);
+  font-weight: 500;
+}
+
+.info-list.promotions li::before {
+  content: "🔥";
+  color: #f59e0b;
+}
+
+.info-list.special li {
+  color: #b8860b;
+  font-weight: 600;
+}
+
+.info-list.special li::before {
+  content: "⭐";
+}
+
+/* ===== ВЫДЕЛЕННЫЕ СЕКЦИИ ===== */
+.details-section.highlight {
+  background: linear-gradient(135deg, #e8f0fe 0%, #dbeafe 100%);
+  border: 1px solid rgba(0, 84, 166, 0.1);
+  padding: 1rem 1.25rem;
+}
+
+.details-section.highlight .section-label {
+  color: var(--domrf-blue);
+}
+
+.details-section.special {
+  background: linear-gradient(135deg, #fef9e7 0%, #fdf3d0 100%);
+  border: 1px solid rgba(212, 168, 71, 0.2);
+  padding: 1rem 1.25rem;
+}
+
+.details-section.special .section-label {
+  color: #b8860b;
+}
+
+/* ===== БАНКИ ===== */
+.banks-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.bank-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.9rem;
+  background: var(--domrf-white);
+  border: 1.5px solid var(--domrf-gray-200);
+  border-radius: 2rem;
+  color: var(--domrf-gray-700);
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.bank-tag:hover {
+  border-color: var(--domrf-blue);
+  color: var(--domrf-blue);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 84, 166, 0.08);
+}
+
+/* ===== НЕТ ВЫБРАННОГО ===== */
+.no-project-selected {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  color: var(--domrf-gray-400);
+  text-align: center;
+}
+
+.no-project-selected .empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-project-selected p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.no-project-selected .empty-hint {
+  font-size: 0.85rem;
+  color: var(--domrf-gray-400);
+  margin-top: 0.25rem;
+}
+
+/* ===== АНИМАЦИИ ===== */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.details-card {
+  animation: fadeSlideIn 0.4s ease-out;
+}
+
+/* ===== АДАПТИВ ===== */
+@media (max-width: 1200px) {
+  .projects-layout {
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .projects-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .projects-list {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .projects-list-header {
+    grid-column: 1 / -1;
+    margin-bottom: 0.5rem;
+  }
+
+  .project-item {
+    margin-bottom: 0;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .project-item .project-status-dot {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .projects-page {
+    padding: 1rem;
+  }
+
+  .projects-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .projects-header h1::before {
+    font-size: 1.5rem;
+  }
+
+  .projects-header .subtitle {
+    font-size: 0.9rem;
+    margin-left: 0;
+  }
+
+  .projects-list {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .details-card {
+    padding: 1.25rem;
+  }
+
+  .details-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .details-title h2 {
+    font-size: 1.1rem;
+  }
+
+  .details-section {
+    padding: 0.75rem 1rem;
+  }
+
+  .section-value.price {
+    font-size: 1.1rem;
+  }
+
+  .info-list li {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .projects-list {
+    grid-template-columns: 1fr;
+  }
+
+  .project-item {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .project-item .project-name {
+    font-size: 0.85rem;
+  }
+
+  .project-item .project-icon {
+    font-size: 1.1rem;
+    width: 28px;
+  }
+
+  .details-card {
+    padding: 1rem;
+  }
+
+  .details-title .project-icon-large {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+  }
+
+  .banks-tags {
+    gap: 0.35rem;
+  }
+
+  .bank-tag {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.6rem;
+  }
+}

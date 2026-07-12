@@ -17,6 +17,9 @@ const Navigation = () => {
           <li className={location.pathname === "/calculator" ? "active" : ""}>
             <Link to="/calculator">Калькулятор</Link>
           </li>
+          <li className={location.pathname === "/projects" ? "active" : ""}>
+            <Link to="/projects">Проекты</Link>
+          </li>
           {/*   <li className={location.pathname === "/results" ? "active" : ""}>
             <Link to="/results">Результаты</Link>
           </li> */}

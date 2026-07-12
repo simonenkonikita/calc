@@ -30,7 +30,7 @@ export const URALSIB_OFFERS: BankOffer[] = [
     subsidyPercent: 13.8,
     minPVPercent: MIN_PV_PERCENT,
   },
-  {
+  /*  {
     bank: "Уралсиб",
     program: "Семейная ипотека (2 договора)",
     type: "family",
@@ -39,5 +39,5 @@ export const URALSIB_OFFERS: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     isTwoContracts: true,
-  },
+  }, */
 ];

@@ -362,7 +362,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
             </div>
           </div>
         </div>
-
         {/* Блок: Параметры ипотеки */}
         <div className="form-block">
           <h2>Параметры ипотеки</h2>
