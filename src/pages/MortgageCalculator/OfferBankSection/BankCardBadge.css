@@ -64,3 +64,8 @@
   background: #ff0000;
   color: #ffffff;
 }
+
+.bank-card-badge.badge-unavailable {
+  background: #16a34a;
+  color: #ffffff;
+}

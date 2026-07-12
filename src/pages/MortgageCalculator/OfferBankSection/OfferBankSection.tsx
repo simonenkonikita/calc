@@ -22,6 +22,8 @@ import {
 
 import { printSelectedOffers } from "../../../utils/printSelectedOffers";
 import { getTermYearsBadge } from "../../../utils/badge/getTermYearsBadge";
+import { isTrancheAvailable } from "../../../utils/tranche/trancheDates";
+import { getTrancheBadge } from "../../../utils/badge/trancheBadge";
 
 // Функция для определения категории программы
 const getProgramCategory = (offer: BankProgramResultWithIndex): string => {
@@ -336,11 +338,18 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                             offer.monthlyPaymentAfter !== null;
 
                           const isTwoContracts = offer.isTwoContracts === true;
+                          const isTrancheUnavailable =
+                            offer.type === "tranche" &&
+                            !isTrancheAvailable(complexName);
 
                           const badge = getBadge(offer);
                           const excessBadge = getExcessBadge(offer);
                           const limitBadge = getLimitBadge(offer);
                           const termBadge = getTermYearsBadge(offer);
+                          const trancheBadge = getTrancheBadge(
+                            offer,
+                            complexName,
+                          );
 
                           return (
                             <div
@@ -389,6 +398,16 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                     </span>
                                     <span className="badge-text">
                                       {termBadge.text}
+                                    </span>
+                                  </div>
+                                )}
+                                {trancheBadge && (
+                                  <div className="bank-card-badge badge-unavailable">
+                                    <span className="badge-icon">
+                                      {trancheBadge.icon}
+                                    </span>
+                                    <span className="badge-text">
+                                      {trancheBadge.text}
                                     </span>
                                   </div>
                                 )}
@@ -680,6 +699,15 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                     </div>
                                   </div>
                                 )}
+                              {/* Предупреждение о недоступности траншевой ипотеки */}
+                              {isTrancheUnavailable && (
+                                <div className="bank-excess-warning-overlay">
+                                  <div className="excess-overlay-title">
+                                    Траншевая ипотека недоступна в данным
+                                    комплексе
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           );
                         })}
