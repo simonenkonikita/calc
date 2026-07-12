@@ -30,7 +30,6 @@ export const MORTGAGE_PARTIAL_DOWN_PAYMENT_SURCHARGES: Record<string, number> =
 
 // ========== ДАТЫ ВЫДАЧИ ПОСЛЕДНЕГО ТРАНША ==========
 export const TRANCHE_SECOND_DATE_BY_COMPLEX: Record<string, string> = {
-  "ЖК Сады у моря 3": "2026-09-01",
   "ЖК Горы здесь": "2027-02-01",
   "ГК Море тут": "2027-02-01",
   "ГК Морелло": "2026-09-01",
@@ -38,6 +37,7 @@ export const TRANCHE_SECOND_DATE_BY_COMPLEX: Record<string, string> = {
 
 // ========== ЖК, ГДЕ ТРАНШЕВАЯ ИПОТЕКА НЕДОСТУПНА ==========
 export const TRANCHE_UNAVAILABLE_COMPLEXES = [
+  "ЖК Сады у моря 3",
   "ЖК Сады у моря 2 (Акция 130 000)",
   "ЖК Два адмирала",
   "ЖК Лермонтов",

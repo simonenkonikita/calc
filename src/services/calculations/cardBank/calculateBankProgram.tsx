@@ -320,6 +320,7 @@ export const calculateBankProgram = (
   // ✅ ТРАНШЕВАЯ ИПОТЕКА
   else if (isTranche) {
     const trancheResult = calculateTranchePayments(
+      actualRate,
       bankOffer,
       mortgageAmount.firstTrancheAmount || 0,
       mortgageAmount.secondTrancheAmount || 0,

@@ -8,6 +8,7 @@ import {
 } from "../../../../../utils/tranche/trancheDates";
 
 export const calculateTranchePayments = (
+  annualRate: number,
   bankOffer: BankOffer,
   firstTrancheAmount: number,
   secondTrancheAmount: number,
@@ -15,7 +16,6 @@ export const calculateTranchePayments = (
   loanTermMonths: number,
   complexName: string,
 ): TranchePaymentsResult => {
-  const annualRate = bankOffer.rate || 0;
   const monthlyRate = annualRate / 100 / 12;
 
   const secondDate = getTrancheSecondDate(complexName);
