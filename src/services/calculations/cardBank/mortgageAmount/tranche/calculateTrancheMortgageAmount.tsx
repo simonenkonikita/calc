@@ -34,6 +34,7 @@ export const calculateTrancheMortgageAmount = (
   } = params;
 
   const MIN_TRANCHE = 100000;
+  const MIN_PERCENT_TRANCHE = 0.4;
 
   // 1. Общая сумма ипотеки
   const mortgageAmount = contractAmount - downPaymentAmount;
@@ -43,7 +44,7 @@ export const calculateTrancheMortgageAmount = (
 
   // 3. Минимальный ПВ (обычно 20.1%)
   const minPVPercent = bankOffer.minPVPercent || 20.1;
-  const targetTotal = contractAmount * 0.4; // 40% от суммы в договоре
+  const targetTotal = contractAmount * MIN_PERCENT_TRANCHE; // 40% от суммы в договоре
   const trancheSumm = contractAmount * (downPayment / contractAmount);
 
   let firstTrancheAmount: number;

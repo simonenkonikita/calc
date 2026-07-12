@@ -592,6 +592,37 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
                                           )}
                                         </span>
                                       </div>
+                                      {/* ✅ Добавляем дату и количество месяцев */}
+                                      {offer.trancheSecondDate && (
+                                        <div className="bank-detail-item tranche-detail">
+                                          <span className="bank-detail-label">
+                                            Дата второго транша:
+                                          </span>
+                                          <span className="bank-detail-value">
+                                            {new Date(
+                                              offer.trancheSecondDate,
+                                            ).toLocaleDateString("ru-RU", {
+                                              day: "2-digit",
+                                              month: "long",
+                                              year: "numeric",
+                                            })}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {offer.monthsUntilSecondTranche !==
+                                        undefined &&
+                                        offer.monthsUntilSecondTranche !==
+                                          null && (
+                                          <div className="bank-detail-item tranche-detail">
+                                            <span className="bank-detail-label">
+                                              До второго транша:
+                                            </span>
+                                            <span className="bank-detail-value">
+                                              {offer.monthsUntilSecondTranche}{" "}
+                                              мес
+                                            </span>
+                                          </div>
+                                        )}
                                     </>
                                   )}
                                 {showOverstatement && (

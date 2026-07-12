@@ -104,6 +104,8 @@ export interface TranchePaymentsResult {
   firstTranchePayment: number;
   secondTranchePayment: number;
   monthlyPayment: number;
+  trancheSecondDate?: string | null;
+  monthsUntilSecondTranche?: number;
 }
 
 // ========== РЕЗУЛЬТАТ РАСЧЕТА ПО ОДНОЙ ПРОГРАММЕ ==========
@@ -153,6 +155,8 @@ export interface BankProgramResult {
   secondTrancheAmount?: number;
   firstTranchePayment?: number;
   secondTranchePayment?: number;
+  trancheSecondDate?: string; // ✅ ДОБАВИТЬ - дата выдачи второго транша
+  monthsUntilSecondTranche?: number; // ✅ ДОБАВИТЬ - количество месяцев до второго транша
 }
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========
 export interface CalculatorResult {

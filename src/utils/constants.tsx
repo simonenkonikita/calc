@@ -7,6 +7,7 @@ export const PRICE_PER_SQUARE_METER_DEFAULT = 140000;
 export const MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGES: Record<string, number> =
   {
     "ЖК Сады у моря 3": 35000,
+    "ЖК Сады у моря 2 (Акция 130 000)": 0,
     "ЖК Лермонтов": 10000,
     "ЖК Горы здесь": 10000,
     "ЖК Два адмирала": 0,
@@ -19,12 +20,28 @@ export const MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGES: Record<string, number> =
 export const MORTGAGE_PARTIAL_DOWN_PAYMENT_SURCHARGES: Record<string, number> =
   {
     "ЖК Сады у моря 3": 15000,
+    "ЖК Сады у моря 2 (Акция 130 000)": 0,
     "ЖК Лермонтов": 10000,
     "ЖК Горы здесь": 10000,
     "ЖК Два адмирала": 0,
     "ГК Море тут": 10000,
     "ГК Морелло": 20000,
   };
+
+// ========== ДАТЫ ВЫДАЧИ ПОСЛЕДНЕГО ТРАНША ==========
+export const TRANCHE_SECOND_DATE_BY_COMPLEX: Record<string, string> = {
+  "ЖК Сады у моря 3": "2026-09-01",
+  "ЖК Горы здесь": "2027-02-01",
+  "ГК Море тут": "2027-02-01",
+  "ГК Морелло": "2026-09-01",
+};
+
+// ========== ЖК, ГДЕ ТРАНШЕВАЯ ИПОТЕКА НЕДОСТУПНА ==========
+export const TRANCHE_UNAVAILABLE_COMPLEXES = [
+  "ЖК Сады у моря 2 (Акция 130 000)",
+  "ЖК Два адмирала",
+  "ЖК Лермонтов",
+];
 
 // ========== ЛИМИТЫ ==========
 export const MIN_AREA = 1;

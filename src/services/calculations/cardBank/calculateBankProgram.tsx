@@ -32,6 +32,7 @@ export const calculateBankProgram = (
   mortgageWithoutDownPayment: boolean,
   mortgagePartialDownPayment: boolean,
   area: number,
+  complexName: string,
 ): BankProgramResult => {
   const isFamilyOrIt = bankOffer.type === "family" || bankOffer.type === "it";
   const isTwoContracts =
@@ -281,7 +282,6 @@ export const calculateBankProgram = (
 
   let monthlyPayment: number;
   let monthlyPaymentAfter: number | null = null;
-
   let firstContractPayment: number = 0;
   let secondContractPayment: number = 0;
   let totalMonthlyPayment: number = 0;
@@ -319,25 +319,28 @@ export const calculateBankProgram = (
   }
   // ✅ ТРАНШЕВАЯ ИПОТЕКА
   else if (isTranche) {
-    const result = calculateTranchePayments(
+    const trancheResult = calculateTranchePayments(
       bankOffer,
       mortgageAmount.firstTrancheAmount || 0,
       mortgageAmount.secondTrancheAmount || 0,
       mortgageAmount.mortgageAmount,
       loanTermMonths,
+      complexName,
     );
 
     // Сохраняем результаты для отображения
-    firstContractPayment = result.firstTranchePayment;
-    secondContractPayment = result.secondTranchePayment;
-    monthlyPayment = result.monthlyPayment;
-    totalMonthlyPayment = result.monthlyPayment;
+    firstContractPayment = trancheResult.firstTranchePayment;
+    secondContractPayment = trancheResult.secondTranchePayment;
+    monthlyPayment = trancheResult.monthlyPayment;
+    totalMonthlyPayment = trancheResult.monthlyPayment;
 
     // ✅ Сохраняем траншевый график для UI с полными данными
     trancheSchedule = {
-      firstTranchePayment: result.firstTranchePayment,
-      secondTranchePayment: result.secondTranchePayment,
-      monthlyPayment: result.monthlyPayment,
+      firstTranchePayment: trancheResult.firstTranchePayment,
+      secondTranchePayment: trancheResult.secondTranchePayment,
+      monthlyPayment: trancheResult.monthlyPayment,
+      monthsUntilSecondTranche: trancheResult.monthsUntilSecondTranche,
+      trancheSecondDate: trancheResult.trancheSecondDate,
     };
   }
   // СТАНДАРТНАЯ ИПОТЕКА
@@ -387,5 +390,8 @@ export const calculateBankProgram = (
     secondTrancheAmount: mortgageAmount.secondTrancheAmount,
     firstTranchePayment: trancheSchedule.firstTranchePayment,
     secondTranchePayment: trancheSchedule.secondTranchePayment,
+    trancheSecondDate: trancheSchedule.trancheSecondDate ?? undefined,
+    monthsUntilSecondTranche:
+      trancheSchedule.monthsUntilSecondTranche ?? undefined,
   };
 };

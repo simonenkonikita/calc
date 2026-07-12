@@ -47,6 +47,8 @@ export const calculateOnlyPercenkSubsidy = (
   );
   const totalPrincipalPaid = mortgageAmount - remainingDebt;
 
+  console.log(2, totalPrincipalPaid);
+
   // 3. Платеж на льготном периоде = аннуитет по полной ставке
   const principalPaidDuringSubsidy = mortgageAmount - totalPrincipalPaid; // B3 - G3
   const part1 = principalPaidDuringSubsidy * monthlyShortRate;
