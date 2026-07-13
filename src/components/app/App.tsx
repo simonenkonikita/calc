@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
-import Navigation from "./components/Navigation";
-import MortgageCalculator from "./pages/MortgageCalculator";
-import { ProjectsPage } from "./pages/ProjectsPage/ProjectsPage";
+import Navigation from "../Navigation";
+import MortgageCalculator from "../../pages/MortgageCalculator";
+import { ProjectsPage } from "../../pages/ProjectsPage/ProjectsPage";
 
 const Home = () => {
   return (

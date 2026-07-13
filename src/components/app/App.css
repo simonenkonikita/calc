@@ -1,15 +1,7 @@
-/* App.css - стили остаются такими же */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
-  padding: 20px;
 }
 
 .mortgage-calculator {
@@ -17,7 +9,7 @@ body {
   margin: 0 auto;
   background: white;
   border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   animation: fadeIn 0.5s ease-out;
 }
@@ -147,12 +139,14 @@ h3 {
   border-radius: 12px;
   padding: 15px;
   border-left: 4px solid #667eea;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .bank-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .bank-card.error {
@@ -201,12 +195,12 @@ h3 {
   .main-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .input-section {
     border-right: none;
     border-bottom: 1px solid #e0e0e0;
   }
-  
+
   .bank-grid {
     grid-template-columns: 1fr;
   }

@@ -18,53 +18,57 @@ export const MortgageCalculator: React.FC = () => {
 
   return (
     <div className="mortgage-calculator-page">
-      <h1>Ипотечный калькулятор</h1>
-
       <div className="calculator">
-        <div className="calculator-form">
-          <FormSection formData={formData} onInputChange={handleInputChange} />
-
-          {!isCalculating && results && (
-            <div className="results-white-card">
-              <ResultsCalcSection
-                objectResult={results.objectResult}
-                formatMoney={formatMoney}
-                area={formData.area}
-              />
-            </div>
-          )}
-
-          {isCalculating && (
-            <div className="results-white-card loading-state">
-              <div className="loading-spinner">
-                <div className="spinner"></div>
-                <p>Расчёт ипотечных программ...</p>
+        {/* Левая колонка - закреплена */}
+        <div className="calculator-form-wrapper">
+          <div className="calculator-form">
+            {!isCalculating && results && (
+              <div className="results-white-card">
+                <ResultsCalcSection
+                  objectResult={results.objectResult}
+                  formatMoney={formatMoney}
+                  area={formData.area}
+                />
               </div>
-            </div>
-          )}
+            )}
 
-          {error && !isCalculating && (
-            <div className="results-white-card error-state">
-              <div className="error-content">
-                <div className="error-icon">⚠️</div>
-                <div className="error-text">
-                  <strong>Ошибка расчёта</strong>
-                  <p>{error}</p>
+            {isCalculating && (
+              <div className="results-white-card loading-state">
+                <div className="loading-spinner">
+                  <div className="spinner"></div>
+                  <p>Расчёт ипотечных программ...</p>
                 </div>
-                <button
-                  className="error-retry-btn"
-                  onClick={() => window.location.reload()}
-                >
-                  Повторить
-                </button>
               </div>
-            </div>
-          )}
+            )}
+
+            {error && !isCalculating && (
+              <div className="results-white-card error-state">
+                <div className="error-content">
+                  <div className="error-icon">⚠️</div>
+                  <div className="error-text">
+                    <strong>Ошибка расчёта</strong>
+                    <p>{error}</p>
+                  </div>
+                  <button
+                    className="error-retry-btn"
+                    onClick={() => window.location.reload()}
+                  >
+                    Повторить
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <FormSection
+              formData={formData}
+              onInputChange={handleInputChange}
+            />
+          </div>
         </div>
 
-        {!isCalculating && results && results.bankResults.length > 0 && (
-          <>
-            <div className="section-divider" />
+        {/* Правая колонка - скроллится */}
+        <div className="calculator-results">
+          {!isCalculating && results && results.bankResults.length > 0 && (
             <OfferBankSection
               bankResults={results.bankResults}
               onSelectOffer={handleSelectOffer}
@@ -75,8 +79,14 @@ export const MortgageCalculator: React.FC = () => {
               area={formData.area}
               complexName={formData.complex}
             />
-          </>
-        )}
+          )}
+
+          {!isCalculating && (!results || results.bankResults.length === 0) && (
+            <div className="empty-results">
+              <p>Заполните параметры для расчета предложений</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
