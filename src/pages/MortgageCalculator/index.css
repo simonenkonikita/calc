@@ -2,9 +2,9 @@
 .mortgage-calculator-page {
   max-width: 100%;
   margin: 0 auto;
-  padding: 2.5rem;
   background: #f3f4f6;
   min-height: 100vh;
+  padding: 1.5rem;
 }
 
 .calculator {
@@ -15,65 +15,24 @@
 }
 
 /* Левая колонка - закреплена */
-.calculator-form-wrapper {
-  position: sticky;
-  top: 0;
-  max-height: calc(100vh - 5rem);
-}
-
 .calculator-form {
+  position: sticky;
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
-  overflow-y: auto;
-  padding-right: 4px;
+  top: 0;
+  max-height: 100vh;
 }
 
-/* Стили для скроллбара левой колонки */
-.calculator-form::-webkit-scrollbar {
-  width: 4px;
+.calculator-form-wrapper {
+  position: sticky;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  top: 0;
+  max-height: 100vh;
 }
 
-.calculator-form::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-.calculator-form::-webkit-scrollbar-thumb {
-  background: #667eea;
-  border-radius: 10px;
-}
-
-.calculator-form::-webkit-scrollbar-thumb:hover {
-  background: #5a6fd6;
-}
-
-/* Правая колонка - скроллится */
-.calculator-results {
-  max-height: calc(100vh - 5rem);
-  overflow-y: auto;
-  padding-right: 8px;
-}
-
-/* Стили для скроллбара правой колонки */
-.calculator-results::-webkit-scrollbar {
-  width: 6px;
-}
-
-.calculator-results::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-.calculator-results::-webkit-scrollbar-thumb {
-  background: #667eea;
-  border-radius: 10px;
-}
-
-.calculator-results::-webkit-scrollbar-thumb:hover {
-  background: #5a6fd6;
-}
-/* Стили для загрузки */
 .loading-state {
   display: flex;
   justify-content: center;
@@ -108,7 +67,6 @@
   }
 }
 
-/* Стили для ошибки */
 .error-state {
   background: #fee2e2;
   border: 1px solid #ef4444;
@@ -212,7 +170,6 @@
   }
 }
 
-/* Адаптив для телефонов */
 @media (max-width: 768px) {
   .mortgage-calculator-page {
     padding: 1rem;

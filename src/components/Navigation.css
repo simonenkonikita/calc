@@ -59,3 +59,22 @@
     font-size: 1rem;
   }
 }
+
+.brand-logo {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .brand-logo {
+    height: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-logo {
+    height: 24px;
+  }
+}

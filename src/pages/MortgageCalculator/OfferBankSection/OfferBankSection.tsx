@@ -232,57 +232,55 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
 
   return (
     <div className="results-section">
-      <div>
-        <div className="banks-header-wrapper">
-          <h3 className="banks-header">
-            Предложения банков ({filteredBankResults.length})
-          </h3>
+      <div className="banks-header-wrapper">
+        <h3 className="banks-header">
+          Предложения банков ({filteredBankResults.length})
+        </h3>
 
-          <div className="banks-filters">
-            <select
-              className="bank-filter-select"
-              value={selectedBankFilter}
-              onChange={(e) => setSelectedBankFilter(e.target.value)}
-            >
-              <option value="all">Все банки ({uniqueBanks.length})</option>
+        <div className="banks-filters">
+          <select
+            className="bank-filter-select"
+            value={selectedBankFilter}
+            onChange={(e) => setSelectedBankFilter(e.target.value)}
+          >
+            <option value="all">Все банки ({uniqueBanks.length})</option>
 
-              {uniqueBanks.map((bank) => (
-                <option key={bank} value={bank}>
-                  {bank}
-                </option>
-              ))}
-            </select>
+            {uniqueBanks.map((bank) => (
+              <option key={bank} value={bank}>
+                {bank}
+              </option>
+            ))}
+          </select>
 
-            <select
-              className="bank-filter-select"
-              value={selectedProgramTypeFilter}
-              onChange={(e) => setSelectedProgramTypeFilter(e.target.value)}
-            >
-              <option value="all">Все типы</option>
-              {uniqueProgramTypes.map((type) => (
-                <option key={type} value={type}>
-                  {getProgramTypeLabel(type)}
-                </option>
-              ))}
-            </select>
+          <select
+            className="bank-filter-select"
+            value={selectedProgramTypeFilter}
+            onChange={(e) => setSelectedProgramTypeFilter(e.target.value)}
+          >
+            <option value="all">Все типы</option>
+            {uniqueProgramTypes.map((type) => (
+              <option key={type} value={type}>
+                {getProgramTypeLabel(type)}
+              </option>
+            ))}
+          </select>
 
-            <button
-              className={`reset-filters-btn ${isFiltersActive ? "active" : "inactive"}`}
-              onClick={resetFilters}
-              disabled={!isFiltersActive}
-            >
-              <span>✕</span> Очистить
-            </button>
+          <button
+            className={`reset-filters-btn ${isFiltersActive ? "active" : "inactive"}`}
+            onClick={resetFilters}
+            disabled={!isFiltersActive}
+          >
+            <span>✕</span> Очистить
+          </button>
 
-            <label className="toggle-overstatement">
-              <input
-                type="checkbox"
-                checked={showOverstatement}
-                onChange={(e) => setShowOverstatement(e.target.checked)}
-              />
-              <span>Показать завышение и субсидию</span>
-            </label>
-          </div>
+          <label className="toggle-overstatement">
+            <input
+              type="checkbox"
+              checked={showOverstatement}
+              onChange={(e) => setShowOverstatement(e.target.checked)}
+            />
+            <span>Показать завышение и субсидию</span>
+          </label>
         </div>
       </div>
 
@@ -729,11 +727,9 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
               Выбрано: {selectedCards.size}
             </span>
             <button className="select-all-btn" onClick={selectAllCards}>
-              Выбрать все
+              <span className="btn-icon">✅</span> Выбрать все
             </button>
-            <button className="select-all-btn" onClick={deselectAllCards}>
-              Снять все
-            </button>
+
             <button className="copy-selected-btn" onClick={copySelectedOffers}>
               {copySuccess ? "✅ Скопировано!" : "📋 Копировать выбранные"}
             </button>
@@ -753,6 +749,9 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
               }
             >
               🖨️ Печать
+            </button>
+            <button className="select-all-btn" onClick={deselectAllCards}>
+              <span className="btn-icon">❌</span> Снять все
             </button>
           </div>
         </div>

@@ -7,6 +7,11 @@ const Navigation = () => {
   return (
     <nav className="navigation">
       <div className="nav-container">
+        <div className="nav-brand">
+          <Link to="/calculator" className="brand-link">
+            <img src="/logo.svg" alt="Логотип" className="brand-logo" />
+          </Link>
+        </div>
         {/*     <div className="nav-brand">
           <Link to="/">Ипотечный калькулятор</Link>
         </div> */}
@@ -17,9 +22,9 @@ const Navigation = () => {
           <li className={location.pathname === "/calculator" ? "active" : ""}>
             <Link to="/calculator">Калькулятор</Link>
           </li>
-          <li className={location.pathname === "/projects" ? "active" : ""}>
+          {/*     <li className={location.pathname === "/projects" ? "active" : ""}>
             <Link to="/projects">Проекты</Link>
-          </li>
+          </li> */}
           {/*   <li className={location.pathname === "/results" ? "active" : ""}>
             <Link to="/results">Результаты</Link>
           </li> */}

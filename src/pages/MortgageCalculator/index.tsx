@@ -21,7 +21,7 @@ export const MortgageCalculator: React.FC = () => {
       <div className="calculator">
         {/* Левая колонка - закреплена */}
         <div className="calculator-form-wrapper">
-          <div className="calculator-form">
+          <div className="calculator-form-wrapper">
             {!isCalculating && results && (
               <div className="results-white-card">
                 <ResultsCalcSection

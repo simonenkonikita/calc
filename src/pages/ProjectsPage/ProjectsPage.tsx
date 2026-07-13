@@ -1,4 +1,4 @@
-// src/pages/ProjectsPage.tsx
+// src/pages/ProjectsPage/ProjectsPage.tsx
 
 import React, { useState } from "react";
 import "./ProjectsPage.css";
@@ -33,59 +33,65 @@ export const ProjectsPage: React.FC = () => {
 
   return (
     <div className="projects-page">
-      <div className="projects-container">
-        <div className="projects-header">
-          <h1>Информация по проектам</h1>
-          <p className="subtitle">
-            Выберите ЖК для просмотра подробной информации
-          </p>
-        </div>
-
-        <div className="projects-layout">
-          {/* Список проектов */}
-          <div className="projects-list">
+      <div className="projects-layout">
+        <div className="projects-list-wrapper">
+          <div className="projects-list-card">
             <div className="projects-list-header">
-              <h2>Жилые комплексы</h2>
+              <h2>Проекты</h2>
               <span className="count">{PROJECTS_INFO.length}</span>
             </div>
-            {PROJECTS_INFO.map((project) => (
-              <div
-                key={project.id}
-                className={`project-item ${selectedProject?.id === project.id ? "active" : ""}`}
-                onClick={() => setSelectedProject(project)}
-              >
-                <span className="project-icon">{project.statusIcon}</span>
-                <span className="project-name">{project.name}</span>
-                <span
-                  className={`project-status-dot ${getStatusDotClass(project.status)}`}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Детальная информация */}
-          <div className="project-details">
-            {selectedProject ? (
-              <div className="details-card">
-                <div className="details-header">
-                  <div className="details-title">
-                    <span className="project-icon-large">
-                      {selectedProject.statusIcon}
-                    </span>
-                    <h2>{selectedProject.name}</h2>
-                  </div>
+            <div className="projects-list-items">
+              {PROJECTS_INFO.map((project) => (
+                <div
+                  key={project.id}
+                  className={`project-item ${selectedProject?.id === project.id ? "active" : ""}`}
+                  onClick={() => setSelectedProject(project)}
+                >
+                  <span className="project-icon">{project.statusIcon}</span>
+                  <span className="project-name">{project.name}</span>
                   <span
-                    className={`status-badge ${getStatusClass(selectedProject.status)}`}
-                  >
-                    {selectedProject.status}
-                  </span>
+                    className={`project-status-dot ${getStatusDotClass(project.status)}`}
+                  />
                 </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
+        <div className="project-details-wrapper">
+          {selectedProject ? (
+            <div className="project-details-card">
+              <div className="details-header">
+                <div className="details-title">
+                  <span className="project-icon-large">
+                    {selectedProject.statusIcon}
+                  </span>
+                  <h2>{selectedProject.name}</h2>
+                </div>
+                <span
+                  className={`status-badge ${getStatusClass(selectedProject.status)}`}
+                >
+                  {selectedProject.status}
+                </span>
+              </div>
+
+              <div className="details-content">
                 {selectedProject.description && (
                   <div className="details-section">
                     <p className="description">{selectedProject.description}</p>
                   </div>
                 )}
+
+                <div className="details-section">
+                  <div className="section-label">🏦 Банки-партнеры</div>
+                  <div className="banks-tags">
+                    {selectedProject.banks.map((bank) => (
+                      <span key={bank} className="bank-tag">
+                        {bank}
+                      </span>
+                    ))}
+                  </div>
+                </div>
 
                 <div className="details-section">
                   <div className="section-label">💰 Цены</div>
@@ -128,28 +134,15 @@ export const ProjectsPage: React.FC = () => {
                       </ul>
                     </div>
                   )}
-
-                <div className="details-section">
-                  <div className="section-label">🏦 Банки-партнеры</div>
-                  <div className="banks-tags">
-                    {selectedProject.banks.map((bank) => (
-                      <span key={bank} className="bank-tag">
-                        {bank}
-                      </span>
-                    ))}
-                  </div>
-                </div>
               </div>
-            ) : (
-              <div className="no-project-selected">
-                <div className="empty-icon">🏗️</div>
-                <p>Выберите проект для просмотра информации</p>
-                <span className="empty-hint">
-                  Кликните на ЖК в списке слева
-                </span>
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="empty-state">
+              <div className="empty-icon">🏗️</div>
+              <p>Выберите проект для просмотра информации</p>
+              <span className="empty-hint">Кликните на ЖК в списке слева</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
