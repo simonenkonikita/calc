@@ -423,22 +423,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
         <div className="form-block form-block-checkboxes">
           <h2>Другие параметры</h2>
           <div className="form-fields">
-            <div className="field">
-              <label>Проектное финансирование</label>
-              <select
-                value={formData.projectFinancingBank || "Сбербанк"}
-                onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                  onInputChange("projectFinancingBank", e.target.value)
-                }
-              >
-                {PROJECT_FINANCING_BANKS.map((bank) => (
-                  <option key={bank} value={bank}>
-                    {bank}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             <div className="checkbox-field">
               <input
                 type="checkbox"

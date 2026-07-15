@@ -62,11 +62,6 @@ export const BANK_ORDER = [
   "Совкомбанк",
 ];
 
-// ========== БАНКИ ДЛЯ ПРОЕКТНОГО ФИНАНСИРОВАНИЯ ==========
-export const PROJECT_FINANCING_BANKS = ["Сбербанк"] as const;
-
-export const DEFAULT_PROJECT_FINANCING_BANK = "Сбербанк";
-
 // ========== ТИПЫ ПРОГРАММ ==========
 export const PROGRAM_TYPES = {
   FULL: "full",
