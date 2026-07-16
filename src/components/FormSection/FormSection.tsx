@@ -1,17 +1,16 @@
-import React, { useMemo } from "react";
-import type { ChangeEvent } from "react";
-import type { CalculatorFormData } from "../../../utils/types";
-import { housingPrices } from "../../../data/calculatorData";
-import "./FormSection.css";
+import { useMemo, ChangeEvent } from "react";
+import { housingPrices } from "../../data/calculatorData";
 import {
-  MAX_AREA,
-  MAX_DOWN_PAYMENT_PERCENT,
-  MAX_LOAN_TERM,
-  MIN_AREA,
-  MIN_DOWN_PAYMENT_PERCENT,
-  MIN_LOAN_TERM,
   PRICE_PER_SQUARE_METER_DEFAULT,
-} from "../../../utils/constants";
+  MAX_DOWN_PAYMENT_PERCENT,
+  MIN_DOWN_PAYMENT_PERCENT,
+  MAX_AREA,
+  MIN_AREA,
+  MAX_LOAN_TERM,
+  MIN_LOAN_TERM,
+} from "../../utils/constants";
+import { CalculatorFormData } from "../../utils/types";
+import "./FormSection.css";
 
 // 🔥 Константа суммы брони
 const DEPOSIT_AMOUNT = 30000;

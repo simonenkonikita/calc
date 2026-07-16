@@ -13,7 +13,7 @@ export const NoResults: React.FC<NoResultsProps> = ({
 }) => {
   return (
     <div className="no-results">
-      <p>😕 {message}</p>
+      <p>{message}</p>
       <button onClick={onReset}>Сбросить фильтры</button>
     </div>
   );

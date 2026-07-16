@@ -1,5 +1,5 @@
 import React from "react";
-import type { ObjectCalculationResult } from "../../../utils/types";
+import type { ObjectCalculationResult } from "../../utils/types";
 import "./ResultsSection.css";
 
 interface ResultsCalcSectionProps {
