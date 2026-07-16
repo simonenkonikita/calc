@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import Navigation from "../Navigation";
+import Navigation from "../Navigation/Navigation";
 import MortgageCalculator from "../../pages/MortgageCalculator";
 import { ProjectsPage } from "../../pages/ProjectsPage/ProjectsPage";
 

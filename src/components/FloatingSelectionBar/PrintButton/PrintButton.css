@@ -1,0 +1,43 @@
+/* src/components/PrintButton/PrintButton.css */
+.print-selected-btn {
+  padding: 0.4rem 1.5rem;
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.print-selected-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.print-selected-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.print-selected-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .print-selected-btn {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .print-selected-btn {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.8rem;
+  }
+}

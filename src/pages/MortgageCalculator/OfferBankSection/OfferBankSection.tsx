@@ -13,40 +13,17 @@ import {
 } from "../../../utils/constants";
 
 import { getBadge } from "../../../utils/badge/getBadge";
-import { formatOfferToText } from "../../../utils/formatOfferToText";
 import { safeFormatMoney } from "../../../utils/formatMoney";
 import {
   getExcessBadge,
   getLimitBadge,
 } from "../../../utils/badge/getExcessBadge";
 
-import { printSelectedOffers } from "../../../utils/printSelectedOffers";
 import { getTermYearsBadge } from "../../../utils/badge/getTermYearsBadge";
 import { isTrancheAvailable } from "../../../utils/tranche/trancheDates";
 import { getTrancheBadge } from "../../../utils/badge/trancheBadge";
-
-// Функция для определения категории программы
-const getProgramCategory = (offer: BankProgramResultWithIndex): string => {
-  if (offer.type === "full" && offer.subsidyAmount === 0) {
-    return "base";
-  }
-  if (offer.type === "full" && offer.subsidyAmount > 0) {
-    return "long";
-  }
-  if (offer.type === "short") {
-    return "short";
-  }
-  if (offer.type === "family") {
-    return "family";
-  }
-  if (offer.type === "it") {
-    return "it";
-  }
-  if (offer.type === "tranche") {
-    return "tranche";
-  }
-  return "base";
-};
+import { getProgramCategory } from "../../../utils/category/getProgramCategory";
+import { FloatingSelectionBar } from "../../../components/FloatingSelectionBar/FloatingSelectionBar";
 
 export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   bankResults,
@@ -63,7 +40,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   const [selectedProgramTypeFilter, setSelectedProgramTypeFilter] =
     useState<string>("all");
   const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set());
-  const [copySuccess, setCopySuccess] = useState(false);
 
   const isSpecialMortgageMode = useMemo(() => {
     return mortgageWithoutDownPayment || mortgagePartialDownPayment;
@@ -167,58 +143,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   const handleCardClick = (index: number) => {
     toggleCardSelection(index);
     onSelectOffer(index);
-  };
-
-  const copySelectedOffers = () => {
-    if (selectedCards.size === 0) return;
-
-    const selectedResults = filteredBankResults.filter((_, idx) =>
-      selectedCards.has(idx),
-    );
-
-    // ============================================================
-    // ФОРМИРУЕМ ЗАГОЛОВОК (ЖК и площадь) ОДИН РАЗ
-    // ============================================================
-    const header = `🏢 ${complexName}\nПлощадь: ${area} м²\n`;
-    const separator = `\n---\n`;
-
-    // ============================================================
-    // ФОРМИРУЕМ ПРЕДЛОЖЕНИЯ (без дублирования ЖК и площади)
-    // ============================================================
-    const texts = selectedResults.map((offer) => {
-      const offerText = formatOfferToText(
-        offer,
-        formatMoney,
-        showOverstatement,
-        isSpecialMortgageMode,
-        loanTermYears,
-      );
-      // Добавляем номер предложения (опционально)
-      return `${offerText}`;
-    });
-
-    // ============================================================
-    // СОБИРАЕМ ВСЕ ВМЕСТЕ
-    // ============================================================
-    const fullText = `${header}${texts.join(separator)}`;
-
-    // Копируем в буфер обмена
-    navigator.clipboard
-      .writeText(fullText)
-      .then(() => {
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 3000);
-      })
-      .catch(() => {
-        const textarea = document.createElement("textarea");
-        textarea.value = fullText;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 3000);
-      });
   };
 
   const selectAllCards = () => {
@@ -719,42 +643,19 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
         })
       )}
 
-      {/* Плавающий бар снизу */}
       {selectedCards.size > 0 && (
-        <div className="floating-selection-bar">
-          <div className="floating-bar-content">
-            <span className="selection-count">
-              Выбрано: {selectedCards.size}
-            </span>
-            <button className="select-all-btn" onClick={selectAllCards}>
-              <span className="btn-icon">✅</span> Выбрать все
-            </button>
-
-            <button className="copy-selected-btn" onClick={copySelectedOffers}>
-              {copySuccess ? "✅ Скопировано!" : "📋 Копировать выбранные"}
-            </button>
-            <button
-              className="print-selected-btn"
-              onClick={() =>
-                printSelectedOffers({
-                  selectedCards,
-                  filteredBankResults,
-                  complexName,
-                  area,
-                  formatMoney,
-                  showOverstatement,
-                  isSpecialMortgageMode,
-                  loanTermYears,
-                })
-              }
-            >
-              🖨️ Печать
-            </button>
-            <button className="select-all-btn" onClick={deselectAllCards}>
-              <span className="btn-icon">❌</span> Снять все
-            </button>
-          </div>
-        </div>
+        <FloatingSelectionBar
+          selectedCards={selectedCards}
+          filteredBankResults={filteredBankResults}
+          complexName={complexName}
+          area={area}
+          formatMoney={formatMoney}
+          showOverstatement={showOverstatement}
+          isSpecialMortgageMode={isSpecialMortgageMode}
+          loanTermYears={loanTermYears}
+          onSelectAll={selectAllCards}
+          onDeselectAll={deselectAllCards}
+        />
       )}
     </div>
   );
