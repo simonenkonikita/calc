@@ -1,9 +1,10 @@
 import React from "react";
 import { useMortgageCalculator } from "../../hooks/useMortgageCalculations";
-import { FormSection } from "./FormSection/FormSection";
+
 import "./index.css";
 import { ResultsCalcSection } from "./ResultsCalcSection/ResultsCalcSection";
-import { OfferBankSection } from "./OfferBankSection/OfferBankSection";
+import { OfferBankSection } from "../../components/OfferBankSection/OfferBankSection";
+import { FormSection } from "./FormSection/FormSection";
 
 export const MortgageCalculator: React.FC = () => {
   const {

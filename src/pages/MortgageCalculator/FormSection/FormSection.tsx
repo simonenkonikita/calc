@@ -10,7 +10,6 @@ import {
   MIN_AREA,
   MIN_DOWN_PAYMENT_PERCENT,
   MIN_LOAN_TERM,
-  PROJECT_FINANCING_BANKS,
   PRICE_PER_SQUARE_METER_DEFAULT,
 } from "../../../utils/constants";
 

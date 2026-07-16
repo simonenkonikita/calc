@@ -1,0 +1,130 @@
+/* OfferBankSection.css - только для OfferBankSection */
+
+/* Заголовок предложений банков */
+.banks-header {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+  padding-bottom: 0.75rem;
+}
+
+/* Контейнер для заголовка и фильтров */
+.banks-header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 12px;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: white;
+  padding: 0.5rem 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.banks-header {
+  margin-bottom: 0;
+}
+
+/* Фильтры банков */
+.banks-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.bank-filter-select {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  outline: none;
+  background: white;
+  min-width: 150px;
+}
+
+.bank-filter-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* Кнопка сброса фильтров */
+.reset-filters-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  background: #f9fafb;
+  color: #9ca3af;
+  white-space: nowrap;
+  cursor: not-allowed;
+}
+
+.reset-filters-btn.active {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+  cursor: pointer;
+}
+
+.reset-filters-btn.active:hover {
+  background: #dc2626;
+}
+
+/* Галочка для завышения */
+.toggle-overstatement {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #4b5563;
+  padding: 0.3rem 0.75rem;
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+  white-space: nowrap;
+}
+
+.toggle-overstatement input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.toggle-overstatement span {
+  user-select: none;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+  .banks-header-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .banks-filters {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .bank-filter-select {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .reset-filters-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .toggle-overstatement {
+    align-self: flex-start;
+  }
+}

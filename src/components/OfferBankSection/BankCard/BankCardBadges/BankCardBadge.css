@@ -1,0 +1,124 @@
+/* BankCardBadge.css */
+
+.bank-card {
+  position: relative;
+  overflow: visible;
+}
+
+.bank-card-badges {
+  position: absolute;
+  top: -12px;
+  left: -6px;
+  right: -6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 10;
+  width: calc(100% + 12px);
+}
+
+.bank-card-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: default;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  width: 100%;
+}
+
+/* Первый шильдик - скругление сверху */
+.bank-card-badge:first-child {
+  border-top-left-radius: 0.7rem;
+  border-top-right-radius: 0.7rem;
+}
+
+/* Последний шильдик - скругление снизу */
+.bank-card-badge:last-child {
+  border-bottom-left-radius: 0.7rem;
+  border-bottom-right-radius: 0.7rem;
+}
+
+/* Если только один шильдик */
+.bank-card-badge:only-child {
+  border-radius: 0.7rem;
+}
+
+/* 🟢 Промо бейдж - зеленый */
+.bank-card-badge.badge-promo {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+/* 🟣 Сверхлимит бейдж - фиолетовый */
+.bank-card-badge.badge-excess {
+  background: #7c4dff;
+  color: #ffffff;
+}
+
+/* 🔴 Терм бейдж - красный */
+.bank-card-badge.badge-term {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+/* 🟢 Недоступный бейдж - зеленый (можно изменить на серый) */
+.bank-card-badge.badge-unavailable {
+  background: #6b7280;
+  color: #ffffff;
+}
+
+/* Дополнительные стили для иконок и текста */
+.badge-icon {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.badge-text {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: none;
+}
+
+/* Анимация появления бейджей */
+.bank-card-badge {
+  animation: slideDown 0.3s ease-out forwards;
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+@keyframes slideDown {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Задержка для последовательного появления */
+.bank-card-badge:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.bank-card-badge:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.bank-card-badge:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .bank-card-badge {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.6rem;
+  }
+
+  .badge-text {
+    font-size: 0.55rem;
+  }
+}

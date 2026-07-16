@@ -1,13 +1,15 @@
 // src/components/FloatingSelectionBar/FloatingSelectionBar.tsx
 import React from "react";
-import { BankProgramResult } from "../../utils/types";
+
 import { CopyButton } from "./CopyButton/CopyButton";
 import { SelectAllButton } from "./SelectAllButton/SelectAllButton";
 import { DeselectAllButton } from "./DeselectAllButton/DeselectAllButton";
 import { PrintButton } from "./PrintButton/PrintButton";
 import { SelectionCounter } from "./SelectionCounter/SelectionCounter";
-import { printSelectedOffers } from "../../utils/printSelectedOffers";
+
 import "./FloatingSelectionBar.css";
+import { BankProgramResult } from "../../../utils/types";
+import { printSelectedOffers } from "../../../utils/printSelectedOffers";
 
 interface FloatingSelectionBarProps {
   selectedCards: Set<number>;
