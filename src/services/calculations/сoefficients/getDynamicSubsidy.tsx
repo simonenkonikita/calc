@@ -63,7 +63,6 @@ export const getDynamicSubsidy = (
   mortgageAmount: number,
   loanTerm: number = 30,
 ): number => {
-  // 🔥 2. Проверяем наличие dynamicSubsidyPercent
   if (
     bankOffer.dynamicSubsidyPercent &&
     bankOffer.dynamicSubsidyPercent.length > 0

@@ -20,13 +20,12 @@ export const calculateFamilyTwoContractAmount = (
   const limit = variables.familyMortgageLimit || 6000000;
   const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
-  // 🔥 Получаем базовую субсидию из коэффициентов
   const subsidyPercent = coefficients.subsidyPercent;
 
-  const cafsummCred = 1 - userDownPaymentPercent / 100;
-  const cafsummPV = userDownPaymentPercent / 100;
-  const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
+
+  const cafsummCred = 1 - userDownPaymentPercent / 100;
+  const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
 
   const summCreditWithoutPV =
     remainingAmount * coefficients.requiredCoeffWithoutPV +
@@ -35,6 +34,13 @@ export const calculateFamilyTwoContractAmount = (
 
   let summCredit: number;
   let isWithinLimit: boolean;
+  let contractAmount: number;
+
+  if (noSubsidyInflate && !isSpecialMortgageMode) {
+    return {
+      contractAmount: Math.ceil(objectCost),
+    };
+  }
 
   if (isSpecialMortgageMode) {
     summCredit = summCreditWithoutPV * cafsummCred;
@@ -47,14 +53,13 @@ export const calculateFamilyTwoContractAmount = (
   const effectiveSubsidyRate = subsidyPercent / 100;
   const summCreditFamilyTwo = objectCost * coefficients.requiredCoeffFamilyTwo;
 
-  const isThresholdCondition =
-    isSpecialMortgageMode && downPayment < summCreditWithoutPV * cafsummPV;
+  /*   const isThresholdCondition =
+    isSpecialMortgageMode &&
+    downPayment < summCreditWithoutPV * (userDownPaymentPercent / 100); */
 
   const baseContractAmount = objectCost + maxLimit * effectiveSubsidyRate;
 
-  let contractAmount: number;
-
-  if (isThresholdCondition) {
+  if (isSpecialMortgageMode) {
     if (noSubsidyInflate) {
       if (isWithinLimit) {
         contractAmount = Math.ceil((objectCost - downPayment) / 0.799);
