@@ -80,8 +80,8 @@ export const PROGRAM_TYPE_LABELS: Record<string, string> = {
 };
 
 export const CATEGORY_ORDER = [
-  { key: "base", label: "🏠 Базовая ипотека", types: ["full"] },
-  { key: "long", label: "📈 Субсидии на длинный срок", types: ["full"] },
+  { key: "base", label: "🏠 Базовая ипотека", types: ["base"] },
+  { key: "full", label: "📈 Субсидии на длинный срок", types: ["full"] },
   { key: "short", label: "⚡ Субсидии на короткий срок", types: ["short"] },
   { key: "family", label: "👨‍👩‍👧‍👦 Семейная ипотека", types: ["family"] },
   { key: "it", label: "💻 ИТ ипотека", types: ["it"] },

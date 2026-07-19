@@ -6,7 +6,7 @@ export const VTB_OFFERS: BankOffer[] = [
   {
     bank: "ВТБ",
     program: "Базовая",
-    type: "full",
+    type: "base",
     rate: BASE_RATES.VTB,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,

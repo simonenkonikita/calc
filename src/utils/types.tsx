@@ -63,7 +63,13 @@ export interface OfferBankSectionProps {
 }
 
 // ========== БАНКОВСКИЕ ПРОГРАММЫ (из JSON) ==========
-export type ProgramType = "full" | "short" | "family" | "it" | "tranche";
+export type ProgramType =
+  | "base"
+  | "full"
+  | "short"
+  | "family"
+  | "it"
+  | "tranche";
 
 export interface DynamicRateRule {
   // Для простых условий (JSON-совместимые)

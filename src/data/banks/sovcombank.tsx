@@ -2,6 +2,11 @@
 
 import { BankOffer } from "../../utils/types";
 import {
+  SOVKOMBANK_SUBSIDIES_11_9,
+  SOVKOMBANK_SUBSIDIES_12_49,
+  SOVKOMBANK_SUBSIDIES_13_99,
+} from "../subsidies/sovcombankSubsidies";
+import {
   SOVCOMBANK_SUBSIDIES_V1,
   SOVCOMBANK_SUBSIDIES_V2,
 } from "../subsidies/sovcombankTwoContractSubsidies";
@@ -15,19 +20,38 @@ export const SOVCOMBANK_OFFERS: BankOffer[] = [
   {
     bank: "Совкомбанк",
     program: "Базовая",
-    type: "full",
+    type: "base",
     rate: BASE_RATES.SOVKOM,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
   },
+  /*   {
+    bank: "Совкомбанк",
+    program: "11.9% на весь срок",
+    type: "full",
+    rate: 11.9,
+    subsidyPercent: 0,
+    minPVPercent: MIN_PV_PERCENT,
+    dynamicSubsidyPercent: SOVKOMBANK_SUBSIDIES_11_9,
+  }, */
   {
     bank: "Совкомбанк",
-    program: "12,49% на весь срок",
+    program: "12.49% на весь срок",
     type: "full",
     rate: 12.49,
     subsidyPercent: 12.49,
     minPVPercent: MIN_PV_PERCENT,
+    /*  dynamicSubsidyPercent: SOVKOMBANK_SUBSIDIES_12_49, */
   },
+  /*   {
+    bank: "Совкомбанк",
+    program: "13.99% на весь срок",
+    type: "full",
+    rate: 13.99,
+    subsidyPercent: 0,
+    minPVPercent: MIN_PV_PERCENT,
+    dynamicSubsidyPercent: SOVKOMBANK_SUBSIDIES_13_99,
+  }, */
   {
     bank: "Совкомбанк",
     program: "Семейная ипотека (2 договора)",

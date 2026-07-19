@@ -8,7 +8,7 @@ export const URALSIB_OFFERS: BankOffer[] = [
   {
     bank: "Уралсиб",
     program: "Базовая",
-    type: "full",
+    type: "base",
     rate: BASE_RATES.URALSIB,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,

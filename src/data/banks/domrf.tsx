@@ -7,7 +7,7 @@ export const DOMRF_OFFERS: BankOffer[] = [
   {
     bank: "Дом.РФ Банк",
     program: "Базовая",
-    type: "full",
+    type: "base",
     rate: BASE_RATES.DOMRF,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,

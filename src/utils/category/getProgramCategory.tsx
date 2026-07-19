@@ -4,11 +4,11 @@ import { BankProgramResultWithIndex } from "../types";
 export const getProgramCategory = (
   offer: BankProgramResultWithIndex,
 ): string => {
-  if (offer.type === "full" && offer.subsidyAmount === 0) {
+  if (offer.type === "base") {
     return "base";
   }
-  if (offer.type === "full" && offer.subsidyAmount > 0) {
-    return "long";
+  if (offer.type === "full") {
+    return "full";
   }
   if (offer.type === "short") {
     return "short";

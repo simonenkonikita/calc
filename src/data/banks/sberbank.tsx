@@ -9,7 +9,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
   {
     bank: "Сбербанк",
     program: "Базовая",
-    type: "full",
+    type: "base",
     rate: BASE_RATES.SBER - 1,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,

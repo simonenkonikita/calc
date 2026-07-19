@@ -13,7 +13,7 @@ import {
   getLimitBadge,
 } from "../../../utils/badge/getExcessBadge";
 import { getTermYearsBadge } from "../../../utils/badge/getTermYearsBadge";
-import { getTrancheBadge } from "../../../utils/badge/trancheBadge";
+import { getTrancheBadge } from "../../../utils/badge/getTrancheBadge";
 import { BankProgramResultWithIndex } from "../../../utils/types";
 
 interface BankCardProps {

@@ -11,7 +11,7 @@ export const ALFABANK_OFFERS: BankOffer[] = [
   {
     bank: "Альфа-Банк",
     program: "Базовая",
-    type: "full",
+    type: "base",
     rate: BASE_RATES.ALFA,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
@@ -37,7 +37,7 @@ export const ALFABANK_OFFERS: BankOffer[] = [
   },
   {
     bank: "Альфа-Банк",
-    program: "13,89% на весь срок",
+    program: "13.89% на весь срок",
     type: "full",
     rate: 13.89,
     subsidyPercent: 0,
