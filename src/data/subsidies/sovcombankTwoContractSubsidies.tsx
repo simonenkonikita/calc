@@ -44,7 +44,7 @@ export const SOVCOMBANK_SUBSIDIES_19_89: DynamicRateRule[] = [
     description: "Сумма от 2 до 3 млн → 9.50%",
   },
   {
-    conditionFn: (_pv, amount, _term) => amount >= 1500000 && amount < 2000000,
+    conditionFn: (_pv, amount, _term) => amount < 2000000,
     subsidyPercent: 16.0,
     priority: 1,
     description: "Сумма от 1.5 до 2 млн → 16.00%",
@@ -102,7 +102,7 @@ export const SOVCOMBANK_SUBSIDIES_11_9: DynamicRateRule[] = [
   },
   // Сумма от 1.5 до 2 млн
   {
-    conditionFn: (_pv, amount) => amount >= 1500000 && amount < 2000000,
+    conditionFn: (_pv, amount) => amount < 2000000,
     subsidyPercent: 46, // 16.00%
     priority: 1,
     description: "Сумма от 1.5 до 2 млн → 16.00%",

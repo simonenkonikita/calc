@@ -124,11 +124,12 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
 
   const getProgramTypeLabel = (type: string): string => {
     const labels: Record<string, string> = {
-      full: "Весь срок",
-      short: "Короткий срок",
-      family: "Семейная",
-      it: "ИТ",
-      tranche: "Траншевая",
+      base: "Базовая ипотека",
+      full: "Субсидия / Весь срок",
+      short: "Субсидия / Короткий срок",
+      family: "Семейная ипотека",
+      it: "ИТ ипотека",
+      tranche: "Траншевая ипотека",
     };
     return labels[type] || type;
   };

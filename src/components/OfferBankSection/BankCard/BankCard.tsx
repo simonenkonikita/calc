@@ -8,13 +8,12 @@ import { BankCardBadges } from "./BankCardBadges/BankCardBadges";
 import { BankCardDetails } from "./BankCardDetails/BankCardDetails";
 import { BankCardHeader } from "./BankCardHeader/BankCardHeader";
 import { getBadge } from "../../../utils/badge/getBadge";
-import {
-  getExcessBadge,
-  getLimitBadge,
-} from "../../../utils/badge/getExcessBadge";
+import { getExcessBadge } from "../../../utils/badge/getExcessBadge";
 import { getTermYearsBadge } from "../../../utils/badge/getTermYearsBadge";
 import { getTrancheBadge } from "../../../utils/badge/getTrancheBadge";
 import { BankProgramResultWithIndex } from "../../../utils/types";
+import { getLimitBadge } from "../../../utils/badge/getLimitBadge";
+import { getExcessBadgeTwoContract } from "../../../utils/badge/getExcessBadgeTwoContract";
 
 interface BankCardProps {
   offer: BankProgramResultWithIndex;
@@ -47,6 +46,7 @@ export const BankCard: React.FC<BankCardProps> = ({
   const limitBadge = getLimitBadge(offer);
   const termBadge = getTermYearsBadge(offer);
   const trancheBadge = getTrancheBadge(offer, complexName);
+  const badgeTwoContract = getExcessBadgeTwoContract(offer);
 
   return (
     <div
@@ -59,6 +59,7 @@ export const BankCard: React.FC<BankCardProps> = ({
         excessBadge={excessBadge}
         termBadge={termBadge}
         trancheBadge={trancheBadge}
+        badgeTwoContract={badgeTwoContract}
       />
 
       <BankCardHeader
@@ -93,6 +94,18 @@ export const BankCard: React.FC<BankCardProps> = ({
           </div>
         </div>
       )}
+
+      {/*   {offer.type === "family" && offer.isTwoContracts && (
+        <div className="bank-excess-warning-overlay">
+          <div className="excess-overlay-icon">🚫</div>
+          <div className="excess-overlay-title">
+            Ипотека с выбранными параметрами невозможна
+          </div>
+          <div className="excess-overlay-hint">
+            Превышен лимит семейной ипотеки
+          </div>
+        </div>
+      )} */}
 
       {isTrancheUnavailable && (
         <div className="bank-excess-warning-overlay">

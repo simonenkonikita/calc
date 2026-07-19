@@ -2,14 +2,14 @@ import { BankProgramResultWithIndex } from "../types";
 import { getMinExcessAmount } from "./getMinExcessAmount";
 import { variables } from "../../data/limitdDate";
 
-export const getExcessBadge = (
+export const getExcessBadgeTwoContract = (
   offer: BankProgramResultWithIndex,
 ): { text: string; icon: string } | null => {
   // Проверяем, что это сверхлимитная программа
   const isExcessProgram =
-    offer.program?.toLowerCase().includes("сверхлимит") ||
-    offer.program === "Семейная ипотека сверхлимит" ||
-    offer.program === "ИТ ипотека сверхлимит";
+    offer.program?.toLowerCase().includes("2 договора") ||
+    offer.program === "Семейная ипотека (2 договора)" ||
+    offer.program === "ИТ ипотека сверхлимит (2 договора)";
 
   if (!isExcessProgram) {
     return null;

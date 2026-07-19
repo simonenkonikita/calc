@@ -12,11 +12,3 @@ export const BASE_RATES = {
 
 // Минимальный ПВ
 export const MIN_PV_PERCENT = 20.1;
-
-// Лимиты
-export const LIMITS = {
-  FAMILY: 6000000,
-  FAMILY_MAX: 15000000,
-  IT: 9000000,
-  IT_MAX: 18000000,
-} as const;

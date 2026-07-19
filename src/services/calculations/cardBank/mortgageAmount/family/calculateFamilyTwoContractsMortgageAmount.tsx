@@ -34,7 +34,7 @@ export const calculateFamilyTwoContractsMortgageAmount = (
     coefficients,
   } = params;
 
-  const limit = variables.familyMortgageLimit || 6000000;
+  const limit = variables.minExcessAmounts?.[bankOffer.bank] || 7500000;
   const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;

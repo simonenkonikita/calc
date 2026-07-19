@@ -3,11 +3,12 @@ import React from "react";
 import "./BankCardBadge.css";
 
 interface BankCardBadgesProps {
-  badge: string | null;
+  badge: { text: string; icon: string } | null;
   limitBadge: { text: string; icon: string } | null;
   excessBadge: { text: string; icon: string } | null;
   termBadge: { text: string; icon: string } | null;
   trancheBadge: { text: string; icon: string } | null;
+  badgeTwoContract: { text: string; icon: string } | null;
 }
 
 export const BankCardBadges: React.FC<BankCardBadgesProps> = ({
@@ -16,12 +17,12 @@ export const BankCardBadges: React.FC<BankCardBadgesProps> = ({
   excessBadge,
   termBadge,
   trancheBadge,
+  badgeTwoContract,
 }) => {
-  // 🔥 Добавляем классы для каждого типа бейджа
   const badges = [
     {
       id: "badge",
-      data: badge ? { text: badge, icon: "🎯" } : null,
+      data: badge,
       className: "badge-promo", // Зеленый
     },
     {
@@ -32,6 +33,11 @@ export const BankCardBadges: React.FC<BankCardBadgesProps> = ({
     {
       id: "excessBadge",
       data: excessBadge,
+      className: "badge-excess", // Фиолетовый
+    },
+    {
+      id: "badgeTwoContract",
+      data: badgeTwoContract,
       className: "badge-excess", // Фиолетовый
     },
     {
