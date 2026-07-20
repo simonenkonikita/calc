@@ -56,7 +56,6 @@ export const calculateTrancheMortgageAmount = (
   if (mortgageAmount <= MIN_TRANCHE) {
     // Если ПВ больше 40%, первый транш всегда = 100 000
     firstTrancheAmount = mortgageAmount;
-    console.log(firstTrancheAmount, mortgageAmount);
     secondTrancheAmount = Math.max(0, mortgageAmount - firstTrancheAmount);
   } else if (
     downPayment >= userDesiredDownPayment &&

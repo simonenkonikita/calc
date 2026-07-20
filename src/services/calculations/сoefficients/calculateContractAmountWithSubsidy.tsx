@@ -10,9 +10,24 @@ const createUpdatedCoefficients = (
   coefficients: BankCoefficients,
   subsidyPercent: number,
   userDownPaymentPercent: number,
+  variables: Variables,
+  objectCost: number,
 ): BankCoefficients => {
   const downPaymentPercent = userDownPaymentPercent || 0;
   const mortgagePercent = Math.max(1, 100 - downPaymentPercent);
+  const pvRate = downPaymentPercent / 100;
+
+  const subsidyRate = subsidyPercent / 100;
+  const m10 = variables.familyMortgageLimit / objectCost;
+  const denominator = 1 - (1 - pvRate) * subsidyRate;
+
+  let requiredCoeffFamilyTwo = 1;
+  if (denominator !== 0 && subsidyRate > 0) {
+    requiredCoeffFamilyTwo =
+      subsidyRate *
+        (((1 - pvRate) * (1 - subsidyRate * m10)) / denominator - m10) +
+      1;
+  }
 
   return {
     ...coefficients,
@@ -31,7 +46,7 @@ const createUpdatedCoefficients = (
         ? (100 - (mortgagePercent * (100 - subsidyPercent)) / 100) /
           ((mortgagePercent * (100 - subsidyPercent)) / 100)
         : 0,
-    requiredCoeffFamilyTwo: coefficients.requiredCoeffFamilyTwo, // сохраняем
+    requiredCoeffFamilyTwo: requiredCoeffFamilyTwo,
   };
 };
 
@@ -57,10 +72,11 @@ export const calculateContractAmountWithSubsidy = (
     coefficients,
     subsidyPercent,
     userDownPaymentPercent,
+    variables, // ← передаем variables
+    objectCost, // ← передаем objectCost
   );
 
   // 2. Используем реальную функцию расчета суммы договора
-  // Она сама выберет правильную реализацию (full, family, it, tranche)
   const result = calculateContractAmount(
     objectCost,
     downPayment,

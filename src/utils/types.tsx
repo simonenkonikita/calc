@@ -84,6 +84,15 @@ export interface DynamicRateRule {
   rate?: number;
   priority?: number;
   description?: string;
+  // 🔥 НОВЫЕ ПОЛЯ ДЛЯ ПОРОГОВОЙ ЛОГИКИ
+  minAmount?: number;
+  /** Максимальная сумма для диапазона (для пороговой логики) */
+  maxAmount?: number;
+  tolerance?: number;
+  /** Коэффициент погрешности для этого правила (переопределяет глобальный) */
+  toleranceType?: "fixed" | "percent";
+  /** Стратегия округления для этого правила */
+  roundingStrategy?: "up" | "down";
 }
 
 export interface BankOffer {
@@ -104,6 +113,12 @@ export interface BankOffer {
   isTranche?: boolean;
   trancheFirstPercent?: number; // % от стоимости объекта для первого транша (например, 19.9%)
   trancheSecondDate?: string; // дата выдачи второго транша (например, "2027-02-01")
+  /** Глобальный коэффициент погрешности (по умолчанию 100000) */
+  thresholdTolerance?: number;
+  thresholdToleranceType?: "fixed" | "percent";
+  /** Глобальная стратегия округления (по умолчанию 'up') */
+  roundingStrategy?: "up" | "down";
+  twoContractSubsidies?: DynamicRateRule[];
 }
 
 export interface TranchePaymentsResult {
@@ -155,6 +170,8 @@ export interface BankProgramResult {
   secondContractPayment: number;
   firstContractAmount?: number; // Сумма по первому договору
   secondContractAmount?: number; // Сумма по второму договору
+  secondContractSubsidyPercent?: number; // 🔥 НОВОЕ: субсидия по второму договору в %
+  secondContractSubsidyAmount?: number; // 🔥 НОВОЕ: сумма субсидии по второму договору
   // ===== НОВЫЕ ПОЛЯ ДЛЯ ТРАНШЕВОЙ ИПОТЕКИ =====
   isTranche?: boolean;
   firstTrancheAmount?: number;
@@ -224,4 +241,19 @@ export interface MortgageAmountResult {
 export interface DownAmountResult {
   downPaymentAmount: number;
   isNoSpecialMortgageMode: boolean;
+}
+
+export interface ThresholdAdjustmentResult {
+  /** Скорректированная сумма кредита */
+  adjustedAmount: number;
+  /** Скорректированный ПВ */
+  adjustedDownPayment: number;
+  /** Итоговая сумма в договоре */
+  contractAmount: number;
+  /** Название диапазона */
+  rangeName: string;
+  /** Была ли применена корректировка */
+  wasAdjusted: boolean;
+  /** Причина корректировки */
+  adjustmentReason?: string;
 }

@@ -40,6 +40,7 @@ export const calculateBankCoefficients = (
   // 1. ОПРЕДЕЛЕНИЕ ФЛАГОВ
   // ============================================================
   const isTwoContracts = bankOffer.isTwoContracts === true;
+
   const hasDynamicSubsidy =
     bankOffer.dynamicSubsidyPercent &&
     bankOffer.dynamicSubsidyPercent.length > 0;

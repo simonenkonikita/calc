@@ -62,8 +62,11 @@ export const SOVCOMBANK_OFFERS: BankOffer[] = [
     minPVPercent: MIN_PV_PERCENT,
     isTwoContracts: true,
     dynamicSubsidyPercent: SOVCOMBANK_SUBSIDIES_19_89,
+    thresholdTolerance: 0,
+    thresholdToleranceType: "percent",
+    roundingStrategy: "down",
   },
-  {
+  /*  {
     bank: "Совкомбанк",
     program: "Семейная ипотека (2 договора)",
     type: "family",
@@ -73,7 +76,9 @@ export const SOVCOMBANK_OFFERS: BankOffer[] = [
     minPVPercent: MIN_PV_PERCENT,
     isTwoContracts: true,
     dynamicSubsidyPercent: SOVCOMBANK_SUBSIDIES_11_9,
-  },
+    thresholdTolerance: 100000,
+    roundingStrategy: "up",
+  }, */
   /*   {
     bank: "Совкомбанк",
     program: "Семейная ипотека сверхлимит 6%",

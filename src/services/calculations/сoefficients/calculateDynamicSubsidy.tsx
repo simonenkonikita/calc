@@ -38,23 +38,60 @@ export const calculateDynamicSubsidy = (
   } = params;
 
   let subsidyPercent = bankOffer.subsidyPercent || 0;
+  let сontractAmount = objectCost;
+  let initialMortgage = remainingAmount;
 
-  // ============================================================
-  // НАЧАЛЬНАЯ ИПОТЕКА
-  // ============================================================
-  let initialMortgage = objectCost * ((100 - userDownPaymentPercent) / 100);
-
-  // Для 2 договоров - используем сумму второго договора
-  if (isTwoContracts) {
-    const firstContractLimit = 6000000;
-    const secondContract = Math.max(0, initialMortgage - firstContractLimit);
-    initialMortgage = secondContract > 0 ? secondContract : initialMortgage;
-  }
-
-  let currentMortgage = initialMortgage;
   let iterations = 0;
   const MAX_ITERATIONS = 20;
   const CONVERGENCE_THRESHOLD = 1;
+
+  if (isTwoContracts) {
+    while (iterations < MAX_ITERATIONS) {
+      iterations++;
+
+      const newSubsidy = getDynamicSubsidy(
+        bankOffer,
+        userDownPaymentPercent,
+        initialMortgage - variables.familyMortgageLimit,
+        loanTermYears,
+      );
+
+      if (newSubsidy === subsidyPercent && iterations > 1) {
+        break;
+      }
+
+      if (newSubsidy !== undefined) {
+        subsidyPercent = newSubsidy;
+      }
+
+      сontractAmount = calculateContractAmountWithSubsidy(
+        objectCost,
+        downPayment,
+        remainingAmount,
+        userDownPaymentPercent,
+        manualDownPayment,
+        bankOffer,
+        variables,
+        noSubsidyInflate,
+        isSpecialMortgageMode,
+        coefficients,
+        subsidyPercent,
+      );
+
+      const downPaymentFromContract =
+        сontractAmount * (userDownPaymentPercent / 100);
+
+      const newMortgage = сontractAmount - downPaymentFromContract;
+
+      if (Math.abs(newMortgage - initialMortgage) < CONVERGENCE_THRESHOLD) {
+        initialMortgage = newMortgage;
+        break;
+      }
+
+      initialMortgage = newMortgage;
+    }
+    return subsidyPercent;
+  }
 
   while (iterations < MAX_ITERATIONS) {
     iterations++;
@@ -62,7 +99,7 @@ export const calculateDynamicSubsidy = (
     const newSubsidy = getDynamicSubsidy(
       bankOffer,
       userDownPaymentPercent,
-      currentMortgage,
+      initialMortgage,
       loanTermYears,
     );
 
@@ -74,7 +111,6 @@ export const calculateDynamicSubsidy = (
       subsidyPercent = newSubsidy;
     }
 
-    // Пересчитываем сумму договора с новой субсидией
     const newContractAmount = calculateContractAmountWithSubsidy(
       objectCost,
       downPayment,
@@ -94,27 +130,12 @@ export const calculateDynamicSubsidy = (
 
     const newMortgage = newContractAmount - downPaymentFromContract;
 
-    // Для 2 договоров - обновляем сумму второго договора
-    let newSecondContract = newMortgage;
-
-    if (isTwoContracts) {
-      newSecondContract = newMortgage - variables.familyMortgageLimit;
-    }
-
-    // Для сравнения используем сумму второго договора (если это 2 договора)
-    const mortgageForComparison = isTwoContracts
-      ? newSecondContract
-      : newMortgage;
-
-    if (
-      Math.abs(mortgageForComparison - currentMortgage) < CONVERGENCE_THRESHOLD
-    ) {
-      currentMortgage = mortgageForComparison;
+    if (Math.abs(newMortgage - initialMortgage) < CONVERGENCE_THRESHOLD) {
+      initialMortgage = newMortgage;
       break;
     }
 
-    currentMortgage = mortgageForComparison;
+    initialMortgage = newMortgage;
   }
-
   return subsidyPercent;
 };

@@ -22,7 +22,6 @@ export const calculateTranchePayments = (
   // Получаем количество месяцев до второго транша из ЖК
   const monthsFromComplex = getMonthsUntilTranche(complexName);
 
-  console.log(999, monthsFromComplex);
   // Если траншевая недоступна для этого ЖК, используем дефолт 12 месяцев
   const monthsUntilSecondTranche =
     monthsFromComplex !== null ? monthsFromComplex : 12;
