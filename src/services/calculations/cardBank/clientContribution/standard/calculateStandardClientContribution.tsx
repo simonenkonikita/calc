@@ -4,7 +4,7 @@ import {
   Variables,
 } from "../../../../../utils/types";
 
-interface CalculateClientContributionParams {
+interface clientContribution {
   objectCost: number; // $B$7
   downPaymentAmount: number; // D32 (сумма ПВ)
   ownFunds: number; // E32 (собственные средства)
@@ -15,9 +15,7 @@ interface CalculateClientContributionParams {
   coefficients: BankCoefficients;
 }
 
-export const calculateClientContribution = (
-  params: CalculateClientContributionParams,
-): number => {
+export const clientContribution = (params: clientContribution): number => {
   const {
     objectCost,
     downPaymentAmount,

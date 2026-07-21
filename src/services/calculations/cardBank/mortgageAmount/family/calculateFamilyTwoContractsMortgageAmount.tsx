@@ -61,6 +61,17 @@ export const calculateFamilyTwoContractsMortgageAmount = (
   // eslint-disable-next-line no-useless-assignment
   let isLimitExceeded: boolean = false;
 
+  // Разбивка на 2 договора
+
+  const firstContractAmount = Math.min(
+    mortgageAmount,
+    variables.familyMortgageLimit,
+  );
+  const secondContractAmount = Math.max(
+    0,
+    mortgageAmount - variables.familyMortgageLimit,
+  );
+
   if (isSpecialMortgageMode) {
     if (mortgageAmount < limit) {
       mortgageAmount = contractAmount - downPaymentAmount;
@@ -87,6 +98,8 @@ export const calculateFamilyTwoContractsMortgageAmount = (
 
   return {
     mortgageAmount: Math.ceil(mortgageAmount),
+    firstContractAmount: Math.ceil(firstContractAmount),
+    secondContractAmount: Math.ceil(secondContractAmount),
     isLimitExceeded,
   };
 };

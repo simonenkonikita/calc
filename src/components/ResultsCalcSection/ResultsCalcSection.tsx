@@ -1,6 +1,7 @@
 import React from "react";
 import type { ObjectCalculationResult } from "../../utils/types";
 import "./ResultsSection.css";
+import { calculatePricePerM2 } from "../../utils/pricePerM2/pricePerM2";
 
 interface ResultsCalcSectionProps {
   objectResult: ObjectCalculationResult;
@@ -14,7 +15,10 @@ export const ResultsCalcSection: React.FC<ResultsCalcSectionProps> = ({
   formatMoney,
   area = 0,
 }) => {
-  const calculatedPricePerM2 = area > 0 ? objectResult.objectCost / area : null;
+  const calculatedPricePerM2 = calculatePricePerM2(
+    objectResult.objectCost,
+    area,
+  );
 
   return (
     <div className="results-calc-section">

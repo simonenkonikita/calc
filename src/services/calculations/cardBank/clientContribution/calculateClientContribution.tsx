@@ -1,50 +1,51 @@
+// src/hooks/calculations/bankProgram/steps/calculateClientContribution.ts
+
 import {
   BankCoefficients,
   BankOffer,
   Variables,
 } from "../../../../utils/types";
+import { clientContribution } from "./standard/calculateStandardClientContribution";
 
 interface CalculateClientContributionParams {
-  objectCost: number; // $B$7
-  downPaymentAmount: number; // D32 (сумма ПВ)
-  ownFunds: number; // E32 (собственные средства)
-  userDownPaymentPercent: number; // $B$8
+  objectCost: number;
+  downPaymentAmount: number;
+  ownFunds: number;
+  userDownPaymentPercent: number;
   bankOffer: BankOffer;
   variables: Variables;
-  mortgageWithoutDownPayment: boolean; // $L$10 (не используется в расчете, но может понадобиться)
+  isSpecialMortgageMode: boolean;
   coefficients: BankCoefficients;
+  isFamilyOrIt: boolean;
 }
 
 export const calculateClientContribution = (
   params: CalculateClientContributionParams,
 ): number => {
   const {
-    objectCost,
     downPaymentAmount,
     ownFunds,
+    isSpecialMortgageMode,
+    isFamilyOrIt,
+    objectCost,
     userDownPaymentPercent,
     bankOffer,
     variables,
     coefficients,
   } = params;
 
-  const limit = bankOffer.excessLimit
-    ? variables.maxFamilyMortgageSum || 15000000
-    : variables.familyMortgageLimit || 6000000;
-
-  const minPVPercent = coefficients.requiredCoeffWithMinPV; // Сбербанк!J16
-
-  const summCredit =
-    (objectCost / minPVPercent) * (1 - userDownPaymentPercent / 100);
-  const isWithinLimit = summCredit <= limit;
-
-  let clientContribution: number;
-
-  if (isWithinLimit) {
-    clientContribution = downPaymentAmount - ownFunds;
-  } else {
-    clientContribution = 0;
+  if (isFamilyOrIt) {
+    return clientContribution({
+      objectCost,
+      downPaymentAmount,
+      ownFunds,
+      userDownPaymentPercent,
+      bankOffer,
+      variables,
+      mortgageWithoutDownPayment: isSpecialMortgageMode,
+      coefficients,
+    });
   }
 
-  return Math.ceil(clientContribution);
+  return downPaymentAmount - ownFunds;
 };

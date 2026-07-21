@@ -236,6 +236,8 @@ export interface MortgageAmountResult {
   mortgageAmount: number;
   firstTrancheAmount?: number;
   secondTrancheAmount?: number;
+  firstContractAmount?: number;
+  secondContractAmount?: number;
   isLimitExceeded?: boolean;
 }
 export interface DownAmountResult {

@@ -1,69 +1,55 @@
+// src/hooks/calculations/bankProgram/steps/calculateOwnFunds.ts
+
 import {
   BankCoefficients,
   BankOffer,
   Variables,
 } from "../../../../utils/types";
+import { ownFunds } from "./standard/ownFunds";
 
 interface CalculateOwnFundsParams {
-  objectCost: number; // $B$7
-  downPayment: number; // $B$13 / J32 (введенный ПВ)
+  objectCost: number;
+  downPayment: number;
   remainingAmount: number;
   contractAmount: number;
-  downPaymentAmount: number; // D32 (рассчитанная сумма ПВ)
-  userDownPaymentPercent: number; // $B$8
+  downPaymentAmount: number;
+  userDownPaymentPercent: number;
   bankOffer: BankOffer;
   variables: Variables;
-  isSpecialMortgageMode: boolean; // $L$10
+  isSpecialMortgageMode: boolean;
   coefficients: BankCoefficients;
+  isFamilyOrIt: boolean;
 }
+
 export const calculateOwnFunds = (params: CalculateOwnFundsParams): number => {
   const {
-    objectCost,
     downPayment,
-    remainingAmount,
     downPaymentAmount,
+    isSpecialMortgageMode,
+    isFamilyOrIt,
+    objectCost,
+    remainingAmount,
+    contractAmount,
     userDownPaymentPercent,
     bankOffer,
     variables,
-    isSpecialMortgageMode,
     coefficients,
   } = params;
 
-  const limit = bankOffer.excessLimit
-    ? variables.maxFamilyMortgageSum || 15000000 // Если excessLimit true → 15 млн
-    : variables.familyMortgageLimit || 6000000; // Иначе → 6 млн
-
-  const cafsummCred = 1 - userDownPaymentPercent / 100;
-
-  const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
-
-  const summCreditWithoutPV =
-    remainingAmount * coefficients.requiredCoeffWithoutPV +
-    objectCost -
-    downPayment;
-
-  let summCredit: number;
-  let isWithinLimit: boolean;
-
-  if (isSpecialMortgageMode) {
-    summCredit = summCreditWithoutPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
-  } else {
-    summCredit = summCreditMinPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+  if (isFamilyOrIt) {
+    return ownFunds({
+      objectCost,
+      downPayment,
+      remainingAmount,
+      contractAmount,
+      downPaymentAmount,
+      userDownPaymentPercent,
+      bankOffer,
+      variables,
+      isSpecialMortgageMode,
+      coefficients,
+    });
   }
 
-  let ownFunds: number;
-
-  if (isSpecialMortgageMode) {
-    if (isWithinLimit) {
-      ownFunds = downPayment;
-    } else {
-      ownFunds = downPaymentAmount;
-    }
-  } else {
-    ownFunds = downPaymentAmount;
-  }
-
-  return Math.ceil(ownFunds);
+  return isSpecialMortgageMode ? downPayment : downPaymentAmount;
 };
