@@ -191,20 +191,17 @@ export const calculateBankProgram = (
   );
 
   // ============================================================
-  // 10. СУММА СУБСИДИИ (ОСНОВНАЯ ЛОГИКА)
+  // 10. СУММА СУБСИДИИ
   // ============================================================
   let subsidyAmount: number;
   let secondContractSubsidyPercent: number | undefined;
   let secondContractSubsidyAmount: number | undefined;
-  let finalContractAmount = contractAmount;
-  let finalDownPaymentAmount = downPaymentAmount;
 
   if (isTwoContracts) {
-    // 🔥 ДЛЯ ДВУХ ДОГОВОРОВ: субсидия считается от суммы ВТОРОГО договора
+    // 🔥 Для двух договоров субсидия считается от суммы ВТОРОГО договора
     const secondContract = secondContractAmount || 0;
 
-    // Получаем субсидию для второго договора из динамических правил
-    // Используем dynamicSubsidyPercent из банковского оффера
+    // Получаем субсидию для второго договора
     if (
       bankOffer.dynamicSubsidyPercent &&
       bankOffer.dynamicSubsidyPercent.length > 0
@@ -216,44 +213,16 @@ export const calculateBankProgram = (
         loanTermYears,
       );
     } else {
-      // Fallback: используем базовую субсидию
       secondContractSubsidyPercent = actualSubsidyPercent;
     }
 
-    // Сумма субсидии по второму договору
     secondContractSubsidyAmount =
       secondContract * (secondContractSubsidyPercent / 100);
     subsidyAmount = secondContractSubsidyAmount;
 
-    // 🔥 ПЕРЕСЧИТЫВАЕМ СУММУ В ДОГОВОРЕ
-    // contractAmount = objectCost + subsidyAmount
-    finalContractAmount = objectCost + subsidyAmount;
-
-    // 🔥 ПЕРЕСЧИТЫВАЕМ ПВ
-    // ПВ = contractAmount - 6 000 000 - secondContractAmount
-    // Но также нужно учитывать минимальный ПВ
-    const minPVAmount = finalContractAmount * (bankOffer.minPVPercent / 100);
-    const calculatedDownPayment =
-      finalContractAmount - 6000000 - secondContract;
-    finalDownPaymentAmount = Math.max(minPVAmount, calculatedDownPayment);
-
-    // Обновляем значения для дальнейших расчетов
-    contractAmount = finalContractAmount;
-    downPaymentAmount = finalDownPaymentAmount;
-
-    // Обновляем mortgageAmount с новыми значениями
-    // mortgageAmount = contractAmount - downPaymentAmount
-    // Но для двух договоров mortgageAmount уже рассчитан выше
-
-    // Пересчитываем firstContractAmount и secondContractAmount с новым contractAmount
-    const newMortgageAmount = contractAmount - downPaymentAmount;
-    firstContractAmount = Math.min(newMortgageAmount, 6000000);
-    secondContractAmount = Math.max(0, newMortgageAmount - 6000000);
-
-    // Обновляем mortgageAmountResult
-    mortgageAmountResult.mortgageAmount = newMortgageAmount;
+    // 🔥 НЕ ПЕРЕСЧИТЫВАЕМ contractAmount здесь!
+    // Он уже рассчитан в calculateContractAmount с учетом всех флагов
   } else {
-    // Обычная логика для не-двухдоговорных программ
     subsidyAmount =
       mortgageAmountResult.mortgageAmount * (actualSubsidyPercent / 100);
   }

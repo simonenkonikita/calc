@@ -66,7 +66,6 @@ export const calculateFamilyExcessLimitContractAmount = (
     }
   } else {
     if (noSubsidyInflate) {
-      contractAmount = Math.ceil(objectCost);
     } else if (isWithinLimit) {
       if (downPayment <= userDesiredDownPayment) {
         contractAmount = objectCost / coefficients.requiredCoeffWithMinPV;
