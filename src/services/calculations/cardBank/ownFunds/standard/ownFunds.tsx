@@ -30,9 +30,8 @@ export const ownFunds = (params: ownFundsParams): number => {
     coefficients,
   } = params;
 
-  const limit = bankOffer.excessLimit
-    ? variables.maxFamilyMortgageSum || 15000000 // Если excessLimit true → 15 млн
-    : variables.familyMortgageLimit || 6000000; // Иначе → 6 млн
+  const limit = variables.familyMortgageLimit || 6000000;
+  const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
 
@@ -48,10 +47,10 @@ export const ownFunds = (params: ownFundsParams): number => {
 
   if (isSpecialMortgageMode) {
     summCredit = summCreditWithoutPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+    isWithinLimit = summCredit <= maxLimit;
   } else {
     summCredit = summCreditMinPV * cafsummCred;
-    isWithinLimit = summCredit <= limit;
+    isWithinLimit = summCredit <= maxLimit;
   }
 
   let ownFunds: number;

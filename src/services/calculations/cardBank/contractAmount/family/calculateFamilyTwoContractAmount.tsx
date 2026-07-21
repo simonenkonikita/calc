@@ -49,7 +49,6 @@ export const calculateFamilyTwoContractAmount = (
     isWithinLimit = summCredit <= maxLimit;
   }
 
-  const estimatedFirstContract = limit;
   const estimatedSecondContract = Math.max(0, summCredit - limit);
 
   let secondContractSubsidyPercent = coefficients.subsidyPercent;

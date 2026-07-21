@@ -81,12 +81,13 @@ export const calculateBankProgram = (
     coefficients,
   );
 
-  const contractAmount = contractResult.contractAmount;
+  let contractAmount = contractResult.contractAmount;
 
   // ============================================================
   // 4. ПЕРВОНАЧАЛЬНЫЙ ВЗНОС
   // ============================================================
-  const downPaymentAmount = calculateDownPaymentAmount({
+  // 🔥 МЕНЯЕМ const НА let
+  let downPaymentAmount = calculateDownPaymentAmount({
     objectCost,
     downPayment,
     contractAmount,
@@ -135,7 +136,7 @@ export const calculateBankProgram = (
   // ============================================================
   // 8. СУММА ИПОТЕКИ
   // ============================================================
-  const mortgageAmountResult = calculateMortgageAmount({
+  let mortgageAmountResult = calculateMortgageAmount({
     objectCost,
     contractAmount,
     downPayment,
@@ -149,7 +150,7 @@ export const calculateBankProgram = (
     coefficients,
   });
 
-  const { firstContractAmount, secondContractAmount, isLimitExceeded } =
+  let { firstContractAmount, secondContractAmount, isLimitExceeded } =
     mortgageAmountResult;
 
   // ============================================================
@@ -165,23 +166,43 @@ export const calculateBankProgram = (
   });
 
   // ============================================================
-  // 10. СУММА СУБСИДИИ
+  // 10. СУММА СУБСИДИИ И КОРРЕКТИРОВКА ДЛЯ ДВУХ ДОГОВОРОВ
   // ============================================================
   const subsidyResult = calculateSubsidyAmount({
     bankOffer,
+    objectCost,
     mortgageAmount: mortgageAmountResult.mortgageAmount,
     secondContractAmount: mortgageAmountResult.secondContractAmount,
+    variables,
     isTwoContracts,
     actualSubsidyPercent,
     userDownPaymentPercent,
     loanTermYears,
+    noSubsidyInflate,
+    minPVPercent: bankOffer.minPVPercent,
   });
 
-  let {
+  const {
     subsidyAmount,
     secondContractSubsidyPercent,
     secondContractSubsidyAmount,
+    adjustedContractAmount,
+    adjustedDownPaymentAmount,
+    adjustedMortgageAmount,
+    adjustedFirstContractAmount,
+    adjustedSecondContractAmount,
   } = subsidyResult;
+
+  if (isTwoContracts && adjustedContractAmount !== undefined) {
+    contractAmount = adjustedContractAmount;
+    downPaymentAmount = adjustedDownPaymentAmount!;
+    mortgageAmountResult = {
+      ...mortgageAmountResult,
+      mortgageAmount: adjustedMortgageAmount!,
+    };
+    firstContractAmount = adjustedFirstContractAmount!;
+    secondContractAmount = adjustedSecondContractAmount!;
+  }
 
   // ============================================================
   // 7. ПВ В ПРОЦЕНТАХ
@@ -190,6 +211,7 @@ export const calculateBankProgram = (
     downPaymentAmount,
     contractAmount,
   );
+
   // ============================================================
   // 11. СВЕРХЛИМИТ
   // ============================================================
@@ -201,7 +223,8 @@ export const calculateBankProgram = (
     actualSubsidyPercent,
   });
 
-  subsidyAmount = excessResult.subsidyAmount;
+  // 🔥 МЕНЯЕМ const НА let ДЛЯ subsidyAmount, ТАК КАК ОНА ПЕРЕОПРЕДЕЛЯЕТСЯ
+  let finalSubsidyAmount = excessResult.subsidyAmount;
   const excessLimit = excessResult.excessLimit;
 
   // ============================================================
@@ -213,7 +236,7 @@ export const calculateBankProgram = (
     downPayment,
     remainingAmount,
     mortgageAmount: mortgageAmountResult.mortgageAmount,
-    subsidyAmount,
+    subsidyAmount: finalSubsidyAmount,
     contractAmount,
     userDownPaymentPercent,
     bankOffer,
@@ -311,7 +334,7 @@ export const calculateBankProgram = (
     // Лимиты и субсидии
     excessLimit: excessLimit ? Math.ceil(excessLimit) : undefined,
     mortgageAmount: Math.ceil(mortgageAmountResult.mortgageAmount),
-    subsidyAmount: Math.ceil(subsidyAmount),
+    subsidyAmount: Math.ceil(finalSubsidyAmount),
     developerAccount: Math.ceil(developerAccount),
     pricePerM2: pricePerM2 !== null ? Math.ceil(pricePerM2) : null,
 

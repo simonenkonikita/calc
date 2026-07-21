@@ -35,6 +35,7 @@ export const calculateFamilyTwoContractsMortgageAmount = (
   } = params;
 
   const limit = variables.minExcessAmounts?.[bankOffer.bank] || 7500000;
+
   const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
@@ -76,12 +77,15 @@ export const calculateFamilyTwoContractsMortgageAmount = (
     if (mortgageAmount < limit) {
       mortgageAmount = contractAmount - downPaymentAmount;
       isLimitExceeded = true;
+      console.log(1, mortgageAmount);
     } else if (isWithinLimit) {
       mortgageAmount = contractAmount - downPaymentAmount;
       isLimitExceeded = false;
+      console.log(2, mortgageAmount);
     } else {
       mortgageAmount = contractAmount - downPaymentAmount;
       isLimitExceeded = true;
+      console.log(3, mortgageAmount);
     }
   } else {
     if (mortgageAmount < limit) {

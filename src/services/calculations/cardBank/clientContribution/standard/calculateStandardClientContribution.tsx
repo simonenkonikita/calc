@@ -26,15 +26,14 @@ export const clientContribution = (params: clientContribution): number => {
     coefficients,
   } = params;
 
-  const limit = bankOffer.excessLimit
-    ? variables.maxFamilyMortgageSum || 15000000
-    : variables.familyMortgageLimit || 6000000;
+  const limit = variables.familyMortgageLimit || 6000000;
+  const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
   const minPVPercent = coefficients.requiredCoeffWithMinPV; // Сбербанк!J16
 
   const summCredit =
     (objectCost / minPVPercent) * (1 - userDownPaymentPercent / 100);
-  const isWithinLimit = summCredit <= limit;
+  const isWithinLimit = summCredit <= maxLimit;
 
   let clientContribution: number;
 
