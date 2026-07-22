@@ -77,15 +77,12 @@ export const calculateFamilyTwoContractsMortgageAmount = (
     if (mortgageAmount < limit) {
       mortgageAmount = contractAmount - downPaymentAmount;
       isLimitExceeded = true;
-      console.log(1, mortgageAmount);
     } else if (isWithinLimit) {
       mortgageAmount = contractAmount - downPaymentAmount;
-      isLimitExceeded = false;
-      console.log(2, mortgageAmount);
+      isLimitExceeded = true;
     } else {
       mortgageAmount = contractAmount - downPaymentAmount;
       isLimitExceeded = true;
-      console.log(3, mortgageAmount);
     }
   } else {
     if (mortgageAmount < limit) {

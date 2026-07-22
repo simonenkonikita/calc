@@ -9,6 +9,8 @@ import { clientContribution } from "./standard/calculateStandardClientContributi
 
 interface CalculateClientContributionParams {
   objectCost: number;
+  downPayment: number;
+  remainingAmount: number;
   downPaymentAmount: number;
   ownFunds: number;
   userDownPaymentPercent: number;
@@ -23,6 +25,8 @@ export const calculateClientContribution = (
   params: CalculateClientContributionParams,
 ): number => {
   const {
+    downPayment,
+    remainingAmount,
     downPaymentAmount,
     ownFunds,
     isSpecialMortgageMode,
@@ -37,12 +41,14 @@ export const calculateClientContribution = (
   if (isFamilyOrIt) {
     return clientContribution({
       objectCost,
+      downPayment,
+      remainingAmount,
       downPaymentAmount,
       ownFunds,
       userDownPaymentPercent,
       bankOffer,
       variables,
-      mortgageWithoutDownPayment: isSpecialMortgageMode,
+      isSpecialMortgageMode,
       coefficients,
     });
   }

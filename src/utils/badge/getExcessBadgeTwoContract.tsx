@@ -4,6 +4,7 @@ import { variables } from "../../data/limitdDate";
 
 export const getExcessBadgeTwoContract = (
   offer: BankProgramResultWithIndex,
+  isSpecialMortgageMode: boolean = false,
 ): { text: string; icon: string } | null => {
   // Проверяем, что это сверхлимитная программа
   const isExcessProgram =
@@ -13,6 +14,13 @@ export const getExcessBadgeTwoContract = (
 
   if (!isExcessProgram) {
     return null;
+  }
+
+  if (isSpecialMortgageMode) {
+    return {
+      icon: "🚫",
+      text: "Недоступна при ипотеке без ПВ",
+    };
   }
 
   const minExcessAmount = getMinExcessAmount(offer.bank);

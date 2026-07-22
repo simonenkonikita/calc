@@ -46,7 +46,10 @@ export const BankCard: React.FC<BankCardProps> = ({
   const limitBadge = getLimitBadge(offer);
   const termBadge = getTermYearsBadge(offer);
   const trancheBadge = getTrancheBadge(offer, complexName);
-  const badgeTwoContract = getExcessBadgeTwoContract(offer);
+  const badgeTwoContract = getExcessBadgeTwoContract(
+    offer,
+    isSpecialMortgageMode,
+  );
 
   return (
     <div

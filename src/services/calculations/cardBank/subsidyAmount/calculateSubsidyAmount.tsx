@@ -1,5 +1,76 @@
 // src/hooks/calculations/bankProgram/steps/calculateSubsidyAmount.ts
 
+import { BankOffer } from "../../../../utils/types";
+import { getDynamicSubsidy } from "../../сoefficients/getDynamicSubsidy";
+
+interface CalculateSubsidyAmountParams {
+  bankOffer: BankOffer;
+  mortgageAmount: number;
+  secondContractAmount?: number;
+  isTwoContracts: boolean;
+  actualSubsidyPercent: number;
+  userDownPaymentPercent: number;
+  loanTermYears: number;
+}
+
+interface CalculateSubsidyAmountResult {
+  subsidyAmount: number;
+  secondContractSubsidyPercent?: number;
+  secondContractSubsidyAmount?: number;
+}
+
+export const calculateSubsidyAmount = (
+  params: CalculateSubsidyAmountParams,
+): CalculateSubsidyAmountResult => {
+  const {
+    bankOffer,
+    mortgageAmount,
+    secondContractAmount,
+    isTwoContracts,
+    actualSubsidyPercent,
+    userDownPaymentPercent,
+    loanTermYears,
+  } = params;
+
+  let subsidyAmount: number;
+  let secondContractSubsidyPercent: number | undefined;
+  let secondContractSubsidyAmount: number | undefined;
+
+  if (isTwoContracts) {
+    // Для двух договоров субсидия считается от суммы ВТОРОГО договора
+    const secondContract = secondContractAmount || 0;
+
+    // Получаем субсидию для второго договора
+    if (
+      bankOffer.dynamicSubsidyPercent &&
+      bankOffer.dynamicSubsidyPercent.length > 0
+    ) {
+      secondContractSubsidyPercent = getDynamicSubsidy(
+        bankOffer,
+        userDownPaymentPercent,
+        secondContract,
+        loanTermYears,
+      );
+    } else {
+      secondContractSubsidyPercent = actualSubsidyPercent;
+    }
+
+    secondContractSubsidyAmount =
+      secondContract * (secondContractSubsidyPercent / 100);
+    subsidyAmount = secondContractSubsidyAmount;
+  } else {
+    subsidyAmount = mortgageAmount * (actualSubsidyPercent / 100);
+  }
+
+  return {
+    subsidyAmount,
+    secondContractSubsidyPercent,
+    secondContractSubsidyAmount,
+  };
+};
+
+/* // src/hooks/calculations/bankProgram/steps/calculateSubsidyAmount.ts
+
 import { variables } from "../../../../data/limitdDate";
 import { BankOffer, Variables } from "../../../../utils/types";
 import { getDynamicSubsidy } from "../../сoefficients/getDynamicSubsidy";
@@ -7,6 +78,7 @@ import { getDynamicSubsidy } from "../../сoefficients/getDynamicSubsidy";
 interface CalculateSubsidyAmountParams {
   bankOffer: BankOffer;
   objectCost: number;
+  ownFunds: number;
   mortgageAmount: number;
   secondContractAmount?: number;
   variables: Variables;
@@ -28,6 +100,7 @@ interface CalculateSubsidyAmountResult {
   adjustedMortgageAmount?: number;
   adjustedFirstContractAmount?: number;
   adjustedSecondContractAmount?: number;
+  adjustedClientContribution?: number;
 }
 
 export const calculateSubsidyAmount = (
@@ -36,6 +109,7 @@ export const calculateSubsidyAmount = (
   const {
     bankOffer,
     objectCost,
+    ownFunds,
     mortgageAmount,
     secondContractAmount,
     isTwoContracts,
@@ -55,6 +129,7 @@ export const calculateSubsidyAmount = (
   let adjustedMortgageAmount: number | undefined;
   let adjustedFirstContractAmount: number | undefined;
   let adjustedSecondContractAmount: number | undefined;
+  let adjustedClientContribution: number | undefined;
 
   // ============================================================
   // 1. РАСЧЕТ СУБСИДИИ
@@ -112,6 +187,8 @@ export const calculateSubsidyAmount = (
       newMortgageAmount - variables.familyMortgageLimit,
     );
 
+    let newClientContribution: number = 0;
+
     // ============================================================
     // 1.3 ИТЕРАТИВНЫЙ ПЕРЕСЧЕТ (ЕСЛИ ВТОРОЙ ДОГОВОР ИЗМЕНИЛСЯ)
     // ============================================================
@@ -158,10 +235,7 @@ export const calculateSubsidyAmount = (
         const newMinPVAmount = newContractAmount * (minPVPercent / 100);
         const newCalculatedDownPayment =
           newContractAmount - variables.familyMortgageLimit - secondContract;
-        newDownPaymentAmount = Math.max(
-          newMinPVAmount,
-          newCalculatedDownPayment,
-        );
+        newDownPaymentAmount = newMinPVAmount;
 
         // Пересчитываем ипотеку
         newMortgageAmount = newContractAmount - newDownPaymentAmount;
@@ -175,6 +249,9 @@ export const calculateSubsidyAmount = (
           0,
           newMortgageAmount - variables.familyMortgageLimit,
         );
+
+        // Пересчитываем сумму внесеных денег за клиента
+        newClientContribution = newDownPaymentAmount - ownFunds;
       }
     }
 
@@ -184,6 +261,7 @@ export const calculateSubsidyAmount = (
     adjustedMortgageAmount = newMortgageAmount;
     adjustedFirstContractAmount = newFirstContractAmount;
     adjustedSecondContractAmount = newSecondContractAmount;
+    adjustedClientContribution = newClientContribution;
   } else {
     // ============================================================
     // 2. ОБЫЧНАЯ ЛОГИКА ДЛЯ НЕ-ДВУХДОГОВОРНЫХ ПРОГРАММ
@@ -202,5 +280,7 @@ export const calculateSubsidyAmount = (
     adjustedMortgageAmount,
     adjustedFirstContractAmount,
     adjustedSecondContractAmount,
+    adjustedClientContribution,
   };
 };
+ */
