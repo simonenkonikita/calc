@@ -1,14 +1,5 @@
 /* OfferBankSection.css - только для OfferBankSection */
 
-/* Заголовок предложений банков */
-.banks-header {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  color: #1f2937;
-  padding-bottom: 0.75rem;
-}
-
 /* Контейнер для заголовка и фильтров */
 .banks-header-wrapper {
   display: flex;
@@ -23,8 +14,13 @@
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
+/* Заголовок предложений банков */
 .banks-header {
+  font-size: 1.5rem;
+  font-weight: 700;
   margin-bottom: 0;
+  color: #1f2937;
+  padding-bottom: 0.75rem;
 }
 
 /* Фильтры банков */

@@ -14,7 +14,7 @@
 }
 
 .calculator-form-wrapper {
-  position: sticky;
+  /*  position: sticky; */
   display: grid;
   grid-template-columns: 1fr;
   gap: 30px;
@@ -125,13 +125,11 @@
 @media (max-width: 1200px) {
   .mortgage-calculator-page {
     padding: 1.5rem;
-    height: auto;
     overflow: visible;
   }
 
   .calculator {
     grid-template-columns: 1fr;
-    height: auto;
     gap: 1.5rem;
   }
 
@@ -142,13 +140,11 @@
   }
 
   .calculator-form {
-    height: auto;
     overflow: visible;
     padding-right: 0;
   }
 
   .calculator-results {
-    height: auto;
     overflow: visible;
     padding-right: 0;
   }
@@ -164,11 +160,10 @@
   }
 
   .calculator {
-    gap: 1rem;
-  }
-
-  .results-white-card {
-    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 220px;
+    align-items: start;
   }
 
   .error-content {

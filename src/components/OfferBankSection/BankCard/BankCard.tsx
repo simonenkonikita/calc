@@ -92,9 +92,9 @@ export const BankCard: React.FC<BankCardProps> = ({
           <div className="excess-overlay-title">
             Ипотека с выбранными параметрами невозможна
           </div>
-          <div className="excess-overlay-hint">
+          {/*      <div className="excess-overlay-hint">
             Превышен лимит семейной ипотеки
-          </div>
+          </div> */}
         </div>
       )}
 
