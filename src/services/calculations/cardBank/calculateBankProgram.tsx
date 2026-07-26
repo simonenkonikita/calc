@@ -163,7 +163,6 @@ export const calculateBankProgram = (
     const adjustmentResult = adjustTwoContracts({
       bankOffer,
       objectCost,
-      downPayment,
       ownFunds: tempOwnFunds,
       mortgageAmount: mortgageAmountResult.mortgageAmount,
       secondContractAmount: secondContractAmount || 0,
