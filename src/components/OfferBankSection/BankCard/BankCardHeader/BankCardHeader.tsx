@@ -88,13 +88,20 @@ export const BankCardHeader: React.FC<BankCardHeaderProps> = ({
     }
 
     if (isTwoContracts) {
+      const totalPayment =
+        (offer.firstContractPayment || 0) + (offer.secondContractPayment || 0);
       return (
         <div className="payment-values-wrapper">
-          <p className="payment-value payment-with-subsidy">
-            {formatMoney(offer.firstContractPayment)}
-          </p>
-          <p className="payment-value payment-with-subsidy">
-            {formatMoney(offer.secondContractPayment)}
+          <div className="two-contracts-payments">
+            <p className="payment-value payment-with-subsidy">
+              {formatMoney(offer.firstContractPayment)}
+            </p>
+            <p className="payment-value payment-with-subsidy">
+              {formatMoney(offer.secondContractPayment)}
+            </p>
+          </div>
+          <p className="payment-value payment-after-subsidy">
+            → {formatMoney(totalPayment)}
           </p>
         </div>
       );

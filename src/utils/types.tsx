@@ -22,6 +22,7 @@ export interface HousingComplexPrice {
   complexName: string;
   apartmentType: string;
   pricePerSquareMeter: number;
+  banks?: string[];
 }
 
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========
@@ -119,6 +120,7 @@ export interface BankOffer {
   /** Глобальная стратегия округления (по умолчанию 'up') */
   roundingStrategy?: "up" | "down";
   twoContractSubsidies?: DynamicRateRule[];
+  complexes?: string[];
 }
 
 export interface TranchePaymentsResult {
