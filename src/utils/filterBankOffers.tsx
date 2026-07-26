@@ -9,13 +9,17 @@ interface FilterBankOffersParams {
   housingPrices: HousingComplexPrice[];
 }
 
+/**
+ * Фильтрует банковские предложения по доступности для ЖК
+ * Возвращает только те предложения, которые доступны для выбранного ЖК
+ */
 export const filterBankOffersByComplex = (
   params: FilterBankOffersParams,
 ): BankOffer[] => {
   const { bankOffers, complexName, apartmentType, housingPrices } = params;
 
-  // Если ЖК не выбран - возвращаем все предложения
-  if (!complexName) {
+  // Если ЖК или тип квартиры не выбраны - возвращаем все предложения
+  if (!complexName || !apartmentType) {
     return bankOffers;
   }
 
@@ -36,6 +40,7 @@ export const filterBankOffersByComplex = (
   return bankOffers.filter((offer) => {
     // 1. Проверка по программе: если у программы указан список ЖК
     if (offer.complexes && offer.complexes.length > 0) {
+      // Программа доступна только если ЖК есть в списке
       if (!offer.complexes.includes(complexName)) {
         return false;
       }
@@ -43,68 +48,65 @@ export const filterBankOffersByComplex = (
 
     // 2. Проверка по банку: если у ЖК указан список банков
     if (availableBanks && availableBanks.length > 0) {
+      // Банк доступен только если он есть в списке
       if (!availableBanks.includes(offer.bank)) {
         return false;
       }
     }
 
+    // Все проверки пройдены - доступно
     return true;
   });
 };
 
-// Функция для получения причины недоступности
-export const getBankUnavailableReason = (
+/**
+ * Проверяет, доступен ли банк для конкретного ЖК
+ */
+export const isBankAvailableForComplex = (
   bankName: string,
   complexName: string,
   apartmentType: string,
   housingPrices: HousingComplexPrice[],
-  offerComplexes?: string[],
-): { isAvailable: boolean; reason: string | null } => {
-  if (!complexName) {
-    return { isAvailable: true, reason: null };
-  }
+): boolean => {
+  if (!complexName || !apartmentType) return true;
 
   const complexData = housingPrices.find(
     (item) =>
       item.complexName === complexName && item.apartmentType === apartmentType,
   );
 
-  if (!complexData) {
-    return { isAvailable: true, reason: null };
-  }
+  if (!complexData) return true;
+  if (!complexData.banks) return true;
 
-  // Проверка по программе
-  if (offerComplexes && offerComplexes.length > 0) {
-    if (!offerComplexes.includes(complexName)) {
-      return {
-        isAvailable: false,
-        reason: `Программа недоступна для ${complexName}`,
-      };
-    }
-  }
-
-  // Проверка по банку
-  if (complexData.banks && complexData.banks.length > 0) {
-    if (!complexData.banks.includes(bankName)) {
-      return {
-        isAvailable: false,
-        reason: `Банк не аккредитован в ${complexName}`,
-      };
-    }
-  }
-
-  return { isAvailable: true, reason: null };
+  return complexData.banks.includes(bankName);
 };
 
-// Получение доступных банков для ЖК
+/**
+ * Проверяет, доступна ли программа для конкретного ЖК
+ */
+export const isProgramAvailableForComplex = (
+  offer: BankOffer,
+  complexName: string,
+): boolean => {
+  if (!complexName) return true;
+  if (!offer.complexes || offer.complexes.length === 0) return true;
+  return offer.complexes.includes(complexName);
+};
+
+/**
+ * Получает список доступных банков для ЖК
+ */
 export const getAvailableBanksForComplex = (
   complexName: string,
   apartmentType: string,
   housingPrices: HousingComplexPrice[],
 ): string[] | null => {
+  if (!complexName || !apartmentType) return null;
+
   const complexData = housingPrices.find(
     (item) =>
       item.complexName === complexName && item.apartmentType === apartmentType,
   );
+
   return complexData?.banks || null;
 };
