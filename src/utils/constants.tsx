@@ -43,6 +43,22 @@ export const TRANCHE_UNAVAILABLE_COMPLEXES = [
   "ГК Морелло",
 ];
 
+export const COMPLEXES_FAMILY = [
+  "ЖК Сады у моря 3",
+  "ЖК Сады у моря 2 (Акция 130 000)",
+  "ЖК Два адмирала",
+  "ЖК Лермонтов",
+  "ЖК Горы здесь",
+];
+
+export const COMPLEXES_IT = [
+  "ЖК Сады у моря 3",
+  "ЖК Сады у моря 2 (Акция 130 000)",
+  "ЖК Два адмирала",
+  "ЖК Лермонтов",
+  "ЖК Горы здесь",
+];
+
 // ========== ЛИМИТЫ ==========
 export const MIN_AREA = 1;
 export const MAX_AREA = 150;

@@ -1,5 +1,6 @@
 // src/config/banks/sovcombank.ts
 
+import { COMPLEXES_FAMILY } from "../../utils/constants";
 import { BankOffer } from "../../utils/types";
 import {
   SOVKOMBANK_SUBSIDIES_11_9,
@@ -65,6 +66,7 @@ export const SOVCOMBANK_OFFERS: BankOffer[] = [
     thresholdTolerance: 0.5,
     thresholdToleranceType: "percent",
     roundingStrategy: "up",
+    complexes: COMPLEXES_FAMILY,
   },
   {
     bank: "Совкомбанк",
@@ -79,6 +81,7 @@ export const SOVCOMBANK_OFFERS: BankOffer[] = [
     thresholdTolerance: 0.5,
     thresholdToleranceType: "percent",
     roundingStrategy: "up",
+    complexes: COMPLEXES_FAMILY,
   },
   /*   {
     bank: "Совкомбанк",

@@ -4,6 +4,7 @@ import {
   SBERBANK_EXCESS_RATES,
 } from "../rates/sberbankRates";
 import { BankOffer } from "../../utils/types";
+import { COMPLEXES_FAMILY } from "../../utils/constants";
 
 export const SBERBANK_OFFERS: BankOffer[] = [
   {
@@ -102,6 +103,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     rate: 6,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
+    complexes: COMPLEXES_FAMILY,
   },
   {
     bank: "Сбербанк",
@@ -110,6 +112,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     rate: 3.5,
     subsidyPercent: 14.5,
     minPVPercent: MIN_PV_PERCENT,
+    complexes: COMPLEXES_FAMILY,
   },
   {
     bank: "Сбербанк",
@@ -120,6 +123,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     minPVPercent: MIN_PV_PERCENT,
     excessLimit: true,
     dynamicRates: SBERBANK_EXCESS_RATES,
+    complexes: COMPLEXES_FAMILY,
   },
   /* {
     bank: "Сбербанк",

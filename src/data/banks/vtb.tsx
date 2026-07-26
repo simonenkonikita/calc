@@ -1,6 +1,7 @@
 import { BASE_RATES, MIN_PV_PERCENT } from "./constants";
 import { BankOffer } from "../../utils/types";
 import { VTB_EXCESS_RATES } from "../rates/vtbRates";
+import { COMPLEXES_FAMILY } from "../../utils/constants";
 
 export const VTB_OFFERS: BankOffer[] = [
   {
@@ -26,6 +27,7 @@ export const VTB_OFFERS: BankOffer[] = [
     rate: 6,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
+    complexes: COMPLEXES_FAMILY,
   },
   {
     bank: "ВТБ",
@@ -36,5 +38,6 @@ export const VTB_OFFERS: BankOffer[] = [
     minPVPercent: MIN_PV_PERCENT,
     excessLimit: true,
     dynamicRates: VTB_EXCESS_RATES,
+    complexes: COMPLEXES_FAMILY,
   },
 ];

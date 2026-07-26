@@ -6,6 +6,7 @@ import {
   ALFA_SUBSIDIES_12_99,
   ALFA_SUBSIDIES_13_89,
 } from "../subsidies/alfaSubsidies";
+import { COMPLEXES_FAMILY } from "../../utils/constants";
 
 export const ALFABANK_OFFERS: BankOffer[] = [
   {
@@ -51,6 +52,7 @@ export const ALFABANK_OFFERS: BankOffer[] = [
     rate: 6,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
+    complexes: COMPLEXES_FAMILY,
   },
   {
     bank: "Альфа-Банк",
@@ -59,5 +61,6 @@ export const ALFABANK_OFFERS: BankOffer[] = [
     rate: 3.5,
     subsidyPercent: 16.09,
     minPVPercent: MIN_PV_PERCENT,
+    complexes: COMPLEXES_FAMILY,
   },
 ];
