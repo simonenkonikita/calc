@@ -23,6 +23,10 @@ export interface HousingComplexPrice {
   apartmentType: string;
   pricePerSquareMeter: number;
   banks?: string[];
+  surcharges?: {
+    withoutDownPayment: number;
+    partialDownPayment: number;
+  };
 }
 
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========

@@ -5,7 +5,8 @@
 import {
   TRANCHE_SECOND_DATE_BY_COMPLEX,
   TRANCHE_UNAVAILABLE_COMPLEXES,
-} from "../constants";
+} from "../../data/complexPrice/complexPriceData";
+import {} from "../../data/constants";
 
 /**
  * Проверка доступности траншевой ипотеки для ЖК

@@ -1,38 +1,43 @@
-import { BASE_RATES, MIN_PV_PERCENT } from "./constants";
+import {
+  BANK_NAMES,
+  BASE_RATES,
+  MIN_PV_PERCENT,
+  PROGRAM_TYPES,
+} from "./constants";
 import { BankOffer } from "../../utils/types";
 import { VTB_EXCESS_RATES } from "../rates/vtbRates";
-import { COMPLEXES_FAMILY } from "../../utils/constants";
+import { COMPLEXES_FAMILY } from "../complexPrice/complexPriceData";
 
 export const VTB_OFFERS: BankOffer[] = [
   {
-    bank: "ВТБ",
-    program: "Базовая",
+    bank: BANK_NAMES.VTB,
+    program: PROGRAM_TYPES.BASE,
     type: "base",
     rate: BASE_RATES.VTB,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
   },
   {
-    bank: "ВТБ",
+    bank: BANK_NAMES.VTB,
     program: "12,89% на весь срок",
-    type: "full",
+    type: PROGRAM_TYPES.FULL,
     rate: 12.89,
     subsidyPercent: 14.3,
     minPVPercent: MIN_PV_PERCENT,
   },
   {
-    bank: "ВТБ",
+    bank: BANK_NAMES.VTB,
     program: "Семейная базовая",
-    type: "family",
+    type: PROGRAM_TYPES.FAMILY,
     rate: 6,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     complexes: COMPLEXES_FAMILY,
   },
   {
-    bank: "ВТБ",
+    bank: BANK_NAMES.VTB,
     program: "Семейная ипотека сверхлимит",
-    type: "family",
+    type: PROGRAM_TYPES.FAMILY,
     rate: 7.17,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,

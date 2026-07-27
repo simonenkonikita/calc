@@ -1,5 +1,5 @@
 import { useMemo, ChangeEvent } from "react";
-import { housingPrices } from "../../data/calculatorData";
+import { housingPrices } from "../../data/complexPrice/complexPriceData";
 import {
   PRICE_PER_SQUARE_METER_DEFAULT,
   MAX_DOWN_PAYMENT_PERCENT,
@@ -8,7 +8,7 @@ import {
   MIN_AREA,
   MAX_LOAN_TERM,
   MIN_LOAN_TERM,
-} from "../../utils/constants";
+} from "../../data/constants";
 import { CalculatorFormData } from "../../utils/types";
 import "./FormSection.css";
 

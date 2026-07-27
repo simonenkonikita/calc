@@ -2,8 +2,9 @@
 import React from "react";
 import { BankCategory } from "../BankCategory/BankCategory";
 import "./BankGroup.css";
-import { CATEGORY_ORDER } from "../../../../utils/constants";
+
 import { BankProgramResultWithIndex } from "../../../../utils/types";
+import { CATEGORY_ORDER } from "../../../../data/banks/constants";
 
 interface BankGroupProps {
   bankName: string;

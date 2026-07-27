@@ -6,18 +6,17 @@ import type {
   BankProgramResult,
 } from "../utils/types";
 import { bankOffers } from "../data/banks";
-import { housingPrices } from "../data/calculatorData";
+import { housingPrices } from "../data/complexPrice/complexPriceData";
 import { variables } from "../data/limitdDate";
 import { calculateFullMortgage } from "../services/calculations/result/calculateFullMortgage";
 import { formatMoney } from "../utils/formatMoney";
 import {
   DEFAULT_LOAN_TERM_YEARS,
   DEFAULT_MIN_PV_PERCENT,
-  MORTGAGE_PARTIAL_DOWN_PAYMENT_SURCHARGES,
-  MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGES,
   PRICE_PER_SQUARE_METER_DEFAULT,
-} from "../utils/constants";
+} from "../data/constants";
 import { filterBankOffersByComplex } from "../utils/filterBankOffers";
+import { getMortgageSurcharge } from "../utils/mortgageSurcharges";
 
 // Функция для получения цены за м2
 const getPricePerSquareMeter = (
@@ -40,27 +39,6 @@ const getPricePerSquareMeter = (
   }
 
   return found.pricePerSquareMeter;
-};
-
-// Функция для получения наценки
-const getMortgageSurcharge = (
-  complexName: string,
-  mortgageWithoutDownPayment: boolean,
-  mortgagePartialDownPayment: boolean,
-): number => {
-  if (!complexName) return 0;
-
-  if (mortgageWithoutDownPayment) {
-    const surcharge = MORTGAGE_WITHOUT_DOWN_PAYMENT_SURCHARGES[complexName];
-    return surcharge ?? 0;
-  }
-
-  if (mortgagePartialDownPayment) {
-    const surcharge = MORTGAGE_PARTIAL_DOWN_PAYMENT_SURCHARGES[complexName];
-    return surcharge ?? 0;
-  }
-
-  return 0;
 };
 
 export const useMortgageCalculator = () => {
@@ -100,17 +78,20 @@ export const useMortgageCalculator = () => {
   }, [formData.complex, formData.apartmentType]);
 
   // ============================================================
-  // 2. НАЦЕНКА
+  // 2. 🔥 НАЦЕНКА (С УЧЁТОМ ТИПА КВАРТИРЫ)
   // ============================================================
   const surchargePerM2 = useMemo(() => {
-    if (!formData.complex) return 0;
+    if (!formData.complex || !formData.apartmentType) return 0;
+
     return getMortgageSurcharge(
       formData.complex,
+      formData.apartmentType,
       formData.mortgageWithoutDownPayment,
       formData.mortgagePartialDownPayment,
     );
   }, [
     formData.complex,
+    formData.apartmentType,
     formData.mortgageWithoutDownPayment,
     formData.mortgagePartialDownPayment,
   ]);

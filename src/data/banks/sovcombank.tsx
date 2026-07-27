@@ -1,7 +1,6 @@
 // src/config/banks/sovcombank.ts
-
-import { COMPLEXES_FAMILY } from "../../utils/constants";
 import { BankOffer } from "../../utils/types";
+import { COMPLEXES_FAMILY } from "../complexPrice/complexPriceData";
 import {
   SOVKOMBANK_SUBSIDIES_11_9,
   SOVKOMBANK_SUBSIDIES_12_49,
@@ -15,48 +14,53 @@ import {
   SOVCOMBANK_SUBSIDIES_V1,
   SOVCOMBANK_SUBSIDIES_V2,
 } from "../subsidies/sovcombankSubsidies"; */
-import { BASE_RATES, MIN_PV_PERCENT } from "./constants";
+import {
+  BANK_NAMES,
+  BASE_RATES,
+  MIN_PV_PERCENT,
+  PROGRAM_TYPES,
+} from "./constants";
 
 export const SOVCOMBANK_OFFERS: BankOffer[] = [
   {
-    bank: "Совкомбанк",
-    program: "Базовая",
+    bank: BANK_NAMES.SOVKOM,
+    program: PROGRAM_TYPES.BASE,
     type: "base",
     rate: BASE_RATES.SOVKOM,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
   },
   {
-    bank: "Совкомбанк",
+    bank: BANK_NAMES.SOVKOM,
     program: "11.9% на весь срок",
-    type: "full",
+    type: PROGRAM_TYPES.FULL,
     rate: 11.9,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicSubsidyPercent: SOVKOMBANK_SUBSIDIES_11_9,
   },
   {
-    bank: "Совкомбанк",
+    bank: BANK_NAMES.SOVKOM,
     program: "12.49% на весь срок",
-    type: "full",
+    type: PROGRAM_TYPES.FULL,
     rate: 12.49,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicSubsidyPercent: SOVKOMBANK_SUBSIDIES_12_49,
   },
   {
-    bank: "Совкомбанк",
+    bank: BANK_NAMES.SOVKOM,
     program: "13.99% на весь срок",
-    type: "full",
+    type: PROGRAM_TYPES.FULL,
     rate: 13.99,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicSubsidyPercent: SOVKOMBANK_SUBSIDIES_13_99,
   },
   {
-    bank: "Совкомбанк",
+    bank: BANK_NAMES.SOVKOM,
     program: "Семейная ипотека (2 договора)",
-    type: "family",
+    type: PROGRAM_TYPES.FAMILY,
     rate: 6,
     twoRate: 19.89,
     subsidyPercent: 0,
@@ -69,9 +73,9 @@ export const SOVCOMBANK_OFFERS: BankOffer[] = [
     complexes: COMPLEXES_FAMILY,
   },
   {
-    bank: "Совкомбанк",
+    bank: BANK_NAMES.SOVKOM,
     program: "Семейная ипотека (2 договора)",
-    type: "family",
+    type: PROGRAM_TYPES.FAMILY,
     rate: 6,
     twoRate: 11.9,
     subsidyPercent: 0,

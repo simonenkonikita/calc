@@ -1,4 +1,4 @@
-import { DEFAULT_MIN_PV_PERCENT } from "../../../utils/constants";
+import { DEFAULT_MIN_PV_PERCENT } from "../../../data/constants";
 import {
   CalculatorFormData,
   ObjectCalculationResult,
