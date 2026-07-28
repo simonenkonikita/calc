@@ -1,5 +1,8 @@
 import { useMemo, ChangeEvent } from "react";
-import { housingPrices } from "../../data/complexPrice/complexPriceData";
+import {
+  DEPOSIT_AMOUNT,
+  housingPrices,
+} from "../../data/complexPrice/complexPriceData";
 import {
   PRICE_PER_SQUARE_METER_DEFAULT,
   MAX_DOWN_PAYMENT_PERCENT,
@@ -11,9 +14,6 @@ import {
 } from "../../data/constants";
 import { CalculatorFormData } from "../../utils/types";
 import "./FormSection.css";
-
-// 🔥 Константа суммы брони
-const DEPOSIT_AMOUNT = 30000;
 
 interface FormSectionProps {
   formData: CalculatorFormData;
