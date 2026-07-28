@@ -1,6 +1,6 @@
 // src/utils/printSelectedOffers.ts
 
-import { BankProgramResult } from "./types";
+import { BankProgramResult } from "../types";
 import { formatOfferToText } from "./formatOfferToText";
 
 interface PrintSelectedOffersParams {

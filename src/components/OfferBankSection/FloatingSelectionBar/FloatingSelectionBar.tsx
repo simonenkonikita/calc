@@ -9,7 +9,7 @@ import { SelectionCounter } from "./SelectionCounter/SelectionCounter";
 
 import "./FloatingSelectionBar.css";
 import { BankProgramResult } from "../../../utils/types";
-import { printSelectedOffers } from "../../../utils/printSelectedOffers";
+import { printSelectedOffers } from "../../../utils/offers/printSelectedOffers";
 
 interface FloatingSelectionBarProps {
   selectedCards: Set<number>;

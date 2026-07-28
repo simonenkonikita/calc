@@ -1,6 +1,7 @@
 // hooks/useCopySelectedOffers.ts
 import { useState } from "react";
-import { formatOfferToText } from "../utils/formatOfferToText";
+import { formatOfferToText } from "../utils/offers/formatOfferToText";
+import { getComplexEmoji } from "../utils/offers/getComplexEmoji";
 import { BankProgramResult } from "../utils/types";
 
 interface UseCopySelectedOffersProps {
@@ -33,7 +34,8 @@ export const useCopySelectedOffers = ({
       selectedCards.has(idx),
     );
 
-    const header = `🏢 ${complexName}\nПлощадь: ${area} м²\n`;
+    const complexEmoji = getComplexEmoji(complexName);
+    const header = `${complexEmoji} ${complexName}\nПлощадь: ${area} м²\n`;
     const separator = `\n---\n`;
 
     const texts = selectedResults.map((offer) => {
