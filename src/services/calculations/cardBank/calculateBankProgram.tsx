@@ -345,6 +345,7 @@ export const calculateBankProgram = (
       : actualSubsidyPercent,
     durationMonths:
       bankOffer.type === "short" ? bankOffer.durationMonths : loanTermMonths,
+    minLoanTermYears: bankOffer.minLoanTermYears,
 
     // Платежи
     monthlyPayment: Math.ceil(monthlyPayment),

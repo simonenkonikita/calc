@@ -125,6 +125,7 @@ export interface BankOffer {
   roundingStrategy?: "up" | "down";
   twoContractSubsidies?: DynamicRateRule[];
   complexes?: string[];
+  minLoanTermYears?: number;
 }
 
 export interface TranchePaymentsResult {
@@ -186,6 +187,7 @@ export interface BankProgramResult {
   secondTranchePayment?: number;
   trancheSecondDate?: string; // ✅ ДОБАВИТЬ - дата выдачи второго транша
   monthsUntilSecondTranche?: number; // ✅ ДОБАВИТЬ - количество месяцев до второго транша
+  minLoanTermYears?: number;
 }
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========
 export interface CalculatorResult {

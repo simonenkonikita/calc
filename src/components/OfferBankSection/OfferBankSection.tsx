@@ -194,6 +194,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
             showOverstatement={showOverstatement}
             isSpecialMortgageMode={isSpecialMortgageMode}
             complexName={complexName}
+            loanTermYears={loanTermYears}
             formatMoney={formatMoney}
             onCardClick={handleCardClick}
             hasProgramsInCategory={hasProgramsInCategory}

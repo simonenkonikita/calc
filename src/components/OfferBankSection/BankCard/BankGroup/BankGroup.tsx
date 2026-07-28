@@ -14,6 +14,7 @@ interface BankGroupProps {
   showOverstatement: boolean;
   isSpecialMortgageMode: boolean;
   complexName: string;
+  loanTermYears: number;
   formatMoney: (amount: number) => string;
   onCardClick: (index: number) => void;
   hasProgramsInCategory: (
@@ -30,6 +31,7 @@ export const BankGroup: React.FC<BankGroupProps> = ({
   showOverstatement,
   isSpecialMortgageMode,
   complexName,
+  loanTermYears,
   formatMoney,
   onCardClick,
   hasProgramsInCategory,
@@ -64,6 +66,7 @@ export const BankGroup: React.FC<BankGroupProps> = ({
               showOverstatement={showOverstatement}
               isSpecialMortgageMode={isSpecialMortgageMode}
               complexName={complexName}
+              loanTermYears={loanTermYears}
               formatMoney={formatMoney}
               onCardClick={onCardClick}
             />

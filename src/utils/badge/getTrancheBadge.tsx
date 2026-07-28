@@ -1,7 +1,6 @@
 import { isTrancheAvailable } from "../tranche/trancheDates";
 import { BankProgramResultWithIndex } from "../types";
 
-// ✅ Функция для получения шильдика (бейджа) для банка
 export const getTrancheBadge = (
   offer: BankProgramResultWithIndex,
   complexName: string,

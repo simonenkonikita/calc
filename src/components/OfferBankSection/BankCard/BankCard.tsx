@@ -14,6 +14,7 @@ import { getTrancheBadge } from "../../../utils/badge/getTrancheBadge";
 import { BankProgramResultWithIndex } from "../../../utils/types";
 import { getLimitBadge } from "../../../utils/badge/getLimitBadge";
 import { getExcessBadgeTwoContract } from "../../../utils/badge/getExcessBadgeTwoContract";
+import { getLoanTermBadge } from "../../../utils/badge/getLoanTermBadge";
 
 interface BankCardProps {
   offer: BankProgramResultWithIndex;
@@ -24,6 +25,7 @@ interface BankCardProps {
   showOverstatement: boolean;
   isSpecialMortgageMode: boolean;
   complexName: string;
+  loanTermYears: number;
   formatMoney: (amount: number) => string;
   onClick: (index: number) => void;
 }
@@ -37,6 +39,7 @@ export const BankCard: React.FC<BankCardProps> = ({
   showOverstatement,
   isSpecialMortgageMode,
   complexName,
+  loanTermYears,
   formatMoney,
   onClick,
 }) => {
@@ -50,6 +53,7 @@ export const BankCard: React.FC<BankCardProps> = ({
     offer,
     isSpecialMortgageMode,
   );
+  const loanTermBadge = getLoanTermBadge(offer, loanTermYears);
 
   return (
     <div
@@ -63,6 +67,7 @@ export const BankCard: React.FC<BankCardProps> = ({
         termBadge={termBadge}
         trancheBadge={trancheBadge}
         badgeTwoContract={badgeTwoContract}
+        loanTermBadge={loanTermBadge}
       />
 
       <BankCardHeader
@@ -83,6 +88,18 @@ export const BankCard: React.FC<BankCardProps> = ({
       {offer.excessLimit && offer.excessLimit > 0 && (
         <div className="bank-excess">
           Сверхлимит: {formatMoney(offer.excessLimit)}
+        </div>
+      )}
+
+      {loanTermBadge && (
+        <div className="bank-excess-warning-overlay">
+          <div className="excess-overlay-icon">🚫</div>
+          <div className="excess-overlay-title">
+            Ипотека с выбранными параметрами невозможна
+          </div>
+          {/*      <div className="excess-overlay-hint">
+            Превышен лимит семейной ипотеки
+          </div> */}
         </div>
       )}
 

@@ -14,6 +14,7 @@ interface BankCategoryProps {
   showOverstatement: boolean;
   isSpecialMortgageMode: boolean;
   complexName: string;
+  loanTermYears: number;
   formatMoney: (amount: number) => string;
   onCardClick: (index: number) => void;
 }
@@ -25,6 +26,7 @@ export const BankCategory: React.FC<BankCategoryProps> = ({
   showOverstatement,
   isSpecialMortgageMode,
   complexName,
+  loanTermYears,
   formatMoney,
   onCardClick,
 }) => {
@@ -57,6 +59,7 @@ export const BankCategory: React.FC<BankCategoryProps> = ({
               showOverstatement={showOverstatement}
               isSpecialMortgageMode={isSpecialMortgageMode}
               complexName={complexName}
+              loanTermYears={loanTermYears}
               formatMoney={formatMoney}
               onClick={onCardClick}
             />

@@ -66,6 +66,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     subsidyPercent: 13,
     minPVPercent: MIN_PV_PERCENT,
     durationMonths: 12,
+    minLoanTermYears: 15,
     subsidyCalculationMethod: "onlyPercent",
   },
   {
@@ -77,6 +78,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     subsidyPercent: 19,
     minPVPercent: MIN_PV_PERCENT,
     durationMonths: 24,
+    minLoanTermYears: 15,
     subsidyCalculationMethod: "onlyPercent",
   },
   {
@@ -88,6 +90,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     subsidyPercent: 15.5,
     minPVPercent: MIN_PV_PERCENT,
     durationMonths: 24,
+    minLoanTermYears: 15,
     subsidyCalculationMethod: "onlyPercent",
   },
   {
@@ -99,6 +102,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     subsidyPercent: 13,
     minPVPercent: MIN_PV_PERCENT,
     durationMonths: 24,
+    minLoanTermYears: 15,
     subsidyCalculationMethod: "onlyPercent",
   },
   {
