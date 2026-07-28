@@ -96,7 +96,7 @@ export const housingPrices: HousingComplexPrice[] = [
     pricePerSquareMeter: 140000,
     banks: BANKS_ALL,
     surcharges: {
-      withoutDownPayment: 35000, // 🔥 НАЦЕНКИ ЗА ИПОТЕКУ БЕЗ ПВ
+      withoutDownPayment: 40000, // 🔥 НАЦЕНКИ ЗА ИПОТЕКУ БЕЗ ПВ
       partialDownPayment: 15000, // 🔥 НАЦЕНКИ ЗА ИПОТЕКУ С ЧАСТИЧНЫМ ПВ
     },
   },
@@ -106,7 +106,7 @@ export const housingPrices: HousingComplexPrice[] = [
     pricePerSquareMeter: 140000,
     banks: BANKS_ALL,
     surcharges: {
-      withoutDownPayment: 350000,
+      withoutDownPayment: 40000,
       partialDownPayment: 15000,
     },
   },
@@ -116,7 +116,7 @@ export const housingPrices: HousingComplexPrice[] = [
     pricePerSquareMeter: 140000,
     banks: BANKS_ALL,
     surcharges: {
-      withoutDownPayment: 300000,
+      withoutDownPayment: 40000,
       partialDownPayment: 15000,
     },
   },
@@ -165,7 +165,7 @@ export const housingPrices: HousingComplexPrice[] = [
     banks: BANKS_ALL,
     surcharges: {
       withoutDownPayment: 0,
-      partialDownPayment: 10000,
+      partialDownPayment: 0,
     },
   },
   {
@@ -175,7 +175,7 @@ export const housingPrices: HousingComplexPrice[] = [
     banks: BANKS_ALL,
     surcharges: {
       withoutDownPayment: 0,
-      partialDownPayment: 10000,
+      partialDownPayment: 0,
     },
   },
   {
@@ -185,7 +185,7 @@ export const housingPrices: HousingComplexPrice[] = [
     banks: BANKS_ALL,
     surcharges: {
       withoutDownPayment: 0,
-      partialDownPayment: 10000,
+      partialDownPayment: 0,
     },
   },
 
@@ -199,7 +199,7 @@ export const housingPrices: HousingComplexPrice[] = [
     banks: BANKS_V1,
     surcharges: {
       withoutDownPayment: 0,
-      partialDownPayment: 10000,
+      partialDownPayment: 0,
     },
   },
   {
@@ -209,7 +209,7 @@ export const housingPrices: HousingComplexPrice[] = [
     banks: BANKS_V1,
     surcharges: {
       withoutDownPayment: 0,
-      partialDownPayment: 10000,
+      partialDownPayment: 0,
     },
   },
   {
@@ -219,7 +219,7 @@ export const housingPrices: HousingComplexPrice[] = [
     banks: BANKS_V1,
     surcharges: {
       withoutDownPayment: 0,
-      partialDownPayment: 10000,
+      partialDownPayment: 0,
     },
   },
 
@@ -266,8 +266,8 @@ export const housingPrices: HousingComplexPrice[] = [
     pricePerSquareMeter: 270000,
     banks: BANKS_ALL,
     surcharges: {
-      withoutDownPayment: 10000,
-      partialDownPayment: 10000,
+      withoutDownPayment: 0,
+      partialDownPayment: 0,
     },
   },
   {
@@ -276,8 +276,8 @@ export const housingPrices: HousingComplexPrice[] = [
     pricePerSquareMeter: 270000,
     banks: BANKS_ALL,
     surcharges: {
-      withoutDownPayment: 10000,
-      partialDownPayment: 10000,
+      withoutDownPayment: 0,
+      partialDownPayment: 0,
     },
   },
 
@@ -290,8 +290,8 @@ export const housingPrices: HousingComplexPrice[] = [
     pricePerSquareMeter: 355000,
     banks: BANKS_ALL,
     surcharges: {
-      withoutDownPayment: 20000,
-      partialDownPayment: 20000,
+      withoutDownPayment: 25000,
+      partialDownPayment: 10000,
     },
   },
   {
@@ -300,8 +300,8 @@ export const housingPrices: HousingComplexPrice[] = [
     pricePerSquareMeter: 300000,
     banks: BANKS_ALL,
     surcharges: {
-      withoutDownPayment: 20000,
-      partialDownPayment: 20000,
+      withoutDownPayment: 25000,
+      partialDownPayment: 10000,
     },
   },
   {
@@ -310,8 +310,8 @@ export const housingPrices: HousingComplexPrice[] = [
     pricePerSquareMeter: 290000,
     banks: BANKS_ALL,
     surcharges: {
-      withoutDownPayment: 20000,
-      partialDownPayment: 20000,
+      withoutDownPayment: 25000,
+      partialDownPayment: 10000,
     },
   },
 ];
