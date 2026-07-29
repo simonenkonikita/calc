@@ -307,7 +307,7 @@ export const housingPrices: HousingComplexPrice[] = [
     pricePerSquareMeter: 300000,
     banks: BANKS_ALL,
     surcharges: {
-      withoutDownPayment: 25000,
+      withoutDownPayment: 30000,
       partialDownPayment: 10000,
     },
   },
@@ -317,7 +317,7 @@ export const housingPrices: HousingComplexPrice[] = [
     pricePerSquareMeter: 290000,
     banks: BANKS_ALL,
     surcharges: {
-      withoutDownPayment: 25000,
+      withoutDownPayment: 40000,
       partialDownPayment: 10000,
     },
   },
