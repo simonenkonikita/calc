@@ -55,7 +55,7 @@ export const DOMRF_OFFERS: BankOffer[] = [
     shortRate: 10,
     subsidyPercent: 18.54,
     minPVPercent: MIN_PV_PERCENT,
-    durationMonths: 24,
+    durationMonths: 60,
     subsidyCalculationMethod: "standard",
   },
 ];
