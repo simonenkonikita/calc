@@ -1,0 +1,36 @@
+/* src/components/NoResults/NoResults.css */
+.no-results {
+  text-align: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  margin: 1rem 0;
+}
+
+.no-results p {
+  color: #6b7280;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.no-results button {
+  padding: 0.5rem 1rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background 0.2s;
+}
+
+.no-results button:hover {
+  background: #5b6fc7;
+}
+
+@media (max-width: 768px) {
+  .no-results {
+    padding: 2rem;
+  }
+}

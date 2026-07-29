@@ -1,0 +1,35 @@
+.select-all-btn {
+  padding: 0.4rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.select-all-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.select-all-btn:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 768px) {
+  .select-all-btn {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .select-all-btn {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.8rem;
+  }
+}

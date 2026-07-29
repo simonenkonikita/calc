@@ -1,0 +1,152 @@
+/* ResultsSection.css - в стиле FormSection */
+
+/* ============================================================
+   ОСНОВНОЙ КОНТЕЙНЕР
+   ============================================================ */
+.results-calc-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+/* ============================================================
+   БЛОК РЕЗУЛЬТАТОВ
+   ============================================================ */
+.results-calc-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.results-calc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #667eea;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ============================================================
+   ЗАГОЛОВОК (как в FormSection)
+   ============================================================ */
+.results-calc-title {
+  color: #333;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  padding-bottom: 0.5rem;
+}
+
+/* ============================================================
+   ОСНОВНАЯ СУММА
+   ============================================================ */
+.results-calc-value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #2563eb;
+  padding: 0.5rem 0 0.75rem 0;
+}
+
+/* ============================================================
+   ДЕТАЛИ (в стиле полей FormSection)
+   ============================================================ */
+.results-calc-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+}
+
+.results-calc-detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.results-calc-detail-item:last-child {
+  border-bottom: none;
+}
+
+/* ============================================================
+   ЛЕЙБЛЫ (как в FormSection)
+   ============================================================ */
+.detail-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #555;
+}
+
+/* ============================================================
+   ЗНАЧЕНИЯ
+   ============================================================ */
+.detail-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.detail-percent {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #6b7280;
+  margin-left: 0.25rem;
+}
+
+/* ============================================================
+   АДАПТИВ
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .results-calc-section {
+    padding: 1rem;
+  }
+
+  .results-calc-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .results-calc-value {
+    font-size: 1.5rem;
+    padding: 0.35rem 0 0.5rem 0;
+  }
+
+  .detail-label {
+    font-size: 0.8125rem;
+  }
+
+  .detail-value {
+    font-size: 0.8125rem;
+  }
+
+  .results-calc-detail-item {
+    padding: 0.25rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .results-calc-section {
+    padding: 0.75rem;
+  }
+
+  .results-calc-value {
+    font-size: 1.25rem;
+  }
+
+  .detail-label {
+    font-size: 0.75rem;
+  }
+
+  .detail-value {
+    font-size: 0.75rem;
+  }
+
+  .results-calc-details {
+    gap: 0.35rem;
+  }
+}

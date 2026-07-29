@@ -2,65 +2,47 @@
 
 import { BankOffer } from "../../utils/types";
 import { URALSIB_BASE_RATES } from "../rates/uralsib";
-import { BASE_RATES, MIN_PV_PERCENT } from "./constants";
+import {
+  BANK_NAMES,
+  BASE_RATES,
+  MIN_PV_PERCENT,
+  PROGRAM_TYPES,
+} from "./constants";
 
 export const URALSIB_OFFERS: BankOffer[] = [
   {
-    bank: "Уралсиб",
+    bank: BANK_NAMES.URALSIB,
     program: "Базовая",
-    type: "full",
+    type: PROGRAM_TYPES.BASE,
     rate: BASE_RATES.URALSIB,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicRates: URALSIB_BASE_RATES,
   },
   {
-    bank: "Уралсиб",
+    bank: BANK_NAMES.URALSIB,
     program: "12,89% на весь срок",
-    type: "full",
+    type: PROGRAM_TYPES.FULL,
     rate: 12.89,
     subsidyPercent: 18.6,
     minPVPercent: MIN_PV_PERCENT,
   },
   {
-    bank: "Уралсиб",
+    bank: BANK_NAMES.URALSIB,
     program: "13,89% на весь срок",
-    type: "full",
+    type: PROGRAM_TYPES.FULL,
     rate: 13.89,
     subsidyPercent: 13.8,
     minPVPercent: MIN_PV_PERCENT,
   },
-  {
+  /*  {
     bank: "Уралсиб",
-    program: "7,89% на 12 мес",
-    type: "short",
-    rate: BASE_RATES.URALSIB,
-    shortRate: 8.19,
-    subsidyPercent: 9.4,
+    program: "Семейная ипотека (2 договора)",
+    type: "family",
+    rate: 6,
+    twoRate: 19.89,
+    subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
-    durationMonths: 12,
-    subsidyCalculationMethod: "standard",
-  },
-  {
-    bank: "Уралсиб",
-    program: "7,89% на 24 мес",
-    type: "short",
-    rate: BASE_RATES.URALSIB,
-    shortRate: 7.89,
-    subsidyPercent: 15.2,
-    minPVPercent: MIN_PV_PERCENT,
-    durationMonths: 24,
-    subsidyCalculationMethod: "standard",
-  },
-  {
-    bank: "Уралсиб",
-    program: "7,89% на 36 мес",
-    type: "short",
-    rate: BASE_RATES.URALSIB,
-    shortRate: 7.89,
-    subsidyPercent: 19.9,
-    minPVPercent: MIN_PV_PERCENT,
-    durationMonths: 36,
-    subsidyCalculationMethod: "standard",
-  },
+    isTwoContracts: true,
+  }, */
 ];

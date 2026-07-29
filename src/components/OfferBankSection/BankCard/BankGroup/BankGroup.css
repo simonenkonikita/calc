@@ -1,0 +1,48 @@
+/* src/components/BankGroup/BankGroup.css */
+.bank-group {
+  margin-bottom: 2.5rem;
+}
+
+.bank-group-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 0.75rem;
+  color: white;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.bank-group-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.bank-group-count {
+  font-size: 0.875rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  flex-shrink: 0;
+}
+
+.bank-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .bank-group-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .bank-group-title {
+    font-size: 1rem;
+  }
+}

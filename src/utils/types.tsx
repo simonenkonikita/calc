@@ -22,6 +22,11 @@ export interface HousingComplexPrice {
   complexName: string;
   apartmentType: string;
   pricePerSquareMeter: number;
+  banks?: string[];
+  surcharges?: {
+    withoutDownPayment: number;
+    partialDownPayment: number;
+  };
 }
 
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========
@@ -63,7 +68,13 @@ export interface OfferBankSectionProps {
 }
 
 // ========== БАНКОВСКИЕ ПРОГРАММЫ (из JSON) ==========
-export type ProgramType = "full" | "short" | "family" | "it";
+export type ProgramType =
+  | "base"
+  | "full"
+  | "short"
+  | "family"
+  | "it"
+  | "tranche";
 
 export interface DynamicRateRule {
   // Для простых условий (JSON-совместимые)
@@ -78,6 +89,15 @@ export interface DynamicRateRule {
   rate?: number;
   priority?: number;
   description?: string;
+  // 🔥 НОВЫЕ ПОЛЯ ДЛЯ ПОРОГОВОЙ ЛОГИКИ
+  minAmount?: number;
+  /** Максимальная сумма для диапазона (для пороговой логики) */
+  maxAmount?: number;
+  tolerance?: number;
+  /** Коэффициент погрешности для этого правила (переопределяет глобальный) */
+  toleranceType?: "fixed" | "percent";
+  /** Стратегия округления для этого правила */
+  roundingStrategy?: "up" | "down";
 }
 
 export interface BankOffer {
@@ -95,6 +115,25 @@ export interface BankOffer {
   subsidyCalculationMethod?: "onlyPercent" | "standard";
   dynamicRates?: DynamicRateRule[];
   dynamicSubsidyPercent?: DynamicRateRule[];
+  isTranche?: boolean;
+  trancheFirstPercent?: number; // % от стоимости объекта для первого транша (например, 19.9%)
+  trancheSecondDate?: string; // дата выдачи второго транша (например, "2027-02-01")
+  /** Глобальный коэффициент погрешности (по умолчанию 100000) */
+  thresholdTolerance?: number;
+  thresholdToleranceType?: "fixed" | "percent";
+  /** Глобальная стратегия округления (по умолчанию 'up') */
+  roundingStrategy?: "up" | "down";
+  twoContractSubsidies?: DynamicRateRule[];
+  complexes?: string[];
+  minLoanTermYears?: number;
+}
+
+export interface TranchePaymentsResult {
+  firstTranchePayment: number;
+  secondTranchePayment: number;
+  monthlyPayment: number;
+  trancheSecondDate?: string | null;
+  monthsUntilSecondTranche?: number;
 }
 
 // ========== РЕЗУЛЬТАТ РАСЧЕТА ПО ОДНОЙ ПРОГРАММЕ ==========
@@ -138,8 +177,18 @@ export interface BankProgramResult {
   secondContractPayment: number;
   firstContractAmount?: number; // Сумма по первому договору
   secondContractAmount?: number; // Сумма по второму договору
+  secondContractSubsidyPercent?: number; // 🔥 НОВОЕ: субсидия по второму договору в %
+  secondContractSubsidyAmount?: number; // 🔥 НОВОЕ: сумма субсидии по второму договору
+  // ===== НОВЫЕ ПОЛЯ ДЛЯ ТРАНШЕВОЙ ИПОТЕКИ =====
+  isTranche?: boolean;
+  firstTrancheAmount?: number;
+  secondTrancheAmount?: number;
+  firstTranchePayment?: number;
+  secondTranchePayment?: number;
+  trancheSecondDate?: string; // ✅ ДОБАВИТЬ - дата выдачи второго транша
+  monthsUntilSecondTranche?: number; // ✅ ДОБАВИТЬ - количество месяцев до второго транша
+  minLoanTermYears?: number;
 }
-
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========
 export interface CalculatorResult {
   objectResult: {
@@ -193,9 +242,28 @@ export interface SubsidyPaymentResult {
 
 export interface MortgageAmountResult {
   mortgageAmount: number;
+  firstTrancheAmount?: number;
+  secondTrancheAmount?: number;
+  firstContractAmount?: number;
+  secondContractAmount?: number;
   isLimitExceeded?: boolean;
 }
 export interface DownAmountResult {
   downPaymentAmount: number;
   isNoSpecialMortgageMode: boolean;
+}
+
+export interface ThresholdAdjustmentResult {
+  /** Скорректированная сумма кредита */
+  adjustedAmount: number;
+  /** Скорректированный ПВ */
+  adjustedDownPayment: number;
+  /** Итоговая сумма в договоре */
+  contractAmount: number;
+  /** Название диапазона */
+  rangeName: string;
+  /** Была ли применена корректировка */
+  wasAdjusted: boolean;
+  /** Причина корректировки */
+  adjustmentReason?: string;
 }

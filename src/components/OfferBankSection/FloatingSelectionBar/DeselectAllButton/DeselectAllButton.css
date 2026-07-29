@@ -1,0 +1,45 @@
+/* src/components/DeselectAllButton/DeselectAllButton.css */
+.deselect-all-btn {
+  padding: 0.4rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.deselect-all-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.deselect-all-btn:active {
+  transform: scale(0.97);
+}
+
+.deselect-all-btn.danger {
+  color: #ff6b6b;
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+.deselect-all-btn.danger:hover {
+  background: rgba(255, 107, 107, 0.2);
+}
+
+@media (max-width: 768px) {
+  .deselect-all-btn {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .deselect-all-btn {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.8rem;
+  }
+}

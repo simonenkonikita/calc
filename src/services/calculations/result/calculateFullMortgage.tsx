@@ -1,4 +1,4 @@
-import { DEFAULT_MIN_PV_PERCENT } from "../../../utils/constants";
+import { DEFAULT_MIN_PV_PERCENT } from "../../../data/constants";
 import {
   CalculatorFormData,
   ObjectCalculationResult,
@@ -68,6 +68,7 @@ export const calculateFullMortgage = (
         formData.mortgageWithoutDownPayment,
         formData.mortgagePartialDownPayment,
         formData.area,
+        formData.complex,
       );
       bankResults.push(result);
     } catch (error) {

@@ -1,5 +1,7 @@
-// src/hooks/сoefficients/getDynamicSubsidy.ts
+// src/hooks/coefficients/getDynamicSubsidy.ts
+
 import { BankOffer, DynamicRateRule } from "../../../utils/types";
+import { getThresholdSubsidy } from "./getThresholdSubsidy";
 
 /**
  * Проверка условия правила
@@ -10,10 +12,20 @@ const checkCondition = (
   amount: number,
   term: number,
 ): boolean => {
+  // 1. Если есть conditionFn - используем её
   if (rule.conditionFn) {
     return rule.conditionFn(pv, amount, term);
   }
 
+  // 2. Если есть minAmount/maxAmount - проверяем диапазон
+  const minAmount = rule.minAmount ?? 0;
+  const maxAmount = rule.maxAmount ?? Infinity;
+
+  if (amount >= minAmount && amount < maxAmount) {
+    return true;
+  }
+
+  // 3. JSON-совместимые условия
   if (rule.type && rule.condition && rule.value !== undefined) {
     let actualValue: number;
     switch (rule.type) {
@@ -51,11 +63,6 @@ const checkCondition = (
 
 /**
  * Получение динамической субсидии
- * @param bankOffer - Предложение банка
- * @param pvPercent - Процент ПВ
- * @param mortgageAmount - Сумма кредита (для 2 договоров - сумма второго договора)
- * @param loanTerm - Срок кредита в годах
- * @returns Процент субсидии
  */
 export const getDynamicSubsidy = (
   bankOffer: BankOffer,
@@ -63,12 +70,36 @@ export const getDynamicSubsidy = (
   mortgageAmount: number,
   loanTerm: number = 30,
 ): number => {
-  // 🔥 2. Проверяем наличие dynamicSubsidyPercent
   if (
     bankOffer.dynamicSubsidyPercent &&
     bankOffer.dynamicSubsidyPercent.length > 0
   ) {
-    const sortedRules = [...bankOffer.dynamicSubsidyPercent].sort(
+    const rules = bankOffer.dynamicSubsidyPercent;
+
+    // 🔥 ПРОВЕРЯЕМ НАЛИЧИЕ ПОРОГОВЫХ ПРАВИЛ
+    const hasThresholdRules = rules.some(
+      (rule) => rule.minAmount !== undefined || rule.maxAmount !== undefined,
+    );
+
+    if (hasThresholdRules) {
+      // Используем пороговую логику с погрешностью
+      const globalTolerance = bankOffer.thresholdTolerance;
+      const globalToleranceType = bankOffer.thresholdToleranceType ?? "percent";
+
+      const subsidy = getThresholdSubsidy(
+        mortgageAmount,
+        rules,
+        globalTolerance,
+        globalToleranceType,
+      );
+
+      if (subsidy > 0) {
+        return subsidy;
+      }
+    }
+
+    // 🔥 ЕСЛИ ПОРОГОВАЯ ЛОГИКА НЕ СРАБОТАЛА - ИСПОЛЬЗУЕМ ОБЫЧНУЮ
+    const sortedRules = [...rules].sort(
       (a, b) => (b.priority || 0) - (a.priority || 0),
     );
 
@@ -83,6 +114,6 @@ export const getDynamicSubsidy = (
     }
   }
 
-  // 🔥 3. Если ничего не подошло - возвращаем базовую субсидию
-  return bankOffer.subsidyPercent;
+  // Если ничего не подошло - возвращаем базовую субсидию
+  return bankOffer.subsidyPercent ?? 0;
 };

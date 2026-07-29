@@ -1,4 +1,4 @@
-// src/hooks/payment/mortgageAmount/calculateTwoContractsCreditAmount.ts
+/* // src/hooks/payment/mortgageAmount/calculateTwoContractsCreditAmount.ts
 
 import { BankOffer, Variables } from "../../../../../utils/types";
 
@@ -98,3 +98,4 @@ export const calculateTwoContractsCreditAmount = (
     totalCredit: Math.ceil(totalCredit),
   };
 };
+ */

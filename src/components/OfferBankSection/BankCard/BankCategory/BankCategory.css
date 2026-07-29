@@ -1,0 +1,44 @@
+/* src/components/BankCategory/BankCategory.css */
+.category-group {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: #f9fafb;
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.category-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.banks-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+}
+
+@media (max-width: 768px) {
+  .banks-list {
+    grid-template-columns: 1fr;
+    padding: 0.75rem;
+  }
+
+  .category-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}

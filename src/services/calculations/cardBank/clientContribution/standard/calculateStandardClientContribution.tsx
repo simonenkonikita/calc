@@ -4,41 +4,56 @@ import {
   Variables,
 } from "../../../../../utils/types";
 
-interface CalculateClientContributionParams {
+interface clientContribution {
   objectCost: number; // $B$7
+  downPayment: number;
+  remainingAmount: number;
   downPaymentAmount: number; // D32 (сумма ПВ)
   ownFunds: number; // E32 (собственные средства)
   userDownPaymentPercent: number; // $B$8
   bankOffer: BankOffer;
   variables: Variables;
-  mortgageWithoutDownPayment: boolean; // $L$10 (не используется в расчете, но может понадобиться)
+  isSpecialMortgageMode: boolean; // $L$10 (не используется в расчете, но может понадобиться)
   coefficients: BankCoefficients;
 }
 
-export const calculateClientContribution = (
-  params: CalculateClientContributionParams,
-): number => {
+export const clientContribution = (params: clientContribution): number => {
   const {
     objectCost,
+    downPayment,
+    remainingAmount,
     downPaymentAmount,
     ownFunds,
     userDownPaymentPercent,
     bankOffer,
     variables,
+    isSpecialMortgageMode,
     coefficients,
   } = params;
 
-  const limit = bankOffer.excessLimit
-    ? variables.maxFamilyMortgageSum || 15000000
-    : variables.familyMortgageLimit || 6000000;
+  const limit = variables.familyMortgageLimit || 6000000;
+  const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
-  const minPVPercent = coefficients.requiredCoeffWithMinPV; // Сбербанк!J16
+  const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
+  const cafsummCred = 1 - userDownPaymentPercent / 100;
 
-  const summCredit =
-    (objectCost / minPVPercent) * (1 - userDownPaymentPercent / 100);
-  const isWithinLimit = summCredit <= limit;
+  const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;
+  const summCreditWithoutPV =
+    remainingAmount * coefficients.requiredCoeffWithoutPV +
+    objectCost -
+    downPayment;
 
+  let summCredit: number;
+  let isWithinLimit: boolean;
   let clientContribution: number;
+
+  if (isSpecialMortgageMode) {
+    summCredit = summCreditWithoutPV * cafsummCred;
+    isWithinLimit = summCredit <= maxLimit;
+  } else {
+    summCredit = summCreditMinPV * cafsummCred;
+    isWithinLimit = summCredit <= maxLimit;
+  }
 
   if (isWithinLimit) {
     clientContribution = downPaymentAmount - ownFunds;
