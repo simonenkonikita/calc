@@ -34,6 +34,7 @@ export const DOMRF_OFFERS: BankOffer[] = [
     subsidyPercent: 16.31,
     minPVPercent: MIN_PV_PERCENT,
     durationMonths: 12,
+    minLoanTermYears: 15,
     subsidyCalculationMethod: "standard",
   },
   {
@@ -45,6 +46,7 @@ export const DOMRF_OFFERS: BankOffer[] = [
     subsidyPercent: 23.66,
     minPVPercent: MIN_PV_PERCENT,
     durationMonths: 24,
+    minLoanTermYears: 15,
     subsidyCalculationMethod: "standard",
   },
   {
@@ -56,6 +58,7 @@ export const DOMRF_OFFERS: BankOffer[] = [
     subsidyPercent: 18.54,
     minPVPercent: MIN_PV_PERCENT,
     durationMonths: 60,
+    minLoanTermYears: 15,
     subsidyCalculationMethod: "standard",
   },
 ];
