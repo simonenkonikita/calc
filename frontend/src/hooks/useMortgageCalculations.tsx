@@ -1,45 +1,16 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useEffect, useCallback, useMemo } from "react";
+// hooks/useMortgageCalculator.ts
+import { useState, useEffect, useCallback, useRef } from "react";
 import type {
   CalculatorFormData,
   ObjectCalculationResult,
   BankProgramResult,
 } from "../utils/types";
-import { bankOffers } from "../data/banks";
-import { housingPrices } from "../data/complexPrice/complexPriceData";
-import { variables } from "../data/limitdDate";
-import { calculateFullMortgage } from "../services/calculations/result/calculateFullMortgage";
+import { api } from "../services/api";
 import { formatMoney } from "../utils/formatMoney";
 import {
   DEFAULT_LOAN_TERM_YEARS,
   DEFAULT_MIN_PV_PERCENT,
-  PRICE_PER_SQUARE_METER_DEFAULT,
 } from "../data/constants";
-import { filterBankOffersByComplex } from "../utils/filterBankOffers";
-import { getMortgageSurcharge } from "../utils/mortgageSurcharges";
-
-// Функция для получения цены за м2
-const getPricePerSquareMeter = (
-  complexName: string,
-  apartmentType: string,
-): number => {
-  if (!complexName || !apartmentType) {
-    console.warn("Не указан ЖК или тип квартиры");
-    return PRICE_PER_SQUARE_METER_DEFAULT;
-  }
-
-  const found = housingPrices.find(
-    (item) =>
-      item.complexName === complexName && item.apartmentType === apartmentType,
-  );
-
-  if (!found) {
-    console.warn(`Цена не найдена для ${complexName} - ${apartmentType}`);
-    return PRICE_PER_SQUARE_METER_DEFAULT;
-  }
-
-  return found.pricePerSquareMeter;
-};
 
 export const useMortgageCalculator = () => {
   const [formData, setFormData] = useState<CalculatorFormData>({
@@ -69,104 +40,87 @@ export const useMortgageCalculator = () => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ============================================================
-  // 1. ЦЕНА ЗА М²
-  // ============================================================
-  const basePricePerM2 = useMemo(() => {
-    if (!formData.complex || !formData.apartmentType) return null;
-    return getPricePerSquareMeter(formData.complex, formData.apartmentType);
-  }, [formData.complex, formData.apartmentType]);
+  // Для отмены предыдущих запросов
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // ============================================================
-  // 2. 🔥 НАЦЕНКА (С УЧЁТОМ ТИПА КВАРТИРЫ)
-  // ============================================================
-  const surchargePerM2 = useMemo(() => {
-    if (!formData.complex || !formData.apartmentType) return 0;
-
-    return getMortgageSurcharge(
-      formData.complex,
-      formData.apartmentType,
-      formData.mortgageWithoutDownPayment,
-      formData.mortgagePartialDownPayment,
-    );
-  }, [
-    formData.complex,
-    formData.apartmentType,
-    formData.mortgageWithoutDownPayment,
-    formData.mortgagePartialDownPayment,
-  ]);
-
-  // ============================================================
-  // 3. ФИНАЛЬНАЯ ЦЕНА
-  // ============================================================
-  const finalPricePerM2 = useMemo(() => {
-    if (basePricePerM2 === null) return null;
-    if (
-      formData.mortgageWithoutDownPayment ||
-      formData.mortgagePartialDownPayment
-    ) {
-      return basePricePerM2 + surchargePerM2;
-    }
-    return basePricePerM2;
-  }, [
-    basePricePerM2,
-    formData.mortgageWithoutDownPayment,
-    formData.mortgagePartialDownPayment,
-    surchargePerM2,
-  ]);
-
-  // ============================================================
-  // 4. 🔥 ФИЛЬТРУЕМ БАНКОВСКИЕ ПРЕДЛОЖЕНИЯ ПО ЖК
-  // ============================================================
-  const filteredBankOffers = useMemo(() => {
-    if (!formData.complex || !formData.apartmentType) {
-      return bankOffers;
-    }
-
-    return filterBankOffersByComplex({
-      bankOffers,
-      complexName: formData.complex,
-      apartmentType: formData.apartmentType,
-      housingPrices,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.complex, formData.apartmentType]);
-
-  // ============================================================
-  // 5. 🔥 РАСЧЕТ С ИСПОЛЬЗОВАНИЕМ ОТФИЛЬТРОВАННЫХ ПРЕДЛОЖЕНИЙ
+  // РАСЧЕТ ЧЕРЕЗ API
   // ============================================================
   const calculateResults = useCallback(async () => {
+    // Отменяем предыдущий запрос, если он ещё идёт
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
     setIsCalculating(true);
     setError(null);
 
-    try {
-      const calculated = calculateFullMortgage(
-        formData,
-        filteredBankOffers, // 🔥 Используем отфильтрованные предложения
-        variables,
-        finalPricePerM2 ?? PRICE_PER_SQUARE_METER_DEFAULT,
-      );
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
-      setResults(calculated);
-      setSelectedOfferIndex(null);
+    try {
+      const response = await api.calculate(formData);
+
+      // Если запрос был отменён — игнорируем результат
+      if (controller.signal.aborted) return;
+
+      if (response.success) {
+        setResults(response.data);
+        setSelectedOfferIndex(null);
+      } else {
+        throw new Error(response.error || "Unknown error");
+      }
     } catch (err) {
+      // Игнорируем ошибки отменённых запросов
+      if (err instanceof Error && err.name === "AbortError") {
+        return;
+      }
+
       console.error("Ошибка при расчёте:", err);
-      setError("Произошла ошибка при расчёте. Попробуйте изменить параметры.");
+      setError(
+        err instanceof Error ? err.message : "Произошла ошибка при расчёте",
+      );
       setResults(null);
     } finally {
-      setIsCalculating(false);
+      if (!controller.signal.aborted) {
+        setIsCalculating(false);
+      }
     }
-  }, [formData, filteredBankOffers, finalPricePerM2]);
+  }, [formData]);
 
   // ============================================================
-  // 6. ЗАПУСК РАСЧЕТА
+  // ДЕБАУНС ДЛЯ ЗАПРОСОВ (чтобы не дёргать API при каждом нажатии)
   // ============================================================
-  useEffect(() => {
-    calculateResults();
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debouncedCalculate = useCallback(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      calculateResults();
+    }, 300); // Задержка 300ms
   }, [calculateResults]);
 
   // ============================================================
-  // 7. ОБРАБОТЧИКИ
+  // АВТОЗАПУСК РАСЧЕТА ПРИ ИЗМЕНЕНИИ ФОРМЫ
+  // ============================================================
+  useEffect(() => {
+    debouncedCalculate();
+
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [debouncedCalculate]);
+
+  // ============================================================
+  // ОБРАБОТЧИКИ ИЗМЕНЕНИЙ
   // ============================================================
   const handleInputChange = useCallback(
     <K extends keyof CalculatorFormData>(
@@ -176,16 +130,19 @@ export const useMortgageCalculator = () => {
       setFormData((prev) => {
         let newData = { ...prev, [field]: value };
 
+        // Если включена "ипотека без ПВ"
         if (field === "mortgageWithoutDownPayment" && value === true) {
           newData.downPaymentPercent = DEFAULT_MIN_PV_PERCENT;
           newData.mortgagePartialDownPayment = false;
         }
 
+        // Если включена "частичная ипотека"
         if (field === "mortgagePartialDownPayment" && value === true) {
           newData.downPaymentPercent = DEFAULT_MIN_PV_PERCENT;
           newData.mortgageWithoutDownPayment = false;
         }
 
+        // Если меняют ПВ, а включены спецрежимы — блокируем
         if (
           field === "downPaymentPercent" &&
           (newData.mortgageWithoutDownPayment ||
@@ -199,6 +156,7 @@ export const useMortgageCalculator = () => {
           };
         }
 
+        // Если ручной ввод ПВ — сбрасываем процент
         if (
           field === "manualDownPayment" &&
           typeof value === "number" &&
@@ -233,7 +191,7 @@ export const useMortgageCalculator = () => {
   );
 
   // ============================================================
-  // 8. ВОЗВРАТ
+  // ВОЗВРАТ
   // ============================================================
   const offersCount = results?.bankResults.length ?? 0;
 
@@ -244,7 +202,6 @@ export const useMortgageCalculator = () => {
     offersCount,
     isCalculating,
     error,
-    filteredBankOffers,
     handleInputChange,
     handleSelectOffer,
     formatMoney,
