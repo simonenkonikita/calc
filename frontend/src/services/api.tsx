@@ -57,4 +57,20 @@ export const api = {
     const response = await fetch(`${API_URL}/calculator/tranche-data`);
     return response.json();
   },
+
+  async getProjects() {
+    const response = await fetch(`${API_URL}/projects`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  },
+
+  async getProjectById(id: string) {
+    const response = await fetch(`${API_URL}/projects/${id}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  },
 };

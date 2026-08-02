@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import calculatorRoutes from "./routes/calculator.routes";
 import banksRoutes from "./routes/banks.routes";
 import limitsRoutes from "./routes/limits.routes";
+import { projectsRoutes } from "./routes/projects.routes";
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.get("/health", (req, res) => {
 app.use("/api/calculator", calculatorRoutes);
 app.use("/api/banks", banksRoutes);
 app.use("/api/limits", limitsRoutes);
+app.use("/api/projects", projectsRoutes);
 
 // Error handling
 app.use(

@@ -1,18 +1,8 @@
 // src/data/projectInfo.ts
 
-export interface ProjectInfo {
-  id: string;
-  name: string;
-  status: "строится" | "сдан" | "проект";
-  statusIcon: string;
-  priceInfo: string;
-  paymentTerms: string[];
-  promotions: string[];
-  banks: string[];
-  specialOffers?: string[];
-  description?: string;
-  materialsLink?: string;
-}
+import { ProjectInfo } from "../types/types";
+
+
 
 export const PROJECTS_INFO: ProjectInfo[] = [
   {
@@ -70,7 +60,7 @@ export const PROJECTS_INFO: ProjectInfo[] = [
   },
   {
     id: "sady_2",
-    name: "ЖК Сады у моря, корпус №2",
+    name: "ЖК Сады у моря 2",
     status: "сдан",
     statusIcon: "✅",
     priceInfo: "130 000 ₽/м² - любая квартира",
@@ -92,7 +82,7 @@ export const PROJECTS_INFO: ProjectInfo[] = [
   },
   {
     id: "sady_3",
-    name: "ЖК Сады у моря, корпус №3",
+    name: "ЖК Сады у моря 3",
     status: "строится",
     statusIcon: "🏗️",
     priceInfo: "140 000 ₽/м² - все типы",

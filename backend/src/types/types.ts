@@ -29,6 +29,21 @@ export interface HousingComplexPrice {
   };
 }
 
+// ==========  ИНФОРМАЦИЯ ПО жк ==========
+export interface ProjectInfo {
+  id: string;
+  name: string;
+  status: "строится" | "сдан" | "проект";
+  statusIcon: string;
+  priceInfo: string;
+  paymentTerms: string[];
+  promotions: string[];
+  banks: string[];
+  specialOffers?: string[];
+  description?: string;
+  materialsLink?: string;
+}
+
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========
 export interface CalculatorFormData {
   // Параметры объекта

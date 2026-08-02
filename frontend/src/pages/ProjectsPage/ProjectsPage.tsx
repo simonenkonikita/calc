@@ -1,13 +1,19 @@
 // src/pages/ProjectsPage/ProjectsPage.tsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./ProjectsPage.css";
-import { ProjectInfo, PROJECTS_INFO } from "../../data/projectInfo";
+import { useProjects, ProjectInfo } from "../../hooks/useProjects";
 
 export const ProjectsPage: React.FC = () => {
-  const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(
-    PROJECTS_INFO[0] || null,
-  );
+  const { projects, loading, error } = useProjects();
+  const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(null);
+
+  // Устанавливаем первый проект при загрузке
+  useEffect(() => {
+    if (projects.length > 0 && !selectedProject) {
+      setSelectedProject(projects[0]);
+    }
+  }, [projects]);
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -31,6 +37,42 @@ export const ProjectsPage: React.FC = () => {
     }
   };
 
+  // Состояние загрузки
+  if (loading) {
+    return (
+      <div className="projects-page">
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Загрузка проектов...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Состояние ошибки
+  if (error) {
+    return (
+      <div className="projects-page">
+        <div className="error-state">
+          <p>❌ {error}</p>
+          <button onClick={() => window.location.reload()}>Повторить</button>
+        </div>
+      </div>
+    );
+  }
+
+  // Нет проектов
+  if (projects.length === 0) {
+    return (
+      <div className="projects-page">
+        <div className="empty-state">
+          <div className="empty-icon">🏗️</div>
+          <p>Нет доступных проектов</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="projects-page">
       <div className="projects-layout">
@@ -38,10 +80,10 @@ export const ProjectsPage: React.FC = () => {
           <div className="projects-list-card">
             <div className="projects-list-header">
               <h2>Проекты</h2>
-              <span className="count">{PROJECTS_INFO.length}</span>
+              <span className="count">{projects.length}</span>
             </div>
             <div className="projects-list-items">
-              {PROJECTS_INFO.map((project) => (
+              {projects.map((project) => (
                 <div
                   key={project.id}
                   className={`project-item ${selectedProject?.id === project.id ? "active" : ""}`}
