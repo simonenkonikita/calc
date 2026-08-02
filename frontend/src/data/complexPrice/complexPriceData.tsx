@@ -41,7 +41,7 @@ const BANKS_V2 = ["Сбербанк"];
 // Все ЖК
 export const ALL_COMPLEXES = [
   "ЖК Сады у моря 3",
-  "ЖК Сады у моря 2 (Акция 130 000)",
+  "ЖК Сады у моря 2",
   "ЖК Лермонтов",
   "ЖК Горы здесь",
   "ЖК Два адмирала",
@@ -53,7 +53,7 @@ export const ALL_COMPLEXES = [
 // ЖК для семейной ипотеки
 export const COMPLEXES_FAMILY = [
   "ЖК Сады у моря 3",
-  "ЖК Сады у моря 2 (Акция 130 000)",
+  "ЖК Сады у моря 2",
   "ЖК Два адмирала",
   "ЖК Лермонтов",
   "ЖК Горы здесь",
@@ -63,7 +63,7 @@ export const COMPLEXES_FAMILY = [
 // ЖК для ИТ ипотеки
 export const COMPLEXES_IT = [
   "ЖК Сады у моря 3",
-  "ЖК Сады у моря 2 (Акция 130 000)",
+  "ЖК Сады у моря 2",
   "ЖК Два адмирала",
   "ЖК Лермонтов",
   "ЖК Горы здесь",
@@ -83,7 +83,7 @@ export const TRANCHE_SECOND_DATE_BY_COMPLEX: Record<string, string> = {
 // ЖК, где траншевая ипотека НЕ доступна
 export const TRANCHE_UNAVAILABLE_COMPLEXES = [
   "ЖК Сады у моря 3",
-  "ЖК Сады у моря 2 (Акция 130 000)",
+  "ЖК Сады у моря 2",
   "ЖК Два адмирала",
   "ЖК Лермонтов",
   "ГК Морелло",
@@ -132,7 +132,7 @@ export const housingPrices: HousingComplexPrice[] = [
   // ЖК Сады у моря 2 (Акция 130 000)
   // ============================================================
   {
-    complexName: "ЖК Сады у моря 2 (Акция 130 000)",
+    complexName: "ЖК Сады у моря 2",
     apartmentType: "Студия",
     pricePerSquareMeter: 130000,
     banks: BANKS_ALL,
@@ -142,7 +142,7 @@ export const housingPrices: HousingComplexPrice[] = [
     },
   },
   {
-    complexName: "ЖК Сады у моря 2 (Акция 130 000)",
+    complexName: "ЖК Сады у моря 2",
     apartmentType: "Однокомнатная квартира",
     pricePerSquareMeter: 130000,
     banks: BANKS_ALL,
@@ -152,7 +152,7 @@ export const housingPrices: HousingComplexPrice[] = [
     },
   },
   {
-    complexName: "ЖК Сады у моря 2 (Акция 130 000)",
+    complexName: "ЖК Сады у моря 2",
     apartmentType: "Двухкомнатная квартира",
     pricePerSquareMeter: 130000,
     banks: BANKS_ALL,

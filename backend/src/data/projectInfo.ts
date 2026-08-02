@@ -1,4 +1,4 @@
-// src/data/projectInfo.ts
+/* // src/data/projectInfo.ts
 
 import { ProjectInfo } from "../types/types";
 
@@ -174,3 +174,4 @@ export const PROJECTS_INFO: ProjectInfo[] = [
     ],
   },
 ];
+ */

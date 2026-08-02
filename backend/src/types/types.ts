@@ -19,28 +19,22 @@ export interface Variables {
 
 // ========== ЦЕНЫ НА ЖК ==========
 export interface HousingComplexPrice {
+  id: string;
   complexName: string;
+  status: "строится" | "сдан" | "проект";
   apartmentType: string;
+  statusIcon: string;
+  description?: string;
   pricePerSquareMeter: number;
   banks?: string[];
   surcharges?: {
     withoutDownPayment: number;
     partialDownPayment: number;
   };
-}
-
-// ==========  ИНФОРМАЦИЯ ПО жк ==========
-export interface ProjectInfo {
-  id: string;
-  name: string;
-  status: "строится" | "сдан" | "проект";
-  statusIcon: string;
-  priceInfo: string;
+  priceInfo?: string;
   paymentTerms: string[];
   promotions: string[];
-  banks: string[];
   specialOffers?: string[];
-  description?: string;
   materialsLink?: string;
 }
 

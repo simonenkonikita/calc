@@ -13,7 +13,7 @@ export const ProjectsPage: React.FC = () => {
     if (projects.length > 0 && !selectedProject) {
       setSelectedProject(projects[0]);
     }
-  }, [projects]);
+  }, [projects, selectedProject]);
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -141,6 +141,37 @@ export const ProjectsPage: React.FC = () => {
                     {selectedProject.priceInfo}
                   </div>
                 </div>
+
+                {/* 🔥 Добавляем блок с типами квартир и ценами */}
+                {selectedProject.apartmentTypes && selectedProject.apartmentTypes.length > 0 && (
+                  <div className="details-section">
+                    <div className="section-label">🏠 Типы квартир</div>
+                    <div className="apartment-types-grid">
+                      {selectedProject.apartmentTypes.map((type, index) => (
+                        <div key={index} className="apartment-type-item">
+                          <span className="type-name">{type.type}</span>
+                          <span className="type-price">
+                            {type.pricePerSquareMeter.toLocaleString()} ₽/м²
+                          </span>
+                          {type.surcharges && (
+                            <div className="type-surcharges">
+                              {type.surcharges.withoutDownPayment > 0 && (
+                                <span className="surcharge-badge">
+                                  Без ПВ: +{type.surcharges.withoutDownPayment.toLocaleString()} ₽/м²
+                                </span>
+                              )}
+                              {type.surcharges.partialDownPayment > 0 && (
+                                <span className="surcharge-badge">
+                                  Частичный ПВ: +{type.surcharges.partialDownPayment.toLocaleString()} ₽/м²
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="details-section">
                   <div className="section-label">💳 Условия оплаты</div>
