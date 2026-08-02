@@ -9,6 +9,7 @@ import calculatorRoutes from "./routes/calculator.routes";
 import banksRoutes from "./routes/banks.routes";
 import limitsRoutes from "./routes/limits.routes";
 import { projectsRoutes } from "./routes/projects.routes";
+import configRoutes from "./routes/config";
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use("/api/calculator", calculatorRoutes);
 app.use("/api/banks", banksRoutes);
 app.use("/api/limits", limitsRoutes);
 app.use("/api/projects", projectsRoutes);
+app.use("/api", configRoutes);
 
 // Error handling
 app.use(

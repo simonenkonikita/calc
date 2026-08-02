@@ -1,3 +1,5 @@
+// Типы данных
+
 // Расширенный тип для хранения оригинального индекса
 export interface BankProgramResultWithIndex extends BankProgramResult {
   _originalIndex: number;
@@ -17,10 +19,61 @@ export interface Variables {
 
 // ========== ЦЕНЫ НА ЖК ==========
 export interface HousingComplexPrice {
+  id: string;
   complexName: string;
+  status: string;
   apartmentType: string;
+  statusIcon: string;
+  description?: string;
   pricePerSquareMeter: number;
   banks?: string[];
+  surcharges?: {
+    withoutDownPayment: number;
+    partialDownPayment: number;
+  };
+  paymentTerms: string[];
+  promotions: string[];
+  specialOffers?: string[];
+  materialsLink?: string;
+}
+
+export interface ApartmentType {
+  type: string;
+  pricePerSquareMeter: number;
+  surcharges?: {
+    withoutDownPayment: number;
+    partialDownPayment: number;
+  };
+}
+
+export interface ProjectInfo {
+  id: string;
+  name: string;
+  status: string;
+  statusIcon: string;
+  description?: string;
+  priceInfo: string;
+  paymentTerms: string[];
+  promotions: string[];
+  banks: string[];
+  specialOffers?: string[];
+  materialsLink?: string;
+  apartmentTypes: ApartmentType[];
+}
+
+export interface RawProjectData {
+  id: string;
+  complexName: string;
+  status: string;
+  statusIcon: string;
+  description?: string;
+  priceInfo: string;
+  paymentTerms: string[];
+  promotions: string[];
+  banks: string[];
+  specialOffers?: string[];
+  apartmentType: string;
+  pricePerSquareMeter: number;
   surcharges?: {
     withoutDownPayment: number;
     partialDownPayment: number;
@@ -264,4 +317,8 @@ export interface ThresholdAdjustmentResult {
   wasAdjusted: boolean;
   /** Причина корректировки */
   adjustmentReason?: string;
+}
+
+export interface ConfigData {
+  depositAmount: number;
 }

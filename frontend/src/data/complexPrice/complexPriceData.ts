@@ -1,4 +1,4 @@
-import { HousingComplexPrice } from "../../types/types";
+import { HousingComplexPrice } from "../../utils/types";
 import {
   COMPLEX_IDS,
   COMPLEX_NAMES,
@@ -11,6 +11,9 @@ import { PAYMENT_TERMS } from "./PAYMENT_TERMS";
 import { PROMOTIONS } from "./PROMOTIONS";
 import { SPECIAL_OFFERS } from "./SPECIAL_OFFERS";
 
+// ============================================================
+// 🔥 ЕДИНАЯ КОНФИГУРАЦИЯ ЖК (ЦЕНЫ + НАЦЕНКИ + БАНКИ)
+// ============================================================
 export const housingPrices: HousingComplexPrice[] = [
   // ============================================================
   // ЖК Сады у моря 3

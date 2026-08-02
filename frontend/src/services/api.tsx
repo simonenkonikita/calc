@@ -1,3 +1,5 @@
+import { ConfigData } from "../utils/types";
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 
 export const api = {
@@ -72,5 +74,22 @@ export const api = {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     return response.json();
+  },
+
+  getConfig: async (): Promise<{
+    success: boolean;
+    data?: ConfigData;
+    error?: string;
+  }> => {
+    try {
+      const response = await fetch("/api/config");
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        error: "Failed to load config",
+      };
+    }
   },
 };

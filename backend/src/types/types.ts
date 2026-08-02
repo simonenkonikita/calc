@@ -21,7 +21,7 @@ export interface Variables {
 export interface HousingComplexPrice {
   id: string;
   complexName: string;
-  status: "строится" | "сдан" | "проект";
+  status: string;
   apartmentType: string;
   statusIcon: string;
   description?: string;
@@ -31,11 +31,53 @@ export interface HousingComplexPrice {
     withoutDownPayment: number;
     partialDownPayment: number;
   };
-  priceInfo?: string;
   paymentTerms: string[];
   promotions: string[];
   specialOffers?: string[];
   materialsLink?: string;
+}
+
+export interface ApartmentType {
+  type: string;
+  pricePerSquareMeter: number;
+  surcharges?: {
+    withoutDownPayment: number;
+    partialDownPayment: number;
+  };
+}
+
+export interface ProjectInfo {
+  id: string;
+  name: string;
+  status: string;
+  statusIcon: string;
+  description?: string;
+  priceInfo: string;
+  paymentTerms: string[];
+  promotions: string[];
+  banks: string[];
+  specialOffers?: string[];
+  materialsLink?: string;
+  apartmentTypes: ApartmentType[];
+}
+
+export interface RawProjectData {
+  id: string;
+  complexName: string;
+  status: string;
+  statusIcon: string;
+  description?: string;
+  priceInfo: string;
+  paymentTerms: string[];
+  promotions: string[];
+  banks: string[];
+  specialOffers?: string[];
+  apartmentType: string;
+  pricePerSquareMeter: number;
+  surcharges?: {
+    withoutDownPayment: number;
+    partialDownPayment: number;
+  };
 }
 
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========

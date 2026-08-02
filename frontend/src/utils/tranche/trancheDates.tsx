@@ -5,7 +5,7 @@
 import {
   TRANCHE_SECOND_DATE_BY_COMPLEX,
   TRANCHE_UNAVAILABLE_COMPLEXES,
-} from "../../data/complexPrice/complexPriceData";
+} from "../../data/complexPrice/CONSTRUCTION";
 import {} from "../../data/constants";
 
 /**

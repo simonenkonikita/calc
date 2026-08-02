@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import "./ProjectsPage.css";
-import { useProjects, ProjectInfo } from "../../hooks/useProjects";
+import { useProjects } from "../../hooks/useProjects";
+import { ProjectInfo } from "../../utils/types";
 
 export const ProjectsPage: React.FC = () => {
   const { projects, loading, error } = useProjects();
-  const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(
+    null,
+  );
 
-  // Устанавливаем первый проект при загрузке
   useEffect(() => {
     if (projects.length > 0 && !selectedProject) {
       setSelectedProject(projects[0]);
@@ -37,7 +39,45 @@ export const ProjectsPage: React.FC = () => {
     }
   };
 
-  // Состояние загрузки
+  // 🔥 ФОРМИРУЕМ СПИСОК ТИПОВ КВАРТИР С ЦЕНАМИ
+  const getPriceInfo = (project: ProjectInfo): React.ReactNode => {
+    if (!project.apartmentTypes || project.apartmentTypes.length === 0) {
+      return "—";
+    }
+
+    return (
+      <div className="price-types-list">
+        {project.apartmentTypes.map((apt, index) => {
+          const basePrice = apt.pricePerSquareMeter;
+          const withoutPV = apt.surcharges?.withoutDownPayment || 0;
+          const partialPV = apt.surcharges?.partialDownPayment || 0;
+
+          return (
+            <div key={index} className="price-type-item">
+              <div className="price-type-name">{apt.type}</div>
+              <div className="price-type-values">
+                <span className="price-base">
+                  💰 {basePrice.toLocaleString()} ₽/м²
+                </span>
+                {withoutPV > 0 && (
+                  <span className="price-without-pv">
+                    🔥 Без ПВ: {(basePrice + withoutPV).toLocaleString()} ₽/м²
+                  </span>
+                )}
+                {partialPV > 0 && (
+                  <span className="price-partial-pv">
+                    🔥 Частичный ПВ: {(basePrice + partialPV).toLocaleString()}{" "}
+                    ₽/м²
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="projects-page">
@@ -49,7 +89,6 @@ export const ProjectsPage: React.FC = () => {
     );
   }
 
-  // Состояние ошибки
   if (error) {
     return (
       <div className="projects-page">
@@ -61,7 +100,6 @@ export const ProjectsPage: React.FC = () => {
     );
   }
 
-  // Нет проектов
   if (projects.length === 0) {
     return (
       <div className="projects-page">
@@ -91,6 +129,7 @@ export const ProjectsPage: React.FC = () => {
                 >
                   <span className="project-icon">{project.statusIcon}</span>
                   <span className="project-name">{project.name}</span>
+
                   <span
                     className={`project-status-dot ${getStatusDotClass(project.status)}`}
                   />
@@ -125,6 +164,22 @@ export const ProjectsPage: React.FC = () => {
                 )}
 
                 <div className="details-section">
+                  <div className="section-label">💳 Условия оплаты</div>
+                  <ul className="info-list">
+                    {selectedProject.paymentTerms.map((term, index) => (
+                      <li key={index}>{term}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="details-section">
+                  <div className="section-label">💰 Цены</div>
+                  <div className="section-value price">
+                    {getPriceInfo(selectedProject)}
+                  </div>
+                </div>
+
+                <div className="details-section">
                   <div className="section-label">🏦 Банки-партнеры</div>
                   <div className="banks-tags">
                     {selectedProject.banks.map((bank) => (
@@ -135,59 +190,10 @@ export const ProjectsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="details-section">
-                  <div className="section-label">💰 Цены</div>
-                  <div className="section-value price">
-                    {selectedProject.priceInfo}
-                  </div>
-                </div>
-
-                {/* 🔥 Добавляем блок с типами квартир и ценами */}
-                {selectedProject.apartmentTypes && selectedProject.apartmentTypes.length > 0 && (
-                  <div className="details-section">
-                    <div className="section-label">🏠 Типы квартир</div>
-                    <div className="apartment-types-grid">
-                      {selectedProject.apartmentTypes.map((type, index) => (
-                        <div key={index} className="apartment-type-item">
-                          <span className="type-name">{type.type}</span>
-                          <span className="type-price">
-                            {type.pricePerSquareMeter.toLocaleString()} ₽/м²
-                          </span>
-                          {type.surcharges && (
-                            <div className="type-surcharges">
-                              {type.surcharges.withoutDownPayment > 0 && (
-                                <span className="surcharge-badge">
-                                  Без ПВ: +{type.surcharges.withoutDownPayment.toLocaleString()} ₽/м²
-                                </span>
-                              )}
-                              {type.surcharges.partialDownPayment > 0 && (
-                                <span className="surcharge-badge">
-                                  Частичный ПВ: +{type.surcharges.partialDownPayment.toLocaleString()} ₽/м²
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="details-section">
-                  <div className="section-label">💳 Условия оплаты</div>
-                  <ul className="info-list">
-                    {selectedProject.paymentTerms.map((term, index) => (
-                      <li key={index}>{term}</li>
-                    ))}
-                  </ul>
-                </div>
-
                 {selectedProject.promotions &&
                   selectedProject.promotions.length > 0 && (
                     <div className="details-section highlight">
-                      <div className="section-label">
-                        🔥 Акции и предложения
-                      </div>
+                      <div className="section-label">Акции и предложения</div>
                       <ul className="info-list promotions">
                         {selectedProject.promotions.map((promo, index) => (
                           <li key={index}>{promo}</li>

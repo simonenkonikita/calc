@@ -3,9 +3,9 @@
 // ============================================================
 
 import {
-  TRANCHE_SECOND_DATE_BY_COMPLEX,
   TRANCHE_UNAVAILABLE_COMPLEXES,
-} from "../../data/complexPrice/complexPriceData";
+  TRANCHE_SECOND_DATE_BY_COMPLEX,
+} from "../../data/complexPrice/CONSTRUCTION";
 
 // Проверка доступности траншевой ипотеки для ЖК
 export const isTrancheAvailable = (complexName: string): boolean => {

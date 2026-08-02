@@ -2,39 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { api } from "../services/api";
-
-// ============================================================
-// 🔥 ТИПЫ
-// ============================================================
-
-export interface ApartmentType {
-  type: string;
-  pricePerSquareMeter: number;
-  surcharges?: {
-    withoutDownPayment: number;
-    partialDownPayment: number;
-  };
-}
-
-export interface ProjectInfo {
-  id: string;
-  name: string;
-  status: "строится" | "сдан" | "проект";
-  statusIcon: string;
-  description?: string;
-  priceInfo: string;
-  paymentTerms: string[];
-  promotions: string[];
-  banks: string[];
-  specialOffers?: string[];
-  materialsLink?: string;
-  // 🔥 Новое поле - все типы квартир в проекте
-  apartmentTypes: ApartmentType[];
-}
-
-// ============================================================
-// 🔥 ХУК
-// ============================================================
+import { ApartmentType, ProjectInfo, RawProjectData } from "../utils/types";
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<ProjectInfo[]>([]);
@@ -47,7 +15,6 @@ export const useProjects = () => {
         setLoading(true);
         const response = await api.getProjects();
         if (response.success) {
-          // 🔥 Группируем данные по проектам
           const groupedProjects = groupProjectsByComplex(response.data);
           setProjects(groupedProjects);
         } else {
@@ -89,11 +56,13 @@ export const useProjects = () => {
 
   const getSurchargesForType = (
     projectId: string,
-    type: string
+    type: string,
   ): { withoutDownPayment: number; partialDownPayment: number } => {
     const types = getApartmentTypes(projectId);
     const found = types.find((t) => t.type === type);
-    return found?.surcharges || { withoutDownPayment: 0, partialDownPayment: 0 };
+    return (
+      found?.surcharges || { withoutDownPayment: 0, partialDownPayment: 0 }
+    );
   };
 
   const getBanksForProject = (projectId: string): string[] => {
@@ -131,25 +100,6 @@ export const useProjects = () => {
 // ============================================================
 // 🔥 ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ГРУППИРОВКИ
 // ============================================================
-
-interface RawProjectData {
-  id: string;
-  complexName: string;
-  status: "строится" | "сдан" | "проект";
-  statusIcon: string;
-  description?: string;
-  priceInfo: string;
-  paymentTerms: string[];
-  promotions: string[];
-  banks: string[];
-  specialOffers?: string[];
-  apartmentType: string;
-  pricePerSquareMeter: number;
-  surcharges?: {
-    withoutDownPayment: number;
-    partialDownPayment: number;
-  };
-}
 
 const groupProjectsByComplex = (data: RawProjectData[]): ProjectInfo[] => {
   const groupedMap = new Map<string, ProjectInfo>();

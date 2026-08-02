@@ -1,7 +1,7 @@
 // src/config/banks/sovcombank.ts
 
 import { BankOffer } from "../../types/types";
-import { COMPLEXES_FAMILY } from "../complexPrice/complexPriceData";
+import { COMPLEXES_FAMILY } from "../complexPrice/CONSTRUCTION";
 import {
   SOVKOMBANK_SUBSIDIES_11_9,
   SOVKOMBANK_SUBSIDIES_12_49,

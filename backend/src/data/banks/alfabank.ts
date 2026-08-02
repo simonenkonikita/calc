@@ -11,8 +11,8 @@ import {
   ALFA_SUBSIDIES_12_99,
   ALFA_SUBSIDIES_13_89,
 } from "../subsidies/alfaSubsidies";
-import { COMPLEXES_FAMILY } from "../complexPrice/complexPriceData";
 import { BankOffer } from "../../types/types";
+import { COMPLEXES_FAMILY } from "../complexPrice/CONSTRUCTION";
 
 export const ALFABANK_OFFERS: BankOffer[] = [
   {
