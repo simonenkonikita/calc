@@ -12,7 +12,7 @@ import {
   ALFA_SUBSIDIES_13_89,
 } from "../subsidies/alfaSubsidies";
 import { BankOffer } from "../../types/types";
-import { COMPLEXES_FAMILY } from "../complexPrice/CONSTRUCTION";
+import { ALL_COMPLEXES, COMPLEXES_FAMILY } from "../complexPrice/CONSTRUCTION";
 
 export const ALFABANK_OFFERS: BankOffer[] = [
   {
@@ -23,6 +23,7 @@ export const ALFABANK_OFFERS: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicRates: ALFABANK_BASE_RATES,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.ALFA,
@@ -32,6 +33,7 @@ export const ALFABANK_OFFERS: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicSubsidyPercent: ALFA_SUBSIDIES_11_89,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.ALFA,
@@ -41,6 +43,7 @@ export const ALFABANK_OFFERS: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicSubsidyPercent: ALFA_SUBSIDIES_12_99,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.ALFA,
@@ -50,6 +53,7 @@ export const ALFABANK_OFFERS: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicSubsidyPercent: ALFA_SUBSIDIES_13_89,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.ALFA,

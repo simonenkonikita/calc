@@ -1,5 +1,8 @@
 // ============================================================
 // 🔥 СУММА БРОНИ
+
+import { PROGRAM_TYPES } from "../banks/constants";
+
 // ============================================================
 export const DEPOSIT_AMOUNT = 30000;
 
@@ -198,6 +201,12 @@ export const TRANCHE_SECOND_DATE_BY_COMPLEX: Record<string, string> = {
   [COMPLEX_NAMES.MORE_TUT]: "2027-02-01",
 };
 
+// ЖК, где траншевая ипотека доступна
+export const COMPLEXES_TRANCHE = [
+  COMPLEX_NAMES.GORY_ZDES,
+  COMPLEX_NAMES.MORE_TUT,
+];
+
 // ЖК, где траншевая ипотека НЕ доступна
 export const TRANCHE_UNAVAILABLE_COMPLEXES = [
   COMPLEX_NAMES.SADY_3,
@@ -207,3 +216,14 @@ export const TRANCHE_UNAVAILABLE_COMPLEXES = [
   COMPLEX_NAMES.MORELLO,
   COMPLEX_NAMES.SOLAR,
 ];
+
+// ПРОГРАММЫ ДЛЯ ОТОБРАЖЕНИЯ
+export const PROGRAM_COMPLEXES: Record<string, string[]> = {
+  [PROGRAM_TYPES.BASE]: ALL_COMPLEXES,
+  [PROGRAM_TYPES.FULL]: ALL_COMPLEXES,
+  [PROGRAM_TYPES.SHORT]: ALL_COMPLEXES,
+  [PROGRAM_TYPES.FAMILY]: COMPLEXES_FAMILY,
+  [PROGRAM_TYPES.IT]: COMPLEXES_IT,
+  [PROGRAM_TYPES.TRANCHE]: COMPLEXES_TRANCHE,
+  // Добавьте другие программы по необходимости
+};

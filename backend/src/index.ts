@@ -10,6 +10,7 @@ import banksRoutes from "./routes/banks.routes";
 import limitsRoutes from "./routes/limits.routes";
 import { projectsRoutes } from "./routes/projects.routes";
 import configRoutes from "./routes/config";
+import mortgageProgramsRoutes from "./routes/mortgagePrograms";
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use("/api/banks", banksRoutes);
 app.use("/api/limits", limitsRoutes);
 app.use("/api/projects", projectsRoutes);
 app.use("/api", configRoutes);
+app.use("/api", mortgageProgramsRoutes);
 
 // Error handling
 app.use(

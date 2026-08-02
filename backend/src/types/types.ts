@@ -17,6 +17,16 @@ export interface Variables {
   };
 }
 
+export interface ProgramInfo {
+  type: string; // Тип программы: "family", "it", "base" и т.д.
+  label: string; // Название: "Семейная ипотека"
+  icon: string; // Иконка: "👨‍👩‍👧‍👦"
+  color: string; // Цвет: "#8b5cf6"
+  description: string; // Описание: "Для семей с детьми. Льготная ставка 6%"
+  banks?: string[]; // Банки: ["Сбербанк", "Альфа-Банк"]
+  offers?: BankOffer[]; // Все офферы по этой программе
+}
+
 // ========== ЦЕНЫ НА ЖК ==========
 export interface HousingComplexPrice {
   id: string;
@@ -35,7 +45,7 @@ export interface HousingComplexPrice {
   promotions: string[];
   specialOffers?: string[];
   materialsLink?: string;
-  eligiblePrograms?: string[];
+  eligiblePrograms?: ProgramInfo[];
 }
 
 export interface ApartmentType {
@@ -60,7 +70,7 @@ export interface ProjectInfo {
   specialOffers?: string[];
   materialsLink?: string;
   apartmentTypes: ApartmentType[];
-  eligibleMortgagePrograms?: string[];
+  eligiblePrograms?: ProgramInfo[];
 }
 
 export interface RawProjectData {
@@ -80,7 +90,6 @@ export interface RawProjectData {
     withoutDownPayment: number;
     partialDownPayment: number;
   };
-  eligiblePrograms?: string[];
 }
 
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========

@@ -1,4 +1,5 @@
 import { HousingComplexPrice } from "../../types/types";
+import { getEligibleProgramsForComplex } from "../banks/mortgagePrograms/programTypes";
 import {
   COMPLEX_IDS,
   COMPLEX_NAMES,
@@ -7,7 +8,6 @@ import {
   BANKS_V1,
   BANKS_V2,
 } from "./CONSTRUCTION";
-import { getEligibleProgramsForComplex } from "./MORTGAGE_PROGRAMS";
 import { PAYMENT_TERMS } from "./PAYMENT_TERMS";
 import { PROMOTIONS } from "./PROMOTIONS";
 import { SPECIAL_OFFERS } from "./SPECIAL_OFFERS";
@@ -178,7 +178,6 @@ export const housingPrices: HousingComplexPrice[] = [
     promotions: PROMOTIONS[COMPLEX_NAMES.LERMONTOV],
     specialOffers: SPECIAL_OFFERS[COMPLEX_NAMES.LERMONTOV],
     eligiblePrograms: getEligibleProgramsForComplex(COMPLEX_NAMES.LERMONTOV),
-
     apartmentType: "Двухкомнатная квартира",
     pricePerSquareMeter: 160000,
     banks: BANKS_ALL,

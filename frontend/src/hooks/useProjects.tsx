@@ -121,7 +121,7 @@ const groupProjectsByComplex = (data: RawProjectData[]): ProjectInfo[] => {
         banks: item.banks,
         specialOffers: item.specialOffers,
         apartmentTypes: [],
-        eligibleMortgagePrograms: item.eligiblePrograms || [],
+        eligiblePrograms: item.eligiblePrograms || [],
       });
     }
 
@@ -133,5 +133,6 @@ const groupProjectsByComplex = (data: RawProjectData[]): ProjectInfo[] => {
     });
   });
 
-  return Array.from(groupedMap.values());
+  const result = Array.from(groupedMap.values());
+  return result;
 };

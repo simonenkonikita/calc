@@ -10,7 +10,11 @@ import {
 } from "../rates/sberbankRates";
 
 import { BankOffer } from "../../types/types";
-import { COMPLEXES_FAMILY } from "../complexPrice/CONSTRUCTION";
+import {
+  ALL_COMPLEXES,
+  COMPLEXES_FAMILY,
+  COMPLEXES_TRANCHE,
+} from "../complexPrice/CONSTRUCTION";
 
 export const SBERBANK_OFFERS: BankOffer[] = [
   {
@@ -21,6 +25,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicRates: SBERBANK_BASE_RATES,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -33,6 +38,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     isTranche: true,
     trancheFirstPercent: 19.9,
     trancheSecondDate: "2027-02-01",
+    complexes: COMPLEXES_TRANCHE,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -41,6 +47,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     rate: 11.9,
     subsidyPercent: 18.5,
     minPVPercent: MIN_PV_PERCENT,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -49,6 +56,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     rate: 12.9,
     subsidyPercent: 14.5,
     minPVPercent: MIN_PV_PERCENT,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -57,6 +65,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     rate: 13.9,
     subsidyPercent: 11.5,
     minPVPercent: MIN_PV_PERCENT,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -69,6 +78,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     durationMonths: 12,
     minLoanTermYears: 15,
     subsidyCalculationMethod: "onlyPercent",
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -81,6 +91,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     durationMonths: 24,
     minLoanTermYears: 15,
     subsidyCalculationMethod: "onlyPercent",
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -93,6 +104,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     durationMonths: 24,
     minLoanTermYears: 15,
     subsidyCalculationMethod: "onlyPercent",
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -105,6 +117,7 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     durationMonths: 24,
     minLoanTermYears: 15,
     subsidyCalculationMethod: "onlyPercent",
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,

@@ -17,6 +17,16 @@ export interface Variables {
   };
 }
 
+export interface ProgramInfo {
+  type: string;
+  label: string;
+  icon: string;
+  color: string;
+  description: string;
+  banks: string[];
+  offers: BankOffer[];
+}
+
 // ========== ЦЕНЫ НА ЖК ==========
 export interface HousingComplexPrice {
   id: string;
@@ -35,7 +45,7 @@ export interface HousingComplexPrice {
   promotions: string[];
   specialOffers?: string[];
   materialsLink?: string;
-  eligiblePrograms?: string[];
+  eligiblePrograms?: ProgramInfo[];
 }
 
 export interface ApartmentType {
@@ -60,7 +70,7 @@ export interface ProjectInfo {
   specialOffers?: string[];
   materialsLink?: string;
   apartmentTypes: ApartmentType[];
-  eligibleMortgagePrograms?: string[];
+  eligiblePrograms?: ProgramInfo[];
 }
 
 export interface RawProjectData {
@@ -80,7 +90,7 @@ export interface RawProjectData {
     withoutDownPayment: number;
     partialDownPayment: number;
   };
-  eligiblePrograms?: string[];
+  eligiblePrograms?: ProgramInfo[];
 }
 
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========

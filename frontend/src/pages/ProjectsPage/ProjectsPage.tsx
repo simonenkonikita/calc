@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import "./ProjectsPage.css";
 import { useProjects } from "../../hooks/useProjects";
 import { ProjectInfo } from "../../utils/types";
-import { MORTGAGE_PROGRAMS_DISPLAY } from "../../data/complexPrice/mortgagePrograms";
 
 export const ProjectsPage: React.FC = () => {
   const { projects, loading, error } = useProjects();
@@ -228,47 +227,56 @@ export const ProjectsPage: React.FC = () => {
                       </ul>
                     </div>
                   )}
-              </div>
 
-              {/* 🔥 БЛОК: ДОСТУПНЫЕ ИПОТЕЧНЫЕ ПРОГРАММЫ */}
-              {selectedProject.eligibleMortgagePrograms &&
-                selectedProject.eligibleMortgagePrograms.length > 0 && (
-                  <div className="details-section mortgage-programs">
-                    <div className="section-label">
-                      🏦 Доступные ипотечные программы
-                    </div>
-                    <div className="mortgage-programs-grid">
-                      {selectedProject.eligibleMortgagePrograms.map(
-                        (programType) => {
-                          const program =
-                            MORTGAGE_PROGRAMS_DISPLAY[
-                              programType as keyof typeof MORTGAGE_PROGRAMS_DISPLAY
-                            ];
-                          if (!program) return null;
-                          return (
-                            <div
-                              key={programType}
-                              className="mortgage-program-badge"
-                              style={{ borderColor: program.color }}
-                            >
-                              <span className="program-icon">
-                                {program.icon}
+                {/* 🔥 БЛОК: ДОСТУПНЫЕ ИПОТЕЧНЫЕ ПРОГРАММЫ */}
+                {selectedProject.eligiblePrograms &&
+                  selectedProject.eligiblePrograms.length > 0 && (
+                    <div className="details-section mortgage-programs-section">
+                      <div className="section-label">
+                        🏦 Доступные ипотечные программы
+                      </div>
+                      <div className="mortgage-programs-grid">
+                        {selectedProject.eligiblePrograms.map((program) => (
+                          <div
+                            key={program.type}
+                            className="mortgage-program-badge"
+                            style={{ borderColor: program.color }}
+                          >
+                            <span className="program-icon">{program.icon}</span>
+                            <div className="program-info">
+                              <span className="program-name">
+                                {program.label}
                               </span>
-                              <div className="program-info">
-                                <span className="program-name">
-                                  {program.label}
-                                </span>
-                                <span className="program-rate">
-                                  {program.rate}
-                                </span>
-                              </div>
+                              <span className="program-description">
+                                {program.description}
+                              </span>
+
+                              {program.banks && program.banks.length > 0 && (
+                                <div className="program-banks">
+                                  <span className="banks-label">🏦 Банки:</span>
+                                  <span className="banks-list">
+                                    {program.banks.join(", ")}
+                                  </span>
+                                </div>
+                              )}
+
+                              {program.offers && program.offers.length > 0 && (
+                                <div className="program-offers">
+                                  <span className="offers-label">
+                                    📊 Предложений:
+                                  </span>
+                                  <span className="offers-count">
+                                    {program.offers.length}
+                                  </span>
+                                </div>
+                              )}
                             </div>
-                          );
-                        },
-                      )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+              </div>
             </div>
           ) : (
             <div className="empty-state">
