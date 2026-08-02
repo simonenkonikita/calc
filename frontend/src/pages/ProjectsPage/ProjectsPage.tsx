@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import "./ProjectsPage.css";
 import { useProjects } from "../../hooks/useProjects";
 import { ProjectInfo } from "../../utils/types";
+import { MORTGAGE_PROGRAMS_DISPLAY } from "../../data/complexPrice/mortgagePrograms";
 
 export const ProjectsPage: React.FC = () => {
   const { projects, loading, error } = useProjects();
@@ -39,7 +40,19 @@ export const ProjectsPage: React.FC = () => {
     }
   };
 
-  // 🔥 ФОРМИРУЕМ СПИСОК ТИПОВ КВАРТИР С ЦЕНАМИ
+  const getStatusIcon = (status: string): string => {
+    switch (status) {
+      case "сдан":
+        return "✅";
+      case "строится":
+        return "🏗️";
+      case "проект":
+        return "🏠";
+      default:
+        return "🏢";
+    }
+  };
+
   const getPriceInfo = (project: ProjectInfo): React.ReactNode => {
     if (!project.apartmentTypes || project.apartmentTypes.length === 0) {
       return "—";
@@ -127,9 +140,10 @@ export const ProjectsPage: React.FC = () => {
                   className={`project-item ${selectedProject?.id === project.id ? "active" : ""}`}
                   onClick={() => setSelectedProject(project)}
                 >
-                  <span className="project-icon">{project.statusIcon}</span>
+                  <span className="project-icon">
+                    {project.statusIcon || getStatusIcon(project.status)}
+                  </span>
                   <span className="project-name">{project.name}</span>
-
                   <span
                     className={`project-status-dot ${getStatusDotClass(project.status)}`}
                   />
@@ -145,7 +159,8 @@ export const ProjectsPage: React.FC = () => {
               <div className="details-header">
                 <div className="details-title">
                   <span className="project-icon-large">
-                    {selectedProject.statusIcon}
+                    {selectedProject.statusIcon ||
+                      getStatusIcon(selectedProject.status)}
                   </span>
                   <h2>{selectedProject.name}</h2>
                 </div>
@@ -214,6 +229,46 @@ export const ProjectsPage: React.FC = () => {
                     </div>
                   )}
               </div>
+
+              {/* 🔥 БЛОК: ДОСТУПНЫЕ ИПОТЕЧНЫЕ ПРОГРАММЫ */}
+              {selectedProject.eligibleMortgagePrograms &&
+                selectedProject.eligibleMortgagePrograms.length > 0 && (
+                  <div className="details-section mortgage-programs">
+                    <div className="section-label">
+                      🏦 Доступные ипотечные программы
+                    </div>
+                    <div className="mortgage-programs-grid">
+                      {selectedProject.eligibleMortgagePrograms.map(
+                        (programType) => {
+                          const program =
+                            MORTGAGE_PROGRAMS_DISPLAY[
+                              programType as keyof typeof MORTGAGE_PROGRAMS_DISPLAY
+                            ];
+                          if (!program) return null;
+                          return (
+                            <div
+                              key={programType}
+                              className="mortgage-program-badge"
+                              style={{ borderColor: program.color }}
+                            >
+                              <span className="program-icon">
+                                {program.icon}
+                              </span>
+                              <div className="program-info">
+                                <span className="program-name">
+                                  {program.label}
+                                </span>
+                                <span className="program-rate">
+                                  {program.rate}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        },
+                      )}
+                    </div>
+                  </div>
+                )}
             </div>
           ) : (
             <div className="empty-state">

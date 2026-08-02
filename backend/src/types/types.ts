@@ -35,6 +35,7 @@ export interface HousingComplexPrice {
   promotions: string[];
   specialOffers?: string[];
   materialsLink?: string;
+  eligiblePrograms?: string[];
 }
 
 export interface ApartmentType {
@@ -59,6 +60,7 @@ export interface ProjectInfo {
   specialOffers?: string[];
   materialsLink?: string;
   apartmentTypes: ApartmentType[];
+  eligibleMortgagePrograms?: string[];
 }
 
 export interface RawProjectData {
@@ -78,6 +80,7 @@ export interface RawProjectData {
     withoutDownPayment: number;
     partialDownPayment: number;
   };
+  eligiblePrograms?: string[];
 }
 
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========

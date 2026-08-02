@@ -121,6 +121,7 @@ const groupProjectsByComplex = (data: RawProjectData[]): ProjectInfo[] => {
         banks: item.banks,
         specialOffers: item.specialOffers,
         apartmentTypes: [],
+        eligibleMortgagePrograms: item.eligiblePrograms || [],
       });
     }
 

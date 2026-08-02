@@ -179,6 +179,15 @@ export const COMPLEXES_IT = [
   COMPLEX_NAMES.SOLAR,
 ];
 
+// ЖК для ВИ ипотеки
+export const COMPLEXES_MILITARY = [
+  COMPLEX_NAMES.SADY_3,
+  COMPLEX_NAMES.SADY_2,
+  COMPLEX_NAMES.DVA_ADMIRALA,
+  COMPLEX_NAMES.LERMONTOV,
+  COMPLEX_NAMES.GORY_ZDES,
+];
+
 // ============================================================
 // 🔥 КОНФИГУРАЦИЯ ТРАНШЕЙ
 // ============================================================

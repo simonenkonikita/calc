@@ -765,3 +765,79 @@
     padding: 1.5rem;
   }
 }
+
+/* 🔥 СТИЛИ ДЛЯ ИПОТЕЧНЫХ ПРОГРАММ */
+.mortgage-programs-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mortgage-program-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: white;
+  border-radius: 8px;
+  border: 1.5px solid #e5e7eb;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.mortgage-program-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.mortgage-program-badge .program-icon {
+  font-size: 1.2rem;
+}
+
+.mortgage-program-badge .program-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.mortgage-program-badge .program-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.mortgage-program-badge .program-rate {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #667eea;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .mortgage-program-badge {
+    padding: 6px 12px;
+  }
+
+  .mortgage-program-badge .program-icon {
+    font-size: 1rem;
+  }
+
+  .mortgage-program-badge .program-name {
+    font-size: 0.75rem;
+  }
+
+  .mortgage-program-badge .program-rate {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mortgage-programs-grid {
+    flex-direction: column;
+  }
+
+  .mortgage-program-badge {
+    width: 100%;
+  }
+}
