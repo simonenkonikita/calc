@@ -39,19 +39,6 @@ export const ProjectsPage: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: string): string => {
-    switch (status) {
-      case "сдан":
-        return "✅";
-      case "строится":
-        return "🏗️";
-      case "проект":
-        return "🏠";
-      default:
-        return "🏢";
-    }
-  };
-
   const getPriceInfo = (project: ProjectInfo): React.ReactNode => {
     if (!project.apartmentTypes || project.apartmentTypes.length === 0) {
       return "—";
@@ -139,9 +126,7 @@ export const ProjectsPage: React.FC = () => {
                   className={`project-item ${selectedProject?.id === project.id ? "active" : ""}`}
                   onClick={() => setSelectedProject(project)}
                 >
-                  <span className="project-icon">
-                    {project.statusIcon || getStatusIcon(project.status)}
-                  </span>
+                  <span className="project-icon">{project.statusIcon}</span>
                   <span className="project-name">{project.name}</span>
                   <span
                     className={`project-status-dot ${getStatusDotClass(project.status)}`}
@@ -158,8 +143,7 @@ export const ProjectsPage: React.FC = () => {
               <div className="details-header">
                 <div className="details-title">
                   <span className="project-icon-large">
-                    {selectedProject.statusIcon ||
-                      getStatusIcon(selectedProject.status)}
+                    {selectedProject.statusIcon}
                   </span>
                   <h2>{selectedProject.name}</h2>
                 </div>
