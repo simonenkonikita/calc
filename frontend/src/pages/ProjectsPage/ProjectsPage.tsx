@@ -228,52 +228,147 @@ export const ProjectsPage: React.FC = () => {
                     </div>
                   )}
 
-                {/* 🔥 БЛОК: ДОСТУПНЫЕ ИПОТЕЧНЫЕ ПРОГРАММЫ */}
+                {/* 🔥 БЛОК: ДОСТУПНЫЕ ИПОТЕЧНЫЕ ПРОГРАММЫ С ПОДРОБНЫМИ ПРЕДЛОЖЕНИЯМИ */}
                 {selectedProject.eligiblePrograms &&
                   selectedProject.eligiblePrograms.length > 0 && (
                     <div className="details-section mortgage-programs-section">
                       <div className="section-label">
                         🏦 Доступные ипотечные программы
+                        <span className="programs-count-badge">
+                          {selectedProject.eligiblePrograms.reduce(
+                            (acc, p) => acc + (p.offers?.length || 0),
+                            0,
+                          )}{" "}
+                          предложений
+                        </span>
                       </div>
-                      <div className="mortgage-programs-grid">
-                        {selectedProject.eligiblePrograms.map((program) => (
+
+                      {selectedProject.eligiblePrograms.map((program) => (
+                        <div key={program.type} className="program-group">
                           <div
-                            key={program.type}
-                            className="mortgage-program-badge"
+                            className="program-group-header"
                             style={{ borderColor: program.color }}
                           >
-                            <span className="program-icon">{program.icon}</span>
-                            <div className="program-info">
+                            <div className="program-group-title">
+                              <span className="program-icon">
+                                {program.icon}
+                              </span>
                               <span className="program-name">
                                 {program.label}
                               </span>
-                              <span className="program-description">
-                                {program.description}
+                              <span
+                                className="program-badge"
+                                style={{ background: program.color }}
+                              >
+                                {program.banks?.length || 0} банков
                               </span>
-
-                              {program.banks && program.banks.length > 0 && (
-                                <div className="program-banks">
-                                  <span className="banks-label">🏦 Банки:</span>
-                                  <span className="banks-list">
-                                    {program.banks.join(", ")}
-                                  </span>
-                                </div>
-                              )}
-
-                              {program.offers && program.offers.length > 0 && (
-                                <div className="program-offers">
-                                  <span className="offers-label">
-                                    📊 Предложений:
-                                  </span>
-                                  <span className="offers-count">
-                                    {program.offers.length}
-                                  </span>
-                                </div>
-                              )}
                             </div>
+                            <span className="program-description-short">
+                              {program.description}
+                            </span>
                           </div>
-                        ))}
-                      </div>
+
+                          <div className="offers-table-wrapper">
+                            <table className="offers-table">
+                              <thead>
+                                <tr>
+                                  <th>Банк</th>
+                                  <th>Программа</th>
+                                  <th>Ставка</th>
+                                  <th>Субсидия</th>
+                                  <th>Мин. ПВ</th>
+                                  <th>Особенности</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {program.offers?.map((offer, idx) => {
+                                  const subsidyPercent =
+                                    offer.subsidyPercent || 0;
+
+                                  return (
+                                    <tr key={idx} className="offer-row">
+                                      <td>
+                                        <span className="bank-name-cell">
+                                          {offer.bank}
+                                        </span>
+                                      </td>
+                                      <td>
+                                        <span className="program-name-cell">
+                                          {offer.program}
+                                        </span>
+                                      </td>
+                                      <td>
+                                        <span className="rate-cell">
+                                          {offer.rate}%
+                                          {offer.twoRate && (
+                                            <span className="rate-two">
+                                              / {offer.twoRate}%
+                                            </span>
+                                          )}
+                                          {offer.shortRate && (
+                                            <span className="rate-short">
+                                              → {offer.shortRate}%
+                                            </span>
+                                          )}
+                                        </span>
+                                      </td>
+                                      <td>
+                                        {subsidyPercent > 0 ? (
+                                          <span className="subsidy-positive">
+                                            {subsidyPercent}%
+                                          </span>
+                                        ) : (
+                                          <span className="subsidy-none">
+                                            —
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td>
+                                        <span className="pv-cell">
+                                          {offer.minPVPercent}%
+                                        </span>
+                                      </td>
+                                      <td>
+                                        <div className="features-cell">
+                                          {offer.isTwoContracts && (
+                                            <span
+                                              className="feature-badge"
+                                              title="2 договора"
+                                            >
+                                              📄 2 договора
+                                            </span>
+                                          )}
+                                          {offer.isTranche && (
+                                            <span
+                                              className="feature-badge"
+                                              title="Траншевая"
+                                            >
+                                              📊 Траншевая
+                                            </span>
+                                          )}
+                                          {offer.excessLimit && (
+                                            <span
+                                              className="feature-badge"
+                                              title="Сверхлимит"
+                                            >
+                                              ⚡ Сверхлимит
+                                            </span>
+                                          )}
+                                          {offer.durationMonths && (
+                                            <span className="feature-badge">
+                                              ⏱ {offer.durationMonths} мес
+                                            </span>
+                                          )}
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
               </div>
