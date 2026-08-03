@@ -1,7 +1,8 @@
 // ============================================================
-// 🔥 КОНФИГУРАЦИЯ ПРОГРАММ И ИХ СПИСКИ ЖК
+// 🔥 ПОЛУЧИТЬ ПОЛНУЮ ИНФОРМАЦИЮ О ПРОГРАММАХ ДЛЯ ЖК
 // ============================================================
 
+import { bankOffers } from "..";
 import { ProgramInfo } from "../../../types/types";
 import { PROGRAM_COMPLEXES } from "../../complexPrice/CONSTRUCTION";
 import {
@@ -12,14 +13,19 @@ import {
   PROGRAM_TYPE_DESCRIPTIONS,
 } from "../constants";
 
-// ============================================================
-// 🔥 ПОЛУЧИТЬ ПОЛНУЮ ИНФОРМАЦИЮ О ПРОГРАММАХ ДЛЯ ЖК
-// ============================================================
-
 export const getEligibleProgramsForComplex = (
   complexName: string,
 ): ProgramInfo[] => {
   const result: ProgramInfo[] = [];
+
+  // 🔥 ФИЛЬТРУЕМ ПРЕДЛОЖЕНИЯ БАНКОВ ДЛЯ ЭТОГО ЖК
+  const offersForComplex = bankOffers.filter((offer) => {
+    // Проверяем, доступна ли программа для этого ЖК
+    if (offer.complexes && !offer.complexes.includes(complexName)) {
+      return false;
+    }
+    return true;
+  });
 
   Object.keys(PROGRAM_TYPES).forEach((key) => {
     const type = PROGRAM_TYPES[key as keyof typeof PROGRAM_TYPES];
@@ -27,6 +33,16 @@ export const getEligibleProgramsForComplex = (
 
     // Проверяем, есть ли ЖК в списке программы
     if (complexes && complexes.includes(complexName)) {
+      // 🔥 ПОЛУЧАЕМ ОФФЕРЫ ДЛЯ ЭТОГО ТИПА ПРОГРАММЫ
+      const matchingOffers = offersForComplex.filter(
+        (offer) => offer.type === type,
+      );
+
+      // 🔥 ПОЛУЧАЕМ УНИКАЛЬНЫЕ БАНКИ
+      const uniqueBanks = Array.from(
+        new Set(matchingOffers.map((offer) => offer.bank)),
+      );
+
       result.push({
         type,
         label: PROGRAM_TYPE_LABELS[key as keyof typeof PROGRAM_TYPE_LABELS],
@@ -36,44 +52,11 @@ export const getEligibleProgramsForComplex = (
           PROGRAM_TYPE_DESCRIPTIONS[
             key as keyof typeof PROGRAM_TYPE_DESCRIPTIONS
           ],
-        banks: [],
-        offers: [],
+        banks: uniqueBanks,
+        offers: matchingOffers,
       });
     }
   });
 
   return result;
-};
-
-// ============================================================
-// 🔥 ПОЛНЫЙ СПИСОК ПРОГРАММ ДЛЯ ОТПРАВКИ НА ФРОНТЕНД
-// ============================================================
-
-export const getProgramsConfig = () => {
-  const programs = Object.keys(PROGRAM_TYPES).map((key) => {
-    const type = PROGRAM_TYPES[key as keyof typeof PROGRAM_TYPES];
-    return {
-      type,
-      label: PROGRAM_TYPE_LABELS[key as keyof typeof PROGRAM_TYPE_LABELS],
-      icon: PROGRAM_TYPE_ICONS[key as keyof typeof PROGRAM_TYPE_ICONS],
-      color: PROGRAM_TYPE_COLORS[key as keyof typeof PROGRAM_TYPE_COLORS],
-      description:
-        PROGRAM_TYPE_DESCRIPTIONS[
-          key as keyof typeof PROGRAM_TYPE_DESCRIPTIONS
-        ],
-    };
-  });
-
-  const orderMap: Record<string, number> = {
-    base: 0,
-    full: 1,
-    short: 2,
-    family: 3,
-    it: 4,
-    tranche: 5,
-  };
-
-  return programs.sort(
-    (a, b) => (orderMap[a.type] || 999) - (orderMap[b.type] || 999),
-  );
 };

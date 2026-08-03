@@ -16,7 +16,6 @@ export const BANK_ORDER = [
   "Альфа-Банк",
   "ВТБ",
   "Совкомбанк",
-  "КП Солнечный",
 ];
 
 // ============================================================
@@ -160,6 +159,23 @@ export const ALL_COMPLEXES = [
   COMPLEX_NAMES.MORE_TUT,
   COMPLEX_NAMES.MORELLO,
   COMPLEX_NAMES.SOLAR,
+];
+
+export const ALL_COMPLEXES_URALSIB = [
+  COMPLEX_NAMES.SADY_3,
+  COMPLEX_NAMES.SADY_2,
+  COMPLEX_NAMES.LERMONTOV,
+  COMPLEX_NAMES.DVA_ADMIRALA,
+  COMPLEX_NAMES.MORE_TUT,
+  COMPLEX_NAMES.MORELLO,
+];
+
+export const ALL_COMPLEXES_DOMRF = [
+  COMPLEX_NAMES.SADY_3,
+  COMPLEX_NAMES.SADY_2,
+  COMPLEX_NAMES.LERMONTOV,
+  COMPLEX_NAMES.GORY_ZDES,
+  COMPLEX_NAMES.DVA_ADMIRALA,
 ];
 
 // ЖК для семейной ипотеки

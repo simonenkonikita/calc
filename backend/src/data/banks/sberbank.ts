@@ -25,7 +25,26 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicRates: SBERBANK_BASE_RATES,
-    complexes: ALL_COMPLEXES,
+    dynamicRatesIU: [
+      {
+        // Ставка при ПВ от 20.1%
+        minPVPercent: 20.1,
+        rate: 19.7,
+        description: "ПВ от 20.1%",
+      },
+      {
+        // Ставка при ПВ от 30.1%
+        minPVPercent: 30.1,
+        rate: 18.2,
+        description: "ПВ от 30.1%",
+      },
+      {
+        // Ставка при ПВ от 50.1%
+        minPVPercent: 50.1,
+        rate: 17.5,
+        description: "ПВ от 50.1%",
+      },
+    ],
   },
   {
     bank: BANK_NAMES.SBER,
@@ -35,10 +54,29 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicRates: SBERBANK_BASE_RATES,
+    dynamicRatesIU: [
+      {
+        // Ставка при ПВ от 20.1%
+        minPVPercent: 20.1,
+        rate: 19.7,
+        description: "ПВ от 20.1%",
+      },
+      {
+        // Ставка при ПВ от 30.1%
+        minPVPercent: 30.1,
+        rate: 18.2,
+        description: "ПВ от 30.1%",
+      },
+      {
+        // Ставка при ПВ от 50.1%
+        minPVPercent: 50.1,
+        rate: 17.5,
+        description: "ПВ от 50.1%",
+      },
+    ],
     isTranche: true,
     trancheFirstPercent: 19.9,
     trancheSecondDate: "2027-02-01",
-    complexes: COMPLEXES_TRANCHE,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -47,7 +85,6 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     rate: 11.9,
     subsidyPercent: 18.5,
     minPVPercent: MIN_PV_PERCENT,
-    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -56,7 +93,6 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     rate: 12.9,
     subsidyPercent: 14.5,
     minPVPercent: MIN_PV_PERCENT,
-    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -65,7 +101,6 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     rate: 13.9,
     subsidyPercent: 11.5,
     minPVPercent: MIN_PV_PERCENT,
-    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -78,7 +113,6 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     durationMonths: 12,
     minLoanTermYears: 15,
     subsidyCalculationMethod: "onlyPercent",
-    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -91,7 +125,6 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     durationMonths: 24,
     minLoanTermYears: 15,
     subsidyCalculationMethod: "onlyPercent",
-    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -104,7 +137,6 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     durationMonths: 24,
     minLoanTermYears: 15,
     subsidyCalculationMethod: "onlyPercent",
-    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -117,7 +149,6 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     durationMonths: 24,
     minLoanTermYears: 15,
     subsidyCalculationMethod: "onlyPercent",
-    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -126,7 +157,6 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     rate: 6,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
-    complexes: COMPLEXES_FAMILY,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -135,7 +165,6 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     rate: 3.5,
     subsidyPercent: 14.5,
     minPVPercent: MIN_PV_PERCENT,
-    complexes: COMPLEXES_FAMILY,
   },
   {
     bank: BANK_NAMES.SBER,

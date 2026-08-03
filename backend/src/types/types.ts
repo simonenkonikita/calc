@@ -163,6 +163,13 @@ export interface DynamicRateRule {
   roundingStrategy?: "up" | "down";
 }
 
+// 🔥 НОВЫЙ ТИП для простых динамических ставок (только ПВ -> ставка)
+export interface SimpleDynamicRate {
+  minPVPercent: number; // Минимальный ПВ для этой ставки
+  rate: number; // Ставка при этом ПВ
+  description?: string; // Описание условия
+}
+
 export interface BankOffer {
   bank: string; // Название банка
   program: string; // Название программы
@@ -177,6 +184,7 @@ export interface BankOffer {
   shortRate?: number; //
   subsidyCalculationMethod?: "onlyPercent" | "standard";
   dynamicRates?: DynamicRateRule[];
+  dynamicRatesIU?: SimpleDynamicRate[];
   dynamicSubsidyPercent?: DynamicRateRule[];
   isTranche?: boolean;
   trancheFirstPercent?: number; // % от стоимости объекта для первого транша (например, 19.9%)
@@ -189,6 +197,7 @@ export interface BankOffer {
   twoContractSubsidies?: DynamicRateRule[];
   complexes?: string[];
   minLoanTermYears?: number;
+  description?: string;
 }
 
 export interface TranchePaymentsResult {

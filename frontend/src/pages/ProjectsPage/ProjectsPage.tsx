@@ -1,6 +1,6 @@
 // src/pages/ProjectsPage/ProjectsPage.tsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./ProjectsPage.css";
 import { useProjects } from "../../hooks/useProjects";
 import { ProjectInfo } from "../../utils/types";
@@ -10,12 +10,59 @@ export const ProjectsPage: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(
     null,
   );
+  const [expandedProgram, setExpandedProgram] = useState<string | null>(null);
 
   useEffect(() => {
     if (projects.length > 0 && !selectedProject) {
       setSelectedProject(projects[0]);
     }
   }, [projects, selectedProject]);
+
+  // Группируем предложения по типам программ
+  const groupedByProgram = useMemo(() => {
+    if (!selectedProject?.eligiblePrograms) return {};
+
+    const grouped: Record<string, any[]> = {};
+
+    selectedProject.eligiblePrograms.forEach((program) => {
+      if (program.offers && program.offers.length > 0) {
+        grouped[program.type] = program;
+      }
+    });
+
+    return grouped;
+  }, [selectedProject]);
+
+  // Сортируем программы в нужном порядке
+  const programOrder = ["base", "tranche", "full", "short", "family", "it"];
+  const sortedProgramTypes = useMemo(() => {
+    const types = Object.keys(groupedByProgram);
+    return types.sort((a, b) => {
+      const indexA = programOrder.indexOf(a);
+      const indexB = programOrder.indexOf(b);
+      if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
+  }, [groupedByProgram]);
+
+  // 🔥 Получаем уникальные банки из всех предложений
+  const uniqueBanksFromOffers = useMemo(() => {
+    if (!selectedProject?.eligiblePrograms) return [];
+
+    const banksSet = new Set<string>();
+
+    selectedProject.eligiblePrograms.forEach((program) => {
+      if (program.offers && program.offers.length > 0) {
+        program.offers.forEach((offer) => {
+          banksSet.add(offer.bank);
+        });
+      }
+    });
+
+    return Array.from(banksSet);
+  }, [selectedProject]);
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -177,28 +224,23 @@ export const ProjectsPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* 🔥 Банки-партнеры теперь берутся из предложений */}
                 <div className="details-section">
                   <div className="section-label">🏦 Банки-партнеры</div>
                   <div className="banks-tags">
-                    {selectedProject.banks.map((bank) => (
-                      <span key={bank} className="bank-tag">
-                        {bank}
+                    {uniqueBanksFromOffers.length > 0 ? (
+                      uniqueBanksFromOffers.map((bank) => (
+                        <span key={bank} className="bank-tag">
+                          {bank}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="bank-tag-empty">
+                        Нет доступных банков
                       </span>
-                    ))}
+                    )}
                   </div>
                 </div>
-
-                {selectedProject.promotions &&
-                  selectedProject.promotions.length > 0 && (
-                    <div className="details-section highlight">
-                      <div className="section-label">Акции и предложения</div>
-                      <ul className="info-list promotions">
-                        {selectedProject.promotions.map((promo, index) => (
-                          <li key={index}>{promo}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
 
                 {selectedProject.specialOffers &&
                   selectedProject.specialOffers.length > 0 && (
@@ -212,52 +254,240 @@ export const ProjectsPage: React.FC = () => {
                     </div>
                   )}
 
-                {/* 🔥 БЛОК: ДОСТУПНЫЕ ИПОТЕЧНЫЕ ПРОГРАММЫ */}
-                {selectedProject.eligiblePrograms &&
-                  selectedProject.eligiblePrograms.length > 0 && (
-                    <div className="details-section mortgage-programs-section">
-                      <div className="section-label">
-                        🏦 Доступные ипотечные программы
-                      </div>
-                      <div className="mortgage-programs-grid">
-                        {selectedProject.eligiblePrograms.map((program) => (
+                {/* 🔥 АККОРДЕОН ПО ТИПАМ ПРОГРАММ */}
+                {sortedProgramTypes.length > 0 && (
+                  <div className="details-section mortgage-modern-section">
+                    <div className="section-label">
+                      🏦 Ипотечные программы
+                      <span className="programs-count-badge">
+                        {sortedProgramTypes.length} типов
+                      </span>
+                    </div>
+
+                    <div className="programs-modern-grid">
+                      {sortedProgramTypes.map((programType) => {
+                        const program = groupedByProgram[programType];
+                        const isExpanded = expandedProgram === programType;
+                        const offers = program.offers || [];
+
+                        return (
                           <div
-                            key={program.type}
-                            className="mortgage-program-badge"
-                            style={{ borderColor: program.color }}
+                            key={programType}
+                            className={`program-modern-card ${isExpanded ? "expanded" : ""}`}
+                            style={{
+                              borderColor: isExpanded
+                                ? program.color
+                                : "#e5e7eb",
+                            }}
                           >
-                            <span className="program-icon">{program.icon}</span>
-                            <div className="program-info">
-                              <span className="program-name">
-                                {program.label}
-                              </span>
-                              <span className="program-description">
-                                {program.description}
-                              </span>
-
-                              {program.banks && program.banks.length > 0 && (
-                                <div className="program-banks">
-                                  <span className="banks-label">🏦 Банки:</span>
-                                  <span className="banks-list">
-                                    {program.banks.join(", ")}
-                                  </span>
-                                </div>
-                              )}
-
-                              {program.offers && program.offers.length > 0 && (
-                                <div className="program-offers">
-                                  <span className="offers-label">
-                                    📊 Предложений:
-                                  </span>
-                                  <span className="offers-count">
-                                    {program.offers.length}
-                                  </span>
-                                </div>
-                              )}
+                            <div
+                              className="program-modern-header"
+                              onClick={() =>
+                                setExpandedProgram(
+                                  isExpanded ? null : programType,
+                                )
+                              }
+                              style={{
+                                background: isExpanded
+                                  ? `linear-gradient(135deg, ${program.color}15 0%, ${program.color}08 100%)`
+                                  : "#f8fafc",
+                              }}
+                            >
+                              <div className="program-modern-info">
+                                <span className="program-modern-icon">
+                                  {program.icon}
+                                </span>
+                                <span className="program-modern-name">
+                                  {program.label}
+                                </span>
+                                <span
+                                  className="program-modern-badge"
+                                  style={{ background: program.color }}
+                                >
+                                  {offers.length} предложений
+                                </span>
+                              </div>
+                              <div className="program-modern-rate">
+                                <span className="expand-icon">
+                                  {isExpanded ? "−" : "+"}
+                                </span>
+                              </div>
                             </div>
+
+                            {isExpanded && (
+                              <div className="program-modern-offers">
+                                {/* Заголовок таблицы */}
+                                <div className="offer-table-header">
+                                  <span className="header-bank">Банк</span>
+                                  <span className="header-rate">Ставка</span>
+                                  <span className="header-subsidy">
+                                    Субсидия
+                                  </span>
+                                  <span className="header-pv">Мин. ПВ</span>
+                                  <span className="header-info">
+                                    Информация
+                                  </span>
+                                </div>
+
+                                {offers.map((offer, idx) => {
+                                  const subsidyPercent =
+                                    offer.subsidyPercent || 0;
+
+                                  // Проверяем наличие dynamicRatesIU
+                                  const hasDynamicRatesIU =
+                                    offer.dynamicRatesIU &&
+                                    offer.dynamicRatesIU.length > 0;
+
+                                  // Проверяем наличие dynamicRates (для сверхлимита)
+                                  const hasDynamicRates =
+                                    offer.dynamicRates &&
+                                    offer.dynamicRates.length > 0 &&
+                                    !hasDynamicRatesIU;
+
+                                  // Проверяем, является ли программа сверхлимитной
+                                  const isExcessLimit =
+                                    offer.excessLimit === true;
+
+                                  // Получаем минимальный ПВ для отображения
+                                  const getMinPV = () => {
+                                    if (hasDynamicRatesIU) {
+                                      return offer.dynamicRatesIU[0]
+                                        .minPVPercent;
+                                    }
+                                    return offer.minPVPercent;
+                                  };
+
+                                  // Получаем ставку для отображения
+                                  const getDisplayRate = () => {
+                                    // Если есть dynamicRatesIU - показываем их
+                                    if (hasDynamicRatesIU) {
+                                      return offer.dynamicRatesIU.map(
+                                        (rule, i) => (
+                                          <div
+                                            key={i}
+                                            className="dynamic-rate-item"
+                                          >
+                                            <span className="dynamic-rate-value">
+                                              {rule.rate}%
+                                            </span>
+                                            <span className="dynamic-rate-condition">
+                                              {rule.description ||
+                                                `ПВ от ${rule.minPVPercent}%`}
+                                            </span>
+                                          </div>
+                                        ),
+                                      );
+                                    }
+
+                                    // Если сверхлимит с dynamicRates - показываем диапазон ставок
+                                    if (isExcessLimit && hasDynamicRates) {
+                                      const rates = offer.dynamicRates
+                                        .map((r) => r.rate)
+                                        .sort((a, b) => a - b);
+                                      const minRate = rates[0];
+                                      const maxRate = rates[rates.length - 1];
+
+                                      return (
+                                        <span className="excess-rate-range-text">
+                                          {minRate}% — {maxRate}%
+                                        </span>
+                                      );
+                                    }
+
+                                    // Обычная ставка
+                                    return (
+                                      <>
+                                        {offer.shortRate && (
+                                          <span className="offer-modern-rate-short">
+                                            {offer.shortRate}% →
+                                          </span>
+                                        )}
+                                        <span className="offer-modern-rate">
+                                          {offer.rate}%
+                                        </span>
+                                        {offer.twoRate && (
+                                          <span className="offer-modern-rate-two">
+                                            {offer.twoRate}%
+                                          </span>
+                                        )}
+                                      </>
+                                    );
+                                  };
+
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className="offer-modern-item"
+                                    >
+                                      {/* Колонка 1: Банк */}
+                                      <div className="offer-modern-left">
+                                        <span className="offer-modern-icon">
+                                          🏦
+                                        </span>
+                                        <div className="offer-modern-info">
+                                          <span className="offer-modern-name">
+                                            {offer.bank}
+                                          </span>
+                                          <span className="offer-modern-desc">
+                                            {offer.program}
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {/* Колонка 2: Ставка */}
+                                      <div className="offer-modern-rate-block">
+                                        {getDisplayRate()}
+                                      </div>
+
+                                      {/* Колонка 3: Субсидия */}
+                                      <div className="offer-modern-subsidy">
+                                        <span className="stat-value">
+                                          {subsidyPercent > 0
+                                            ? `${subsidyPercent}%`
+                                            : "—"}
+                                        </span>
+                                      </div>
+
+                                      {/* Колонка 4: Мин. ПВ */}
+                                      <div className="offer-modern-pv">
+                                        <span className="stat-value">
+                                          {getMinPV()}%
+                                        </span>
+                                      </div>
+
+                                      {/* Колонка 5: Информация */}
+                                      <div className="offer-modern-info-text">
+                                        {offer.description ? (
+                                          <span className="info-text">
+                                            {offer.description}
+                                          </span>
+                                        ) : (
+                                          <span className="info-text-empty">
+                                            —
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {selectedProject.promotions &&
+                  selectedProject.promotions.length > 0 && (
+                    <div className="details-section highlight">
+                      <div className="section-label">Акции и предложения</div>
+                      <ul className="info-list promotions">
+                        {selectedProject.promotions.map((promo, index) => (
+                          <li key={index}>{promo}</li>
                         ))}
-                      </div>
+                      </ul>
                     </div>
                   )}
               </div>

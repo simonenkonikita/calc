@@ -1,4 +1,4 @@
-/* ProjectsPage.css - в стиле MortgageCalculator */
+/* src/pages/ProjectsPage/ProjectsPage.css */
 
 /* ============================================================
    ОСНОВНАЯ СТРАНИЦА
@@ -608,8 +608,368 @@
 }
 
 /* ============================================================
-   АДАПТИВ
+   🔥 АККОРДЕОН ПО ТИПАМ ПРОГРАММ
    ============================================================ */
+
+.mortgage-modern-section {
+  background: transparent;
+  padding: 0;
+}
+
+.programs-modern-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+/* ============================================================
+   🔥 КАРТОЧКА ПРОГРАММЫ (АККОРДЕОН)
+   ============================================================ */
+
+.program-modern-card {
+  background: white;
+  border-radius: 0.75rem;
+  border: 2px solid #e5e7eb;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.program-modern-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.program-modern-card.expanded {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-width: 2px;
+}
+
+/* Хедер программы */
+.program-modern-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.program-modern-header:hover {
+  background: #f1f5f9 !important;
+}
+
+.program-modern-header:active {
+  transform: scale(0.99);
+}
+
+.program-modern-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.program-modern-icon {
+  font-size: 1.4rem;
+  width: 32px;
+  text-align: center;
+}
+
+.program-modern-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1f2937;
+}
+
+.program-modern-badge {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: white;
+  padding: 0.15rem 0.6rem;
+  border-radius: 1rem;
+}
+
+.program-modern-rate {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.best-rate-label {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: #92400e;
+  background: #fef3c7;
+  padding: 0.1rem 0.5rem;
+  border-radius: 1rem;
+}
+
+.best-rate-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.expand-icon {
+  font-size: 1.3rem;
+  font-weight: 300;
+  color: #6b7280;
+  transition: transform 0.3s ease;
+  width: 28px;
+  text-align: center;
+  line-height: 1;
+}
+
+.program-modern-card.expanded .expand-icon {
+  color: #667eea;
+}
+
+/* ============================================================
+   🔥 ЗАГОЛОВОК ТАБЛИЦЫ
+   ============================================================ */
+
+.offer-table-header {
+  display: grid;
+  grid-template-columns: 220px 1fr 0.8fr 0.6fr 1.2fr;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: #f1f5f9;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.header-bank {
+  grid-column: 1;
+}
+.header-rate {
+  grid-column: 2;
+}
+.header-subsidy {
+  grid-column: 3;
+}
+.header-pv {
+  grid-column: 4;
+}
+.header-info {
+  grid-column: 5;
+}
+
+/* ============================================================
+   🔥 ПРЕДЛОЖЕНИЯ ВНУТРИ ПРОГРАММЫ (ТАБЛИЦА)
+   ============================================================ */
+
+.program-modern-offers {
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid #e5e7eb;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.offer-modern-item {
+  display: grid;
+  grid-template-columns: 220px 1fr 0.8fr 0.6fr 1.2fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+}
+
+.offer-modern-item:last-child {
+  border-bottom: none;
+}
+
+.offer-modern-item:hover {
+  background: #f8fafc;
+}
+
+.offer-modern-item.best {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%);
+  border-left: 3px solid #f59e0b;
+  border-radius: 0.5rem;
+}
+
+.offer-modern-item.best:hover {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+/* --------------------------------------------
+   КОЛОНКА 1: Банк
+   -------------------------------------------- */
+.offer-modern-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.offer-modern-icon {
+  font-size: 1rem;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.offer-modern-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.offer-modern-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #1f2937;
+  white-space: nowrap;
+}
+
+.offer-modern-desc {
+  font-size: 0.7rem;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.offer-modern-best-badge {
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: #92400e;
+  background: #fef3c7;
+  padding: 0.1rem 0.4rem;
+  border-radius: 1rem;
+  border: 1px solid #fcd34d;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------
+   КОЛОНКА 2: Ставка
+   -------------------------------------------- */
+.offer-modern-rate-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+/* Динамические ставки (список) */
+.dynamic-rates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.dynamic-rate-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.dynamic-rate-value {
+  font-weight: 700;
+  color: #667eea;
+  font-size: 0.85rem;
+  min-width: 44px;
+}
+
+.dynamic-rate-condition {
+  font-size: 0.65rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+/* Обычная ставка */
+.offer-modern-rate {
+  font-weight: 700;
+  color: #667eea;
+  font-size: 1.1rem;
+}
+
+.offer-modern-rate-short {
+  font-weight: 700;
+  color: #ea580c;
+  font-size: 1.1rem;
+}
+
+.offer-modern-rate-two {
+  font-weight: 700;
+  color: #667eea;
+  font-size: 1.1rem;
+}
+
+/* --------------------------------------------
+   КОЛОНКА 3: Субсидия
+   -------------------------------------------- */
+.offer-modern-subsidy {
+  display: flex;
+  align-items: center;
+}
+
+.offer-modern-subsidy .stat-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* --------------------------------------------
+   КОЛОНКА 4: Мин. ПВ
+   -------------------------------------------- */
+.offer-modern-pv {
+  display: flex;
+  align-items: center;
+}
+
+.offer-modern-pv .stat-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* --------------------------------------------
+   КОЛОНКА 5: Информация
+   -------------------------------------------- */
+.offer-modern-info-text {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.info-text {
+  font-size: 0.75rem;
+  color: #4b5563;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.info-text-empty {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+/* ============================================================
+   🔥 АДАПТИВ
+   ============================================================ */
+
 @media (max-width: 1200px) {
   .projects-layout {
     grid-template-columns: 1fr;
@@ -645,6 +1005,22 @@
     max-height: none;
     overflow: visible;
     padding-right: 0;
+  }
+}
+
+@media (max-width: 992px) {
+  .offer-table-header,
+  .offer-modern-item {
+    grid-template-columns: 180px 1fr 0.7fr 0.5fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .offer-modern-name {
+    font-size: 0.8rem;
+  }
+
+  .offer-modern-rate {
+    font-size: 1rem;
   }
 }
 
@@ -707,6 +1083,112 @@
   .price-type-values span {
     font-size: 12px;
   }
+
+  /* Адаптив таблицы */
+  .offer-table-header {
+    display: none;
+  }
+
+  .offer-modern-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .offer-modern-item:last-child {
+    border-bottom: none;
+  }
+
+  .offer-modern-left {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .offer-modern-rate-block {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .dynamic-rates-list {
+    width: 100%;
+  }
+
+  .dynamic-rate-item {
+    justify-content: space-between;
+    padding: 0.1rem 0;
+  }
+
+  .offer-modern-subsidy {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.15rem 0;
+  }
+
+  .offer-modern-subsidy::before {
+    content: "Субсидия:";
+    font-size: 0.65rem;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .offer-modern-pv {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.15rem 0;
+  }
+
+  .offer-modern-pv::before {
+    content: "Мин. ПВ:";
+    font-size: 0.65rem;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .offer-modern-info-text {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.15rem 0;
+  }
+
+  .offer-modern-info-text::before {
+    content: "Информация:";
+    font-size: 0.65rem;
+    color: #94a3b8;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .program-modern-header {
+    padding: 0.6rem 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .program-modern-rate {
+    flex-wrap: wrap;
+  }
+
+  .program-modern-offers {
+    padding: 0.25rem 0.5rem 0.75rem;
+  }
+
+  .best-rate-value {
+    font-size: 0.95rem;
+  }
+
+  .program-modern-icon {
+    font-size: 1.2rem;
+    width: 28px;
+  }
+
+  .program-modern-name {
+    font-size: 0.85rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -764,80 +1246,87 @@
     height: 300px;
     padding: 1.5rem;
   }
-}
 
-/* 🔥 СТИЛИ ДЛЯ ИПОТЕЧНЫХ ПРОГРАММ */
-.mortgage-programs-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.mortgage-program-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: white;
-  border-radius: 8px;
-  border: 1.5px solid #e5e7eb;
-  transition: all 0.2s;
-  cursor: default;
-}
-
-.mortgage-program-badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.mortgage-program-badge .program-icon {
-  font-size: 1.2rem;
-}
-
-.mortgage-program-badge .program-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.mortgage-program-badge .program-name {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.mortgage-program-badge .program-rate {
-  font-size: 0.7rem;
-  font-weight: 500;
-  color: #667eea;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-  .mortgage-program-badge {
-    padding: 6px 12px;
+  .program-modern-info {
+    flex-wrap: wrap;
   }
 
-  .mortgage-program-badge .program-icon {
-    font-size: 1rem;
+  .program-modern-name {
+    font-size: 0.8rem;
   }
 
-  .mortgage-program-badge .program-name {
+  .offer-modern-rate {
+    font-size: 0.95rem;
+  }
+
+  .dynamic-rate-value {
+    font-size: 0.8rem;
+    min-width: 38px;
+  }
+
+  .dynamic-rate-condition {
+    font-size: 0.6rem;
+  }
+
+  .offer-modern-name {
     font-size: 0.75rem;
   }
 
-  .mortgage-program-badge .program-rate {
+  .offer-modern-desc {
     font-size: 0.65rem;
+  }
+
+  .info-text {
+    font-size: 0.7rem;
+  }
+
+  .program-modern-badge {
+    font-size: 0.5rem;
+    padding: 0.1rem 0.4rem;
+  }
+
+  .best-rate-label {
+    font-size: 0.5rem;
+  }
+}
+/* ============================================================
+   🔥 СТИЛИ ДЛЯ СВЕРХЛИМИТА
+   ============================================================ */
+
+/* Бейдж сверхлимита */
+.excess-badge {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #7c3aed;
+  background: #ede9fe;
+  padding: 0.05rem 0.4rem;
+  border-radius: 0.25rem;
+  margin-left: 0.3rem;
+  border: 1px solid #c4b5fd;
+  white-space: nowrap;
+}
+
+/* Диапазон ставок для сверхлимита (одна строка) */
+.excess-rate-range-text {
+  font-weight: 700;
+  color: #667eea;
+  font-size: 1rem;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  .excess-badge {
+    font-size: 0.5rem;
+    padding: 0.05rem 0.3rem;
+  }
+
+  .excess-rate-range-text {
+    font-size: 0.9rem;
   }
 }
 
 @media (max-width: 480px) {
-  .mortgage-programs-grid {
-    flex-direction: column;
-  }
-
-  .mortgage-program-badge {
-    width: 100%;
+  .excess-rate-range-text {
+    font-size: 0.8rem;
   }
 }
