@@ -6,7 +6,13 @@ import { useProjects } from "../../hooks/useProjects";
 import { ProjectInfo } from "../../utils/types";
 
 export const ProjectsPage: React.FC = () => {
-  const { projects, loading, error } = useProjects();
+  const { 
+    projects, 
+    loading, 
+    error,
+    getBanksForProject 
+  } = useProjects();
+  
   const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(
     null,
   );
@@ -22,7 +28,7 @@ export const ProjectsPage: React.FC = () => {
   const groupedByProgram = useMemo(() => {
     if (!selectedProject?.eligiblePrograms) return {};
 
-    const grouped: Record<string, any[]> = {};
+    const grouped: Record<string, any> = {};
 
     selectedProject.eligiblePrograms.forEach((program) => {
       if (program.offers && program.offers.length > 0) {
@@ -47,8 +53,14 @@ export const ProjectsPage: React.FC = () => {
     });
   }, [groupedByProgram]);
 
-  // 🔥 Получаем уникальные банки из всех предложений
-  const uniqueBanksFromOffers = useMemo(() => {
+  // 🔥 Получаем банки для выбранного ЖК через хук
+  const availableBanks = useMemo(() => {
+    if (!selectedProject) return [];
+    return getBanksForProject(selectedProject.id) || [];
+  }, [selectedProject, getBanksForProject]);
+
+  // 🔥 Получаем банки из предложений и фильтруем их
+  const banksFromOffers = useMemo(() => {
     if (!selectedProject?.eligiblePrograms) return [];
 
     const banksSet = new Set<string>();
@@ -56,13 +68,57 @@ export const ProjectsPage: React.FC = () => {
     selectedProject.eligiblePrograms.forEach((program) => {
       if (program.offers && program.offers.length > 0) {
         program.offers.forEach((offer) => {
-          banksSet.add(offer.bank);
+          if (availableBanks.includes(offer.bank)) {
+            banksSet.add(offer.bank);
+          }
         });
       }
     });
 
     return Array.from(banksSet);
-  }, [selectedProject]);
+  }, [selectedProject, availableBanks]);
+
+  // 🔥 Финальный список банков для отображения
+  const displayBanks = useMemo(() => {
+    if (availableBanks.length > 0) {
+      return availableBanks;
+    }
+    return banksFromOffers;
+  }, [availableBanks, banksFromOffers]);
+
+  // 🔥 Фильтруем офферы по доступным банкам
+  const getFilteredOffers = (offers: any[]) => {
+    return offers.filter((offer) => displayBanks.includes(offer.bank));
+  };
+
+  // 🔥 Функция для отображения субсидии (динамическая или статическая)
+  const getDisplaySubsidy = (offer: any) => {
+    const hasDynamicSubsidy = offer.dynamicSubsidyPercent && offer.dynamicSubsidyPercent.length > 0;
+    
+    if (hasDynamicSubsidy) {
+      const subsidies = offer.dynamicSubsidyPercent
+        .map((rule: any) => rule.subsidyPercent)
+        .filter((val: number) => val !== undefined && val !== null)
+        .sort((a: number, b: number) => a - b);
+      
+      if (subsidies.length === 0) return "—";
+      
+      const minSubsidy = subsidies[0];
+      const maxSubsidy = subsidies[subsidies.length - 1];
+      
+      if (minSubsidy === maxSubsidy) {
+        return `${minSubsidy}%`;
+      }
+      
+      return `${minSubsidy}% — ${maxSubsidy}%`;
+    }
+    
+    if (offer.subsidyPercent > 0) {
+      return `${offer.subsidyPercent}%`;
+    }
+    
+    return "—";
+  };
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -224,12 +280,11 @@ export const ProjectsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 🔥 Банки-партнеры теперь берутся из предложений */}
                 <div className="details-section">
                   <div className="section-label">🏦 Банки-партнеры</div>
                   <div className="banks-tags">
-                    {uniqueBanksFromOffers.length > 0 ? (
-                      uniqueBanksFromOffers.map((bank) => (
+                    {displayBanks.length > 0 ? (
+                      displayBanks.map((bank) => (
                         <span key={bank} className="bank-tag">
                           {bank}
                         </span>
@@ -268,7 +323,8 @@ export const ProjectsPage: React.FC = () => {
                       {sortedProgramTypes.map((programType) => {
                         const program = groupedByProgram[programType];
                         const isExpanded = expandedProgram === programType;
-                        const offers = program.offers || [];
+                        
+                        const filteredOffers = getFilteredOffers(program.offers || []);
 
                         return (
                           <div
@@ -304,7 +360,7 @@ export const ProjectsPage: React.FC = () => {
                                   className="program-modern-badge"
                                   style={{ background: program.color }}
                                 >
-                                  {offers.length} предложений
+                                  {filteredOffers.length} предложений
                                 </span>
                               </div>
                               <div className="program-modern-rate">
@@ -314,9 +370,8 @@ export const ProjectsPage: React.FC = () => {
                               </div>
                             </div>
 
-                            {isExpanded && (
+                            {isExpanded && filteredOffers.length > 0 && (
                               <div className="program-modern-offers">
-                                {/* Заголовок таблицы */}
                                 <div className="offer-table-header">
                                   <span className="header-bank">Банк</span>
                                   <span className="header-rate">Ставка</span>
@@ -329,26 +384,19 @@ export const ProjectsPage: React.FC = () => {
                                   </span>
                                 </div>
 
-                                {offers.map((offer, idx) => {
-                                  const subsidyPercent =
-                                    offer.subsidyPercent || 0;
-
-                                  // Проверяем наличие dynamicRatesIU
+                                {filteredOffers.map((offer, idx) => {
                                   const hasDynamicRatesIU =
                                     offer.dynamicRatesIU &&
                                     offer.dynamicRatesIU.length > 0;
 
-                                  // Проверяем наличие dynamicRates (для сверхлимита)
                                   const hasDynamicRates =
                                     offer.dynamicRates &&
                                     offer.dynamicRates.length > 0 &&
                                     !hasDynamicRatesIU;
 
-                                  // Проверяем, является ли программа сверхлимитной
                                   const isExcessLimit =
                                     offer.excessLimit === true;
 
-                                  // Получаем минимальный ПВ для отображения
                                   const getMinPV = () => {
                                     if (hasDynamicRatesIU) {
                                       return offer.dynamicRatesIU[0]
@@ -357,9 +405,7 @@ export const ProjectsPage: React.FC = () => {
                                     return offer.minPVPercent;
                                   };
 
-                                  // Получаем ставку для отображения
                                   const getDisplayRate = () => {
-                                    // Если есть dynamicRatesIU - показываем их
                                     if (hasDynamicRatesIU) {
                                       return offer.dynamicRatesIU.map(
                                         (rule, i) => (
@@ -379,7 +425,6 @@ export const ProjectsPage: React.FC = () => {
                                       );
                                     }
 
-                                    // Если сверхлимит с dynamicRates - показываем диапазон ставок
                                     if (isExcessLimit && hasDynamicRates) {
                                       const rates = offer.dynamicRates
                                         .map((r) => r.rate)
@@ -394,7 +439,6 @@ export const ProjectsPage: React.FC = () => {
                                       );
                                     }
 
-                                    // Обычная ставка
                                     return (
                                       <>
                                         {offer.shortRate && (
@@ -419,7 +463,6 @@ export const ProjectsPage: React.FC = () => {
                                       key={idx}
                                       className="offer-modern-item"
                                     >
-                                      {/* Колонка 1: Банк */}
                                       <div className="offer-modern-left">
                                         <span className="offer-modern-icon">
                                           🏦
@@ -434,28 +477,22 @@ export const ProjectsPage: React.FC = () => {
                                         </div>
                                       </div>
 
-                                      {/* Колонка 2: Ставка */}
                                       <div className="offer-modern-rate-block">
                                         {getDisplayRate()}
                                       </div>
 
-                                      {/* Колонка 3: Субсидия */}
                                       <div className="offer-modern-subsidy">
                                         <span className="stat-value">
-                                          {subsidyPercent > 0
-                                            ? `${subsidyPercent}%`
-                                            : "—"}
+                                          {getDisplaySubsidy(offer)}
                                         </span>
                                       </div>
 
-                                      {/* Колонка 4: Мин. ПВ */}
                                       <div className="offer-modern-pv">
                                         <span className="stat-value">
                                           {getMinPV()}%
                                         </span>
                                       </div>
 
-                                      {/* Колонка 5: Информация */}
                                       <div className="offer-modern-info-text">
                                         {offer.description ? (
                                           <span className="info-text">

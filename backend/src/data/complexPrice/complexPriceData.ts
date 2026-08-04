@@ -7,6 +7,7 @@ import {
   BANKS_ALL,
   BANKS_V1,
   BANKS_V2,
+  BANKS_V3,
 } from "./CONSTRUCTION";
 import { PAYMENT_TERMS } from "./PAYMENT_TERMS";
 import { PROMOTIONS } from "./PROMOTIONS";
@@ -318,7 +319,7 @@ export const housingPrices: HousingComplexPrice[] = [
     eligiblePrograms: getEligibleProgramsForComplex(COMPLEX_NAMES.MORE_TUT),
     apartmentType: "Однокомнатные номера",
     pricePerSquareMeter: 270000,
-    banks: BANKS_ALL,
+    banks: BANKS_V3,
     surcharges: {
       withoutDownPayment: 0,
       partialDownPayment: 0,
@@ -336,7 +337,7 @@ export const housingPrices: HousingComplexPrice[] = [
     eligiblePrograms: getEligibleProgramsForComplex(COMPLEX_NAMES.MORE_TUT),
     apartmentType: "Двухкомнатные номера",
     pricePerSquareMeter: 270000,
-    banks: BANKS_ALL,
+    banks: BANKS_V3,
     surcharges: {
       withoutDownPayment: 0,
       partialDownPayment: 0,
@@ -358,7 +359,7 @@ export const housingPrices: HousingComplexPrice[] = [
     eligiblePrograms: getEligibleProgramsForComplex(COMPLEX_NAMES.MORELLO),
     apartmentType: "Однокомнатные номера до 39 м2",
     pricePerSquareMeter: 355000,
-    banks: BANKS_ALL,
+    banks: BANKS_V3,
     surcharges: {
       withoutDownPayment: 25000,
       partialDownPayment: 10000,
@@ -376,7 +377,7 @@ export const housingPrices: HousingComplexPrice[] = [
     eligiblePrograms: getEligibleProgramsForComplex(COMPLEX_NAMES.MORELLO),
     apartmentType: "Однокомнатные номера от 39 м2",
     pricePerSquareMeter: 300000,
-    banks: BANKS_ALL,
+    banks: BANKS_V3,
     surcharges: {
       withoutDownPayment: 30000,
       partialDownPayment: 10000,
@@ -394,7 +395,7 @@ export const housingPrices: HousingComplexPrice[] = [
     eligiblePrograms: getEligibleProgramsForComplex(COMPLEX_NAMES.MORELLO),
     apartmentType: "Двухкомнатные номера от 50 м2",
     pricePerSquareMeter: 290000,
-    banks: BANKS_ALL,
+    banks: BANKS_V3,
     surcharges: {
       withoutDownPayment: 40000,
       partialDownPayment: 10000,

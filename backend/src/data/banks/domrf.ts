@@ -1,7 +1,7 @@
 // src/config/banks/sovcombank.ts
 
 import { BankOffer } from "../../types/types";
-import { ALL_COMPLEXES_DOMRF } from "../complexPrice/CONSTRUCTION";
+import { ALL_COMPLEXES } from "../complexPrice/CONSTRUCTION";
 import {
   BANK_NAMES,
   BASE_RATES,
@@ -17,7 +17,7 @@ export const DOMRF_OFFERS: BankOffer[] = [
     rate: BASE_RATES.DOMRF,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
-    complexes: ALL_COMPLEXES_DOMRF,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.DOMRF,
@@ -26,7 +26,7 @@ export const DOMRF_OFFERS: BankOffer[] = [
     rate: 11.9,
     subsidyPercent: 15.46,
     minPVPercent: MIN_PV_PERCENT,
-    complexes: ALL_COMPLEXES_DOMRF,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.DOMRF,
@@ -39,7 +39,7 @@ export const DOMRF_OFFERS: BankOffer[] = [
     durationMonths: 12,
     minLoanTermYears: 15,
     subsidyCalculationMethod: "standard",
-    complexes: ALL_COMPLEXES_DOMRF,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.DOMRF,
@@ -52,7 +52,7 @@ export const DOMRF_OFFERS: BankOffer[] = [
     durationMonths: 24,
     minLoanTermYears: 15,
     subsidyCalculationMethod: "standard",
-    complexes: ALL_COMPLEXES_DOMRF,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.DOMRF,
@@ -65,6 +65,6 @@ export const DOMRF_OFFERS: BankOffer[] = [
     durationMonths: 60,
     minLoanTermYears: 15,
     subsidyCalculationMethod: "standard",
-    complexes: ALL_COMPLEXES_DOMRF,
+    complexes: ALL_COMPLEXES,
   },
 ];
