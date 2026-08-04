@@ -1,0 +1,129 @@
+/* src/pages/ProjectsPage/components/ProjectDetails/ProjectInfo.css */
+.price-types-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.price-type-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.price-type-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1f2937;
+  flex-shrink: 0;
+}
+
+.price-type-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.price-base {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.price-without-pv {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.price-partial-pv {
+  color: #fd7e14;
+  font-weight: 600;
+}
+
+.info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-list li {
+  font-size: 0.9rem;
+  padding: 0.3rem 0;
+  color: #4b5563;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  line-height: 1.4;
+}
+
+.info-list li::before {
+  content: "▸";
+  color: #667eea;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.info-list.promotions li {
+  color: #667eea;
+  font-weight: 500;
+}
+
+.info-list.promotions li::before {
+  content: "🔥";
+  color: #f59e0b;
+}
+
+.info-list.special li {
+  color: #b8860b;
+  font-weight: 600;
+}
+
+.info-list.special li::before {
+  content: "⭐";
+}
+
+.banks-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.bank-tag {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.35rem 0.9rem;
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 20px;
+  color: #4b5563;
+  cursor: default;
+}
+
+.bank-tag-empty {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.35rem 0.9rem;
+  background: #f3f4f6;
+  border: 1.5px dashed #d1d5db;
+  border-radius: 20px;
+  color: #9ca3af;
+}
+
+/* Адаптив для информации */
+@media (max-width: 768px) {
+  .price-type-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .price-type-values {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

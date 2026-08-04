@@ -1,0 +1,91 @@
+/* src/pages/ProjectsPage/components/ProgramCard/ProgramCard.css */
+.program-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.program-card.expanded {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.program-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  user-select: none;
+  background: #f8fafc;
+  transition: background 0.2s ease;
+}
+
+.program-card-header:hover {
+  background: #f1f5f9 !important;
+}
+
+.program-card-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.program-card-icon {
+  font-size: 1.4rem;
+  width: 32px;
+  text-align: center;
+}
+
+.program-card-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1f2937;
+}
+
+.program-card-badge {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: white;
+  padding: 0.15rem 0.6rem;
+  border-radius: 12px;
+}
+
+.expand-icon {
+  font-size: 1.3rem;
+  font-weight: 300;
+  color: #6b7280;
+  width: 28px;
+  text-align: center;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.program-card.expanded .expand-icon {
+  color: #667eea;
+}
+
+.program-card-content {
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 480px) {
+  .program-card-header {
+    padding: 0.5rem 0.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .program-card-info {
+    flex-wrap: wrap;
+  }
+
+  .program-card-name {
+    font-size: 0.8rem;
+  }
+}
