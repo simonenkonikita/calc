@@ -1,8 +1,5 @@
 import { useMemo, ChangeEvent } from "react";
-import {
-  DEPOSIT_AMOUNT,
-  housingPrices,
-} from "../../data/complexPrice/complexPriceData";
+import { housingPrices } from "../../data/complexPrice/complexPriceData";
 import {
   PRICE_PER_SQUARE_METER_DEFAULT,
   MAX_DOWN_PAYMENT_PERCENT,
@@ -14,6 +11,7 @@ import {
 } from "../../data/constants";
 import { CalculatorFormData } from "../../utils/types";
 import "./FormSection.css";
+import { useConfig } from "../../hooks/useConfig";
 
 interface FormSectionProps {
   formData: CalculatorFormData;
@@ -27,17 +25,24 @@ export const FormSection: React.FC<FormSectionProps> = ({
   formData,
   onInputChange,
 }) => {
-  const complexes = Array.from(
-    new Set(housingPrices.map((item) => item.complexName)),
-  );
+  const { config, loading: configLoading } = useConfig();
+  const DEPOSIT_AMOUNT = config?.depositAmount ?? 30000;
 
+  // Получаем список уникальных ЖК
+  const complexes = useMemo(() => {
+    return Array.from(new Set(housingPrices.map((item) => item.complexName)));
+  }, []);
+
+  // Получаем типы квартир для выбранного ЖК
   const getApartmentTypes = (complex: string): string[] => {
     return housingPrices
       .filter((item) => item.complexName === complex)
       .map((item) => item.apartmentType);
   };
 
-  const availableTypes = getApartmentTypes(formData.complex);
+  const availableTypes = useMemo(() => {
+    return getApartmentTypes(formData.complex);
+  }, [formData.complex]);
 
   // ============================================================
   // РАСЧЕТ БАЗОВОЙ СТОИМОСТИ ОБЪЕКТА (без учета брони)
@@ -66,12 +71,11 @@ export const FormSection: React.FC<FormSectionProps> = ({
   // РАСЧЕТ ФИНАЛЬНОЙ СТОИМОСТИ ОБЪЕКТА (с учетом брони)
   // ============================================================
   const calculateObjectCost = useMemo(() => {
-    // Если учитываем бронь - вычитаем сумму брони
     if (formData.considerDepositInCost) {
       return Math.max(0, baseObjectCost - DEPOSIT_AMOUNT);
     }
     return baseObjectCost;
-  }, [baseObjectCost, formData.considerDepositInCost]);
+  }, [baseObjectCost, formData.considerDepositInCost, DEPOSIT_AMOUNT]);
 
   // ============================================================
   // ПРОВЕРКА: достаточно ли ПВ для полной оплаты
@@ -149,9 +153,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
 
     const objectCost = calculateObjectCost;
 
-    // Если сумма >= стоимости объекта
     if (numValue >= objectCost) {
-      // Отключаем флаги ипотеки и устанавливаем ПВ = стоимость объекта
       onInputChange("manualDownPayment", objectCost);
       onInputChange("mortgageWithoutDownPayment", false);
       onInputChange("mortgagePartialDownPayment", false);
@@ -202,7 +204,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
       ? baseObjectCost - DEPOSIT_AMOUNT
       : baseObjectCost;
 
-    // Если текущий ПВ больше новой стоимости - корректируем
     if (formData.manualDownPayment > objectCost) {
       onInputChange("manualDownPayment", objectCost);
       onInputChange("mortgageWithoutDownPayment", false);
@@ -288,6 +289,27 @@ export const FormSection: React.FC<FormSectionProps> = ({
     }
   };
 
+  // ============================================================
+  // ОБРАБОТЧИК ДЛЯ ИЗМЕНЕНИЯ ЖК (сброс типа квартиры)
+  // ============================================================
+  const handleComplexChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const newComplex = e.target.value;
+    const types = getApartmentTypes(newComplex);
+    onInputChange("complex", newComplex);
+    if (types.length > 0) {
+      onInputChange("apartmentType", types[0]);
+    }
+  };
+
+  // Если конфиг загружается, показываем индикатор
+  if (configLoading) {
+    return (
+      <div className="form-section">
+        <div className="loading-config">Загрузка конфигурации...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="form-section">
       <div className="form-grid">
@@ -297,17 +319,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
           <div className="form-fields">
             <div className="field">
               <label>Жилой комплекс</label>
-              <select
-                value={formData.complex}
-                onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                  const newComplex = e.target.value;
-                  const types = getApartmentTypes(newComplex);
-                  onInputChange("complex", newComplex);
-                  if (types.length > 0) {
-                    onInputChange("apartmentType", types[0]);
-                  }
-                }}
-              >
+              <select value={formData.complex} onChange={handleComplexChange}>
                 {complexes.map((complex) => (
                   <option key={complex} value={complex}>
                     {complex}
@@ -342,6 +354,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 value={formData.area || ""}
                 onChange={handleAreaChange}
                 onBlur={handleAreaBlur}
+                placeholder={`${MIN_AREA} - ${MAX_AREA}`}
               />
             </div>
 
@@ -349,6 +362,8 @@ export const FormSection: React.FC<FormSectionProps> = ({
               <label>Ручной ввод стоимости объекта (₽)</label>
               <input
                 type="number"
+                min={0}
+                step={1000}
                 value={formData.manualObjectCost || ""}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   onInputChange(
@@ -356,10 +371,12 @@ export const FormSection: React.FC<FormSectionProps> = ({
                     e.target.value ? Number(e.target.value) : null,
                   )
                 }
+                placeholder="Введите стоимость"
               />
             </div>
           </div>
         </div>
+
         {/* Блок: Параметры ипотеки */}
         <div className="form-block">
           <h2>Параметры ипотеки</h2>
@@ -379,6 +396,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
                   opacity: isDownPaymentDisabled ? 0.6 : 1,
                   cursor: isDownPaymentDisabled ? "not-allowed" : "text",
                 }}
+                placeholder={`${MIN_DOWN_PAYMENT_PERCENT} - ${MAX_DOWN_PAYMENT_PERCENT}`}
               />
             </div>
 
@@ -386,12 +404,15 @@ export const FormSection: React.FC<FormSectionProps> = ({
               <label>Ручной ввод ПВ (₽)</label>
               <input
                 type="number"
+                min={0}
+                step={1000}
                 value={formData.manualDownPayment || ""}
                 onChange={handleManualDownPaymentChange}
                 onBlur={handleManualDownPaymentBlur}
                 style={{
                   borderColor: isFullPayment ? "#22c55e" : undefined,
                 }}
+                placeholder="Введите сумму ПВ"
               />
               {isFullPayment && (
                 <div className="full-payment-message">
@@ -411,7 +432,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 value={formData.loanTerm || ""}
                 onChange={handleLoanTermChange}
                 onBlur={handleLoanTermBlur}
-                placeholder="30"
+                placeholder={`${MIN_LOAN_TERM} - ${MAX_LOAN_TERM}`}
               />
             </div>
           </div>

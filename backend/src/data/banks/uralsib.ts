@@ -1,6 +1,7 @@
 // src/config/banks/sovcombank.ts
 
 import { BankOffer } from "../../types/types";
+import { ALL_COMPLEXES } from "../complexPrice/CONSTRUCTION";
 import { URALSIB_BASE_RATES } from "../rates/uralsib";
 import {
   BANK_NAMES,
@@ -18,6 +19,7 @@ export const URALSIB_OFFERS: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicRates: URALSIB_BASE_RATES,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.URALSIB,
@@ -26,6 +28,7 @@ export const URALSIB_OFFERS: BankOffer[] = [
     rate: 12.89,
     subsidyPercent: 18.6,
     minPVPercent: MIN_PV_PERCENT,
+    complexes: ALL_COMPLEXES,
   },
   {
     bank: BANK_NAMES.URALSIB,
@@ -34,6 +37,7 @@ export const URALSIB_OFFERS: BankOffer[] = [
     rate: 13.89,
     subsidyPercent: 13.8,
     minPVPercent: MIN_PV_PERCENT,
+    complexes: ALL_COMPLEXES,
   },
   /*  {
     bank: "Уралсиб",

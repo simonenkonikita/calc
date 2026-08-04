@@ -9,8 +9,12 @@ import {
   SBERBANK_EXCESS_RATES,
 } from "../rates/sberbankRates";
 
-import { COMPLEXES_FAMILY } from "../complexPrice/complexPriceData";
 import { BankOffer } from "../../types/types";
+import {
+  ALL_COMPLEXES,
+  COMPLEXES_FAMILY,
+  COMPLEXES_TRANCHE,
+} from "../complexPrice/CONSTRUCTION";
 
 export const SBERBANK_OFFERS: BankOffer[] = [
   {
@@ -21,6 +25,26 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicRates: SBERBANK_BASE_RATES,
+    dynamicRatesIU: [
+      {
+        // Ставка при ПВ от 20.1%
+        minPVPercent: 20.1,
+        rate: 19.7,
+        description: "ПВ от 20.1%",
+      },
+      {
+        // Ставка при ПВ от 30.1%
+        minPVPercent: 30.1,
+        rate: 18.2,
+        description: "ПВ от 30.1%",
+      },
+      {
+        // Ставка при ПВ от 50.1%
+        minPVPercent: 50.1,
+        rate: 17.5,
+        description: "ПВ от 50.1%",
+      },
+    ],
   },
   {
     bank: BANK_NAMES.SBER,
@@ -30,6 +54,26 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
     dynamicRates: SBERBANK_BASE_RATES,
+    dynamicRatesIU: [
+      {
+        // Ставка при ПВ от 20.1%
+        minPVPercent: 20.1,
+        rate: 19.7,
+        description: "ПВ от 20.1%",
+      },
+      {
+        // Ставка при ПВ от 30.1%
+        minPVPercent: 30.1,
+        rate: 18.2,
+        description: "ПВ от 30.1%",
+      },
+      {
+        // Ставка при ПВ от 50.1%
+        minPVPercent: 50.1,
+        rate: 17.5,
+        description: "ПВ от 50.1%",
+      },
+    ],
     isTranche: true,
     trancheFirstPercent: 19.9,
     trancheSecondDate: "2027-02-01",
@@ -113,7 +157,6 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     rate: 6,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
-    complexes: COMPLEXES_FAMILY,
   },
   {
     bank: BANK_NAMES.SBER,
@@ -122,7 +165,6 @@ export const SBERBANK_OFFERS: BankOffer[] = [
     rate: 3.5,
     subsidyPercent: 14.5,
     minPVPercent: MIN_PV_PERCENT,
-    complexes: COMPLEXES_FAMILY,
   },
   {
     bank: BANK_NAMES.SBER,

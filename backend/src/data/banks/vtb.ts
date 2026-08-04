@@ -6,8 +6,9 @@ import {
 } from "./constants";
 
 import { VTB_EXCESS_RATES } from "../rates/vtbRates";
-import { COMPLEXES_FAMILY } from "../complexPrice/complexPriceData";
+
 import { BankOffer } from "../../types/types";
+import { COMPLEXES_FAMILY } from "../complexPrice/CONSTRUCTION";
 
 export const VTB_OFFERS: BankOffer[] = [
   {

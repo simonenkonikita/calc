@@ -12,7 +12,7 @@ import { BankFilters } from "./BankFilters/BankFilters";
 import { NoResults } from "./NoResults/NoResults";
 import { BankGroup } from "./BankCard/BankGroup/BankGroup";
 import { FloatingSelectionBar } from "./FloatingSelectionBar/FloatingSelectionBar";
-import { BANK_ORDER } from "../../data/complexPrice/complexPriceData";
+import { BANK_ORDER } from "../../utils/constants";
 
 export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   bankResults,

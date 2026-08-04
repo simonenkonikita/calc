@@ -17,31 +17,79 @@ export interface Variables {
   };
 }
 
+export interface ProgramInfo {
+  type: string; // Тип программы: "family", "it", "base" и т.д.
+  label: string; // Название: "Семейная ипотека"
+  icon: string; // Иконка: "👨‍👩‍👧‍👦"
+  color: string; // Цвет: "#8b5cf6"
+  description: string; // Описание: "Для семей с детьми. Льготная ставка 6%"
+  banks?: string[]; // Банки: ["Сбербанк", "Альфа-Банк"]
+  offers?: BankOffer[]; // Все офферы по этой программе
+}
+
 // ========== ЦЕНЫ НА ЖК ==========
 export interface HousingComplexPrice {
+  id: string;
   complexName: string;
+  status: string;
   apartmentType: string;
+  statusIcon: string;
+  description?: string;
   pricePerSquareMeter: number;
   banks?: string[];
   surcharges?: {
     withoutDownPayment: number;
     partialDownPayment: number;
   };
+  paymentTerms: string[];
+  promotions: string[];
+  specialOffers?: string[];
+  materialsLink?: string;
+  eligiblePrograms?: ProgramInfo[];
 }
 
-// ==========  ИНФОРМАЦИЯ ПО жк ==========
+export interface ApartmentType {
+  type: string;
+  pricePerSquareMeter: number;
+  surcharges?: {
+    withoutDownPayment: number;
+    partialDownPayment: number;
+  };
+}
+
 export interface ProjectInfo {
   id: string;
   name: string;
-  status: "строится" | "сдан" | "проект";
+  status: string;
   statusIcon: string;
+  description?: string;
   priceInfo: string;
   paymentTerms: string[];
   promotions: string[];
   banks: string[];
   specialOffers?: string[];
-  description?: string;
   materialsLink?: string;
+  apartmentTypes: ApartmentType[];
+  eligiblePrograms?: ProgramInfo[];
+}
+
+export interface RawProjectData {
+  id: string;
+  complexName: string;
+  status: string;
+  statusIcon: string;
+  description?: string;
+  priceInfo: string;
+  paymentTerms: string[];
+  promotions: string[];
+  banks: string[];
+  specialOffers?: string[];
+  apartmentType: string;
+  pricePerSquareMeter: number;
+  surcharges?: {
+    withoutDownPayment: number;
+    partialDownPayment: number;
+  };
 }
 
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========
@@ -115,6 +163,13 @@ export interface DynamicRateRule {
   roundingStrategy?: "up" | "down";
 }
 
+// 🔥 НОВЫЙ ТИП для простых динамических ставок (только ПВ -> ставка)
+export interface SimpleDynamicRate {
+  minPVPercent: number; // Минимальный ПВ для этой ставки
+  rate: number; // Ставка при этом ПВ
+  description?: string; // Описание условия
+}
+
 export interface BankOffer {
   bank: string; // Название банка
   program: string; // Название программы
@@ -129,6 +184,7 @@ export interface BankOffer {
   shortRate?: number; //
   subsidyCalculationMethod?: "onlyPercent" | "standard";
   dynamicRates?: DynamicRateRule[];
+  dynamicRatesIU?: SimpleDynamicRate[];
   dynamicSubsidyPercent?: DynamicRateRule[];
   isTranche?: boolean;
   trancheFirstPercent?: number; // % от стоимости объекта для первого транша (например, 19.9%)
@@ -141,6 +197,7 @@ export interface BankOffer {
   twoContractSubsidies?: DynamicRateRule[];
   complexes?: string[];
   minLoanTermYears?: number;
+  description?: string;
 }
 
 export interface TranchePaymentsResult {

@@ -47,6 +47,24 @@ export const PROGRAM_TYPE_ICONS = {
   TRANCHE: "📊",
 };
 
+export const PROGRAM_TYPE_COLORS = {
+  BASE: "#6b7280",
+  FULL: "#f59e0b",
+  SHORT: "#ef4444",
+  FAMILY: "#8b5cf6",
+  IT: "#3b82f6",
+  TRANCHE: "#ec4899",
+};
+
+export const PROGRAM_TYPE_DESCRIPTIONS = {
+  BASE: "Стандартная ипотечная программа с базовой ставкой",
+  FULL: "Субсидированная ипотека на длительный срок",
+  SHORT: "Субсидированная ипотека на короткий срок",
+  FAMILY: "Для семей с детьми. Льготная ставка 6%",
+  IT: "Для IT-специалистов. Льготная ставка 6%",
+  TRANCHE: "Ипотека с траншевой системой финансирования",
+};
+
 export const CATEGORY_ORDER = [
   {
     key: PROGRAM_TYPES.BASE,
