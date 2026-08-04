@@ -91,6 +91,7 @@ export interface RawProjectData {
     partialDownPayment: number;
   };
   eligiblePrograms?: ProgramInfo[];
+  materialsLink?: string;
 }
 
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========

@@ -82,6 +82,11 @@ export const useProjects = () => {
     return Math.max(...types.map((t) => t.pricePerSquareMeter));
   };
 
+  const getProjectLink = (projectId: string): string | undefined => {
+    const project = getProjectById(projectId);
+    return project?.materialsLink;
+  };
+
   return {
     projects,
     loading,
@@ -94,6 +99,7 @@ export const useProjects = () => {
     getBanksForProject,
     getMinPrice,
     getMaxPrice,
+    getProjectLink,
   };
 };
 
@@ -122,6 +128,7 @@ const groupProjectsByComplex = (data: RawProjectData[]): ProjectInfo[] => {
         specialOffers: item.specialOffers,
         apartmentTypes: [],
         eligiblePrograms: item.eligiblePrograms || [],
+        materialsLink: item.materialsLink || undefined,
       });
     }
 

@@ -9,6 +9,7 @@ import {
   BANKS_V2,
   BANKS_V3,
 } from "./CONSTRUCTION";
+import { MATERIALLINK } from "./MATERIALLINK";
 import { PAYMENT_TERMS } from "./PAYMENT_TERMS";
 import { PROMOTIONS } from "./PROMOTIONS";
 import { SPECIAL_OFFERS } from "./SPECIAL_OFFERS";
@@ -324,6 +325,7 @@ export const housingPrices: HousingComplexPrice[] = [
       withoutDownPayment: 0,
       partialDownPayment: 0,
     },
+    materialsLink: MATERIALLINK[COMPLEX_NAMES.MORE_TUT],
   },
   {
     id: COMPLEX_IDS.MORE_TUT,
@@ -342,6 +344,7 @@ export const housingPrices: HousingComplexPrice[] = [
       withoutDownPayment: 0,
       partialDownPayment: 0,
     },
+    materialsLink: MATERIALLINK[COMPLEX_NAMES.MORE_TUT],
   },
 
   // ============================================================
@@ -382,6 +385,7 @@ export const housingPrices: HousingComplexPrice[] = [
       withoutDownPayment: 30000,
       partialDownPayment: 10000,
     },
+    materialsLink: MATERIALLINK[COMPLEX_NAMES.MORE_TUT],
   },
   {
     id: COMPLEX_IDS.MORELLO,

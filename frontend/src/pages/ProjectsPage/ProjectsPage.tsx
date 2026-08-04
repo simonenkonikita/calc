@@ -180,6 +180,13 @@ export const ProjectsPage: React.FC = () => {
     );
   };
 
+  // 🔥 Обработчик открытия ссылки
+  const handleOpenLink = (link: string) => {
+    if (link) {
+      window.open(link, '_blank');
+    }
+  };
+
   if (loading) {
     return (
       <div className="projects-page">
@@ -250,11 +257,24 @@ export const ProjectsPage: React.FC = () => {
                   </span>
                   <h2>{selectedProject.name}</h2>
                 </div>
-                <span
-                  className={`status-badge ${getStatusClass(selectedProject.status)}`}
-                >
-                  {selectedProject.status}
-                </span>
+                <div className="details-header-actions">
+                  <span
+                    className={`status-badge ${getStatusClass(selectedProject.status)}`}
+                  >
+                    {selectedProject.status}
+                  </span>
+                  {/* 🔥 КНОПКА СО ССЫЛКОЙ НА ПРОЕКТ (используем materialsLink) */}
+                  {selectedProject.materialsLink && (
+                    <button
+                      className="project-link-button"
+                      onClick={() => handleOpenLink(selectedProject.materialsLink!)}
+                      title="Открыть страницу проекта"
+                    >
+                      <span className="link-icon">🔗</span>
+                      Сайт проекта
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="details-content">
