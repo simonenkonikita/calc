@@ -6,13 +6,8 @@ import { useProjects } from "../../hooks/useProjects";
 import { ProjectInfo } from "../../utils/types";
 
 export const ProjectsPage: React.FC = () => {
-  const { 
-    projects, 
-    loading, 
-    error,
-    getBanksForProject 
-  } = useProjects();
-  
+  const { projects, loading, error, getBanksForProject } = useProjects();
+
   const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(
     null,
   );
@@ -93,30 +88,31 @@ export const ProjectsPage: React.FC = () => {
 
   // 🔥 Функция для отображения субсидии (динамическая или статическая)
   const getDisplaySubsidy = (offer: any) => {
-    const hasDynamicSubsidy = offer.dynamicSubsidyPercent && offer.dynamicSubsidyPercent.length > 0;
-    
+    const hasDynamicSubsidy =
+      offer.dynamicSubsidyPercent && offer.dynamicSubsidyPercent.length > 0;
+
     if (hasDynamicSubsidy) {
       const subsidies = offer.dynamicSubsidyPercent
         .map((rule: any) => rule.subsidyPercent)
         .filter((val: number) => val !== undefined && val !== null)
         .sort((a: number, b: number) => a - b);
-      
+
       if (subsidies.length === 0) return "—";
-      
+
       const minSubsidy = subsidies[0];
       const maxSubsidy = subsidies[subsidies.length - 1];
-      
+
       if (minSubsidy === maxSubsidy) {
         return `${minSubsidy}%`;
       }
-      
+
       return `${minSubsidy}% — ${maxSubsidy}%`;
     }
-    
+
     if (offer.subsidyPercent > 0) {
       return `${offer.subsidyPercent}%`;
     }
-    
+
     return "—";
   };
 
@@ -183,7 +179,7 @@ export const ProjectsPage: React.FC = () => {
   // 🔥 Обработчик открытия ссылки
   const handleOpenLink = (link: string) => {
     if (link) {
-      window.open(link, '_blank');
+      window.open(link, "_blank");
     }
   };
 
@@ -223,10 +219,14 @@ export const ProjectsPage: React.FC = () => {
   return (
     <div className="projects-page">
       <div className="projects-layout">
+        {/* Левая колонка - список проектов */}
         <div className="projects-list-wrapper">
           <div className="projects-list-card">
             <div className="projects-list-header">
-              <h2>Проекты</h2>
+              <div className="header-left">
+                <span className="header-icon">🏗️</span>
+                <h2>Жилые комплексы</h2>
+              </div>
               <span className="count">{projects.length}</span>
             </div>
             <div className="projects-list-items">
@@ -236,70 +236,109 @@ export const ProjectsPage: React.FC = () => {
                   className={`project-item ${selectedProject?.id === project.id ? "active" : ""}`}
                   onClick={() => setSelectedProject(project)}
                 >
-                  <span className="project-icon">{project.statusIcon}</span>
+                  <span className="project-status-badge">
+                    <span
+                      className={`status-dot ${getStatusDotClass(project.status)}`}
+                    />
+                  </span>
                   <span className="project-name">{project.name}</span>
-                  <span
-                    className={`project-status-dot ${getStatusDotClass(project.status)}`}
-                  />
                 </div>
               ))}
             </div>
           </div>
         </div>
 
+        {/* Правая колонка - детали проекта */}
         <div className="project-details-wrapper">
           {selectedProject ? (
             <div className="project-details-card">
+              {/* Хедер с градиентом */}
               <div className="details-header">
-                <div className="details-title">
-                  <span className="project-icon-large">
-                    {selectedProject.statusIcon}
-                  </span>
-                  <h2>{selectedProject.name}</h2>
-                </div>
-                <div className="details-header-actions">
-                  <span
-                    className={`status-badge ${getStatusClass(selectedProject.status)}`}
-                  >
-                    {selectedProject.status}
-                  </span>
-                  {/* 🔥 КНОПКА СО ССЫЛКОЙ НА ПРОЕКТ (используем materialsLink) */}
-                  {selectedProject.materialsLink && (
-                    <button
-                      className="project-link-button"
-                      onClick={() => handleOpenLink(selectedProject.materialsLink!)}
-                      title="Открыть страницу проекта"
-                    >
-                      <span className="link-icon">🔗</span>
-                      Сайт проекта
-                    </button>
-                  )}
+                <div className="details-header-bg">
+                  <div className="details-header-top">
+                    <div className="details-title">
+                      <div className="project-icon-large">
+                        {selectedProject.statusIcon}
+                      </div>
+                      <div>
+                        <h2>{selectedProject.name}</h2>
+                        {selectedProject.description && (
+                          <p className="project-subtitle">
+                            {selectedProject.description}
+                          </p>
+                        )}
+                        {/* 🔥 Статус под названием, слева */}
+                        <span
+                          className={`status-badge ${getStatusClass(selectedProject.status)}`}
+                        >
+                          {selectedProject.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 🔥 Кнопка Сайт проекта в правом углу */}
+                    <div className="details-header-right">
+                      {selectedProject.materialsLink && (
+                        <button
+                          className="project-link-button"
+                          onClick={() =>
+                            handleOpenLink(selectedProject.materialsLink!)
+                          }
+                        >
+                          <svg
+                            className="link-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                          </svg>
+                          Сайт проекта
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-
+              {/* Контент */}
               <div className="details-content">
-                {selectedProject.description && (
-                  <div className="details-section">
-                    <p className="description">{selectedProject.description}</p>
+                {/* Акции */}
+                {selectedProject.promotions &&
+                  selectedProject.promotions.length > 0 && (
+                    <div className="details-section highlight">
+                      <div className="section-label">
+                        🔥 Акции и предложения
+                      </div>
+                      <ul className="info-list promotions">
+                        {selectedProject.promotions.map((promo, index) => (
+                          <li key={index}>{promo}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                {/* 🔥 Условия оплаты и Цены в одной строке */}
+                <div className="details-row">
+                  <div className="details-section half">
+                    <div className="section-label">💰 Цены</div>
+                    <div className="section-value price">
+                      {getPriceInfo(selectedProject)}
+                    </div>
                   </div>
-                )}
 
-                <div className="details-section">
-                  <div className="section-label">💳 Условия оплаты</div>
-                  <ul className="info-list">
-                    {selectedProject.paymentTerms.map((term, index) => (
-                      <li key={index}>{term}</li>
-                    ))}
-                  </ul>
+                  <div className="details-section half">
+                    <div className="section-label">💳 Условия оплаты</div>
+                    <ul className="info-list">
+                      {selectedProject.paymentTerms.map((term, index) => (
+                        <li key={index}>{term}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
-                <div className="details-section">
-                  <div className="section-label">💰 Цены</div>
-                  <div className="section-value price">
-                    {getPriceInfo(selectedProject)}
-                  </div>
-                </div>
-
+                {/* Банки-партнеры */}
                 <div className="details-section">
                   <div className="section-label">🏦 Банки-партнеры</div>
                   <div className="banks-tags">
@@ -317,6 +356,7 @@ export const ProjectsPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Спецпредложения */}
                 {selectedProject.specialOffers &&
                   selectedProject.specialOffers.length > 0 && (
                     <div className="details-section special">
@@ -332,19 +372,16 @@ export const ProjectsPage: React.FC = () => {
                 {/* 🔥 АККОРДЕОН ПО ТИПАМ ПРОГРАММ */}
                 {sortedProgramTypes.length > 0 && (
                   <div className="details-section mortgage-modern-section">
-                    <div className="section-label">
-                      🏦 Ипотечные программы
-                      <span className="programs-count-badge">
-                        {sortedProgramTypes.length} типов
-                      </span>
-                    </div>
+                    <div className="section-label">🏦 Ипотечные программы</div>
 
                     <div className="programs-modern-grid">
                       {sortedProgramTypes.map((programType) => {
                         const program = groupedByProgram[programType];
                         const isExpanded = expandedProgram === programType;
-                        
-                        const filteredOffers = getFilteredOffers(program.offers || []);
+
+                        const filteredOffers = getFilteredOffers(
+                          program.offers || [],
+                        );
 
                         return (
                           <div
@@ -535,18 +572,6 @@ export const ProjectsPage: React.FC = () => {
                     </div>
                   </div>
                 )}
-
-                {selectedProject.promotions &&
-                  selectedProject.promotions.length > 0 && (
-                    <div className="details-section highlight">
-                      <div className="section-label">Акции и предложения</div>
-                      <ul className="info-list promotions">
-                        {selectedProject.promotions.map((promo, index) => (
-                          <li key={index}>{promo}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
               </div>
             </div>
           ) : (
