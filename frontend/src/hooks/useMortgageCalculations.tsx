@@ -1,5 +1,5 @@
-// hooks/useMortgageCalculator.ts
-import { useState, useEffect, useCallback, useRef } from "react";
+// hooks/useMortgageCalculations.ts
+import { useState, useCallback, useRef } from "react";
 import type {
   CalculatorFormData,
   ObjectCalculationResult,
@@ -40,7 +40,19 @@ export const useMortgageCalculator = () => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Для отмены предыдущих запросов
+  // ✅ Сохраняем выбранный оффер и фильтры между перерасчётами
+  const selectedOfferRef = useRef<number | null>(null);
+
+  const filtersRef = useRef<{
+    selectedBankFilter: string;
+    selectedProgramTypeFilter: string;
+    selectedCards: Set<number>;
+  }>({
+    selectedBankFilter: "all",
+    selectedProgramTypeFilter: "all",
+    selectedCards: new Set(),
+  });
+
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // ============================================================
@@ -61,17 +73,24 @@ export const useMortgageCalculator = () => {
     try {
       const response = await api.calculate(formData);
 
-      // Если запрос был отменён — игнорируем результат
       if (controller.signal.aborted) return;
 
       if (response.success) {
         setResults(response.data);
-        setSelectedOfferIndex(null);
+        // ✅ Восстанавливаем выбранный оффер, если он ещё существует
+        if (selectedOfferRef.current !== null) {
+          const maxIndex = response.data.bankResults.length - 1;
+          if (selectedOfferRef.current <= maxIndex) {
+            setSelectedOfferIndex(selectedOfferRef.current);
+          } else {
+            setSelectedOfferIndex(null);
+            selectedOfferRef.current = null;
+          }
+        }
       } else {
         throw new Error(response.error || "Unknown error");
       }
     } catch (err) {
-      // Игнорируем ошибки отменённых запросов
       if (err instanceof Error && err.name === "AbortError") {
         return;
       }
@@ -89,38 +108,7 @@ export const useMortgageCalculator = () => {
   }, [formData]);
 
   // ============================================================
-  // ДЕБАУНС ДЛЯ ЗАПРОСОВ (чтобы не дёргать API при каждом нажатии)
-  // ============================================================
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const debouncedCalculate = useCallback(() => {
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    debounceTimeoutRef.current = setTimeout(() => {
-      calculateResults();
-    }, 300); // Задержка 300ms
-  }, [calculateResults]);
-
-  // ============================================================
-  // АВТОЗАПУСК РАСЧЕТА ПРИ ИЗМЕНЕНИИ ФОРМЫ
-  // ============================================================
-  useEffect(() => {
-    debouncedCalculate();
-
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, [debouncedCalculate]);
-
-  // ============================================================
-  // ОБРАБОТЧИКИ ИЗМЕНЕНИЙ
+  // ОБРАБОТЧИКИ ИЗМЕНЕНИЙ (только форма, без перерасчёта)
   // ============================================================
   const handleInputChange = useCallback(
     <K extends keyof CalculatorFormData>(
@@ -130,19 +118,16 @@ export const useMortgageCalculator = () => {
       setFormData((prev) => {
         let newData = { ...prev, [field]: value };
 
-        // Если включена "ипотека без ПВ"
         if (field === "mortgageWithoutDownPayment" && value === true) {
           newData.downPaymentPercent = DEFAULT_MIN_PV_PERCENT;
           newData.mortgagePartialDownPayment = false;
         }
 
-        // Если включена "частичная ипотека"
         if (field === "mortgagePartialDownPayment" && value === true) {
           newData.downPaymentPercent = DEFAULT_MIN_PV_PERCENT;
           newData.mortgageWithoutDownPayment = false;
         }
 
-        // Если меняют ПВ, а включены спецрежимы — блокируем
         if (
           field === "downPaymentPercent" &&
           (newData.mortgageWithoutDownPayment ||
@@ -156,7 +141,6 @@ export const useMortgageCalculator = () => {
           };
         }
 
-        // Если ручной ввод ПВ — сбрасываем процент
         if (
           field === "manualDownPayment" &&
           typeof value === "number" &&
@@ -170,24 +154,47 @@ export const useMortgageCalculator = () => {
 
         return newData;
       });
+
+      // ✅ Сбрасываем выбранный оффер только при изменении ключевых параметров
+      const shouldResetOffer = [
+        "complex",
+        "apartmentType",
+        "area",
+        "manualObjectCost",
+        "considerDepositInCost",
+        "downPaymentPercent",
+        "manualDownPayment",
+        "loanTerm",
+        "noSubsidyInflate",
+        "mortgageWithoutDownPayment",
+        "mortgagePartialDownPayment",
+      ].includes(field as string);
+
+      if (shouldResetOffer) {
+        setSelectedOfferIndex(null);
+        selectedOfferRef.current = null;
+        // Сбрасываем выбранные карточки в фильтрах
+        filtersRef.current.selectedCards = new Set();
+      }
     },
     [],
   );
 
-  const handleSelectOffer = useCallback(
-    (index: number) => {
-      setSelectedOfferIndex(index);
-      if (results?.bankResults[index]) {
-        const selected = results.bankResults[index];
-        console.log("Выбрано предложение:", {
-          bank: selected.bank,
-          program: selected.program,
-          monthlyPayment: selected.monthlyPayment,
-          contractAmount: selected.contractAmount,
-        });
-      }
+  const handleSelectOffer = useCallback((index: number) => {
+    setSelectedOfferIndex(index);
+    selectedOfferRef.current = index;
+  }, []);
+
+  // ============================================================
+  // ФУНКЦИИ ДЛЯ УПРАВЛЕНИЯ ФИЛЬТРАМИ
+  // ============================================================
+  const getFiltersRef = useCallback(() => filtersRef.current, []);
+
+  const updateFilters = useCallback(
+    (updates: Partial<typeof filtersRef.current>) => {
+      filtersRef.current = { ...filtersRef.current, ...updates };
     },
-    [results],
+    [],
   );
 
   // ============================================================
@@ -205,5 +212,9 @@ export const useMortgageCalculator = () => {
     handleInputChange,
     handleSelectOffer,
     formatMoney,
+    calculateResults, // ✅ Добавляем функцию для ручного расчёта
+    _filtersRef: filtersRef,
+    _updateFilters: updateFilters,
+    _getFilters: getFiltersRef,
   };
 };

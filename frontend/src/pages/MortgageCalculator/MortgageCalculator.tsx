@@ -15,7 +15,13 @@ export const MortgageCalculator: React.FC = () => {
     handleInputChange,
     handleSelectOffer,
     formatMoney,
+    calculateResults,
+    _filtersRef,
   } = useMortgageCalculator();
+
+  const handleCalculate = () => {
+    calculateResults();
+  };
 
   return (
     <div className="mortgage-calculator-page">
@@ -52,7 +58,7 @@ export const MortgageCalculator: React.FC = () => {
                   </div>
                   <button
                     className="error-retry-btn"
-                    onClick={() => window.location.reload()}
+                    onClick={calculateResults} // ✅ используем calculateResults
                   >
                     Повторить
                   </button>
@@ -63,6 +69,8 @@ export const MortgageCalculator: React.FC = () => {
             <FormSection
               formData={formData}
               onInputChange={handleInputChange}
+              onCalculate={handleCalculate} // ✅ передаём кнопку расчёта
+              isCalculating={isCalculating}
             />
           </div>
         </div>
@@ -79,12 +87,13 @@ export const MortgageCalculator: React.FC = () => {
               loanTermYears={formData.loanTerm || 30}
               area={formData.area}
               complexName={formData.complex}
+              filtersRef={_filtersRef}
             />
           )}
 
           {!isCalculating && (!results || results.bankResults.length === 0) && (
             <div className="empty-results">
-              <p>Заполните параметры для расчета предложений</p>
+              <p>Заполните параметры и нажмите «Рассчитать»</p>
             </div>
           )}
         </div>

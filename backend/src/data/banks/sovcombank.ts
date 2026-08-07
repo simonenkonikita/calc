@@ -2,6 +2,7 @@
 
 import { BankOffer } from "../../types/types";
 import { COMPLEXES_FAMILY } from "../complexPrice/CONSTRUCTION";
+import { SOVKOMBANK_BASE_RATES } from "../rates/sovkombankRates";
 import {
   SOVKOMBANK_SUBSIDIES_11_9,
   SOVKOMBANK_SUBSIDIES_12_49,
@@ -28,6 +29,7 @@ export const SOVCOMBANK_OFFERS: BankOffer[] = [
     program: PROGRAM_TYPES.BASE,
     type: "base",
     rate: BASE_RATES.SOVKOM,
+    dynamicRates: SOVKOMBANK_BASE_RATES,
     subsidyPercent: 0,
     minPVPercent: MIN_PV_PERCENT,
   },

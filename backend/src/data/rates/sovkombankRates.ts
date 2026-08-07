@@ -1,4 +1,4 @@
-import { DynamicRateRule } from "../../utils/types";
+import { DynamicRateRule } from "../../types/types";
 
 export const SOVKOMBANK_BASE_RATES: DynamicRateRule[] = [
   // Сумма ≥ 8 млн ₽

@@ -1,5 +1,7 @@
 // Типы данных
 
+import { RefObject } from "react";
+
 // Расширенный тип для хранения оригинального индекса
 export interface BankProgramResultWithIndex extends BankProgramResult {
   _originalIndex: number;
@@ -128,6 +130,11 @@ export interface OfferBankSectionProps {
   loanTermYears: number;
   area: number;
   complexName: string;
+  filtersRef?: RefObject<{
+    selectedBankFilter: string;
+    selectedProgramTypeFilter: string;
+    selectedCards: Set<number>;
+  }>; // ✅ полное определение
 }
 
 // ========== БАНКОВСКИЕ ПРОГРАММЫ (из JSON) ==========

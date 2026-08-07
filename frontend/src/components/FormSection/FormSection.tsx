@@ -19,11 +19,15 @@ interface FormSectionProps {
     field: K,
     value: CalculatorFormData[K],
   ) => void;
+  onCalculate?: () => void; // ✅ Добавляем проп для кнопки расчёта
+  isCalculating?: boolean;
 }
 
 export const FormSection: React.FC<FormSectionProps> = ({
   formData,
   onInputChange,
+  onCalculate,
+  isCalculating = false,
 }) => {
   const { config, loading: configLoading } = useConfig();
   const DEPOSIT_AMOUNT = config?.depositAmount ?? 30000;
@@ -517,6 +521,19 @@ export const FormSection: React.FC<FormSectionProps> = ({
           </div>
         </div>
       </div>
+
+      {/* ✅ Кнопка "Рассчитать" */}
+      {onCalculate && (
+        <div className="form-actions">
+          <button
+            className="calculate-btn"
+            onClick={onCalculate}
+            disabled={isCalculating}
+          >
+            {isCalculating ? "Расчёт..." : "🔄 Рассчитать"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
