@@ -21,7 +21,6 @@ export const MortgageCalculator: React.FC = () => {
   } = useMortgageCalculator();
 
   const handleCalculate = () => {
-    // 🔥 Очищаем кеш, чтобы получить свежие данные
     clearCache();
     calculateResults();
   };
