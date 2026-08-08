@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./ProjectsPage.css";
-import { useProjects } from "../../hooks/useProjects";
+import { useProjects } from "../../hooks/api/useProjects";
 import { ProjectsList } from "../../components/ProjectsList/ProjectsList";
 import { ProjectDetails } from "../../components/ProjectDetails/ProjectDetails";
 

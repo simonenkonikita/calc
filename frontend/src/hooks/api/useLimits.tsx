@@ -1,16 +1,6 @@
-// frontend/src/hooks/useLimits.ts
-
 import { useState, useEffect } from "react";
-import { api } from "../services/api";
-
-export interface Limits {
-  familyMortgageLimit: number;
-  maxFamilyMortgageSum: number;
-  itMortgageLimit: number;
-  maxItMortgageSum: number;
-  deposit: number;
-  minExcessAmounts: Record<string, number>;
-}
+import { api } from "../../services/api";
+import { Limits } from "../../utils/types";
 
 export const useLimits = () => {
   const [limits, setLimits] = useState<Limits | null>(null);

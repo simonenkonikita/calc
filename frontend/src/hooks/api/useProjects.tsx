@@ -1,8 +1,8 @@
 // frontend/src/hooks/useProjects.ts
 
 import { useState, useEffect } from "react";
-import { api } from "../services/api";
-import { ApartmentType, ProjectInfo, RawProjectData } from "../utils/types";
+import { api } from "../../services/api";
+import { ApartmentType, ProjectInfo, RawProjectData } from "../../utils/types";
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<ProjectInfo[]>([]);

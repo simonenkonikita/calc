@@ -11,7 +11,7 @@ import {
 } from "../../data/constants";
 import { CalculatorFormData } from "../../utils/types";
 import "./FormSection.css";
-import { useConfig } from "../../hooks/useConfig";
+import { useConfig } from "../../hooks/api/useConfig";
 
 interface FormSectionProps {
   formData: CalculatorFormData;

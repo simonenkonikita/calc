@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ProjectDetails } from "../../components/ProjectDetails/ProjectDetails";
-import { useProjects } from "../../hooks/useProjects";
+import { useProjects } from "../../hooks/api/useProjects";
 
 export const MortgageProgramsPage: React.FC = () => {
   const { projects, loading, error } = useProjects();

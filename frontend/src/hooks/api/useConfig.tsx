@@ -1,14 +1,9 @@
-// frontend/src/hooks/useConfig.ts
-
 import { useState, useEffect } from "react";
-import { api } from "../services/api";
-
-export interface Config {
-  depositAmount: number;
-}
+import { api } from "../../services/api";
+import { ConfigData } from "../../utils/types";
 
 export const useConfig = () => {
-  const [config, setConfig] = useState<Config | null>(null);
+  const [config, setConfig] = useState<ConfigData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

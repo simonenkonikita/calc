@@ -1,14 +1,5 @@
-// frontend/src/hooks/usePrograms.ts
-
 import { useState, useEffect } from "react";
-
-export interface ProgramConfig {
-  type: string;
-  label: string;
-  icon: string;
-  color: string;
-  description: string;
-}
+import { ProgramConfig } from "../../utils/types";
 
 export const usePrograms = () => {
   const [programs, setPrograms] = useState<ProgramConfig[]>([]);

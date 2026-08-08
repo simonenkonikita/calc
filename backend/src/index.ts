@@ -8,9 +8,8 @@ import dotenv from "dotenv";
 import calculatorRoutes from "./routes/calculator.routes";
 import banksRoutes from "./routes/banks.routes";
 import limitsRoutes from "./routes/limits.routes";
-import { projectsRoutes } from "./routes/projects.routes";
-import configRoutes from "./routes/config";
-import mortgageProgramsRoutes from "./routes/mortgagePrograms";
+import projectsRoutes from "./routes/projects.routes";
+import configRoutes from "./routes/config.routes";
 
 dotenv.config();
 
@@ -43,12 +42,11 @@ app.get("/health", (req, res) => {
 });
 
 // Ваши роуты
+app.use("/api/config", configRoutes);
 app.use("/api/calculator", calculatorRoutes);
 app.use("/api/banks", banksRoutes);
 app.use("/api/limits", limitsRoutes);
 app.use("/api/projects", projectsRoutes);
-app.use("/api", configRoutes);
-app.use("/api", mortgageProgramsRoutes);
 
 // Error handling
 app.use(

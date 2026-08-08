@@ -1,8 +1,7 @@
-// hooks/useCopySelectedOffers.ts
 import { useState } from "react";
-import { formatOfferToText } from "../utils/offers/formatOfferToText";
-import { getComplexEmoji } from "../utils/offers/getComplexEmoji";
-import { BankProgramResult } from "../utils/types";
+import { formatOfferToText } from "../../utils/offers/formatOfferToText";
+import { getComplexEmoji } from "../../utils/offers/getComplexEmoji";
+import { BankProgramResult } from "../../utils/types";
 
 interface UseCopySelectedOffersProps {
   selectedCards: Set<number>;

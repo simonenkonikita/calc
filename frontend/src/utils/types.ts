@@ -332,3 +332,40 @@ export interface ThresholdAdjustmentResult {
   /** Причина корректировки */
   adjustmentReason?: string;
 }
+
+export interface ProgramConfig {
+  type: string;
+  label: string;
+  icon: string;
+  color: string;
+  description: string;
+}
+
+export interface ProgramsResponse {
+  success: boolean;
+  data?: {
+    programs: ProgramConfig[];
+    categories: Array<{
+      key: string;
+      label: string;
+      types: string[];
+    }>;
+  };
+  error?: string;
+}
+
+export interface Limits {
+  familyMortgageLimit: number;
+  maxFamilyMortgageSum: number;
+  itMortgageLimit: number;
+  maxItMortgageSum: number;
+  deposit: number;
+  minExcessAmounts: Record<string, number>;
+}
+
+export interface ConfigData {
+  depositAmount: number;
+  minDownPayment?: number;
+  maxLoanTerm?: number;
+  defaultComplex?: string;
+}

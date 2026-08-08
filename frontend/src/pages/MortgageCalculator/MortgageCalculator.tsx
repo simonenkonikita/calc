@@ -1,10 +1,10 @@
 import React from "react";
-import { useMortgageCalculator } from "../../hooks/useMortgageCalculations";
 
 import "./MortgageCalculator.css";
 import { ResultsCalcSection } from "../../components/ResultsCalcSection/ResultsCalcSection";
 import { OfferBankSection } from "../../components/OfferBankSection/OfferBankSection";
 import { FormSection } from "../../components/FormSection/FormSection";
+import { useMortgageCalculator } from "../../hooks/ui/useMortgageCalculator";
 
 export const MortgageCalculator: React.FC = () => {
   const {
@@ -16,10 +16,13 @@ export const MortgageCalculator: React.FC = () => {
     handleSelectOffer,
     formatMoney,
     calculateResults,
+    clearCache,
     _filtersRef,
   } = useMortgageCalculator();
 
   const handleCalculate = () => {
+    // 🔥 Очищаем кеш, чтобы получить свежие данные
+    clearCache();
     calculateResults();
   };
 
