@@ -1,26 +1,26 @@
-// ============================================================
-// 🔥 ПОЛУЧИТЬ ПОЛНУЮ ИНФОРМАЦИЮ О ПРОГРАММАХ ДЛЯ ЖК
-// ============================================================
+// src/utils/programHelpers.ts
 
-import { bankOffers } from "..";
-import { ProgramInfo } from "../../../types/types";
-import { PROGRAM_COMPLEXES } from "../../complexPrice/CONSTRUCTION";
+import { ProgramInfo } from "../types/types";
 import {
   PROGRAM_TYPES,
   PROGRAM_TYPE_LABELS,
   PROGRAM_TYPE_ICONS,
   PROGRAM_TYPE_COLORS,
   PROGRAM_TYPE_DESCRIPTIONS,
-} from "../constants";
+} from "../data/banks/constants";
+import { bankOffers } from "../data/banks";
+import { PROGRAM_COMPLEXES } from "../data/complexPrice/CONSTRUCTION";
 
-export const getEligibleProgramsForComplex = (
-  complexName: string,
-): ProgramInfo[] => {
+/**
+ * 🔥 Утилита для получения программ для конкретного ЖК
+ * @param complexName - название жилого комплекса
+ * @returns массив программ с офферами для этого ЖК
+ */
+export const getProgramsForComplex = (complexName: string): ProgramInfo[] => {
   const result: ProgramInfo[] = [];
 
-  // 🔥 ФИЛЬТРУЕМ ПРЕДЛОЖЕНИЯ БАНКОВ ДЛЯ ЭТОГО ЖК
+  // Фильтруем предложения для этого ЖК
   const offersForComplex = bankOffers.filter((offer) => {
-    // Проверяем, доступна ли программа для этого ЖК
     if (offer.complexes && !offer.complexes.includes(complexName)) {
       return false;
     }
@@ -31,14 +31,11 @@ export const getEligibleProgramsForComplex = (
     const type = PROGRAM_TYPES[key as keyof typeof PROGRAM_TYPES];
     const complexes = PROGRAM_COMPLEXES[type];
 
-    // Проверяем, есть ли ЖК в списке программы
     if (complexes && complexes.includes(complexName)) {
-      // 🔥 ПОЛУЧАЕМ ОФФЕРЫ ДЛЯ ЭТОГО ТИПА ПРОГРАММЫ
       const matchingOffers = offersForComplex.filter(
         (offer) => offer.type === type,
       );
 
-      // 🔥 ПОЛУЧАЕМ УНИКАЛЬНЫЕ БАНКИ
       const uniqueBanks = Array.from(
         new Set(matchingOffers.map((offer) => offer.bank)),
       );
@@ -56,6 +53,23 @@ export const getEligibleProgramsForComplex = (
         offers: matchingOffers,
       });
     }
+  });
+
+  return result;
+};
+
+/**
+ * 🔥 Получить программы для всех ЖК (кэшируется)
+ */
+export const getAllProgramsForComplexes = (): Record<string, ProgramInfo[]> => {
+  const result: Record<string, ProgramInfo[]> = {};
+  const complexNames = Object.keys(PROGRAM_COMPLEXES).flatMap(
+    (type) => PROGRAM_COMPLEXES[type],
+  );
+  const uniqueComplexes = Array.from(new Set(complexNames));
+
+  uniqueComplexes.forEach((complexName) => {
+    result[complexName] = getProgramsForComplex(complexName);
   });
 
   return result;

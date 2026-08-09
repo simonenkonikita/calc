@@ -1,31 +1,36 @@
-// backend/src/controllers/admin.controller.ts
+// backend/src/controllers/admin.controller.ts (обновленный)
 
 import { Request, Response } from "express";
-
-import { housingPrices } from "../data/complexPrice/complexPriceData";
-
-import { DEPOSIT_AMOUNT } from "../data/complexPrice/CONSTRUCTION";
+import { AppDataSource } from "../data-source";
+import { Bank } from "../entities/Bank";
+import { Complex } from "../entities/Complex";
+import { Program } from "../entities/Program";
+import { Offer } from "../entities/Offer";
+import { DynamicRate } from "../entities/DynamicRate";
+import { DynamicSubsidy } from "../entities/DynamicSubsidy";
+import { Config } from "../entities/Config";
 import {
   BANK_NAMES,
   BASE_RATES,
   MIN_PV_PERCENT,
-  PROGRAM_TYPES,
 } from "../data/banks/constants";
-import { bankOffers } from "../data/banks";
+
+const bankRepository = AppDataSource.getRepository(Bank);
+const complexRepository = AppDataSource.getRepository(Complex);
+const programRepository = AppDataSource.getRepository(Program);
+const offerRepository = AppDataSource.getRepository(Offer);
+const rateRepository = AppDataSource.getRepository(DynamicRate);
+const subsidyRepository = AppDataSource.getRepository(DynamicSubsidy);
+const configRepository = AppDataSource.getRepository(Config);
 
 // ============================================================
-// 🔥 БАНКИ (из BANK_NAMES и BASE_RATES)
+// 🔥 БАНКИ
 // ============================================================
-export const getBanks = (req: Request, res: Response) => {
+export const getBanks = async (req: Request, res: Response) => {
   try {
-    const banks = Object.entries(BANK_NAMES).map(([key, name], index) => ({
-      id: String(index + 1),
-      name,
-      baseRate: BASE_RATES[key as keyof typeof BASE_RATES] || 0,
-      minPVPercent: MIN_PV_PERCENT,
-      isActive: true,
-      order: index,
-    }));
+    const banks = await bankRepository.find({
+      order: { displayOrder: "ASC" },
+    });
     res.json(banks);
   } catch (error) {
     console.error("Error getting banks:", error);
@@ -33,95 +38,76 @@ export const getBanks = (req: Request, res: Response) => {
   }
 };
 
-// ============================================================
-// 🔥 ЖК (из housingPrices)
-// ============================================================
-export const getComplexes = (req: Request, res: Response) => {
+export const updateBank = async (req: Request, res: Response) => {
   try {
-    const complexMap = new Map();
+    const { id } = req.params;
+    const data = req.body;
+    await bankRepository.update(id, data);
+    const updated = await bankRepository.findOneBy({ id });
+    res.json(updated);
+  } catch (error) {
+    console.error("Error updating bank:", error);
+    res.status(500).json({ error: "Failed to update bank" });
+  }
+};
 
-    housingPrices.forEach((item) => {
-      if (!complexMap.has(item.complexName)) {
-        complexMap.set(item.complexName, {
-          id: item.id,
-          name: item.complexName,
-          status: item.status || "строится",
-          description: item.description || "",
-          pricePerSquareMeter: item.pricePerSquareMeter,
-          banks: item.banks || [],
-          surcharges: item.surcharges || {
-            withoutDownPayment: 0,
-            partialDownPayment: 0,
-          },
-          paymentTerms: item.paymentTerms || [],
-          promotions: item.promotions || [],
-          specialOffers: item.specialOffers || [],
-          materialsLink: item.materialsLink || "",
-          isActive: true,
-        });
-      }
+// ============================================================
+// 🔥 ЖК (КОМПЛЕКСЫ)
+// ============================================================
+export const getComplexes = async (req: Request, res: Response) => {
+  try {
+    const complexes = await complexRepository.find({
+      order: { name: "ASC" },
     });
-
-    res.json(Array.from(complexMap.values()));
+    res.json(complexes);
   } catch (error) {
     console.error("Error getting complexes:", error);
     res.status(500).json({ error: "Failed to get complexes" });
   }
 };
 
-// ============================================================
-// 🔥 ПРОГРАММЫ (из PROGRAM_TYPES)
-// ============================================================
-export const getPrograms = (req: Request, res: Response) => {
+export const updateComplex = async (req: Request, res: Response) => {
   try {
-    const labels: Record<string, string> = {
-      base: "Базовая ипотека",
-      full: "Субсидии на длинный срок",
-      short: "Субсидии на короткий срок",
-      family: "Семейная ипотека",
-      it: "ИТ ипотека",
-      tranche: "Траншевая ипотека",
-    };
+    const { id } = req.params;
+    const data = req.body;
+    await complexRepository.update(id, data);
+    const updated = await complexRepository.findOneBy({ id });
+    res.json(updated);
+  } catch (error) {
+    console.error("Error updating complex:", error);
+    res.status(500).json({ error: "Failed to update complex" });
+  }
+};
 
-    const icons: Record<string, string> = {
-      base: "🏠",
-      full: "📈",
-      short: "⚡",
-      family: "👨‍👩‍👧‍👦",
-      it: "💻",
-      tranche: "📊",
-    };
+export const createComplex = async (req: Request, res: Response) => {
+  try {
+    const data = req.body;
+    const complex = complexRepository.create(data);
+    await complexRepository.save(complex);
+    res.status(201).json(complex);
+  } catch (error) {
+    console.error("Error creating complex:", error);
+    res.status(500).json({ error: "Failed to create complex" });
+  }
+};
 
-    const colors: Record<string, string> = {
-      base: "#6b7280",
-      full: "#f59e0b",
-      short: "#ef4444",
-      family: "#8b5cf6",
-      it: "#3b82f6",
-      tranche: "#ec4899",
-    };
+export const deleteComplex = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await complexRepository.delete(id);
+    res.json({ success: true, message: "Complex deleted" });
+  } catch (error) {
+    console.error("Error deleting complex:", error);
+    res.status(500).json({ error: "Failed to delete complex" });
+  }
+};
 
-    const descriptions: Record<string, string> = {
-      base: "Стандартная ипотечная программа с базовой ставкой",
-      full: "Субсидированная ипотека на длительный срок",
-      short: "Субсидированная ипотека на короткий срок",
-      family: "Для семей с детьми. Льготная ставка 6%",
-      it: "Для IT-специалистов. Льготная ставка 6%",
-      tranche: "Ипотека с траншевой системой финансирования",
-    };
-
-    const programs = Object.entries(PROGRAM_TYPES).map(
-      ([key, type], index) => ({
-        id: String(index + 1),
-        type,
-        label: labels[type] || type,
-        icon: icons[type] || "📋",
-        color: colors[type] || "#6b7280",
-        description: descriptions[type] || "",
-        isActive: true,
-      }),
-    );
-
+// ============================================================
+// 🔥 ПРОГРАММЫ
+// ============================================================
+export const getPrograms = async (req: Request, res: Response) => {
+  try {
+    const programs = await programRepository.find();
     res.json(programs);
   } catch (error) {
     console.error("Error getting programs:", error);
@@ -130,26 +116,13 @@ export const getPrograms = (req: Request, res: Response) => {
 };
 
 // ============================================================
-// 🔥 СТАВКИ (из dynamicRates в bankOffers)
+// 🔥 СТАВКИ
 // ============================================================
-export const getRates = (req: Request, res: Response) => {
+export const getRates = async (req: Request, res: Response) => {
   try {
-    const rates = bankOffers
-      .filter((offer) => offer.dynamicRates && offer.dynamicRates.length > 0)
-      .flatMap((offer) =>
-        offer.dynamicRates!.map((rule, index) => ({
-          id: `${offer.bank}-${index}`,
-          bankId: offer.bank,
-          programType: offer.type,
-          conditionType: rule.type || "pv",
-          condition: rule.condition || "gte",
-          value: rule.value || 0,
-          rate: rule.rate || 0,
-          priority: rule.priority || 0,
-          description: rule.description || "",
-          isActive: true,
-        })),
-      );
+    const rates = await rateRepository.find({
+      relations: ["offer", "offer.bank"],
+    });
     res.json(rates);
   } catch (error) {
     console.error("Error getting rates:", error);
@@ -158,32 +131,13 @@ export const getRates = (req: Request, res: Response) => {
 };
 
 // ============================================================
-// 🔥 СУБСИДИИ (из dynamicSubsidyPercent в bankOffers)
+// 🔥 СУБСИДИИ
 // ============================================================
-export const getSubsidies = (req: Request, res: Response) => {
+export const getSubsidies = async (req: Request, res: Response) => {
   try {
-    const subsidies = bankOffers
-      .filter(
-        (offer) =>
-          offer.dynamicSubsidyPercent && offer.dynamicSubsidyPercent.length > 0,
-      )
-      .flatMap((offer) =>
-        offer.dynamicSubsidyPercent!.map((rule, index) => ({
-          id: `${offer.bank}-${index}`,
-          bankId: offer.bank,
-          programType: offer.type,
-          minPVPercent: 0,
-          maxPVPercent: null,
-          minAmount: rule.minAmount || null,
-          maxAmount: rule.maxAmount || null,
-          minTerm: null,
-          maxTerm: null,
-          subsidyPercent: rule.subsidyPercent || 0,
-          priority: rule.priority || 0,
-          description: rule.description || "",
-          isActive: true,
-        })),
-      );
+    const subsidies = await subsidyRepository.find({
+      relations: ["offer", "offer.bank"],
+    });
     res.json(subsidies);
   } catch (error) {
     console.error("Error getting subsidies:", error);
@@ -192,39 +146,34 @@ export const getSubsidies = (req: Request, res: Response) => {
 };
 
 // ============================================================
-// 🔥 КОНФИГУРАЦИЯ (из существующих констант)
+// 🔥 КОНФИГУРАЦИЯ
 // ============================================================
-export const getConfig = (req: Request, res: Response) => {
+export const getConfig = async (req: Request, res: Response) => {
   try {
-    res.json({
-      depositAmount: DEPOSIT_AMOUNT || 30000,
-      minDownPayment: MIN_PV_PERCENT,
-      maxLoanTerm: 30,
-      defaultComplex: housingPrices[0]?.complexName || "ЖК Сады у моря 3",
-      bankOrder: Object.values(BANK_NAMES),
+    const config = await configRepository.findOne({
+      where: { key: "app_config" },
     });
+    res.json(config?.value || {});
   } catch (error) {
     console.error("Error getting config:", error);
     res.status(500).json({ error: "Failed to get config" });
   }
 };
 
-// ============================================================
-// 🔥 ОБНОВЛЕНИЕ КОНФИГУРАЦИИ
-// ============================================================
-export const updateConfig = (req: Request, res: Response) => {
+export const updateConfig = async (req: Request, res: Response) => {
   try {
-    // TODO: Сохранять изменения в файл или БД
-    const currentConfig = {
-      depositAmount: DEPOSIT_AMOUNT || 30000,
-      minDownPayment: MIN_PV_PERCENT,
-      maxLoanTerm: 30,
-      defaultComplex: housingPrices[0]?.complexName || "ЖК Сады у моря 3",
-      bankOrder: Object.values(BANK_NAMES),
-    };
+    const data = req.body;
+    let config = await configRepository.findOne({
+      where: { key: "app_config" },
+    });
 
-    const updatedConfig = { ...currentConfig, ...req.body };
-    res.json(updatedConfig);
+    if (!config) {
+      config = new Config();
+      config.key = "app_config";
+    }
+    config.value = { ...config.value, ...data };
+    await configRepository.save(config);
+    res.json(config.value);
   } catch (error) {
     console.error("Error updating config:", error);
     res.status(500).json({ error: "Failed to update config" });
