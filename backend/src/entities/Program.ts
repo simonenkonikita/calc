@@ -15,7 +15,7 @@ export class Program {
   id: string;
 
   @Column({ type: "varchar", length: 50, unique: true })
-  type: string; // "base", "family", "full"
+  type: string;
 
   @Column({ type: "varchar", length: 100 })
   label: string;
@@ -31,6 +31,9 @@ export class Program {
 
   @Column({ type: "boolean", default: true })
   isActive: boolean;
+
+  @Column({ type: "int", default: 0 }) // 👈 ДОБАВЬТЕ ЭТО ПОЛЕ
+  displayOrder: number;
 
   @CreateDateColumn()
   createdAt: Date;

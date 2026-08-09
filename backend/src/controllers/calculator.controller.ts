@@ -1,22 +1,42 @@
+// backend/src/controllers/calculator.controller.ts
 import { Request, Response } from "express";
 import { calculateFullMortgage } from "../services/calculations/result/calculateFullMortgage";
-import { housingPrices } from "../data/complexPrice/complexPriceData";
-import { bankOffers } from "../data/banks";
-import { filterBankOffersByComplex } from "../utils/filterBankOffers";
-import {
-  findPricePerSquareMeter,
-  getMortgageSurcharge,
-} from "../utils/mortgageSurcharges";
-import { PRICE_PER_SQUARE_METER_DEFAULT } from "../data/constants";
+import { ComplexService } from "../services/ComplexService";
+import { OfferService } from "../services/OfferService";
+import { ProgramService } from "../services/ProgramService";
 import { variables } from "../data/limitdDate";
+import { getMortgageSurcharge } from "../utils/mortgageSurcharges";
+import { PRICE_PER_SQUARE_METER_DEFAULT } from "../data/constants";
+import { ApartmentType } from "../entities/ApartmentType";
+import { Offer } from "../entities/Offer";
+import { Complex } from "../entities/Complex";
+import { ProgramType } from "../types/types";
+
+const complexService = new ComplexService();
+const offerService = new OfferService();
+const programService = new ProgramService();
 
 export const calculate = async (req: Request, res: Response) => {
   try {
     const { formData, pricePerSquareMeter } = req.body;
 
+    const complex = await complexService.getComplexByName(formData.complex);
+
+    if (!complex) {
+      return res.status(404).json({
+        success: false,
+        error: "Complex not found",
+      });
+    }
+
+    const apartmentType = complex.apartmentTypes?.find(
+      (at: ApartmentType) => at.type === formData.apartmentType,
+    );
+
     const basePrice =
       pricePerSquareMeter ||
-      findPricePerSquareMeter(formData.complex, formData.apartmentType);
+      apartmentType?.pricePerSquareMeter ||
+      PRICE_PER_SQUARE_METER_DEFAULT;
 
     const surcharge = getMortgageSurcharge(
       formData.complex,
@@ -30,16 +50,30 @@ export const calculate = async (req: Request, res: Response) => {
         ? basePrice + surcharge
         : basePrice;
 
-    const filteredBankOffers = filterBankOffersByComplex({
-      bankOffers,
-      complexName: formData.complex,
-      apartmentType: formData.apartmentType,
-      housingPrices,
-    });
+    const offers = await offerService.getOffersByComplex(formData.complex);
+
+    // 👇 ПРЕОБРАЗУЕМ null В undefined
+    const bankOffers = offers.map((offer: Offer) => ({
+      bank: offer.bank.name,
+      program: offer.program,
+      type: offer.programEntity.type as ProgramType,
+      rate: offer.rate,
+      twoRate: offer.twoRate ?? undefined, // null -> undefined
+      shortRate: offer.shortRate ?? undefined, // null -> undefined
+      subsidyPercent: offer.subsidyPercent,
+      minPVPercent: offer.minPVPercent,
+      durationMonths: offer.durationMonths ?? undefined, // null -> undefined
+      isTwoContracts: offer.isTwoContracts ?? undefined, // false -> undefined если нужно
+      excessLimit: offer.excessLimit ?? undefined,
+      isTranche: offer.isTranche ?? undefined,
+      trancheFirstPercent: offer.trancheFirstPercent ?? undefined,
+      trancheSecondDate: offer.trancheSecondDate ?? undefined,
+      complexes: offer.complexes ?? undefined,
+    }));
 
     const result = calculateFullMortgage(
       formData,
-      filteredBankOffers,
+      bankOffers,
       variables,
       finalPricePerM2 || PRICE_PER_SQUARE_METER_DEFAULT,
     );
@@ -49,7 +83,7 @@ export const calculate = async (req: Request, res: Response) => {
       data: result,
       meta: {
         pricePerSquareMeter: finalPricePerM2,
-        banksCount: filteredBankOffers.length,
+        banksCount: bankOffers.length,
       },
     });
   } catch (error) {
@@ -63,11 +97,11 @@ export const calculate = async (req: Request, res: Response) => {
 
 export const getComplexes = async (req: Request, res: Response) => {
   try {
-    const complexes = Array.from(
-      new Set(housingPrices.map((item) => item.complexName)),
-    );
-    res.json({ success: true, data: complexes });
+    const complexes = await complexService.getAllComplexes();
+    const complexNames = complexes.map((c: Complex) => c.name);
+    res.json({ success: true, data: complexNames });
   } catch (error) {
+    console.error("Error getting complexes:", error);
     res.status(500).json({ success: false, error: "Failed to get complexes" });
   }
 };
@@ -75,12 +109,20 @@ export const getComplexes = async (req: Request, res: Response) => {
 export const getComplexTypes = async (req: Request, res: Response) => {
   try {
     const { complexName } = req.params;
-    const types = housingPrices
-      .filter((item) => item.complexName === complexName)
-      .map((item) => item.apartmentType);
+    const complex = await complexService.getComplexByName(complexName);
 
+    if (!complex) {
+      return res.status(404).json({
+        success: false,
+        error: "Complex not found",
+      });
+    }
+
+    const types =
+      complex.apartmentTypes?.map((at: ApartmentType) => at.type) || [];
     res.json({ success: true, data: types });
   } catch (error) {
+    console.error("Error getting apartment types:", error);
     res
       .status(500)
       .json({ success: false, error: "Failed to get apartment types" });
@@ -99,8 +141,23 @@ export const getPricePerSquareMeter = async (req: Request, res: Response) => {
       });
     }
 
-    const price = findPricePerSquareMeter(complex, type);
-    res.json({ success: true, data: price });
+    const complexData = await complexService.getComplexByName(complex);
+    if (!complexData) {
+      return res.status(404).json({
+        success: false,
+        error: "Complex not found",
+      });
+    }
+
+    const apartmentType = complexData.apartmentTypes?.find(
+      (at: ApartmentType) => at.type === type,
+    );
+
+    res.json({
+      success: true,
+      data:
+        apartmentType?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT,
+    });
   } catch (error) {
     console.error("Error getting price:", error);
     res.status(500).json({ success: false, error: "Failed to get price" });
@@ -110,16 +167,15 @@ export const getPricePerSquareMeter = async (req: Request, res: Response) => {
 export const getAvailableBanks = async (req: Request, res: Response) => {
   try {
     const { complexName, apartmentType } = req.params;
-    const filtered = filterBankOffersByComplex({
-      bankOffers,
-      complexName,
-      apartmentType,
-      housingPrices,
-    });
 
-    const banks = Array.from(new Set(filtered.map((offer) => offer.bank)));
+    const offers = await offerService.getOffersByComplex(complexName);
+    const banks = Array.from(
+      new Set(offers.map((offer: Offer) => offer.bank.name)),
+    );
+
     res.json({ success: true, data: banks });
   } catch (error) {
+    console.error("Error getting banks:", error);
     res.status(500).json({ success: false, error: "Failed to get banks" });
   }
 };

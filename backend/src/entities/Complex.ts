@@ -26,16 +26,8 @@ export class Complex {
   @Column({ type: "text", nullable: true })
   description: string;
 
-  // 🔥 УДАЛЯЕМ pricePerSquareMeter - теперь он в ApartmentType
-  // @Column({ type: "decimal", precision: 12, scale: 2 })
-  // pricePerSquareMeter: number;
-
   @Column({ type: "jsonb", nullable: true })
   banks: string[];
-
-  // 🔥 УДАЛЯЕМ surcharges - теперь они в ApartmentType
-  // @Column({ type: "jsonb", nullable: true })
-  // surcharges: { ... };
 
   @Column({ type: "jsonb", nullable: true })
   paymentTerms: string[];

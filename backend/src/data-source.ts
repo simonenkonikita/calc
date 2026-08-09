@@ -1,4 +1,16 @@
+// backend/src/data-source.ts
+
+import "reflect-metadata";
 import { DataSource } from "typeorm";
+import { Bank } from "./entities/Bank";
+import { Complex } from "./entities/Complex";
+import { ApartmentType } from "./entities/ApartmentType";
+import { Program } from "./entities/Program";
+import { Offer } from "./entities/Offer";
+import { DynamicRate } from "./entities/DynamicRate";
+import { DynamicSubsidy } from "./entities/DynamicSubsidy";
+import { Config } from "./entities/Config";
+import * as path from "path";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -9,8 +21,18 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE || "ipoteka_db",
   synchronize: true,
   logging: process.env.NODE_ENV === "development",
-  entities: ["src/entities/*.ts"],
-  migrations: ["src/migrations/*.ts"],
-
+  entities: [
+    Bank,
+    Complex,
+    ApartmentType,
+    Program,
+    Offer,
+    DynamicRate,
+    DynamicSubsidy,
+    Config,
+  ],
+  migrations: [path.join(__dirname, "..", "migrations", "*.ts")],
   subscribers: [],
 });
+
+export default AppDataSource;

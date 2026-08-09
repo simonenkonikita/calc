@@ -59,6 +59,33 @@ export class Offer {
   @Column({ type: "jsonb", nullable: true })
   complexes: string[] | null;
 
+  @Column({ type: "varchar", length: 20, nullable: true })
+  subsidyCalculationMethod: string | null;
+
+  @Column({ type: "jsonb", nullable: true })
+  dynamicRatesIU: any; // SimpleDynamicRate[]
+
+  @Column({ type: "jsonb", nullable: true })
+  dynamicSubsidyPercent: any; // DynamicRateRule[]
+
+  @Column({ type: "decimal", precision: 12, scale: 2, nullable: true })
+  thresholdTolerance: number | null;
+
+  @Column({ type: "varchar", length: 10, nullable: true })
+  thresholdToleranceType: string | null; // 'fixed' | 'percent'
+
+  @Column({ type: "varchar", length: 10, nullable: true })
+  roundingStrategy: string | null; // 'up' | 'down'
+
+  @Column({ type: "jsonb", nullable: true })
+  twoContractSubsidies: any; // DynamicRateRule[]
+
+  @Column({ type: "int", nullable: true })
+  minLoanTermYears: number | null;
+
+  @Column({ type: "text", nullable: true })
+  description: string | null;
+
   @Column({ type: "boolean", default: true })
   isActive: boolean;
 

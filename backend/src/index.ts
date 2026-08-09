@@ -5,18 +5,20 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 import dotenv from "dotenv";
+import { AppDataSource } from "./data-source";
 import calculatorRoutes from "./routes/calculator.routes";
 import banksRoutes from "./routes/banks.routes";
 import limitsRoutes from "./routes/limits.routes";
 import projectsRoutes from "./routes/projects.routes";
 import configRoutes from "./routes/config.routes";
+import adminRoutes from "./routes/admin.routes";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware (базовый минимум для вашего API)
+// Middleware
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -41,12 +43,13 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Ваши роуты
+// Роуты
 app.use("/api/config", configRoutes);
 app.use("/api/calculator", calculatorRoutes);
 app.use("/api/banks", banksRoutes);
 app.use("/api/limits", limitsRoutes);
 app.use("/api/projects", projectsRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Error handling
 app.use(
@@ -69,10 +72,52 @@ app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-// Запуск сервера
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/health`);
-});
+// 🔥 ЗАПУСК СЕРВЕРА С ПРОВЕРКОЙ
+async function startServer() {
+  try {
+    // Проверяем, инициализирована ли БД
+    if (AppDataSource.isInitialized) {
+      console.log("✅ Database already connected");
+    } else {
+      console.log("🔄 Connecting to database...");
+      await AppDataSource.initialize();
+      console.log("✅ Database connected successfully");
+      console.log(
+        "📊 Entities loaded:",
+        AppDataSource.entityMetadatas.map((e) => e.name),
+      );
+    }
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📍 Health check: http://localhost:${PORT}/health`);
+      console.log(`📊 Admin API: http://localhost:${PORT}/api/admin`);
+    });
+  } catch (error: any) {
+    if (error.message?.includes("already established")) {
+      console.log("ℹ️ Database connection already established");
+      // Пытаемся получить существующее соединение
+      try {
+        if (!AppDataSource.isInitialized) {
+          await AppDataSource.initialize();
+        }
+      } catch (e) {
+        console.error("❌ Failed to get connection:", e);
+        process.exit(1);
+      }
+
+      app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`📍 Health check: http://localhost:${PORT}/health`);
+        console.log(`📊 Admin API: http://localhost:${PORT}/api/admin`);
+      });
+    } else {
+      console.error("❌ Database connection error:", error);
+      process.exit(1);
+    }
+  }
+}
+
+startServer();
 
 export default app;

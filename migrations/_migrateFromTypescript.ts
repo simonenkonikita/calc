@@ -1,21 +1,21 @@
 // backend/src/migrations/migrateFromTypescript.ts
-import { AppDataSource } from "../data-source";
-import { bankOffers } from "../data/banks";
+
+import { AppDataSource } from "../backend/src/data-source";
+import { bankOffers } from "../backend/src/data/banks";
 import {
   BANK_NAMES,
   BASE_RATES,
   MIN_PV_PERCENT,
-} from "../data/banks/constants";
-import { housingPrices } from "../data/complexPrice/complexPriceData";
-import { DEPOSIT_AMOUNT } from "../data/complexPrice/CONSTRUCTION";
-import { ApartmentType } from "../entities/ApartmentType";
-import { Bank } from "../entities/Bank";
-import { Complex } from "../entities/Complex";
-import { Config } from "../entities/Config";
-import { Offer } from "../entities/Offer";
-import { Program } from "../entities/Program";
-
-import { generateSlug } from "../utils/slugify";
+} from "../backend/src/data/banks/constants";
+import { housingPrices } from "../backend/src/data/complexPrice/complexPriceData";
+import { DEPOSIT_AMOUNT } from "../backend/src/data/complexPrice/CONSTRUCTION";
+import { ApartmentType } from "../backend/src/entities/ApartmentType";
+import { Bank } from "../backend/src/entities/Bank";
+import { Complex } from "../backend/src/entities/Complex";
+import { Config } from "../backend/src/entities/Config";
+import { Offer } from "../backend/src/entities/Offer";
+import { Program } from "../backend/src/entities/Program";
+import { generateSlug } from "../backend/src/utils/slugify";
 
 async function migrate() {
   try {
@@ -72,6 +72,7 @@ async function migrate() {
           icon: "🏠",
           color: "#6b7280",
           description: "Стандартная ипотечная программа с базовой ставкой",
+          displayOrder: 0,
         },
         {
           type: "full",
@@ -79,6 +80,7 @@ async function migrate() {
           icon: "📈",
           color: "#f59e0b",
           description: "Субсидированная ипотека на длительный срок",
+          displayOrder: 1,
         },
         {
           type: "short",
@@ -86,6 +88,7 @@ async function migrate() {
           icon: "⚡",
           color: "#ef4444",
           description: "Субсидированная ипотека на короткий срок",
+          displayOrder: 2,
         },
         {
           type: "family",
@@ -93,6 +96,7 @@ async function migrate() {
           icon: "👨‍👩‍👧‍👦",
           color: "#8b5cf6",
           description: "Для семей с детьми. Льготная ставка 6%",
+          displayOrder: 3,
         },
         {
           type: "it",
@@ -100,6 +104,7 @@ async function migrate() {
           icon: "💻",
           color: "#3b82f6",
           description: "Для IT-специалистов. Льготная ставка 6%",
+          displayOrder: 4,
         },
         {
           type: "tranche",
@@ -107,6 +112,7 @@ async function migrate() {
           icon: "📊",
           color: "#ec4899",
           description: "Ипотека с траншевой системой финансирования",
+          displayOrder: 5,
         },
       ];
 
@@ -129,6 +135,7 @@ async function migrate() {
         program.icon = prog.icon;
         program.color = prog.color;
         program.description = prog.description;
+        program.displayOrder = prog.displayOrder;
         program.isActive = true;
         await queryRunner.manager.save(program);
 
@@ -190,7 +197,6 @@ async function migrate() {
           continue;
         }
 
-        // Проверяем, существует ли уже такой тип
         const existingType = await queryRunner.manager.findOne(ApartmentType, {
           where: {
             complexId: complexId,
@@ -227,11 +233,12 @@ async function migrate() {
       );
 
       // ============================================================
-      // 5. МИГРАЦИЯ ОФФЕРОВ
+      // 5. МИГРАЦИЯ ОФФЕРОВ (С НОВЫМИ ПОЛЯМИ) - ИСПРАВЛЕННАЯ ВЕРСИЯ
       // ============================================================
-      console.log("🔄 Migrating offers...");
+      console.log("🔄 Migrating offers with new fields...");
       let offersCreated = 0;
       let offersSkipped = 0;
+      let offersUpdated = 0;
 
       for (const offer of bankOffers) {
         const bankKey = Object.keys(BANK_NAMES).find(
@@ -250,23 +257,58 @@ async function migrate() {
           continue;
         }
 
+        // Проверяем существующий оффер
         const existingOffer = await queryRunner.manager.findOne(Offer, {
           where: {
             bankId: bankId,
             programId: programId,
             program: offer.program,
-            rate: offer.rate,
           },
         });
 
         if (existingOffer) {
           console.log(
-            `  ⚠️ Offer already exists: ${offer.bank} - ${offer.program}`,
+            `  🔄 Updating existing offer: ${offer.bank} - ${offer.program}`,
           );
-          offersSkipped++;
+
+          // Обновляем поля
+          existingOffer.rate = offer.rate;
+          existingOffer.twoRate = offer.twoRate ?? null;
+          existingOffer.shortRate = offer.shortRate ?? null;
+          existingOffer.subsidyPercent = offer.subsidyPercent ?? 0;
+          existingOffer.minPVPercent = offer.minPVPercent;
+          existingOffer.durationMonths = offer.durationMonths ?? null;
+          existingOffer.isTwoContracts = offer.isTwoContracts ?? false;
+          existingOffer.excessLimit = offer.excessLimit ?? false;
+          existingOffer.isTranche = offer.isTranche ?? false;
+          existingOffer.trancheFirstPercent = offer.trancheFirstPercent ?? null;
+          existingOffer.trancheSecondDate = offer.trancheSecondDate ?? null;
+          existingOffer.complexes = offer.complexes ?? [];
+          existingOffer.subsidyCalculationMethod =
+            offer.subsidyCalculationMethod || null;
+          existingOffer.dynamicRatesIU = offer.dynamicRatesIU || null;
+          existingOffer.dynamicSubsidyPercent =
+            offer.dynamicSubsidyPercent || null;
+          existingOffer.thresholdTolerance = offer.thresholdTolerance || null;
+          existingOffer.thresholdToleranceType =
+            offer.thresholdToleranceType || null;
+          existingOffer.roundingStrategy = offer.roundingStrategy || null;
+          existingOffer.twoContractSubsidies =
+            offer.twoContractSubsidies || null;
+          existingOffer.minLoanTermYears = offer.minLoanTermYears || null;
+          existingOffer.description = offer.description || null;
+          existingOffer.isActive = true;
+
+          // Явно указываем, что не хотим обновлять updatedAt через триггер
+          // Используем save с отключением триггера
+          await queryRunner.manager.save(existingOffer);
+
+          offersUpdated++;
+          console.log(`  ✅ Updated offer: ${offer.bank} - ${offer.program}`);
           continue;
         }
 
+        // Создаем новый оффер с новыми полями
         const newOffer = new Offer();
         newOffer.bankId = bankId;
         newOffer.programId = programId;
@@ -283,14 +325,25 @@ async function migrate() {
         newOffer.trancheFirstPercent = offer.trancheFirstPercent ?? null;
         newOffer.trancheSecondDate = offer.trancheSecondDate ?? null;
         newOffer.complexes = offer.complexes ?? [];
+        newOffer.subsidyCalculationMethod =
+          offer.subsidyCalculationMethod || null;
+        newOffer.dynamicRatesIU = offer.dynamicRatesIU || null;
+        newOffer.dynamicSubsidyPercent = offer.dynamicSubsidyPercent || null;
+        newOffer.thresholdTolerance = offer.thresholdTolerance || null;
+        newOffer.thresholdToleranceType = offer.thresholdToleranceType || null;
+        newOffer.roundingStrategy = offer.roundingStrategy || null;
+        newOffer.twoContractSubsidies = offer.twoContractSubsidies || null;
+        newOffer.minLoanTermYears = offer.minLoanTermYears || null;
+        newOffer.description = offer.description || null;
         newOffer.isActive = true;
 
         await queryRunner.manager.save(newOffer);
         offersCreated++;
         console.log(`  ✅ Created offer: ${offer.bank} - ${offer.program}`);
       }
+
       console.log(
-        `✅ Offers migrated: ${offersCreated} created, ${offersSkipped} skipped`,
+        `✅ Offers migrated: ${offersCreated} created, ${offersUpdated} updated, ${offersSkipped} skipped`,
       );
 
       // ============================================================
@@ -340,7 +393,7 @@ async function migrate() {
         `  ✅ Apartment types: ${apartmentTypesCreated} created, ${apartmentTypesSkipped} skipped`,
       );
       console.log(
-        `  ✅ Offers: ${offersCreated} created, ${offersSkipped} skipped`,
+        `  ✅ Offers: ${offersCreated} created, ${offersUpdated} updated, ${offersSkipped} skipped`,
       );
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -353,6 +406,7 @@ async function migrate() {
     console.error("❌ Error:", error);
   } finally {
     await AppDataSource.destroy();
+    console.log("🔌 Database connection closed");
   }
 }
 
