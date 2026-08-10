@@ -3,28 +3,44 @@
 export interface AdminBank {
   id: string;
   name: string;
+  slug?: string;
   baseRate: number;
   minPVPercent: number;
   isActive: boolean;
-  order: number;
+  displayOrder: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AdminApartmentType {
+  id: string;
+  type: string;
+  pricePerSquareMeter: number;
+  surcharges: {
+    withoutDownPayment: number;
+    partialDownPayment: number;
+  };
+  isActive: boolean;
+  complexId: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AdminComplex {
   id: string;
   name: string;
+  slug?: string;
   status: "строится" | "сдан" | "проект";
   description: string;
-  pricePerSquareMeter: number;
   banks: string[];
-  surcharges: {
-    withoutDownPayment: number;
-    partialDownPayment: number;
-  };
   paymentTerms: string[];
   promotions: string[];
   specialOffers: string[];
   materialsLink: string;
   isActive: boolean;
+  apartmentTypes: AdminApartmentType[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AdminProgram {
@@ -34,27 +50,32 @@ export interface AdminProgram {
   icon: string;
   color: string;
   description: string;
+  displayOrder: number;
   isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AdminRate {
   id: string;
-  bankId: string;
-  programType: string;
+  offerId: string;
   conditionType: "pv" | "amount" | "term";
   condition: "gte" | "lte" | "lt" | "gt" | "eq";
-  value: number;
+  value: number | null;
+  minValue: number | null;
+  maxValue: number | null;
   rate: number;
   priority: number;
   description: string;
   isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AdminSubsidy {
   id: string;
-  bankId: string;
-  programType: string;
-  minPVPercent: number;
+  offerId: string;
+  minPVPercent: number | null;
   maxPVPercent: number | null;
   minAmount: number | null;
   maxAmount: number | null;
@@ -64,6 +85,41 @@ export interface AdminSubsidy {
   priority: number;
   description: string;
   isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AdminOffer {
+  id: string;
+  program: string;
+  rate: number;
+  twoRate: number | null;
+  shortRate: number | null;
+  subsidyPercent: number;
+  minPVPercent: number;
+  durationMonths: number | null;
+  isTwoContracts: boolean;
+  excessLimit: boolean;
+  isTranche: boolean;
+  trancheFirstPercent: number | null;
+  trancheSecondDate: string | null;
+  complexes: string[];
+  subsidyCalculationMethod: string | null;
+  dynamicRatesIU: any | null;
+  dynamicSubsidyPercent: any | null;
+  thresholdTolerance: number | null;
+  thresholdToleranceType: string | null;
+  roundingStrategy: string | null;
+  twoContractSubsidies: any | null;
+  minLoanTermYears: number | null;
+  description: string | null;
+  isActive: boolean;
+  bankId: string;
+  programId: string;
+  bank?: AdminBank;
+  programEntity?: AdminProgram;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AdminConfig {
@@ -72,4 +128,6 @@ export interface AdminConfig {
   maxLoanTerm: number;
   defaultComplex: string;
   bankOrder: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }

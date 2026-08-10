@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { adminApi } from "../../../services/adminApi";
 import { AdminSubsidy } from "../types/admin.types";
 import { AdminLayout } from "../AdminLayout";
+import "./SubsidiesSection.css";
 
 export const SubsidiesSection: React.FC = () => {
   const [subsidies, setSubsidies] = useState<AdminSubsidy[]>([]);
@@ -19,9 +20,19 @@ export const SubsidiesSection: React.FC = () => {
     try {
       setLoading(true);
       const data = await adminApi.getSubsidies();
-      setSubsidies(data);
+      console.log("Subsidies data:", data); // Для отладки
+
+      // 🔥 Безопасная проверка: если data - объект с полем data, берем его
+      let subsidiesData = data;
+      if (data && typeof data === "object" && "data" in data) {
+        subsidiesData = (data as any).data;
+      }
+
+      // Если subsidiesData не массив, устанавливаем пустой массив
+      setSubsidies(Array.isArray(subsidiesData) ? subsidiesData : []);
     } catch (error) {
       console.error("Error loading subsidies:", error);
+      setSubsidies([]); // В случае ошибки - пустой массив
     } finally {
       setLoading(false);
     }
@@ -30,9 +41,8 @@ export const SubsidiesSection: React.FC = () => {
   const handleCreate = async () => {
     try {
       const newSubsidy = await adminApi.createSubsidy({
-        bankId: "",
-        programType: "full",
-        minPVPercent: 0,
+        offerId: "",
+        minPVPercent: null,
         maxPVPercent: null,
         minAmount: null,
         maxAmount: null,
@@ -72,7 +82,19 @@ export const SubsidiesSection: React.FC = () => {
 
   const startEdit = (subsidy: AdminSubsidy) => {
     setEditingId(subsidy.id);
-    setFormData(subsidy);
+    setFormData({
+      offerId: subsidy.offerId,
+      minPVPercent: subsidy.minPVPercent,
+      maxPVPercent: subsidy.maxPVPercent,
+      minAmount: subsidy.minAmount,
+      maxAmount: subsidy.maxAmount,
+      minTerm: subsidy.minTerm,
+      maxTerm: subsidy.maxTerm,
+      subsidyPercent: subsidy.subsidyPercent,
+      priority: subsidy.priority,
+      description: subsidy.description,
+      isActive: subsidy.isActive,
+    });
   };
 
   const cancelEdit = () => {
@@ -83,207 +105,287 @@ export const SubsidiesSection: React.FC = () => {
   if (loading) return <div className="admin-loading">Загрузка...</div>;
 
   return (
-    <AdminLayout title="💰 Субсидии">
-      <div className="admin-toolbar">
-        <button onClick={handleCreate} className="admin-btn-primary">
-          + Добавить субсидию
-        </button>
-        <button onClick={loadSubsidies} className="admin-btn-secondary">
-          🔄 Обновить
-        </button>
-      </div>
+    <div className="subsidies-section">
+      <AdminLayout title="💰 Субсидии">
+        <div className="admin-toolbar">
+          <button onClick={handleCreate} className="admin-btn-primary">
+            + Добавить субсидию
+          </button>
+          <button onClick={loadSubsidies} className="admin-btn-secondary">
+            🔄 Обновить
+          </button>
+        </div>
 
-      <div className="admin-table-wrapper">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Банк</th>
-              <th>Программа</th>
-              <th>ПВ от</th>
-              <th>ПВ до</th>
-              <th>Субсидия</th>
-              <th>Приоритет</th>
-              <th>Описание</th>
-              <th>Статус</th>
-              <th>Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {subsidies.map((subsidy) => (
-              <tr key={subsidy.id}>
-                <td>
-                  {editingId === subsidy.id ? (
-                    <input
-                      value={formData.bankId || ""}
-                      onChange={(e) =>
-                        setFormData({ ...formData, bankId: e.target.value })
-                      }
-                    />
-                  ) : (
-                    subsidy.bankId || "-"
-                  )}
-                </td>
-                <td>
-                  {editingId === subsidy.id ? (
-                    <select
-                      value={formData.programType || "full"}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          programType: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="base">Базовая</option>
-                      <option value="full">На весь срок</option>
-                      <option value="short">Короткая</option>
-                      <option value="family">Семейная</option>
-                      <option value="it">ИТ</option>
-                      <option value="tranche">Траншевая</option>
-                    </select>
-                  ) : (
-                    subsidy.programType
-                  )}
-                </td>
-                <td>
-                  {editingId === subsidy.id ? (
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={formData.minPVPercent ?? ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          minPVPercent: parseFloat(e.target.value),
-                        })
-                      }
-                    />
-                  ) : (
-                    subsidy.minPVPercent
-                  )}
-                </td>
-                <td>
-                  {editingId === subsidy.id ? (
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={formData.maxPVPercent ?? ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          maxPVPercent: e.target.value
-                            ? parseFloat(e.target.value)
-                            : null,
-                        })
-                      }
-                    />
-                  ) : (
-                    (subsidy.maxPVPercent ?? "∞")
-                  )}
-                </td>
-                <td>
-                  {editingId === subsidy.id ? (
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={formData.subsidyPercent ?? ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          subsidyPercent: parseFloat(e.target.value),
-                        })
-                      }
-                    />
-                  ) : (
-                    `${subsidy.subsidyPercent}%`
-                  )}
-                </td>
-                <td>
-                  {editingId === subsidy.id ? (
-                    <input
-                      type="number"
-                      value={formData.priority ?? ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          priority: parseInt(e.target.value),
-                        })
-                      }
-                    />
-                  ) : (
-                    subsidy.priority
-                  )}
-                </td>
-                <td>
-                  {editingId === subsidy.id ? (
-                    <input
-                      value={formData.description || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
-                      }
-                    />
-                  ) : (
-                    subsidy.description
-                  )}
-                </td>
-                <td>
-                  {editingId === subsidy.id ? (
-                    <select
-                      value={formData.isActive ? "active" : "inactive"}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isActive: e.target.value === "active",
-                        })
-                      }
-                    >
-                      <option value="active">✅ Активен</option>
-                      <option value="inactive">❌ Неактивен</option>
-                    </select>
-                  ) : subsidy.isActive ? (
-                    "✅ Активен"
-                  ) : (
-                    "❌ Неактивен"
-                  )}
-                </td>
-                <td>
-                  {editingId === subsidy.id ? (
-                    <div className="admin-actions">
-                      <button
-                        onClick={() => handleUpdate(subsidy.id)}
-                        className="admin-btn-success"
-                      >
-                        💾
-                      </button>
-                      <button onClick={cancelEdit} className="admin-btn-danger">
-                        ✕
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="admin-actions">
-                      <button
-                        onClick={() => startEdit(subsidy)}
-                        className="admin-btn-primary"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => handleDelete(subsidy.id)}
-                        className="admin-btn-danger"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  )}
-                </td>
+        <div className="admin-table-wrapper">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Offer ID</th>
+                <th>ПВ от</th>
+                <th>ПВ до</th>
+                <th>Сумма от</th>
+                <th>Сумма до</th>
+                <th>Срок от</th>
+                <th>Срок до</th>
+                <th>Субсидия</th>
+                <th>Приоритет</th>
+                <th>Описание</th>
+                <th>Статус</th>
+                <th>Действия</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </AdminLayout>
+            </thead>
+            <tbody>
+              {subsidies.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={12}
+                    style={{
+                      textAlign: "center",
+                      color: "#6b7280",
+                      padding: "2rem",
+                    }}
+                  >
+                    Нет субсидий
+                  </td>
+                </tr>
+              ) : (
+                subsidies.map((subsidy) => (
+                  <tr key={subsidy.id}>
+                    <td>
+                      {editingId === subsidy.id ? (
+                        <input
+                          value={formData.offerId || ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              offerId: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        subsidy.offerId?.substring(0, 8) || "-"
+                      )}
+                    </td>
+                    <td>
+                      {editingId === subsidy.id ? (
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={formData.minPVPercent ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              minPVPercent: e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            })
+                          }
+                        />
+                      ) : (
+                        (subsidy.minPVPercent ?? "—")
+                      )}
+                    </td>
+                    <td>
+                      {editingId === subsidy.id ? (
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={formData.maxPVPercent ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              maxPVPercent: e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            })
+                          }
+                        />
+                      ) : (
+                        (subsidy.maxPVPercent ?? "∞")
+                      )}
+                    </td>
+                    <td>
+                      {editingId === subsidy.id ? (
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={formData.minAmount ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              minAmount: e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            })
+                          }
+                        />
+                      ) : (
+                        (subsidy.minAmount?.toLocaleString() ?? "—")
+                      )}
+                    </td>
+                    <td>
+                      {editingId === subsidy.id ? (
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={formData.maxAmount ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              maxAmount: e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            })
+                          }
+                        />
+                      ) : (
+                        (subsidy.maxAmount?.toLocaleString() ?? "∞")
+                      )}
+                    </td>
+                    <td>
+                      {editingId === subsidy.id ? (
+                        <input
+                          type="number"
+                          value={formData.minTerm ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              minTerm: e.target.value
+                                ? parseInt(e.target.value)
+                                : null,
+                            })
+                          }
+                        />
+                      ) : (
+                        (subsidy.minTerm ?? "—")
+                      )}
+                    </td>
+                    <td>
+                      {editingId === subsidy.id ? (
+                        <input
+                          type="number"
+                          value={formData.maxTerm ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              maxTerm: e.target.value
+                                ? parseInt(e.target.value)
+                                : null,
+                            })
+                          }
+                        />
+                      ) : (
+                        (subsidy.maxTerm ?? "∞")
+                      )}
+                    </td>
+                    <td>
+                      {editingId === subsidy.id ? (
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={formData.subsidyPercent ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              subsidyPercent: parseFloat(e.target.value),
+                            })
+                          }
+                        />
+                      ) : (
+                        `${subsidy.subsidyPercent}%`
+                      )}
+                    </td>
+                    <td>
+                      {editingId === subsidy.id ? (
+                        <input
+                          type="number"
+                          value={formData.priority ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              priority: parseInt(e.target.value),
+                            })
+                          }
+                        />
+                      ) : (
+                        subsidy.priority
+                      )}
+                    </td>
+                    <td>
+                      {editingId === subsidy.id ? (
+                        <input
+                          value={formData.description || ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              description: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        subsidy.description?.substring(0, 20) || "-"
+                      )}
+                    </td>
+                    <td>
+                      {editingId === subsidy.id ? (
+                        <select
+                          value={formData.isActive ? "active" : "inactive"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isActive: e.target.value === "active",
+                            })
+                          }
+                        >
+                          <option value="active">✅ Активен</option>
+                          <option value="inactive">❌ Неактивен</option>
+                        </select>
+                      ) : subsidy.isActive ? (
+                        "✅ Активен"
+                      ) : (
+                        "❌ Неактивен"
+                      )}
+                    </td>
+                    <td>
+                      {editingId === subsidy.id ? (
+                        <div className="admin-actions">
+                          <button
+                            onClick={() => handleUpdate(subsidy.id)}
+                            className="admin-btn-success"
+                          >
+                            💾
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            className="admin-btn-danger"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="admin-actions">
+                          <button
+                            onClick={() => startEdit(subsidy)}
+                            className="admin-btn-primary"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => handleDelete(subsidy.id)}
+                            className="admin-btn-danger"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminLayout>
+    </div>
   );
 };

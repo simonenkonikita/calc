@@ -18,6 +18,6 @@ export class Config {
   @Column({ type: "jsonb" })
   value: any;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;
 }

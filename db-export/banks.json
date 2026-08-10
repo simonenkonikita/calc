@@ -1,0 +1,68 @@
+[
+  {
+    "id": "0a4ef1a4-7ae3-4240-88e4-8e006070e09d",
+    "slug": "alfa",
+    "name": "Альфа-Банк",
+    "baseRate": 19.09,
+    "minPVPercent": 20.1,
+    "isActive": true,
+    "displayOrder": 1,
+    "created_at": "2026-08-10T23:15:59.950235",
+    "updated_at": "2026-08-10T23:15:59.950235"
+  },
+  {
+    "id": "86e96cf4-449f-45a4-b3bc-288b5b70deca",
+    "slug": "sovkom",
+    "name": "Совкомбанк",
+    "baseRate": 18.99,
+    "minPVPercent": 20.1,
+    "isActive": true,
+    "displayOrder": 2,
+    "created_at": "2026-08-10T23:15:59.950235",
+    "updated_at": "2026-08-10T23:15:59.950235"
+  },
+  {
+    "id": "9687791e-a421-4c7e-a114-638a4662e80b",
+    "slug": "vtb",
+    "name": "ВТБ",
+    "baseRate": 19.9,
+    "minPVPercent": 20.1,
+    "isActive": true,
+    "displayOrder": 3,
+    "created_at": "2026-08-10T23:15:59.950235",
+    "updated_at": "2026-08-10T23:15:59.950235"
+  },
+  {
+    "id": "d074ca44-e116-400a-acb4-1fc3bce14a28",
+    "slug": "uralsib",
+    "name": "Уралсиб",
+    "baseRate": 18.19,
+    "minPVPercent": 20.1,
+    "isActive": true,
+    "displayOrder": 4,
+    "created_at": "2026-08-10T23:15:59.950235",
+    "updated_at": "2026-08-10T23:15:59.950235"
+  },
+  {
+    "id": "03823cfe-7555-46e4-b525-91d207038cc9",
+    "slug": "domrf",
+    "name": "Дом.РФ Банк",
+    "baseRate": 17.3,
+    "minPVPercent": 20.1,
+    "isActive": true,
+    "displayOrder": 5,
+    "created_at": "2026-08-10T23:15:59.950235",
+    "updated_at": "2026-08-10T23:19:15.421218"
+  },
+  {
+    "id": "eba0e0ac-c95d-4359-9a5a-9331e1c3e058",
+    "slug": "sber",
+    "name": "Сбербанк",
+    "baseRate": 100.0,
+    "minPVPercent": 20.1,
+    "isActive": true,
+    "displayOrder": 0,
+    "created_at": "2026-08-10T23:15:59.950235",
+    "updated_at": "2026-08-10T23:20:18.429081"
+  }
+]

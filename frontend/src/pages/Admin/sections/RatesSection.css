@@ -1,0 +1,22 @@
+/* frontend/src/pages/Admin/sections/RatesSection.css */
+
+.rates-section .rate-condition {
+  font-family: "Courier New", monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.rates-section .rate-value-high {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.rates-section .rate-value-low {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.rates-section .rate-priority {
+  text-align: center;
+  font-weight: 500;
+}

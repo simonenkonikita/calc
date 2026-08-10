@@ -1,14 +1,17 @@
+// backend/src/routes/banks.routes.ts
+
 import { Router } from "express";
 import {
   getAllBanks,
-  getAllOffers,
+  getBankById,
   getBankOffers,
 } from "../controllers/banks.controller";
 
 const router = Router();
 
-router.get("/banks", getAllBanks);
-router.get("/offers", getAllOffers);
-router.get("/banks/:bankName/offers", getBankOffers);
+// Публичные эндпоинты для банков (без CRUD)
+router.get("/", getAllBanks);
+router.get("/:id", getBankById);
+router.get("/:bankName/offers", getBankOffers);
 
 export default router;

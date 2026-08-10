@@ -1,6 +1,7 @@
 // frontend/src/pages/Admin/AdminLayout.tsx
 
 import React from "react";
+import "./AdminLayout.css";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
