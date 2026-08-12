@@ -329,3 +329,55 @@
     font-size: 0.6rem;
   }
 }
+
+.programs-section .admin-table td {
+  vertical-align: middle;
+}
+
+.programs-section .admin-table input[type="color"] {
+  cursor: pointer;
+}
+
+.programs-section .admin-table input[type="number"] {
+  text-align: center;
+}
+
+.programs-section .admin-table code {
+  background: #f3f4f6;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  color: #374151;
+}
+
+.programs-section .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.programs-section .status-badge.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.programs-section .status-badge.inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.programs-section .admin-btn-sm {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  .programs-section .admin-table {
+    min-width: 700px;
+  }
+}

@@ -1,4 +1,4 @@
-// frontend/src/pages/Admin/sections/RatesSection.tsx
+// frontend/src/pages/Admin/sections/DynamicRatesSection.tsx
 
 import React, { useState, useEffect } from "react";
 import { adminApi } from "../../../services/adminApi";
@@ -23,7 +23,7 @@ interface DynamicRate {
   };
 }
 
-export const RatesSection: React.FC = () => {
+export const DynamicRatesSection: React.FC = () => {
   const [rates, setRates] = useState<DynamicRate[]>([]);
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +40,7 @@ export const RatesSection: React.FC = () => {
     try {
       setLoading(true);
       const [ratesData, offersData] = await Promise.all([
-        adminApi.getDynamicRates(), // 🔥 Используем getDynamicRates вместо getRates
+        adminApi.getDynamicRates(),
         adminApi.getOffers(),
       ]);
       setRates(Array.isArray(ratesData) ? ratesData : []);

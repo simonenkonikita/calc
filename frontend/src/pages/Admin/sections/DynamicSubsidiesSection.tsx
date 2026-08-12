@@ -1,8 +1,9 @@
-// frontend/src/pages/Admin/sections/SubsidiesSection.tsx
+// frontend/src/pages/Admin/sections/DynamicSubsidiesSection.tsx
 
 import React, { useState, useEffect } from "react";
 import { adminApi } from "../../../services/adminApi";
 import { AdminLayout } from "../AdminLayout";
+import "./DynamicSubsidiesSection.css";
 
 interface DynamicSubsidy {
   id: string;
@@ -40,7 +41,7 @@ interface SubsidyFormRow {
   roundingStrategy: string | null;
 }
 
-export const SubsidiesSection: React.FC = () => {
+export const DynamicSubsidiesSection: React.FC = () => {
   const [subsidies, setSubsidies] = useState<DynamicSubsidy[]>([]);
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -174,6 +175,7 @@ export const SubsidiesSection: React.FC = () => {
     }
   };
 
+  // 🔥 Редактирование субсидии
   const startEdit = (subsidy: DynamicSubsidy) => {
     setEditingId(subsidy.id);
     setFormData({
@@ -192,6 +194,7 @@ export const SubsidiesSection: React.FC = () => {
     });
   };
 
+  // 🔥 Обновление субсидии
   const handleUpdate = async (id: string) => {
     try {
       const updated = await adminApi.updateDynamicSubsidy(id, formData);
@@ -205,6 +208,7 @@ export const SubsidiesSection: React.FC = () => {
     }
   };
 
+  // 🔥 Удаление субсидии
   const handleDelete = async (id: string) => {
     if (!confirm("Удалить субсидию?")) return;
     try {
@@ -217,11 +221,13 @@ export const SubsidiesSection: React.FC = () => {
     }
   };
 
+  // 🔥 Отмена редактирования
   const cancelEdit = () => {
     setEditingId(null);
     setFormData({});
   };
 
+  // 🔥 Отмена создания
   const cancelCreate = () => {
     setIsCreating(false);
     setSelectedOfferId("");
@@ -274,29 +280,11 @@ export const SubsidiesSection: React.FC = () => {
         </span>
       </div>
 
+      {/* Форма массового создания */}
       {isCreating && (
-        <div
-          className="admin-section"
-          style={{
-            marginBottom: "1.5rem",
-            padding: "1rem",
-            background: "#f9fafb",
-            borderRadius: "0.5rem",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "1rem",
-              flexWrap: "wrap",
-              gap: "0.5rem",
-            }}
-          >
-            <h3 style={{ fontSize: "1rem", fontWeight: 600, margin: 0 }}>
-              📝 Создание субсидий
-            </h3>
+        <div className="admin-section" style={{ marginBottom: "1.5rem" }}>
+          <div className="admin-section-header">
+            <h3>📝 Создание субсидий</h3>
             <div>
               <select
                 value={selectedOfferId}
@@ -306,7 +294,6 @@ export const SubsidiesSection: React.FC = () => {
                   borderRadius: "0.375rem",
                   border: "1px solid #e5e7eb",
                   marginRight: "0.5rem",
-                  background: "white",
                 }}
               >
                 <option value="">Выберите оффер</option>
@@ -316,11 +303,7 @@ export const SubsidiesSection: React.FC = () => {
                   </option>
                 ))}
               </select>
-              <button
-                onClick={addRow}
-                className="admin-btn-secondary"
-                style={{ marginRight: "0.5rem" }}
-              >
+              <button onClick={addRow} className="admin-btn-secondary">
                 + Добавить строку
               </button>
               <button
@@ -329,11 +312,7 @@ export const SubsidiesSection: React.FC = () => {
               >
                 💾 Сохранить все
               </button>
-              <button
-                onClick={cancelCreate}
-                className="admin-btn-danger"
-                style={{ marginLeft: "0.5rem" }}
-              >
+              <button onClick={cancelCreate} className="admin-btn-danger">
                 ✕ Отмена
               </button>
             </div>
@@ -511,6 +490,7 @@ export const SubsidiesSection: React.FC = () => {
         </div>
       )}
 
+      {/* Список существующих субсидий */}
       <div className="admin-table-wrapper">
         <table className="admin-table">
           <thead>
@@ -532,6 +512,7 @@ export const SubsidiesSection: React.FC = () => {
             {subsidies.map((subsidy) => (
               <tr key={subsidy.id}>
                 {editingId === subsidy.id ? (
+                  // Режим редактирования
                   <>
                     <td>{getOfferLabel(subsidy.offer)}</td>
                     <td>
@@ -685,6 +666,7 @@ export const SubsidiesSection: React.FC = () => {
                     </td>
                   </>
                 ) : (
+                  // Режим просмотра
                   <>
                     <td>{getOfferLabel(subsidy.offer)}</td>
                     <td>{subsidy.minPVPercent ?? "—"}</td>
@@ -740,5 +722,3 @@ export const SubsidiesSection: React.FC = () => {
     </AdminLayout>
   );
 };
-
-export default SubsidiesSection;

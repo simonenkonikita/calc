@@ -14,10 +14,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
+    { id: "dashboard", label: "Главная", icon: "📊" },
     { id: "complexes", label: "Жилые комплексы", icon: "🏗️" },
-    { id: "dashboard", label: "Обзор", icon: "📊" },
-    { id: "programs", label: "Программы", icon: "📋" },
     { id: "banks", label: "Банки", icon: "🏦" },
+    { id: "programs", label: "Программы", icon: "📋" },
     { id: "offers", label: "Офферы", icon: "📄" },
     { id: "rates", label: "Ставки", icon: "📈" },
     { id: "subsidies", label: "Субсидии", icon: "💰" },

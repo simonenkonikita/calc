@@ -1,4 +1,5 @@
 // backend/src/entities/Program.ts
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -20,10 +21,10 @@ export class Program {
   @Column({ type: "varchar", length: 100 })
   label: string;
 
-  @Column({ type: "varchar", length: 10, nullable: true })
+  @Column({ type: "varchar", length: 10, nullable: true, default: "🏦" })
   icon: string;
 
-  @Column({ type: "varchar", length: 20, nullable: true })
+  @Column({ type: "varchar", length: 20, nullable: true, default: "#6b7280" })
   color: string;
 
   @Column({ type: "text", nullable: true })
@@ -32,15 +33,16 @@ export class Program {
   @Column({ type: "boolean", default: true })
   isActive: boolean;
 
-  @Column({ type: "int", default: 0 }) // 👈 ДОБАВЬТЕ ЭТО ПОЛЕ
+  @Column({ type: "int", default: 0 })
   displayOrder: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;
 
+  // 🔥 Связь с офферами (но не загружаем при обновлении)
   @OneToMany(() => Offer, (offer) => offer.programEntity)
   offers: Offer[];
 }

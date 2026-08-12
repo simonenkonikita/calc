@@ -9,6 +9,7 @@ import {
   AdminComplex,
 } from "../types/admin.types";
 import { AdminLayout } from "../AdminLayout";
+import { DynamicSubsidiesTable } from "./DynamicSubsidiesTable";
 import "./OffersSection.css";
 
 export const OffersSection: React.FC = () => {
@@ -23,6 +24,7 @@ export const OffersSection: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterBank, setFilterBank] = useState<string>("");
   const [filterProgram, setFilterProgram] = useState<string>("");
+  const [expandedOffer, setExpandedOffer] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -55,7 +57,6 @@ export const OffersSection: React.FC = () => {
   // ============================================================
   const handleCreate = async () => {
     try {
-      // Проверяем обязательные поля
       if (!formData.bankId) {
         alert("Выберите банк");
         return;
@@ -270,6 +271,10 @@ export const OffersSection: React.FC = () => {
   const renderComplexesList = (complexesList: string[] | null | undefined) => {
     if (!complexesList || complexesList.length === 0) return "Все ЖК";
     return complexesList.join(", ");
+  };
+
+  const toggleExpand = (id: string) => {
+    setExpandedOffer(expandedOffer === id ? null : id);
   };
 
   // ============================================================
@@ -543,6 +548,7 @@ export const OffersSection: React.FC = () => {
                 <th>Субсидия %</th>
                 <th>Мин. ПВ</th>
                 <th>ЖК</th>
+                <th>Субсидии</th>
                 <th>Активен</th>
                 <th>Действия</th>
               </tr>
@@ -571,6 +577,18 @@ export const OffersSection: React.FC = () => {
                       <td>{offer.minPVPercent}%</td>
                       <td style={{ fontSize: "0.8rem" }}>
                         {renderComplexesList(offer.complexes)}
+                      </td>
+                      <td>
+                        <button
+                          className="admin-btn-secondary"
+                          onClick={() => toggleExpand(offer.id)}
+                          style={{ fontSize: "0.75rem" }}
+                        >
+                          {expandedOffer === offer.id
+                            ? "📄 Скрыть"
+                            : "📄 Показать"}{" "}
+                          (субсидии)
+                        </button>
                       </td>
                       <td>{offer.isActive ? "✅ Активен" : "❌ Неактивен"}</td>
                       <td>
@@ -619,13 +637,23 @@ export const OffersSection: React.FC = () => {
                       </td>
                     </tr>
                   )}
+                  {expandedOffer === offer.id && (
+                    <tr>
+                      <td colSpan={11} style={{ padding: "0.5rem" }}>
+                        <DynamicSubsidiesTable
+                          offerId={offer.id}
+                          onUpdate={loadData}
+                        />
+                      </td>
+                    </tr>
+                  )}
                 </React.Fragment>
               ))}
 
               {filteredOffers.length === 0 && !isCreating && (
                 <tr>
                   <td
-                    colSpan={10}
+                    colSpan={11}
                     style={{
                       textAlign: "center",
                       color: "#6b7280",
@@ -645,3 +673,5 @@ export const OffersSection: React.FC = () => {
     </div>
   );
 };
+
+export default OffersSection;

@@ -2,128 +2,162 @@
 
 import { Router } from "express";
 import {
-  // Банки
-  getBanks,
-  createBank,
-  updateBank,
-  deleteBank,
-  // ЖК
-  getComplexes,
-  createComplex,
-  updateComplex,
-  deleteComplex,
-  // Типы квартир
-  getApartmentTypes,
-  createApartmentType,
-  updateApartmentType,
-  deleteApartmentType,
-  // Программы
-  getPrograms,
-  createProgram,
-  updateProgram,
-  deleteProgram,
-  // Офферы
-  getOffers,
-  getActiveOffers,
-  getOfferById,
-  createOffer,
-  updateOffer,
-  deleteOffer,
-  restoreOffer,
-  hardDeleteOffer,
-  copyOffer,
-  getOffersFiltered,
-  getRateRange,
-  // Ставки
-  getAllDynamicRates,
-  getDynamicRatesByOffer,
-  createDynamicRate,
-  updateDynamicRate,
-  deleteDynamicRate,
-  // Субсидии
-  getAllDynamicSubsidies,
-  getDynamicSubsidiesByOffer,
-  createDynamicSubsidy,
-  updateDynamicSubsidy,
-  deleteDynamicSubsidy,
-  // Конфиг
-  getConfig,
-  updateConfig,
-} from "../controllers/admin.controller";
+  bankController,
+  complexController,
+  apartmentTypeController,
+  programController,
+  offerController,
+  rateController,
+  subsidyController,
+  configController,
+} from "../controllers/admin";
 
 const router = Router();
 
 // ============================================================
-// БАНКИ
+// 🔥 БАНКИ
 // ============================================================
-router.get("/banks", getBanks);
-router.post("/banks", createBank);
-router.put("/banks/:id", updateBank);
-router.delete("/banks/:id", deleteBank);
+router.get("/banks", bankController.getAll.bind(bankController));
+router.get("/banks/:id", bankController.getOne.bind(bankController));
+router.post("/banks", bankController.create.bind(bankController));
+router.put("/banks/:id", bankController.update.bind(bankController));
+router.delete("/banks/:id", bankController.delete.bind(bankController));
 
 // ============================================================
-// ЖК (КОМПЛЕКСЫ)
+// 🔥 ЖК (КОМПЛЕКСЫ)
 // ============================================================
-router.get("/complexes", getComplexes);
-router.post("/complexes", createComplex);
-router.put("/complexes/:id", updateComplex);
-router.delete("/complexes/:id", deleteComplex);
+router.get("/complexes", complexController.getAll.bind(complexController));
+router.get("/complexes/:id", complexController.getOne.bind(complexController));
+router.post("/complexes", complexController.create.bind(complexController));
+router.put("/complexes/:id", complexController.update.bind(complexController));
+router.delete(
+  "/complexes/:id",
+  complexController.delete.bind(complexController),
+);
 
 // ============================================================
-// ТИПЫ КВАРТИР
+// 🔥 ТИПЫ КВАРТИР
 // ============================================================
-router.get("/complexes/:complexId/apartment-types", getApartmentTypes);
-router.post("/complexes/:complexId/apartment-types", createApartmentType);
-router.put("/apartment-types/:id", updateApartmentType);
-router.delete("/apartment-types/:id", deleteApartmentType);
+router.get(
+  "/complexes/:complexId/apartment-types",
+  apartmentTypeController.getByComplex.bind(apartmentTypeController),
+);
+router.post(
+  "/complexes/:complexId/apartment-types",
+  apartmentTypeController.create.bind(apartmentTypeController),
+);
+router.put(
+  "/apartment-types/:id",
+  apartmentTypeController.update.bind(apartmentTypeController),
+);
+router.delete(
+  "/apartment-types/:id",
+  apartmentTypeController.delete.bind(apartmentTypeController),
+);
 
 // ============================================================
-// ПРОГРАММЫ
+// 🔥 ПРОГРАММЫ
 // ============================================================
-router.get("/programs", getPrograms);
-router.post("/programs", createProgram);
-router.put("/programs/:id", updateProgram);
-router.delete("/programs/:id", deleteProgram);
+router.get("/programs", programController.getAll.bind(programController));
+router.post("/programs", programController.create.bind(programController));
+router.put("/programs/:id", programController.update.bind(programController));
+router.delete(
+  "/programs/:id",
+  programController.delete.bind(programController),
+);
 
 // ============================================================
-// ОФФЕРЫ
+// 🔥 ОФФЕРЫ
 // ============================================================
-router.get("/offers", getOffers);
-router.get("/offers/active", getActiveOffers);
-router.get("/offers/filter", getOffersFiltered);
-router.get("/offers/rate-range", getRateRange);
-router.get("/offers/:id", getOfferById);
-router.post("/offers", createOffer);
-router.put("/offers/:id", updateOffer);
-router.delete("/offers/:id", deleteOffer);
-router.post("/offers/:id/restore", restoreOffer);
-router.delete("/offers/:id/hard", hardDeleteOffer);
-router.post("/offers/:id/copy", copyOffer);
+router.get("/offers", offerController.getAll.bind(offerController));
+router.get("/offers/active", offerController.getActive.bind(offerController));
+router.get("/offers/filter", offerController.getFiltered.bind(offerController));
+router.get(
+  "/offers/rate-range",
+  offerController.getRateRange.bind(offerController),
+);
+router.get("/offers/:id", offerController.getOne.bind(offerController));
+router.post("/offers", offerController.create.bind(offerController));
+router.put("/offers/:id", offerController.update.bind(offerController));
+router.delete("/offers/:id", offerController.delete.bind(offerController));
+router.post(
+  "/offers/:id/restore",
+  offerController.restore.bind(offerController),
+);
+router.delete(
+  "/offers/:id/hard",
+  offerController.hardDelete.bind(offerController),
+);
+router.post("/offers/:id/copy", offerController.copy.bind(offerController));
 
 // ============================================================
-// ДИНАМИЧЕСКИЕ СТАВКИ
+// 🔥 ДИНАМИЧЕСКИЕ СТАВКИ
 // ============================================================
-router.get("/rates", getAllDynamicRates);
-router.get("/offers/:offerId/rates", getDynamicRatesByOffer);
-router.post("/rates", createDynamicRate);
-router.post("/offers/:offerId/rates", createDynamicRate);
-router.put("/rates/:id", updateDynamicRate);
-router.delete("/rates/:id", deleteDynamicRate);
+router.get("/dynamic-rates", rateController.getAll.bind(rateController));
+router.get("/dynamic-rates/:id", rateController.getOne.bind(rateController));
+router.get(
+  "/offers/:offerId/dynamic-rates",
+  rateController.getByOffer.bind(rateController),
+);
+router.post(
+  "/offers/:offerId/dynamic-rates",
+  rateController.create.bind(rateController),
+);
+router.put("/dynamic-rates/:id", rateController.update.bind(rateController));
+router.delete("/dynamic-rates/:id", rateController.delete.bind(rateController));
+router.delete(
+  "/dynamic-rates/:id/hard",
+  rateController.hardDelete.bind(rateController),
+);
+router.put(
+  "/dynamic-rates/priorities",
+  rateController.updatePriorities.bind(rateController),
+);
 
 // ============================================================
-// ДИНАМИЧЕСКИЕ СУБСИДИИ
+// 🔥 ДИНАМИЧЕСКИЕ СУБСИДИИ
 // ============================================================
-router.get("/subsidies", getAllDynamicSubsidies);
-router.get("/offers/:offerId/subsidies", getDynamicSubsidiesByOffer);
-router.post("/subsidies", createDynamicSubsidy);
-router.post("/offers/:offerId/subsidies", createDynamicSubsidy);
-router.put("/subsidies/:id", updateDynamicSubsidy);
-router.delete("/subsidies/:id", deleteDynamicSubsidy);
+router.get(
+  "/dynamic-subsidies",
+  subsidyController.getAll.bind(subsidyController),
+);
+router.get(
+  "/dynamic-subsidies/:id",
+  subsidyController.getOne.bind(subsidyController),
+);
+router.get(
+  "/offers/:offerId/dynamic-subsidies",
+  subsidyController.getByOffer.bind(subsidyController),
+);
+router.post(
+  "/offers/:offerId/dynamic-subsidies",
+  subsidyController.create.bind(subsidyController),
+);
+router.put(
+  "/dynamic-subsidies/:id",
+  subsidyController.update.bind(subsidyController),
+);
+router.delete(
+  "/dynamic-subsidies/:id",
+  subsidyController.delete.bind(subsidyController),
+);
+router.delete(
+  "/dynamic-subsidies/:id/hard",
+  subsidyController.hardDelete.bind(subsidyController),
+);
+router.put(
+  "/dynamic-subsidies/priorities",
+  subsidyController.updatePriorities.bind(subsidyController),
+);
+router.post(
+  "/dynamic-subsidies/copy",
+  subsidyController.copyFromOffer.bind(subsidyController),
+);
 
 // ============================================================
-// КОНФИГУРАЦИЯ
+// 🔥 КОНФИГУРАЦИЯ
 // ============================================================
-router.get("/config", getConfig);
-router.put("/config", updateConfig);
+router.get("/config", configController.get.bind(configController));
+router.put("/config", configController.update.bind(configController));
 
 export default router;

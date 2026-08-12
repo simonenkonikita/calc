@@ -1,1 +1,21 @@
-[{"id":"d184580a-9482-4acc-94a9-e487390d4187","key":"app_config","value":{"bankOrder": ["Сбербанк", "Альфа-Банк", "Совкомбанк", "ВТБ", "Уралсиб", "Дом.РФ Банк"], "maxLoanTerm": 30, "depositAmount": 30000, "defaultComplex": "ЖК Сады у моря 3", "minDownPayment": 20.1},"updatedAt":"2026-08-09T10:55:05.085351"}]
+[
+  {
+    "id": "d184580a-9482-4acc-94a9-e487390d4187",
+    "key": "app_config",
+    "value": {
+      "bankOrder": [
+        "Сбербанк",
+        "Альфа-Банк",
+        "Совкомбанк",
+        "ВТБ",
+        "Уралсиб",
+        "Дом.РФ Банк"
+      ],
+      "maxLoanTerm": 30,
+      "depositAmount": 30000,
+      "defaultComplex": "ЖК Сады у моря 3",
+      "minDownPayment": 20.1
+    },
+    "updatedAt": "2026-08-09T10:55:05.085351"
+  }
+]

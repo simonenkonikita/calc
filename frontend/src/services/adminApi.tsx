@@ -16,7 +16,23 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 // Вспомогательная функция для обработки ответов
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch {
+      errorData = {};
+    }
+
+    // Специальная обработка для 409 Conflict (каскадное удаление)
+    if (response.status === 409 && errorData.canCascade) {
+      throw {
+        status: 409,
+        message: errorData.error || "Entity has associated records",
+        offersCount: errorData.offersCount || 0,
+        canCascade: errorData.canCascade || false,
+      };
+    }
+
     throw new Error(
       errorData.error ||
         errorData.message ||
@@ -27,8 +43,11 @@ async function handleResponse<T>(response: Response): Promise<T> {
   const data = await response.json();
 
   // Если ответ имеет структуру { success: true, data: ... }
-  if (data && typeof data === "object" && "success" in data && "data" in data) {
-    return data.data as T;
+  if (data && typeof data === "object" && "success" in data) {
+    if (data.success) {
+      return data.data !== undefined ? data.data : data;
+    }
+    throw new Error(data.error || "Request failed");
   }
 
   return data as T;
@@ -41,6 +60,11 @@ export const adminApi = {
   async getBanks(): Promise<AdminBank[]> {
     const response = await fetch(`${API_URL}/admin/banks`);
     return handleResponse<AdminBank[]>(response);
+  },
+
+  async getBank(id: string): Promise<AdminBank> {
+    const response = await fetch(`${API_URL}/admin/banks/${id}`);
+    return handleResponse<AdminBank>(response);
   },
 
   async createBank(data: Partial<AdminBank>): Promise<AdminBank> {
@@ -74,6 +98,11 @@ export const adminApi = {
   async getComplexes(): Promise<AdminComplex[]> {
     const response = await fetch(`${API_URL}/admin/complexes`);
     return handleResponse<AdminComplex[]>(response);
+  },
+
+  async getComplex(id: string): Promise<AdminComplex> {
+    const response = await fetch(`${API_URL}/admin/complexes/${id}`);
+    return handleResponse<AdminComplex>(response);
   },
 
   async createComplex(data: Partial<AdminComplex>): Promise<AdminComplex> {
@@ -156,6 +185,11 @@ export const adminApi = {
     return handleResponse<AdminProgram[]>(response);
   },
 
+  async getProgram(id: string): Promise<AdminProgram> {
+    const response = await fetch(`${API_URL}/admin/programs/${id}`);
+    return handleResponse<AdminProgram>(response);
+  },
+
   async createProgram(data: Partial<AdminProgram>): Promise<AdminProgram> {
     const response = await fetch(`${API_URL}/admin/programs`, {
       method: "POST",
@@ -177,15 +211,46 @@ export const adminApi = {
     return handleResponse<AdminProgram>(response);
   },
 
-  async deleteProgram(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/programs/${id}`, {
+  async deleteProgram(
+    id: string,
+    cascade?: boolean,
+  ): Promise<{ offersDeleted?: number }> {
+    const url = cascade
+      ? `${API_URL}/admin/programs/${id}?cascade=true`
+      : `${API_URL}/admin/programs/${id}`;
+
+    const response = await fetch(url, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete program");
+
+    if (!response.ok) {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = {};
+      }
+
+      if (response.status === 409) {
+        throw {
+          status: 409,
+          message: errorData.error || "Program has associated offers",
+          offersCount: errorData.offersCount || 0,
+          canCascade: errorData.canCascade || false,
+        };
+      }
+
+      throw new Error(
+        errorData.error || errorData.message || "Failed to delete program",
+      );
+    }
+
+    const data = await response.json();
+    return data;
   },
 
   // ============================================================
-  // СТАВКИ
+  // СТАВКИ (старые, для обратной совместимости)
   // ============================================================
   async getRates(): Promise<AdminRate[]> {
     const response = await fetch(`${API_URL}/admin/rates`);
@@ -218,7 +283,7 @@ export const adminApi = {
   },
 
   // ============================================================
-  // СУБСИДИИ
+  // СУБСИДИИ (старые, для обратной совместимости)
   // ============================================================
   async getSubsidies(): Promise<AdminSubsidy[]> {
     const response = await fetch(`${API_URL}/admin/subsidies`);
@@ -372,6 +437,22 @@ export const adminApi = {
     return handleResponse<any>(response);
   },
 
+  async updateOfferRate(id: string, data: any): Promise<any> {
+    const response = await fetch(`${API_URL}/admin/rates/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return handleResponse<any>(response);
+  },
+
+  async deleteOfferRate(id: string): Promise<void> {
+    const response = await fetch(`${API_URL}/admin/rates/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Failed to delete rate");
+  },
+
   // ============================================================
   // ДИНАМИЧЕСКИЕ СУБСИДИИ ДЛЯ ОФФЕРОВ
   // ============================================================
@@ -392,6 +473,197 @@ export const adminApi = {
       },
     );
     return handleResponse<any>(response);
+  },
+
+  async updateOfferSubsidy(id: string, data: any): Promise<any> {
+    const response = await fetch(`${API_URL}/admin/subsidies/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return handleResponse<any>(response);
+  },
+
+  async deleteOfferSubsidy(id: string): Promise<void> {
+    const response = await fetch(`${API_URL}/admin/subsidies/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Failed to delete subsidy");
+  },
+
+  // ============================================================
+  // НОВЫЕ ДИНАМИЧЕСКИЕ СТАВКИ (через отдельные эндпоинты)
+  // ============================================================
+  async getDynamicRates(): Promise<any[]> {
+    const response = await fetch(`${API_URL}/admin/dynamic-rates`);
+    return handleResponse<any[]>(response);
+  },
+
+  async getDynamicRate(id: string): Promise<any> {
+    const response = await fetch(`${API_URL}/admin/dynamic-rates/${id}`);
+    return handleResponse<any>(response);
+  },
+
+  async createDynamicRate(offerId: string, data: any): Promise<any> {
+    const response = await fetch(
+      `${API_URL}/admin/offers/${offerId}/dynamic-rates`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+    );
+    return handleResponse<any>(response);
+  },
+
+  async updateDynamicRate(id: string, data: any): Promise<any> {
+    const response = await fetch(`${API_URL}/admin/dynamic-rates/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return handleResponse<any>(response);
+  },
+
+  async deleteDynamicRate(id: string): Promise<void> {
+    const response = await fetch(`${API_URL}/admin/dynamic-rates/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Failed to delete rate");
+  },
+
+  async hardDeleteDynamicRate(id: string): Promise<void> {
+    const response = await fetch(`${API_URL}/admin/dynamic-rates/${id}/hard`, {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Failed to hard delete rate");
+  },
+
+  async updateDynamicRatesPriorities(
+    rates: { id: string; priority: number }[],
+  ): Promise<any[]> {
+    const response = await fetch(`${API_URL}/admin/dynamic-rates/priorities`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rates }),
+    });
+    return handleResponse<any[]>(response);
+  },
+
+  // ============================================================
+  // НОВЫЕ ДИНАМИЧЕСКИЕ СУБСИДИИ (через отдельные эндпоинты)
+  // ============================================================
+  async getDynamicSubsidies(): Promise<any[]> {
+    const response = await fetch(`${API_URL}/admin/dynamic-subsidies`);
+    return handleResponse<any[]>(response);
+  },
+
+  async getDynamicSubsidy(id: string): Promise<any> {
+    const response = await fetch(`${API_URL}/admin/dynamic-subsidies/${id}`);
+    return handleResponse<any>(response);
+  },
+
+  async createDynamicSubsidy(offerId: string, data: any): Promise<any> {
+    const response = await fetch(
+      `${API_URL}/admin/offers/${offerId}/dynamic-subsidies`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+    );
+    return handleResponse<any>(response);
+  },
+
+  async updateDynamicSubsidy(id: string, data: any): Promise<any> {
+    const response = await fetch(`${API_URL}/admin/dynamic-subsidies/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return handleResponse<any>(response);
+  },
+
+  async deleteDynamicSubsidy(id: string): Promise<void> {
+    const response = await fetch(`${API_URL}/admin/dynamic-subsidies/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Failed to delete subsidy");
+  },
+
+  async hardDeleteDynamicSubsidy(id: string): Promise<void> {
+    const response = await fetch(
+      `${API_URL}/admin/dynamic-subsidies/${id}/hard`,
+      {
+        method: "DELETE",
+      },
+    );
+    if (!response.ok) throw new Error("Failed to hard delete subsidy");
+  },
+
+  async updateDynamicSubsidiesPriorities(
+    subsidies: { id: string; priority: number }[],
+  ): Promise<any[]> {
+    const response = await fetch(
+      `${API_URL}/admin/dynamic-subsidies/priorities`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subsidies }),
+      },
+    );
+    return handleResponse<any[]>(response);
+  },
+
+  async copyDynamicSubsidies(
+    sourceOfferId: string,
+    targetOfferId: string,
+  ): Promise<any[]> {
+    const response = await fetch(`${API_URL}/admin/dynamic-subsidies/copy`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sourceOfferId, targetOfferId }),
+    });
+    return handleResponse<any[]>(response);
+  },
+
+  async deleteDynamicSubsidiesByOffer(
+    offerId: string,
+  ): Promise<{ affected: number }> {
+    const response = await fetch(
+      `${API_URL}/admin/offers/${offerId}/dynamic-subsidies`,
+      {
+        method: "DELETE",
+      },
+    );
+    return handleResponse<{ affected: number }>(response);
+  },
+
+  async getDynamicSubsidiesStats(): Promise<{
+    total: number;
+    active: number;
+    inactive: number;
+    byOffer: { offerId: string; count: string }[];
+  }> {
+    const response = await fetch(`${API_URL}/admin/dynamic-subsidies/stats`);
+    return handleResponse<any>(response);
+  },
+
+  // ============================================================
+  // ПОЛУЧЕНИЕ ДИНАМИЧЕСКИХ ДАННЫХ ДЛЯ ОФФЕРА (для калькулятора)
+  // ============================================================
+  async getOfferDynamicRates(offerId: string): Promise<any[]> {
+    const response = await fetch(
+      `${API_URL}/admin/offers/${offerId}/dynamic-rates`,
+    );
+    return handleResponse<any[]>(response);
+  },
+
+  async getOfferDynamicSubsidies(offerId: string): Promise<any[]> {
+    const response = await fetch(
+      `${API_URL}/admin/offers/${offerId}/dynamic-subsidies`,
+    );
+    return handleResponse<any[]>(response);
   },
 };
 
