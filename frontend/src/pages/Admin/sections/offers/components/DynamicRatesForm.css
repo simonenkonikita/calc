@@ -1,0 +1,190 @@
+/* frontend/src/pages/Admin/sections/offers/components/DynamicRatesForm.css */
+
+.dynamic-form {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.dynamic-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dynamic-form-header h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.dynamic-form .admin-table-wrapper {
+  background: white;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.dynamic-form .admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.dynamic-form .admin-table th {
+  text-align: left;
+  padding: 0.3rem 0.4rem;
+  font-weight: 600;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  border-bottom: 2px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.dynamic-form .admin-table td {
+  padding: 0.2rem 0.3rem;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.dynamic-form .admin-table input,
+.dynamic-form .admin-table select {
+  padding: 0.15rem 0.3rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  font-size: 0.7rem;
+  background: white;
+  width: 100%;
+}
+
+.dynamic-form .admin-table input:focus,
+.dynamic-form .admin-table select:focus {
+  outline: none;
+  border-color: #818cf8;
+}
+
+.dynamic-form .admin-table .checkbox-cell {
+  text-align: center;
+}
+
+.dynamic-form .admin-table .checkbox-cell input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #818cf8;
+}
+
+.complex-params {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+}
+
+.complex-params-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.25rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 0.25rem 0;
+}
+
+.complex-params-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.complex-params-row input {
+  padding: 0.1rem 0.2rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  font-size: 0.6rem;
+  width: 100%;
+}
+
+.complex-params-row input:focus {
+  outline: none;
+  border-color: #818cf8;
+}
+
+.admin-btn-secondary {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.admin-btn-secondary:hover {
+  background: #e5e5e5;
+}
+
+.admin-btn-danger {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.1rem 0.3rem;
+  font-size: 0.6rem;
+}
+
+.admin-btn-danger:hover {
+  background: #fee2e2;
+}
+
+.admin-btn-sm {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.7rem;
+  border-radius: 0.25rem;
+}
+
+.admin-btn-xs {
+  padding: 0.1rem 0.3rem;
+  font-size: 0.6rem;
+  border-radius: 0.2rem;
+}
+
+@media (max-width: 768px) {
+  .complex-params-grid,
+  .complex-params-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .dynamic-form {
+    padding: 0.5rem;
+  }
+
+  .dynamic-form .admin-table {
+    font-size: 0.6rem;
+  }
+
+  .dynamic-form .admin-table input,
+  .dynamic-form .admin-table select {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.2rem;
+  }
+
+  .complex-params-grid,
+  .complex-params-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

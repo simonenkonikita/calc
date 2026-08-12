@@ -1,0 +1,87 @@
+/* frontend/src/pages/Admin/sections/offers/components/BankTabs.css */
+
+.bank-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.bank-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem 0.5rem 0 0;
+  cursor: pointer;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+  position: relative;
+}
+
+.bank-tab:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.bank-tab.active {
+  background: #f8fafc;
+  color: #1f2937;
+  border-bottom: 3px solid #818cf8;
+}
+
+.bank-tab .bank-tab-icon {
+  font-size: 1rem;
+}
+
+.bank-tab .bank-tab-name {
+  font-weight: 600;
+}
+
+.bank-tab .bank-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 0.4rem;
+  background: #e5e7eb;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.bank-tab.active .bank-tab-count {
+  background: #818cf8;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .bank-tabs {
+    gap: 0.25rem;
+  }
+
+  .bank-tab {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .bank-tab .bank-tab-name {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bank-tab .bank-tab-count {
+    display: none;
+  }
+}

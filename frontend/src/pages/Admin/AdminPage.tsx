@@ -11,7 +11,8 @@ import { ConfigSection } from "./sections/ConfigSection";
 import "./AdminPage.css";
 import { DashboardSection } from "./DashboardSection";
 import { ProgramsSection } from "./sections/ProgramsSection";
-import OffersSection from "./sections/OffersSection";
+import { OffersSection } from "./sections/offers";
+
 
 type AdminSection =
   | "dashboard"

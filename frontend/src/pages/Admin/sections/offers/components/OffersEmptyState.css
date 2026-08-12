@@ -1,0 +1,26 @@
+/* frontend/src/pages/Admin/sections/offers/components/OffersEmptyState.css */
+
+.offers-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+.offers-empty-state .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.offers-empty-state .empty-title {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.offers-empty-state .empty-description {
+  font-size: 0.85rem;
+}

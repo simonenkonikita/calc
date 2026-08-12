@@ -1,0 +1,205 @@
+/* frontend/src/pages/Admin/sections/offers/OffersSection.css */
+
+/* ============================================================
+   ОБЩИЕ СТИЛИ ДЛЯ СЕКЦИИ
+   ============================================================ */
+
+.offers-section .offer-program {
+  font-weight: 500;
+}
+
+.offers-section .offer-rate {
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.offers-section .offer-complexes {
+  font-size: 0.75rem;
+  color: #555;
+}
+
+.offers-section .complex-tag {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  background: #f5f5f5;
+  border-radius: 0.25rem;
+  font-size: 0.65rem;
+  color: #555;
+  margin: 0.1rem;
+}
+
+.offers-section .complex-tag.selected {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.offers-section .complex-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  min-width: 200px;
+}
+
+/* ============================================================
+   ТАБЛИЦЫ (общие)
+   ============================================================ */
+
+.offers-section .admin-table-wrapper {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid #f3f4f6;
+}
+
+.offers-section .admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  min-width: 500px;
+}
+
+.offers-section .admin-table th {
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  font-weight: 600;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  border-bottom: 2px solid #e5e7eb;
+  background: #f8fafc;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.offers-section .admin-table td {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+  color: #1f2937;
+}
+
+.offers-section .admin-table input,
+.offers-section .admin-table select {
+  padding: 0.15rem 0.3rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  font-size: 0.7rem;
+  background: white;
+  transition: all 0.2s;
+}
+
+.offers-section .admin-table input:focus,
+.offers-section .admin-table select:focus {
+  outline: none;
+  border-color: #818cf8;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.offers-section .admin-actions {
+  display: flex;
+  gap: 0.2rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ============================================================
+   КНОПКИ (общие для всей секции)
+   ============================================================ */
+
+.offers-section .admin-btn-xs {
+  padding: 0.1rem 0.3rem;
+  font-size: 0.65rem;
+  border-radius: 0.2rem;
+}
+
+.offers-section .admin-btn-sm {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.7rem;
+  border-radius: 0.25rem;
+}
+
+.offers-section .admin-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.offers-section .admin-btn-success {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.offers-section .admin-btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.offers-section .admin-btn-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.offers-section .admin-btn-secondary {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.offers-section .admin-btn-primary:hover,
+.offers-section .admin-btn-success:hover,
+.offers-section .admin-btn-danger:hover,
+.offers-section .admin-btn-warning:hover,
+.offers-section .admin-btn-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.offers-section .admin-btn-primary:disabled,
+.offers-section .admin-btn-success:disabled,
+.offers-section .admin-btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ============================================================
+   ЗАГРУЗКА
+   ============================================================ */
+
+.offers-section .admin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-size: 1rem;
+}
