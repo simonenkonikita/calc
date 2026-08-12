@@ -1,21 +1,19 @@
-// backend/src/migrations/migrateFromTypescript.ts
-
-import { AppDataSource } from "../backend/src/data-source";
-import { bankOffers } from "../backend/src/data/banks";
+import { AppDataSource } from "../src/data-source";
+import { bankOffers } from "../src/data/banks";
 import {
   BANK_NAMES,
   BASE_RATES,
   MIN_PV_PERCENT,
-} from "../backend/src/data/banks/constants";
-import { housingPrices } from "../backend/src/data/complexPrice/complexPriceData";
-import { DEPOSIT_AMOUNT } from "../backend/src/data/complexPrice/CONSTRUCTION";
-import { ApartmentType } from "../backend/src/entities/ApartmentType";
-import { Bank } from "../backend/src/entities/Bank";
-import { Complex } from "../backend/src/entities/Complex";
-import { Config } from "../backend/src/entities/Config";
-import { Offer } from "../backend/src/entities/Offer";
-import { Program } from "../backend/src/entities/Program";
-import { generateSlug } from "../backend/src/utils/slugify";
+} from "../src/data/banks/constants";
+import { housingPrices } from "../src/data/complexPrice/complexPriceData";
+import { DEPOSIT_AMOUNT } from "../src/data/complexPrice/CONSTRUCTION";
+import { ApartmentType } from "../src/entities/ApartmentType";
+import { Bank } from "../src/entities/Bank";
+import { Complex } from "../src/entities/Complex";
+import { Config } from "../src/entities/Config";
+import { Offer } from "../src/entities/Offer";
+import { Program } from "../src/entities/Program";
+import { generateSlug } from "../src/utils/slugify";
 
 async function migrate() {
   try {

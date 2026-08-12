@@ -44,7 +44,7 @@ export const getProjects = async (req: Request, res: Response) => {
             promotions: complex.promotions || [],
             specialOffers: complex.specialOffers || [],
             materialsLink: complex.materialsLink,
-            eligiblePrograms: eligiblePrograms, // 🔥 ДОБАВЛЯЕМ ПРОГРАММЫ
+            eligiblePrograms: eligiblePrograms, 
           });
         }
       }

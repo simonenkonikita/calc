@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { AdminSidebar } from "./AdminSidebar";
 import { BanksSection } from "./sections/BanksSection";
 import { ComplexesSection } from "./sections/ComplexesSection";
-import { OffersSection } from "./sections/OffersSection";
+
 import { RatesSection } from "./sections/RatesSection";
 import { SubsidiesSection } from "./sections/SubsidiesSection";
 import { ConfigSection } from "./sections/ConfigSection";
@@ -11,6 +11,7 @@ import { ConfigSection } from "./sections/ConfigSection";
 import "./AdminPage.css";
 import { DashboardSection } from "./DashboardSection";
 import { ProgramsSection } from "./sections/ProgramsSection";
+import OffersSection from "./sections/OffersSection";
 
 type AdminSection =
   | "dashboard"
@@ -127,7 +128,7 @@ export const AdminPage: React.FC = () => {
         return <RatesSection />;
       case "subsidies":
         return <SubsidiesSection />;
-      case "programs": // ✅ добавить
+      case "programs": 
         return <ProgramsSection />;
       case "config":
         return <ConfigSection />;
