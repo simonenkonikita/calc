@@ -65,6 +65,66 @@
   color: white;
 }
 
+/* 🔥 Стили для неактивного банка */
+.bank-tab.inactive {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bank-tab.inactive:hover {
+  background: transparent;
+  color: #6b7280;
+}
+
+/* 🔥 Разделитель между активными и неактивными банками */
+.bank-tabs-divider {
+  width: 2px;
+  background: #e5e7eb;
+  margin: 4px 0;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* 🔥 Пустое состояние */
+.bank-tabs-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px dashed #d1d5db;
+  margin: 16px 0;
+  width: 100%;
+}
+
+.bank-tabs-empty .empty-message {
+  font-size: 18px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.bank-tabs-empty .empty-hint {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-top: 8px;
+}
+
+/* 🔥 Статус банка */
+.bank-tab .bank-tab-status {
+  font-size: 0.7rem;
+  margin-left: 2px;
+}
+
+.bank-tab .bank-tab-status.active {
+  color: #10b981;
+}
+
+.bank-tab .bank-tab-status.inactive {
+  color: #ef4444;
+}
+
 @media (max-width: 768px) {
   .bank-tabs {
     gap: 0.25rem;

@@ -44,6 +44,11 @@
   letter-spacing: 0.03em;
 }
 
+.program-offers {
+  display: flex;
+  gap: 20px;
+}
+
 .program-offers-count {
   font-size: 0.75rem;
   color: #6b7280;

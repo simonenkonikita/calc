@@ -45,10 +45,54 @@
   gap: 0.25rem;
 }
 
-.offer-details {
+/* 🔥 Верхняя часть с деталями */
+.offer-details-top {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 0.25rem 1rem;
+}
+
+/* 🔥 Строка с ЖК внизу */
+.offer-complexes-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #e5e7eb;
+  flex-wrap: wrap;
+}
+
+.offer-complexes-row .detail-label {
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 0.85rem;
+  min-width: 40px;
+}
+
+.offer-complexes-row .complexes-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: #1f2937;
+}
+
+/* 🔥 Описание */
+.offer-description {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.offer-description .detail-label {
+  color: #6b7280;
+  font-weight: 500;
+  min-width: 70px;
+}
+
+.offer-description .detail-value {
+  color: #1f2937;
 }
 
 .offer-detail-item {
@@ -67,10 +111,6 @@
 .offer-detail-item .detail-value {
   color: #1f2937;
   font-weight: 500;
-}
-
-.offer-detail-item.full-width {
-  grid-column: 1 / -1;
 }
 
 .offer-card-footer {
@@ -206,7 +246,7 @@
 }
 
 @media (max-width: 768px) {
-  .offer-details {
+  .offer-details-top {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -227,10 +267,20 @@
     width: 100%;
     justify-content: flex-start;
   }
+
+  .offer-complexes-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .offer-details {
+  .offer-details-top {
     grid-template-columns: 1fr;
+  }
+
+  .offer-complexes-row .complexes-list {
+    font-size: 0.7rem;
   }
 }

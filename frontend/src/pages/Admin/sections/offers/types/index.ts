@@ -46,6 +46,8 @@ export interface DynamicData {
 
 export interface OfferCardProps {
   offer: AdminOffer;
+  programIsActive: boolean;
+  bankIsActive: boolean;
   dynamicData?: DynamicData;
   onEdit: (offer: AdminOffer) => void;
   onCopy: (id: string) => void;
@@ -61,6 +63,8 @@ export interface ProgramGroupProps {
   programId: string;
   programLabel: string;
   programType: string;
+  programIsActive: boolean;
+  bankIsActive: boolean;
   offers: AdminOffer[];
   dynamicDataMap: Record<string, DynamicData>;
   onEdit: (offer: AdminOffer) => void;

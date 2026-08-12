@@ -1,4 +1,4 @@
-// frontend/src/pages/Admin/sections/offers/components/OfferCard.tsx
+// frontend/src/pages/Admin/sections/offers/components/OfferCard/OfferCard.tsx
 
 import React from "react";
 import { OfferCardProps } from "../types";
@@ -6,6 +6,8 @@ import "./OfferCard.css";
 
 export const OfferCard: React.FC<OfferCardProps> = ({
   offer,
+  programIsActive,
+  bankIsActive,
   dynamicData,
   onEdit,
   onCopy,
@@ -18,18 +20,33 @@ export const OfferCard: React.FC<OfferCardProps> = ({
 }) => {
   const subsidy = getDisplaySubsidy(offer);
 
+  // 🔥 Логика: оффер активен ТОЛЬКО если активны ВСЕ три
+  const isOfferEffectiveActive =
+    programIsActive && bankIsActive && offer.isActive;
+
+  // 🔥 Получаем причину неактивности
+  const getInactiveReason = (): string => {
+    if (!offer.isActive) return "Оффер деактивирован";
+    if (!bankIsActive) return "Банк неактивен";
+    if (!programIsActive) return "Программа неактивна";
+    return "Неизвестная причина";
+  };
+
   return (
     <div className="offer-card">
       <div className="offer-card-header">
         <div className="offer-card-title">
           <span className="offer-program-name">{offer.program}</span>
-          {offer.isActive ? (
-            <span className="status-badge active">✅ Активен</span>
-          ) : (
-            <span className="status-badge inactive">❌ Неактивен</span>
-          )}
         </div>
         <div className="offer-card-actions">
+          {isOfferEffectiveActive ? (
+            <span className="status-badge active">✅ Активен</span>
+          ) : (
+            <span className="status-badge inactive" title={getInactiveReason()}>
+              ❌ Неактивен
+              <span className="status-reason"> ({getInactiveReason()})</span>
+            </span>
+          )}
           <button
             onClick={() => onEdit(offer)}
             className="admin-btn-primary admin-btn-sm"
@@ -44,7 +61,8 @@ export const OfferCard: React.FC<OfferCardProps> = ({
           >
             📋
           </button>
-          {!offer.isActive ? (
+          {/* 🔥 Используем isOfferEffectiveActive для отображения кнопок */}
+          {!isOfferEffectiveActive ? (
             <button
               onClick={() => onRestore(offer.id)}
               className="admin-btn-success admin-btn-sm"
@@ -61,7 +79,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
               🗑️
             </button>
           )}
-          {!offer.isActive && (
+          {!isOfferEffectiveActive && (
             <button
               onClick={() => onHardDelete(offer.id)}
               className="admin-btn-danger admin-btn-sm"
@@ -74,10 +92,13 @@ export const OfferCard: React.FC<OfferCardProps> = ({
       </div>
 
       <div className="offer-card-body">
-        <div className="offer-details">
+        {/* Верхняя часть - детали оффера */}
+        <div className="offer-details-top">
           <div className="offer-detail-item">
             <span className="detail-label">Ставка:</span>
-            <span className="detail-value rate-cell">{getDisplayRate(offer)}</span>
+            <span className="detail-value rate-cell">
+              {getDisplayRate(offer)}
+            </span>
           </div>
           <div className="offer-detail-item">
             <span className="detail-label">Субсидия:</span>
@@ -88,8 +109,8 @@ export const OfferCard: React.FC<OfferCardProps> = ({
                   subsidy.type === "dynamic"
                     ? "Динамическая субсидия"
                     : subsidy.type === "fixed"
-                    ? "Фиксированная субсидия"
-                    : "Нет субсидии"
+                      ? "Фиксированная субсидия"
+                      : "Нет субсидии"
                 }
               >
                 {subsidy.display}
@@ -103,67 +124,46 @@ export const OfferCard: React.FC<OfferCardProps> = ({
             <span className="detail-label">Мин. ПВ:</span>
             <span className="detail-value">{offer.minPVPercent}%</span>
           </div>
-          <div className="offer-detail-item">
-            <span className="detail-label">ЖК:</span>
-            <span className="detail-value complex-list">
-              {renderComplexesList(offer.complexes)}
-            </span>
-          </div>
-          {offer.shortRate && (
-            <div className="offer-detail-item">
-              <span className="detail-label">Short Rate:</span>
-              <span className="detail-value">{offer.shortRate}%</span>
-            </div>
-          )}
-          {offer.twoRate && (
-            <div className="offer-detail-item">
-              <span className="detail-label">Two Rate:</span>
-              <span className="detail-value">{offer.twoRate}%</span>
-            </div>
-          )}
-          {offer.isTranche && (
-            <div className="offer-detail-item">
-              <span className="detail-label">Траншевая:</span>
-              <span className="detail-value">✅</span>
-            </div>
-          )}
-          {offer.isTwoContracts && (
-            <div className="offer-detail-item">
-              <span className="detail-label">2 договора:</span>
-              <span className="detail-value">✅</span>
-            </div>
-          )}
-          {offer.excessLimit && (
-            <div className="offer-detail-item">
-              <span className="detail-label">Сверхлимит:</span>
-              <span className="detail-value">✅</span>
-            </div>
-          )}
-          {offer.description && (
-            <div className="offer-detail-item full-width">
-              <span className="detail-label">Описание:</span>
-              <span className="detail-value">{offer.description}</span>
-            </div>
-          )}
         </div>
+
+        {/* Нижняя часть - ЖК в строку */}
+        <div className="offer-complexes-row">
+          <span className="detail-label">ЖК:</span>
+          <div className="complexes-list">
+            {renderComplexesList(offer.complexes)}
+          </div>
+        </div>
+
+        {/* Описание (если есть) */}
+        {offer.description && (
+          <div className="offer-description">
+            <span className="detail-label">Описание:</span>
+            <span className="detail-value">{offer.description}</span>
+          </div>
+        )}
       </div>
 
-      {dynamicData && (dynamicData.rates.length > 0 || dynamicData.subsidies.length > 0) && (
-        <div className="offer-card-footer">
-          {dynamicData.rates.length > 0 && (
-            <div className="dynamic-info">
-              <span className="dynamic-label">📊 Ставки:</span>
-              <span className="dynamic-value">{dynamicData.rates.length} условий</span>
-            </div>
-          )}
-          {dynamicData.subsidies.length > 0 && (
-            <div className="dynamic-info">
-              <span className="dynamic-label">💰 Субсидии:</span>
-              <span className="dynamic-value">{dynamicData.subsidies.length} условий</span>
-            </div>
-          )}
-        </div>
-      )}
+      {dynamicData &&
+        (dynamicData.rates.length > 0 || dynamicData.subsidies.length > 0) && (
+          <div className="offer-card-footer">
+            {dynamicData.rates.length > 0 && (
+              <div className="dynamic-info">
+                <span className="dynamic-label">📊 Ставки:</span>
+                <span className="dynamic-value">
+                  {dynamicData.rates.length} условий
+                </span>
+              </div>
+            )}
+            {dynamicData.subsidies.length > 0 && (
+              <div className="dynamic-info">
+                <span className="dynamic-label">💰 Субсидии:</span>
+                <span className="dynamic-value">
+                  {dynamicData.subsidies.length} условий
+                </span>
+              </div>
+            )}
+          </div>
+        )}
     </div>
   );
 };

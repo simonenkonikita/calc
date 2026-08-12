@@ -4,13 +4,17 @@ import React, { useState } from "react";
 import { AdminLayout } from "../../AdminLayout";
 import { AdminOffer } from "../../types/admin.types";
 import { useOffersData } from "./hooks/useOffersData";
-import { BankTabs } from "./components/BankTabs";
-import { ProgramGroup } from "./components/ProgramGroup";
+import { BankTabs } from "./components/BankTabs/BankTabs";
+import { ProgramGroup } from "./components/ProgramGroup/ProgramGroup";
 import { OfferModal } from "./components/OfferModal";
 import { OffersToolbar } from "./components/OffersToolbar";
 import { OffersEmptyState } from "./components/OffersEmptyState";
 import "./OffersSection.css";
-import { getDisplayRate, getDisplaySubsidy, renderComplexesList } from "./utils/offerHelpers";
+import {
+  getDisplayRate,
+  getDisplaySubsidy,
+  renderComplexesList,
+} from "./utils/offerHelpers";
 import adminApi from "../../../../services/adminApi";
 
 export const OffersSection: React.FC = () => {
@@ -31,11 +35,18 @@ export const OffersSection: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // 🔥 Фильтруем офферы: только для активных банков
   const getOffersByBankAndProgram = () => {
     const result: Record<string, Record<string, AdminOffer[]>> = {};
     const offersByBank: Record<string, AdminOffer[]> = {};
-    
-    for (const offer of offers) {
+
+    // 🔥 Показываем только офферы активных банков
+    const activeOffers = offers.filter((offer) => {
+      const bank = banks.find((b) => b.id === offer.bankId);
+      return bank?.isActive === true;
+    });
+
+    for (const offer of activeOffers) {
       if (!offersByBank[offer.bankId]) {
         offersByBank[offer.bankId] = [];
       }
@@ -88,7 +99,8 @@ export const OffersSection: React.FC = () => {
   const handleCopy = async (id: string) => {
     try {
       const copy = await adminApi.copyOffer(id);
-      setOffers([...offers, copy]);
+      // После копирования обновляем список
+      refresh();
       alert("✅ Оффер скопирован");
     } catch (error) {
       console.error("Error copying offer:", error);
@@ -100,7 +112,7 @@ export const OffersSection: React.FC = () => {
     if (!confirm("Удалить оффер?")) return;
     try {
       await adminApi.deleteOffer(id);
-      setOffers(offers.filter((o) => o.id !== id));
+      refresh();
       alert("✅ Оффер удален");
     } catch (error) {
       console.error("Error deleting offer:", error);
@@ -109,10 +121,11 @@ export const OffersSection: React.FC = () => {
   };
 
   const handleHardDelete = async (id: string) => {
-    if (!confirm("Полностью удалить оффер без возможности восстановления?")) return;
+    if (!confirm("Полностью удалить оффер без возможности восстановления?"))
+      return;
     try {
       await adminApi.hardDeleteOffer(id);
-      setOffers(offers.filter((o) => o.id !== id));
+      refresh();
       alert("✅ Оффер полностью удален");
     } catch (error) {
       console.error("Error hard deleting offer:", error);
@@ -122,8 +135,8 @@ export const OffersSection: React.FC = () => {
 
   const handleRestore = async (id: string) => {
     try {
-      const restored = await adminApi.restoreOffer(id);
-      setOffers(offers.map((o) => (o.id === id ? restored : o)));
+      await adminApi.restoreOffer(id);
+      refresh();
       alert("✅ Оффер восстановлен");
     } catch (error) {
       console.error("Error restoring offer:", error);
@@ -131,11 +144,18 @@ export const OffersSection: React.FC = () => {
     }
   };
 
+  // 🔥 Фильтруем офферы для поиска с учетом статуса банка
   const filteredOffers = offers.filter((offer) => {
+    const bank = banks.find((b) => b.id === offer.bankId);
+    // 🔥 Показываем только офферы активных банков
+    if (!bank?.isActive) return false;
+
     const matchesBank = !selectedBankId || offer.bankId === selectedBankId;
     const matchesSearch =
       offer.program.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      getBankName(offer.bankId).toLowerCase().includes(searchTerm.toLowerCase());
+      getBankName(offer.bankId)
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
     return matchesBank && matchesSearch;
   });
 
@@ -144,6 +164,8 @@ export const OffersSection: React.FC = () => {
     return bank?.name || bankId;
   };
 
+  // 🔥 Проверяем, есть ли активные банки
+  const hasActiveBanks = banks.some((b) => b.isActive === true);
   const groupedOffers = getOffersByBankAndProgram();
 
   if (loading) return <div className="admin-loading">Загрузка...</div>;
@@ -159,6 +181,7 @@ export const OffersSection: React.FC = () => {
           totalCount={filteredOffers.length}
         />
 
+        {/* 🔥 Передаем все банки, но BankTabs сам отфильтрует активные */}
         <BankTabs
           banks={banks}
           offers={offers}
@@ -166,31 +189,51 @@ export const OffersSection: React.FC = () => {
           onSelect={setSelectedBankId}
         />
 
-        {selectedBankId && groupedOffers[selectedBankId] ? (
+        {!hasActiveBanks ? (
+          <div className="no-active-banks">
+            <div className="no-active-banks-icon">🏦</div>
+            <h3>Нет активных банков</h3>
+            <p>
+              Чтобы увидеть офферы, активируйте банк в разделе{" "}
+              <strong>"Банки-партнеры"</strong>
+            </p>
+          </div>
+        ) : selectedBankId && groupedOffers[selectedBankId] ? (
           <div className="bank-offers">
-            {Object.entries(groupedOffers[selectedBankId]).map(([programId, programOffers]) => {
-              const programLabel = getProgramLabel(programId);
-              const programType = getProgramType(programId);
+            {Object.entries(groupedOffers[selectedBankId]).map(
+              ([programId, programOffers]) => {
+                const programLabel = getProgramLabel(programId);
+                const programType = getProgramType(programId);
 
-              return (
-                <ProgramGroup
-                  key={programId}
-                  programId={programId}
-                  programLabel={programLabel}
-                  programType={programType}
-                  offers={programOffers}
-                  dynamicDataMap={dynamicDataMap}
-                  onEdit={openEditModal}
-                  onCopy={handleCopy}
-                  onDelete={handleDelete}
-                  onRestore={handleRestore}
-                  onHardDelete={handleHardDelete}
-                  getDisplayRate={getDisplayRate}
-                  getDisplaySubsidy={getDisplaySubsidy}
-                  renderComplexesList={renderComplexesList}
-                />
-              );
-            })}
+                const program = programs.find((p) => p.id === programId);
+                const programIsActive = program?.isActive ?? true;
+
+                // 🔥 Проверяем статус банка для отображения
+                const bank = banks.find((b) => b.id === selectedBankId);
+                const bankIsActive = bank?.isActive ?? true;
+
+                return (
+                  <ProgramGroup
+                    key={programId}
+                    programId={programId}
+                    programLabel={programLabel}
+                    programType={programType}
+                    programIsActive={programIsActive}
+                    bankIsActive={bankIsActive}
+                    offers={programOffers}
+                    dynamicDataMap={dynamicDataMap}
+                    onEdit={openEditModal}
+                    onCopy={handleCopy}
+                    onDelete={handleDelete}
+                    onRestore={handleRestore}
+                    onHardDelete={handleHardDelete}
+                    getDisplayRate={getDisplayRate}
+                    getDisplaySubsidy={getDisplaySubsidy}
+                    renderComplexesList={renderComplexesList}
+                  />
+                );
+              },
+            )}
           </div>
         ) : (
           <OffersEmptyState />

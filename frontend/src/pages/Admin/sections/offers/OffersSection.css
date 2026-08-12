@@ -203,3 +203,39 @@
   color: #6b7280;
   font-size: 1rem;
 }
+
+/* frontend/src/pages/Admin/sections/offers/OffersSection.css */
+
+.no-active-banks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px dashed #d1d5db;
+  margin: 20px 0;
+}
+
+.no-active-banks-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.no-active-banks h3 {
+  font-size: 20px;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.no-active-banks p {
+  font-size: 14px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.no-active-banks strong {
+  color: #1e3a5f;
+}
