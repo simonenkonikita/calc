@@ -4,10 +4,14 @@ import React from "react";
 import { AdminOffer } from "../../../types/admin.types";
 import { DynamicData } from "../types";
 
-export const getDisplayRate = (offer: AdminOffer, dynamicDataMap?: Record<string, DynamicData>) => {
+export const getDisplayRate = (
+  offer: AdminOffer,
+  dynamicDataMap?: Record<string, DynamicData>,
+) => {
   const offerData = dynamicDataMap?.[offer.id];
   const hasDynamicRates = offerData?.rates && offerData.rates.length > 0;
-  const hasDynamicRatesIU = offer.dynamicRatesIU && offer.dynamicRatesIU.length > 0;
+  const hasDynamicRatesIU =
+    offer.dynamicRatesIU && offer.dynamicRatesIU.length > 0;
 
   if (hasDynamicRates) {
     return (
@@ -18,18 +22,21 @@ export const getDisplayRate = (offer: AdminOffer, dynamicDataMap?: Record<string
             const meta = rule.conditionMetadata;
             const parts = [];
             if (meta.pvMin !== null || meta.pvMax !== null) {
-              parts.push(`ПВ ${meta.pvMin ?? '—'}—${meta.pvMax ?? '∞'}`);
+              parts.push(`ПВ ${meta.pvMin ?? "—"}—${meta.pvMax ?? "∞"}`);
             }
             if (meta.amountMin !== null || meta.amountMax !== null) {
-              parts.push(`Сумма ${meta.amountMin ?? '—'}—${meta.amountMax ?? '∞'}`);
+              parts.push(
+                `Сумма ${meta.amountMin ?? "—"}—${meta.amountMax ?? "∞"}`,
+              );
             }
             if (meta.termMin !== null || meta.termMax !== null) {
-              parts.push(`Срок ${meta.termMin ?? '—'}—${meta.termMax ?? '∞'}`);
+              parts.push(`Срок ${meta.termMin ?? "—"}—${meta.termMax ?? "∞"}`);
             }
-            conditionDisplay = parts.join(', ');
+            conditionDisplay = parts.join(", ");
           } else {
-            conditionDisplay = rule.description ||
-              `${rule.conditionType} ${rule.condition} ${rule.value || ''}`;
+            conditionDisplay =
+              rule.description ||
+              `${rule.conditionType} ${rule.condition} ${rule.value || ""}`;
           }
           return (
             <div key={i} className="rate-dynamic-item">
@@ -59,17 +66,24 @@ export const getDisplayRate = (offer: AdminOffer, dynamicDataMap?: Record<string
 
   return (
     <div className="rate-static-container">
-      {offer.shortRate && <span className="rate-short">{offer.shortRate}% →</span>}
+      {offer.shortRate && (
+        <span className="rate-short">{offer.shortRate}% →</span>
+      )}
       <span className="rate-main">{offer.rate}%</span>
       {offer.twoRate && <span className="rate-two">{offer.twoRate}%</span>}
     </div>
   );
 };
 
-export const getDisplaySubsidy = (offer: AdminOffer, dynamicDataMap?: Record<string, DynamicData>) => {
+export const getDisplaySubsidy = (
+  offer: AdminOffer,
+  dynamicDataMap?: Record<string, DynamicData>,
+) => {
   const offerData = dynamicDataMap?.[offer.id];
-  const hasDynamicSubsidy = offerData?.subsidies && offerData.subsidies.length > 0;
-  const hasDynamicSubsidyPercent = offer.dynamicSubsidyPercent && offer.dynamicSubsidyPercent.length > 0;
+  const hasDynamicSubsidy =
+    offerData?.subsidies && offerData.subsidies.length > 0;
+  const hasDynamicSubsidyPercent =
+    offer.dynamicSubsidyPercent && offer.dynamicSubsidyPercent.length > 0;
 
   if (hasDynamicSubsidy) {
     const subsidies = offerData.subsidies
@@ -114,7 +128,15 @@ export const getDisplaySubsidy = (offer: AdminOffer, dynamicDataMap?: Record<str
   return { display: "—", type: "none" };
 };
 
-export const renderComplexesList = (complexesList: string[] | null | undefined) => {
-  if (!complexesList || complexesList.length === 0) return "Все ЖК";
-  return complexesList.join(", ");
+export const renderComplexesList = (
+  complexesList: string[] | null | undefined,
+) => {
+  if (!complexesList || complexesList.length === 0) {
+    return <span className="complex-tag">Все ЖК</span>;
+  }
+  return complexesList.map((complex, index) => (
+    <span key={index} className="complex-tag">
+      {complex}
+    </span>
+  ));
 };

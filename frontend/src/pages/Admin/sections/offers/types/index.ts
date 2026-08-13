@@ -56,7 +56,7 @@ export interface OfferCardProps {
   onHardDelete: (id: string) => void;
   getDisplayRate: (offer: AdminOffer) => React.ReactNode;
   getDisplaySubsidy: (offer: AdminOffer) => { display: string; type: string };
-  renderComplexesList: (complexes: string[] | null | undefined) => string;
+  renderComplexesList: (complexes: string[] | null | undefined) => React.ReactNode; 
 }
 
 export interface ProgramGroupProps {
@@ -74,7 +74,9 @@ export interface ProgramGroupProps {
   onHardDelete: (id: string) => void;
   getDisplayRate: (offer: AdminOffer) => React.ReactNode;
   getDisplaySubsidy: (offer: AdminOffer) => { display: string; type: string };
-  renderComplexesList: (complexes: string[] | null | undefined) => string;
+  renderComplexesList: (
+    complexes: string[] | null | undefined,
+  ) => React.ReactNode;
 }
 
 export interface BankTabsProps {
