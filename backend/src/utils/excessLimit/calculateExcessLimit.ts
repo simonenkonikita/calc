@@ -1,12 +1,10 @@
-// src/hooks/calculations/bankProgram/steps/calculateExcessLimit.ts
+// backend/src/services/calculations/bankProgram/steps/calculateExcessLimit.ts
 
+import { Offer } from "../../entities/Offer";
 import { Variables } from "../../types/types";
 
 interface CalculateExcessLimitParams {
-  bankOffer: {
-    type: string;
-    excessLimit?: boolean;
-  };
+  offer: Offer;
   variables: Variables;
   mortgageAmount: number;
   subsidyAmount: number;
@@ -22,7 +20,7 @@ export const calculateExcessLimit = (
   params: CalculateExcessLimitParams,
 ): CalculateExcessLimitResult => {
   const {
-    bankOffer,
+    offer,
     variables,
     mortgageAmount,
     subsidyAmount: initialSubsidyAmount,
@@ -32,8 +30,10 @@ export const calculateExcessLimit = (
   let subsidyAmount = initialSubsidyAmount;
   let excessLimit: number | undefined;
 
-  if (bankOffer.excessLimit) {
-    if (bankOffer.type === "family") {
+  const programType = offer.programEntity?.type || "base";
+
+  if (offer.excessLimit) {
+    if (programType === "family") {
       const maxSubsidy =
         variables.familyMortgageLimit * (actualSubsidyPercent / 100);
       if (subsidyAmount > maxSubsidy) {
@@ -41,7 +41,7 @@ export const calculateExcessLimit = (
         excessLimit = mortgageAmount - variables.familyMortgageLimit;
         if (excessLimit < 0) excessLimit = 0;
       }
-    } else if (bankOffer.type === "it") {
+    } else if (programType === "it") {
       const maxSubsidy =
         variables.itMortgageLimit * (actualSubsidyPercent / 100);
       if (subsidyAmount > maxSubsidy) {

@@ -1,7 +1,7 @@
 // src/hooks/payment/downPayment/calculateStandardDownPayment.ts
 
 import { MIN_DOWN_PAYMENT_PERCENT } from "../../../../../data/constants";
-import { BankOffer } from "../../../../../types/types";
+import { Offer } from "../../../../../entities/Offer";
 
 interface StandardDownPaymentParams {
   contractAmount: number;
@@ -10,7 +10,7 @@ interface StandardDownPaymentParams {
   isSpecialMortgageMode: boolean;
   userDownPaymentPercent: number;
   objectCost: number;
-  bankOffer: BankOffer;
+  offer: Offer;
 }
 
 export const calculateStandardDownPayment = (
@@ -23,12 +23,12 @@ export const calculateStandardDownPayment = (
     isSpecialMortgageMode,
     userDownPaymentPercent,
     objectCost,
-    bankOffer,
+    offer,
   } = params;
 
   const downPaymentFromContract =
     contractAmount * (userDownPaymentPercent / 100);
-  const contractAmountMinPV = contractAmount * (bankOffer.minPVPercent / 100);
+  const contractAmountMinPV = contractAmount * (offer.minPVPercent / 100);
 
   let downPaymentAmount: number;
 

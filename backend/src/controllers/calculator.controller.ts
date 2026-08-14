@@ -1,27 +1,26 @@
 // backend/src/controllers/calculator.controller.ts
+
 import { Request, Response } from "express";
 import { calculateFullMortgage } from "../services/calculations/result/calculateFullMortgage";
 import { ComplexService } from "../services/ComplexService";
 import { OfferService } from "../services/OfferService";
-import { ProgramService } from "../services/ProgramService";
-import { variables } from "../data/limitdDate";
+import { ConfigService } from "../services/ConfigService";
 import { getMortgageSurcharge } from "../utils/mortgageSurcharges";
 import { PRICE_PER_SQUARE_METER_DEFAULT } from "../data/constants";
 import { ApartmentType } from "../entities/ApartmentType";
 import { Offer } from "../entities/Offer";
 import { Complex } from "../entities/Complex";
-import { ProgramType } from "../types/types";
 
 const complexService = new ComplexService();
 const offerService = new OfferService();
-const programService = new ProgramService();
+const configService = new ConfigService();
 
 export const calculate = async (req: Request, res: Response) => {
   try {
-    const { formData, pricePerSquareMeter } = req.body;
+    const { formData } = req.body;
 
+    // 1. Получаем ЖК
     const complex = await complexService.getComplexByName(formData.complex);
-
     if (!complex) {
       return res.status(404).json({
         success: false,
@@ -29,15 +28,15 @@ export const calculate = async (req: Request, res: Response) => {
       });
     }
 
+    // 2. Получаем тип квартиры и цену за м²
     const apartmentType = complex.apartmentTypes?.find(
       (at: ApartmentType) => at.type === formData.apartmentType,
     );
 
     const basePrice =
-      pricePerSquareMeter ||
-      apartmentType?.pricePerSquareMeter ||
-      PRICE_PER_SQUARE_METER_DEFAULT;
+      apartmentType?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT;
 
+    // 3. Наценка за специальные режимы (без ПВ / частичный ПВ)
     const surcharge = getMortgageSurcharge(
       formData.complex,
       formData.apartmentType,
@@ -50,30 +49,16 @@ export const calculate = async (req: Request, res: Response) => {
         ? basePrice + surcharge
         : basePrice;
 
-    const offers = await offerService.getOffersByComplex(formData.complex);
+    // 4. Получаем офферы из БД с загрузкой всех связей
+    const offers: Offer[] = await offerService.getOffersByComplex(formData.complex);
 
-    // 👇 ПРЕОБРАЗУЕМ null В undefined
-    const bankOffers = offers.map((offer: Offer) => ({
-      bank: offer.bank.name,
-      program: offer.program,
-      type: offer.programEntity.type as ProgramType,
-      rate: offer.rate,
-      twoRate: offer.twoRate ?? undefined, // null -> undefined
-      shortRate: offer.shortRate ?? undefined, // null -> undefined
-      subsidyPercent: offer.subsidyPercent,
-      minPVPercent: offer.minPVPercent,
-      durationMonths: offer.durationMonths ?? undefined, // null -> undefined
-      isTwoContracts: offer.isTwoContracts ?? undefined, // false -> undefined если нужно
-      excessLimit: offer.excessLimit ?? undefined,
-      isTranche: offer.isTranche ?? undefined,
-      trancheFirstPercent: offer.trancheFirstPercent ?? undefined,
-      trancheSecondDate: offer.trancheSecondDate ?? undefined,
-      complexes: offer.complexes ?? undefined,
-    }));
+    // 5. Получаем Variables из БД
+    const variables = await configService.getVariables();
 
+    // 6. Вызываем калькулятор напрямую с Offer[] (без адаптера!)
     const result = calculateFullMortgage(
       formData,
-      bankOffers,
+      offers,
       variables,
       finalPricePerM2 || PRICE_PER_SQUARE_METER_DEFAULT,
     );
@@ -83,7 +68,7 @@ export const calculate = async (req: Request, res: Response) => {
       data: result,
       meta: {
         pricePerSquareMeter: finalPricePerM2,
-        banksCount: bankOffers.length,
+        banksCount: offers.length,
       },
     });
   } catch (error) {
@@ -118,14 +103,11 @@ export const getComplexTypes = async (req: Request, res: Response) => {
       });
     }
 
-    const types =
-      complex.apartmentTypes?.map((at: ApartmentType) => at.type) || [];
+    const types = complex.apartmentTypes?.map((at: ApartmentType) => at.type) || [];
     res.json({ success: true, data: types });
   } catch (error) {
     console.error("Error getting apartment types:", error);
-    res
-      .status(500)
-      .json({ success: false, error: "Failed to get apartment types" });
+    res.status(500).json({ success: false, error: "Failed to get apartment types" });
   }
 };
 
@@ -155,8 +137,7 @@ export const getPricePerSquareMeter = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      data:
-        apartmentType?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT,
+      data: apartmentType?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT,
     });
   } catch (error) {
     console.error("Error getting price:", error);
@@ -166,7 +147,7 @@ export const getPricePerSquareMeter = async (req: Request, res: Response) => {
 
 export const getAvailableBanks = async (req: Request, res: Response) => {
   try {
-    const { complexName, apartmentType } = req.params;
+    const { complexName } = req.params;
 
     const offers = await offerService.getOffersByComplex(complexName);
     const banks = Array.from(

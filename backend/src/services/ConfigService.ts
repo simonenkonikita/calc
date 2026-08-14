@@ -2,23 +2,74 @@
 
 import { AppDataSource } from "../data-source";
 import { Config } from "../entities/Config";
+import { Variables } from "../types/types";
 import { DEPOSIT_AMOUNT } from "../data/complexPrice/CONSTRUCTION";
 import { MIN_PV_PERCENT } from "../data/banks/constants";
 import { BANK_NAMES } from "../data/banks/constants";
 
 export class ConfigService {
   private configRepository = AppDataSource.getRepository(Config);
+  private cache: Map<string, any> = new Map(); // ← ДОБАВЛЯЕМ ЭТУ СТРОКУ
+
+  /**
+   * Получить Variables для калькулятора
+   */
+  async getVariables(): Promise<Variables> {
+    const cacheKey = "variables";
+    
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey);
+    }
+
+    try {
+      const config = await this.getConfig();
+      
+      const variables: Variables = {
+        familyMortgageLimit: config.familyMortgageLimit || 6000000,
+        maxFamilyMortgageSum: config.maxFamilyMortgageSum || 15000000,
+        itMortgageLimit: config.itMortgageLimit || 9000000,
+        maxItMortgageSum: config.maxItMortgageSum || 18000000,
+        deposit: config.depositAmount || 30000,
+        minExcessAmounts: config.minExcessAmounts || {
+          Сбербанк: 6300000,
+          ВТБ: 6150000,
+          "Альфа-Банк": 6000000,
+          Совкомбанк: 7500000,
+          Уралсиб: 6000000,
+          "Дом.РФ Банк": 6000000,
+        },
+      };
+
+      this.cache.set(cacheKey, variables);
+      return variables;
+    } catch (error) {
+      console.error("Error getting variables:", error);
+      return this.getDefaultVariables();
+    }
+  }
+
+  /**
+   * Инвалидация кэша переменных
+   */
+  invalidateVariablesCache(): void {
+    this.cache.delete("variables");
+  }
 
   /**
    * Получить конфигурацию
    */
   async getConfig(): Promise<any> {
+    const cacheKey = "config";
+    
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey);
+    }
+
     try {
       let config = await this.configRepository.findOne({
         where: { key: "app_config" },
       });
 
-      // Если конфиг не найден, создаем с значениями по умолчанию
       if (!config) {
         console.log("⚠️ Config not found, creating default config...");
         config = new Config();
@@ -28,6 +79,7 @@ export class ConfigService {
         console.log("✅ Default config created");
       }
 
+      this.cache.set(cacheKey, config.value);
       return config.value;
     } catch (error) {
       console.error("Error in getConfig:", error);
@@ -53,7 +105,6 @@ export class ConfigService {
         config.value = this.getDefaultConfig();
       }
 
-      // Обновляем только переданные поля
       const updatedValue = {
         ...config.value,
         ...data,
@@ -61,6 +112,10 @@ export class ConfigService {
 
       config.value = updatedValue;
       await this.configRepository.save(config);
+
+      // Инвалидируем кэш
+      this.invalidateVariablesCache();
+      this.cache.delete("config");
 
       console.log("✅ Config updated:", updatedValue);
       return config.value;
@@ -88,11 +143,7 @@ export class ConfigService {
   /**
    * Обновить конкретное поле в конфигурации
    */
-  async updateConfigField(
-    key: string,
-    field: string,
-    value: any,
-  ): Promise<any> {
+  async updateConfigField(key: string, field: string, value: any): Promise<any> {
     try {
       console.log(`📝 Updating field "${field}" to:`, value);
 
@@ -110,13 +161,14 @@ export class ConfigService {
       config.value[field] = value;
       await this.configRepository.save(config);
 
+      // Инвалидируем кэш
+      this.invalidateVariablesCache();
+      this.cache.delete("config");
+
       console.log(`✅ Field "${field}" updated`);
       return config.value;
     } catch (error) {
-      console.error(
-        `Error in updateConfigField for key ${key}, field ${field}:`,
-        error,
-      );
+      console.error(`Error in updateConfigField for key ${key}, field ${field}:`, error);
       throw error;
     }
   }
@@ -139,6 +191,10 @@ export class ConfigService {
 
       config.value = this.getDefaultConfig();
       await this.configRepository.save(config);
+
+      // Инвалидируем кэш
+      this.invalidateVariablesCache();
+      this.cache.delete("config");
 
       console.log("✅ Config reset to default");
       return config.value;
@@ -170,6 +226,11 @@ export class ConfigService {
     try {
       console.log("🗑️ Deleting config...");
       await this.configRepository.delete({ key: "app_config" });
+      
+      // Инвалидируем кэш
+      this.invalidateVariablesCache();
+      this.cache.delete("config");
+      
       console.log("✅ Config deleted");
     } catch (error) {
       console.error("Error in deleteConfig:", error);
@@ -178,12 +239,33 @@ export class ConfigService {
   }
 
   /**
+   * Значения по умолчанию для Variables
+   */
+  private getDefaultVariables(): Variables {
+    return {
+      familyMortgageLimit: 6000000,
+      maxFamilyMortgageSum: 15000000,
+      itMortgageLimit: 9000000,
+      maxItMortgageSum: 18000000,
+      deposit: 30000,
+      minExcessAmounts: {
+        Сбербанк: 6300000,
+        ВТБ: 6150000,
+        "Альфа-Банк": 6000000,
+        Совкомбанк: 7500000,
+        Уралсиб: 6000000,
+        "Дом.РФ Банк": 6000000,
+      },
+    };
+  }
+
+  /**
    * Значения конфигурации по умолчанию
    */
   private getDefaultConfig(): any {
     return {
       // Основные настройки
-      depositAmount: DEPOSIT_AMOUNT || 1500000,
+      depositAmount: DEPOSIT_AMOUNT || 30000,
       minDownPayment: MIN_PV_PERCENT || 20.1,
       maxLoanTerm: 30,
       defaultComplex: "ЖК Сады у моря 3",
@@ -194,8 +276,18 @@ export class ConfigService {
       enableITMortgage: true,
       familyMortgageLimit: 6000000,
       itMortgageLimit: 9000000,
-      maxFamilyMortgageSum: 12000000,
+      maxFamilyMortgageSum: 15000000,
       maxItMortgageSum: 18000000,
+
+      // Минимальные суммы для сверхлимита по банкам
+      minExcessAmounts: {
+        Сбербанк: 6300000,
+        ВТБ: 6150000,
+        "Альфа-Банк": 6000000,
+        Совкомбанк: 7500000,
+        Уралсиб: 6000000,
+        "Дом.РФ Банк": 6000000,
+      },
 
       // Дополнительные настройки
       showOverstatement: true,

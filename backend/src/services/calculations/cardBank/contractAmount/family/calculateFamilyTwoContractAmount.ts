@@ -1,5 +1,6 @@
 // src/hooks/calculations/bankProgram/contractAmount/family/calculateFamilyTwoContractAmount.tsx
 
+import { Offer } from "../../../../../entities/Offer";
 import {
   BankOffer,
   Variables,
@@ -14,7 +15,7 @@ export const calculateFamilyTwoContractAmount = (
   downPayment: number,
   remainingAmount: number,
   userDownPaymentPercent: number,
-  bankOffer: BankOffer,
+  offer: Offer,
   variables: Variables,
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,
@@ -53,12 +54,9 @@ export const calculateFamilyTwoContractAmount = (
 
   let secondContractSubsidyPercent = coefficients.subsidyPercent;
 
-  if (
-    bankOffer.dynamicSubsidyPercent &&
-    bankOffer.dynamicSubsidyPercent.length > 0
-  ) {
+  if (offer.dynamicSubsidyPercent && offer.dynamicSubsidyPercent.length > 0) {
     secondContractSubsidyPercent = getDynamicSubsidy(
-      bankOffer,
+      offer,
       userDownPaymentPercent,
       estimatedSecondContract,
       30,
@@ -75,7 +73,7 @@ export const calculateFamilyTwoContractAmount = (
     // Нужно также пересчитать ПВ, чтобы он был не меньше минимального
     if (isSpecialMortgageMode) {
       // Минимальный ПВ от суммы договора
-      const minPVAmount = contractAmount * (bankOffer.minPVPercent / 100);
+      const minPVAmount = contractAmount * (offer.minPVPercent / 100);
       // ПВ = сумма договора - 6 млн - второй договор
       const calculatedDownPayment =
         contractAmount - limit - estimatedSecondContract;
@@ -90,11 +88,11 @@ export const calculateFamilyTwoContractAmount = (
       // Пересчитываем субсидию с новым вторым договором
       let newSubsidyPercent = coefficients.subsidyPercent;
       if (
-        bankOffer.dynamicSubsidyPercent &&
-        bankOffer.dynamicSubsidyPercent.length > 0
+        offer.dynamicSubsidyPercent &&
+        offer.dynamicSubsidyPercent.length > 0
       ) {
         newSubsidyPercent = getDynamicSubsidy(
-          bankOffer,
+          offer,
           userDownPaymentPercent,
           newSecondContract,
           30,

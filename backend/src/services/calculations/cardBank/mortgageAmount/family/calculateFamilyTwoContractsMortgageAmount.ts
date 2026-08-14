@@ -1,18 +1,20 @@
+// backend/src/services/calculations/bankProgram/steps/mortgageAmount/family/calculateFamilyTwoContractsMortgageAmount.ts
+
+import { Offer } from "../../../../../entities/Offer";
 import {
-  BankOffer,
   Variables,
   BankCoefficients,
   MortgageAmountResult,
 } from "../../../../../types/types";
 
 interface calculateFamilyTwoContractsMortgageAmount {
-  objectCost: number; // $B$7
-  contractAmount: number; // C32
+  objectCost: number;
+  contractAmount: number;
   downPayment: number;
   remainingAmount: number;
-  downPaymentAmount: number; // D32
-  userDownPaymentPercent: number; // $B$8
-  bankOffer: BankOffer;
+  downPaymentAmount: number;
+  userDownPaymentPercent: number;
+  offer: Offer;
   variables: Variables;
   isSpecialMortgageMode: boolean;
   coefficients: BankCoefficients;
@@ -28,13 +30,15 @@ export const calculateFamilyTwoContractsMortgageAmount = (
     remainingAmount,
     downPaymentAmount,
     userDownPaymentPercent,
-    bankOffer,
+    offer,
     variables,
     isSpecialMortgageMode,
     coefficients,
   } = params;
 
-  const limit = variables.minExcessAmounts?.[bankOffer.bank] || 7500000;
+  // 🔥 Исправление: используем название банка как строку
+  const bankName = offer.bank?.name || '';
+  const limit = variables.minExcessAmounts?.[bankName] || 7500000;
 
   const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
@@ -59,11 +63,9 @@ export const calculateFamilyTwoContractsMortgageAmount = (
   }
 
   let mortgageAmount: number = contractAmount - downPaymentAmount;
-  // eslint-disable-next-line no-useless-assignment
   let isLimitExceeded: boolean = false;
 
   // Разбивка на 2 договора
-
   const firstContractAmount = Math.min(
     mortgageAmount,
     variables.familyMortgageLimit,

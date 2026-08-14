@@ -1,6 +1,7 @@
+// ========== КОНСТАНТЫ ИПОТЕКИ ==========
+
 import { MIN_PV_PERCENT } from "./banks/constants";
 
-// ========== КОНСТАНТЫ ИПОТЕКИ ==========
 export const DEFAULT_MIN_PV_PERCENT = MIN_PV_PERCENT;
 export const DEFAULT_LOAN_TERM_YEARS = 30;
 export const PRICE_PER_SQUARE_METER_DEFAULT = 140000;

@@ -1,3 +1,4 @@
+import { Offer } from "../../../../../entities/Offer";
 import {
   BankOffer,
   Variables,
@@ -13,7 +14,7 @@ interface developerAccountParams {
   subsidyAmount: number; // C32
   contractAmount: number; // I32
   userDownPaymentPercent: number; // $B$8
-  bankOffer: BankOffer;
+  offer: Offer;
   variables: Variables;
   isSpecialMortgageMode: boolean; // $L$10
   downPaymentAmount: number;
@@ -31,13 +32,13 @@ export const developerAccount = (params: developerAccountParams): number => {
     subsidyAmount,
     contractAmount,
     userDownPaymentPercent,
-    bankOffer,
+    offer,
     variables,
     isSpecialMortgageMode,
     coefficients,
   } = params;
 
-  const limit = bankOffer.excessLimit
+  const limit = offer.excessLimit
     ? variables.maxFamilyMortgageSum || 15000000
     : variables.familyMortgageLimit || 6000000;
 

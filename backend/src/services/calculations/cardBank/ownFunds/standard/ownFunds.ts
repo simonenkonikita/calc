@@ -1,3 +1,4 @@
+import { Offer } from "../../../../../entities/Offer";
 import {
   BankOffer,
   Variables,
@@ -11,7 +12,7 @@ interface ownFundsParams {
   contractAmount: number;
   downPaymentAmount: number; // D32 (рассчитанная сумма ПВ)
   userDownPaymentPercent: number; // $B$8
-  bankOffer: BankOffer;
+  offer: Offer;
   variables: Variables;
   isSpecialMortgageMode: boolean; // $L$10
   coefficients: BankCoefficients;
@@ -24,7 +25,7 @@ export const ownFunds = (params: ownFundsParams): number => {
     remainingAmount,
     downPaymentAmount,
     userDownPaymentPercent,
-    bankOffer,
+    offer,
     variables,
     isSpecialMortgageMode,
     coefficients,

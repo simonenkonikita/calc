@@ -1,13 +1,16 @@
-// src/hooks/calculations/bankProgram/steps/calculateMonthlyPayment.ts
+// backend/src/services/calculations/bankProgram/steps/payment/calculateAllMonthlyPayment.ts
 
-import { BankOffer, TranchePaymentsResult } from "../../../../types/types";
+import { Offer } from "../../../../entities/Offer";
+import { TranchePaymentsResult } from "../../../../types/types";
 import { calculateMonthlyPayment } from "./calculateMonthlyPayment";
 import { calculateTwoContractsMonthlyPayment } from "./family/calculateTwoContractsMonthlyPayment";
 import { calculateSubsidyPayments } from "./subsidy/calculateSubsidyPayments";
 import { calculateTranchePayments } from "./tranche/calculateTranchePayments";
 
+type SubsidyCalculationMethod = "standard" | "onlyPercent";
+
 interface CalculateAllMonthlyPaymentParams {
-  bankOffer: BankOffer;
+  offer: Offer;
   mortgageAmount: number;
   actualRate: number;
   loanTermYears: number;
@@ -28,11 +31,20 @@ interface CalculateAllMonthlyPaymentResult {
   trancheSchedule: TranchePaymentsResult;
 }
 
+// 🔥 Функция для безопасного получения метода
+const getSubsidyMethod = (offer: Offer): SubsidyCalculationMethod => {
+  const method = offer.subsidyCalculationMethod;
+  if (method === "onlyPercent") {
+    return "onlyPercent";
+  }
+  return "standard"; // default
+};
+
 export const calculateAllMonthlyPayment = (
   params: CalculateAllMonthlyPaymentParams,
 ): CalculateAllMonthlyPaymentResult => {
   const {
-    bankOffer,
+    offer,
     mortgageAmount,
     actualRate,
     loanTermYears,
@@ -45,7 +57,7 @@ export const calculateAllMonthlyPayment = (
   } = params;
 
   const loanTermMonths = loanTermYears * 12;
-  const method = bankOffer.subsidyCalculationMethod || "standard";
+  const method = getSubsidyMethod(offer); // ← теперь правильный тип
 
   let monthlyPayment = 0;
   let monthlyPaymentAfter: number | null = null;
@@ -59,45 +71,42 @@ export const calculateAllMonthlyPayment = (
     monthlyPayment: 0,
   };
 
-  // ============================================================
   // 1. КОРОТКАЯ СУБСИДИЯ
-  // ============================================================
-  if (isShortSubsidy && bankOffer.shortRate !== undefined) {
+  if (isShortSubsidy && offer.shortRate !== null && offer.shortRate !== undefined) {
+    const shortRate = offer.shortRate;
+    const durationMonths = offer.durationMonths ?? 12;
+    
     const result = calculateSubsidyPayments(
       mortgageAmount,
-      bankOffer.shortRate,
+      shortRate,
       actualRate,
       loanTermMonths,
-      bankOffer.durationMonths || 12,
-      method,
+      durationMonths,
+      method, // ← теперь правильный тип "standard" | "onlyPercent"
     );
     monthlyPayment = result.monthlyPaymentSubsidy;
     monthlyPaymentAfter = result.monthlyPaymentAfter;
-  }
-
-  // ============================================================
-  // 2. ДВА ДОГОВОРА (СЕМЕЙНАЯ)
-  // ============================================================
-  else if (isTwoContracts && bankOffer.twoRate !== undefined) {
+  } 
+  // 2. ДВА ДОГОВОРА
+  else if (isTwoContracts && offer.twoRate !== null && offer.twoRate !== undefined) {
+    const twoRate = offer.twoRate;
+    
     const result = calculateTwoContractsMonthlyPayment(
       mortgageAmount,
-      bankOffer.twoRate,
-      actualRate, // 6% для первого договора
+      twoRate,
+      actualRate,
       loanTermMonths,
     );
     firstContractPayment = result.firstContractPayment;
     secondContractPayment = result.secondContractPayment;
     totalMonthlyPayment = result.totalMonthlyPayment;
     monthlyPayment = totalMonthlyPayment;
-  }
-
-  // ============================================================
+  } 
   // 3. ТРАНШЕВАЯ ИПОТЕКА
-  // ============================================================
   else if (isTranche) {
     const trancheResult = calculateTranchePayments(
       actualRate,
-      bankOffer,
+      offer,
       firstTrancheAmount,
       secondTrancheAmount,
       mortgageAmount,
@@ -117,11 +126,8 @@ export const calculateAllMonthlyPayment = (
       monthsUntilSecondTranche: trancheResult.monthsUntilSecondTranche,
       trancheSecondDate: trancheResult.trancheSecondDate,
     };
-  }
-
-  // ============================================================
+  } 
   // 4. СТАНДАРТНАЯ ИПОТЕКА
-  // ============================================================
   else {
     monthlyPayment = calculateMonthlyPayment(
       mortgageAmount,

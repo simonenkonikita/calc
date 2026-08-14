@@ -1,3 +1,4 @@
+import { Offer } from "../../../../../entities/Offer";
 import {
   BankOffer,
   Variables,
@@ -11,7 +12,7 @@ export const calculateFamilyContractAmount = (
   downPayment: number,
   remainingAmount: number,
   userDownPaymentPercent: number,
-  bankOffer: BankOffer,
+  offer: Offer,
   variables: Variables,
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,
@@ -20,7 +21,7 @@ export const calculateFamilyContractAmount = (
   // 🔥 Меняем тип возврата, так как может быть null
   const limit = variables.familyMortgageLimit || 6000000;
 
-  const subsidyPercent = bankOffer.subsidyPercent;
+  const subsidyPercent = offer.subsidyPercent;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
   const cafsummPV = userDownPaymentPercent / 100;

@@ -1,5 +1,6 @@
 // src/hooks/calculations/bankProgram/steps/calculateDeveloperAccount.ts
 
+import { Offer } from "../../../../entities/Offer";
 import {
   BankOffer,
   Variables,
@@ -16,7 +17,7 @@ interface CalculateDeveloperAccountParams {
   subsidyAmount: number;
   contractAmount: number;
   userDownPaymentPercent: number;
-  bankOffer: BankOffer;
+  offer: Offer;
   variables: Variables;
   isSpecialMortgageMode: boolean;
   downPaymentAmount: number;
@@ -37,7 +38,7 @@ export const calculateDeveloperAccount = (
     subsidyAmount,
     contractAmount,
     userDownPaymentPercent,
-    bankOffer,
+    offer,
     variables,
     isSpecialMortgageMode,
     downPaymentAmount,
@@ -59,7 +60,7 @@ export const calculateDeveloperAccount = (
       subsidyAmount,
       contractAmount,
       userDownPaymentPercent,
-      bankOffer,
+      offer,
       variables,
       isSpecialMortgageMode,
       downPaymentAmount,

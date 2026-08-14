@@ -1,3 +1,4 @@
+import { Offer } from "../../../../../entities/Offer";
 import {
   BankCoefficients,
   BankOffer,
@@ -12,7 +13,7 @@ interface calculateFamilyMortgageAmount {
   remainingAmount: number;
   downPaymentAmount: number; // D32
   userDownPaymentPercent: number; // $B$8
-  bankOffer: BankOffer;
+  offer: Offer;
   variables: Variables;
   isSpecialMortgageMode: boolean;
   coefficients: BankCoefficients;
@@ -28,7 +29,7 @@ export const calculateFamilyMortgageAmount = (
     remainingAmount,
     downPaymentAmount,
     userDownPaymentPercent,
-    bankOffer,
+    offer,
     variables,
     isSpecialMortgageMode,
     coefficients,

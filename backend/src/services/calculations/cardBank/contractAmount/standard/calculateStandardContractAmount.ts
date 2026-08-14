@@ -1,17 +1,18 @@
+// backend/src/services/calculations/bankProgram/steps/contractAmount/calculateStandardContractAmount.ts
+
+import { Offer } from "../../../../../entities/Offer";
 import {
-  BankOffer,
   Variables,
   BankCoefficients,
   ContractAmountResult,
 } from "../../../../../types/types";
 
-// ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ==========
 export const calculateStandardContractAmount = (
   objectCost: number,
   downPayment: number,
   remainingAmount: number,
   userDownPaymentPercent: number,
-  bankOffer: BankOffer,
+  offer: Offer,
   variables: Variables,
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,

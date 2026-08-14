@@ -1,26 +1,25 @@
+// backend/src/services/calculations/result/calculateFullMortgage.ts
+
 import { DEFAULT_MIN_PV_PERCENT } from "../../../data/constants";
 import {
   CalculatorFormData,
-  BankOffer,
   Variables,
   ObjectCalculationResult,
   BankProgramResult,
 } from "../../../types/types";
-
-import { calculateBankProgram } from "../cardBank/calculateBankProgram";
+import { Offer } from "../../../entities/Offer";
 import { calculateDownPayment } from "./calculateDownPayment";
+import { calculateBankProgram } from "../cardBank/calculateBankProgram";
 
-// ========== ПОЛНЫЙ РАСЧЕТ ДЛЯ ПЕРВИЧНОГО РЕЗУЛЬТАТА ==========
 export const calculateFullMortgage = (
   formData: CalculatorFormData,
-  bankOffers: BankOffer[],
+  offers: Offer[],
   variables: Variables,
   pricePerSquareMeter: number,
 ): {
   objectResult: ObjectCalculationResult;
   bankResults: BankProgramResult[];
 } => {
-  // 1. Расчет стоимости объекта
   const area = formData.area;
   const manualObjectCost = formData.manualObjectCost;
   const considerDeposit = formData.considerDepositInCost;
@@ -39,22 +38,18 @@ export const calculateFullMortgage = (
   }
   objectCost = Math.ceil(objectCost);
 
-  // 2. Расчет первоначального взноса
   const downPayment = calculateDownPayment(
     objectCost,
     formData,
     DEFAULT_MIN_PV_PERCENT,
   );
 
-  // 3. Остаток от стоимости
   const remainingAmount = objectCost - downPayment;
+  const loanTermYears = formData.loanTerm || 30;
 
-  const loanTermYears = formData.loanTerm || 30; // ← получаем срок из формы
-
-  // 4. Расчет для каждого банка
   const bankResults: BankProgramResult[] = [];
 
-  for (const offer of bankOffers) {
+  for (const offer of offers) {
     try {
       const result = calculateBankProgram(
         objectCost,
@@ -74,7 +69,7 @@ export const calculateFullMortgage = (
       bankResults.push(result);
     } catch (error) {
       console.error(
-        `Ошибка расчета для ${offer.bank} - ${offer.program}`,
+        `Ошибка расчета для ${offer.bank?.name} - ${offer.program}`,
         error,
       );
     }
