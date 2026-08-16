@@ -126,14 +126,11 @@ export class ProgramService {
             : null,
           trancheSecondDate: offer.trancheSecondDate || null,
           subsidyCalculationMethod: offer.subsidyCalculationMethod || null,
-          dynamicRatesIU: offer.dynamicRatesIU || null,
-          dynamicSubsidyPercent: offer.dynamicSubsidyPercent || null,
           thresholdTolerance: offer.thresholdTolerance
             ? Number(offer.thresholdTolerance)
             : null,
           thresholdToleranceType: offer.thresholdToleranceType || null,
           roundingStrategy: offer.roundingStrategy || null,
-          twoContractSubsidies: offer.twoContractSubsidies || null,
           minLoanTermYears: offer.minLoanTermYears || null,
           description: offer.description || null,
           isActive: offer.isActive,

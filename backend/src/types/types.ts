@@ -1,4 +1,5 @@
 import { RefObject } from "react";
+import { DynamicSubsidy } from "../entities/DynamicSubsidy";
 
 // Расширенный тип для хранения оригинального индекса
 export interface BankProgramResultWithIndex extends BankProgramResult {
@@ -189,8 +190,7 @@ export interface BankOffer {
   shortRate?: number; //
   subsidyCalculationMethod?: "onlyPercent" | "standard";
   dynamicRates?: DynamicRateRule[];
-  dynamicRatesIU?: SimpleDynamicRate[];
-  dynamicSubsidyPercent?: DynamicRateRule[];
+  dynamicSubsidies?: DynamicRateRule[];
   isTranche?: boolean;
   trancheFirstPercent?: number; // % от стоимости объекта для первого транша (например, 19.9%)
   trancheSecondDate?: string; // дата выдачи второго транша (например, "2027-02-01")
@@ -199,7 +199,6 @@ export interface BankOffer {
   thresholdToleranceType?: "fixed" | "percent";
   /** Глобальная стратегия округления (по умолчанию 'up') */
   roundingStrategy?: "up" | "down";
-  twoContractSubsidies?: DynamicRateRule[];
   complexes?: string[];
   minLoanTermYears?: number;
   description?: string;

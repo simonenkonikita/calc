@@ -54,7 +54,7 @@ export const calculateFamilyTwoContractAmount = (
 
   let secondContractSubsidyPercent = coefficients.subsidyPercent;
 
-  if (offer.dynamicSubsidyPercent && offer.dynamicSubsidyPercent.length > 0) {
+  if (offer.dynamicSubsidies && offer.dynamicSubsidies.length > 0) {
     secondContractSubsidyPercent = getDynamicSubsidy(
       offer,
       userDownPaymentPercent,
@@ -87,10 +87,7 @@ export const calculateFamilyTwoContractAmount = (
 
       // Пересчитываем субсидию с новым вторым договором
       let newSubsidyPercent = coefficients.subsidyPercent;
-      if (
-        offer.dynamicSubsidyPercent &&
-        offer.dynamicSubsidyPercent.length > 0
-      ) {
+      if (offer.dynamicSubsidies && offer.dynamicSubsidies.length > 0) {
         newSubsidyPercent = getDynamicSubsidy(
           offer,
           userDownPaymentPercent,

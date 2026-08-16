@@ -7,11 +7,13 @@ import "./DynamicSubsidiesForm.css";
 interface DynamicSubsidiesFormProps {
   subsidies: DynamicSubsidy[];
   onSubsidiesChange: (subsidies: DynamicSubsidy[]) => void;
+  onSubsidyDelete?: (subsidy: DynamicSubsidy) => void; // 🔥 Добавляем callback
 }
 
 export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
   subsidies,
   onSubsidiesChange,
+  onSubsidyDelete,
 }) => {
   const addRow = () => {
     onSubsidiesChange([
@@ -37,10 +39,22 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
       alert("Должна быть хотя бы одна строка");
       return;
     }
+
+    const removedSubsidy = subsidies[index];
+
+    // 🔥 Если у удаляемой строки есть ID, вызываем колбэк для удаления из БД
+    if (removedSubsidy.id && onSubsidyDelete) {
+      onSubsidyDelete(removedSubsidy);
+    }
+
     onSubsidiesChange(subsidies.filter((_, i) => i !== index));
   };
 
-  const updateRow = (index: number, field: keyof DynamicSubsidy, value: any) => {
+  const updateRow = (
+    index: number,
+    field: keyof DynamicSubsidy,
+    value: any,
+  ) => {
     const updated = [...subsidies];
     updated[index] = { ...updated[index], [field]: value };
     onSubsidiesChange(updated);
@@ -51,7 +65,7 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
       <div className="dynamic-form-header">
         <h4>💰 Динамические субсидии</h4>
         <button onClick={addRow} className="admin-btn-secondary admin-btn-sm">
-          + Добавить строку
+          + Добавить условие
         </button>
       </div>
       <div className="admin-table-wrapper">
@@ -83,7 +97,7 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
                       updateRow(
                         index,
                         "minPVPercent",
-                        e.target.value ? parseFloat(e.target.value) : null
+                        e.target.value ? parseFloat(e.target.value) : null,
                       )
                     }
                     style={{ width: "60px" }}
@@ -99,7 +113,7 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
                       updateRow(
                         index,
                         "maxPVPercent",
-                        e.target.value ? parseFloat(e.target.value) : null
+                        e.target.value ? parseFloat(e.target.value) : null,
                       )
                     }
                     style={{ width: "60px" }}
@@ -114,7 +128,7 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
                       updateRow(
                         index,
                         "minAmount",
-                        e.target.value ? parseFloat(e.target.value) : null
+                        e.target.value ? parseFloat(e.target.value) : null,
                       )
                     }
                     style={{ width: "80px" }}
@@ -129,7 +143,7 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
                       updateRow(
                         index,
                         "maxAmount",
-                        e.target.value ? parseFloat(e.target.value) : null
+                        e.target.value ? parseFloat(e.target.value) : null,
                       )
                     }
                     style={{ width: "80px" }}
@@ -144,7 +158,7 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
                       updateRow(
                         index,
                         "minTerm",
-                        e.target.value ? parseInt(e.target.value) : null
+                        e.target.value ? parseInt(e.target.value) : null,
                       )
                     }
                     style={{ width: "50px" }}
@@ -159,7 +173,7 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
                       updateRow(
                         index,
                         "maxTerm",
-                        e.target.value ? parseInt(e.target.value) : null
+                        e.target.value ? parseInt(e.target.value) : null,
                       )
                     }
                     style={{ width: "50px" }}
@@ -175,7 +189,7 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
                       updateRow(
                         index,
                         "subsidyPercent",
-                        parseFloat(e.target.value) || 0
+                        parseFloat(e.target.value) || 0,
                       )
                     }
                     style={{ width: "60px" }}
@@ -187,7 +201,11 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
                     placeholder="Приор"
                     value={subsidy.priority ?? ""}
                     onChange={(e) =>
-                      updateRow(index, "priority", parseInt(e.target.value) || 0)
+                      updateRow(
+                        index,
+                        "priority",
+                        parseInt(e.target.value) || 0,
+                      )
                     }
                     style={{ width: "50px" }}
                   />
@@ -196,7 +214,9 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
                   <input
                     placeholder="Описание"
                     value={subsidy.description || ""}
-                    onChange={(e) => updateRow(index, "description", e.target.value)}
+                    onChange={(e) =>
+                      updateRow(index, "description", e.target.value)
+                    }
                     style={{ width: "80px" }}
                   />
                 </td>

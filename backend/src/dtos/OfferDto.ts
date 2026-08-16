@@ -58,14 +58,11 @@ export interface CreateOfferDTO {
 
   // Расчеты
   subsidyCalculationMethod?: string | null;
-  dynamicRatesIU?: SimpleDynamicRateDTO[] | null;
-  dynamicSubsidyPercent?: DynamicRateRuleDTO[] | null;
 
   // Настройки
   thresholdTolerance?: number | null;
   thresholdToleranceType?: string | null;
   roundingStrategy?: string | null;
-  twoContractSubsidies?: DynamicRateRuleDTO[] | null;
   minLoanTermYears?: number | null;
   description?: string | null;
 }
@@ -93,12 +90,9 @@ export interface OfferResponseDTO {
   trancheSecondDate: string | null;
   complexes: string[] | null;
   subsidyCalculationMethod: string | null;
-  dynamicRatesIU: SimpleDynamicRateDTO[] | null;
-  dynamicSubsidyPercent: DynamicRateRuleDTO[] | null;
   thresholdTolerance: number | null;
   thresholdToleranceType: string | null;
   roundingStrategy: string | null;
-  twoContractSubsidies: DynamicRateRuleDTO[] | null;
   minLoanTermYears: number | null;
   description: string | null;
   isActive: boolean;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "admin123";
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
 export const useAdminAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

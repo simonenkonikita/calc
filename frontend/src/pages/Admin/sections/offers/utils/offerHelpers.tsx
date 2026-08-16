@@ -10,8 +10,6 @@ export const getDisplayRate = (
 ) => {
   const offerData = dynamicDataMap?.[offer.id];
   const hasDynamicRates = offerData?.rates && offerData.rates.length > 0;
-  const hasDynamicRatesIU =
-    offer.dynamicRatesIU && offer.dynamicRatesIU.length > 0;
 
   if (hasDynamicRates) {
     return (
@@ -49,21 +47,6 @@ export const getDisplayRate = (
     );
   }
 
-  if (hasDynamicRatesIU) {
-    return (
-      <div className="rate-dynamic-container">
-        {offer.dynamicRatesIU.map((rule: any, i: number) => (
-          <div key={i} className="rate-dynamic-item">
-            <span className="rate-dynamic-value">{rule.rate}%</span>
-            <span className="rate-dynamic-condition">
-              {rule.description || `ПВ от ${rule.minPVPercent}%`}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   return (
     <div className="rate-static-container">
       {offer.shortRate && (
@@ -82,9 +65,10 @@ export const getDisplaySubsidy = (
   const offerData = dynamicDataMap?.[offer.id];
   const hasDynamicSubsidy =
     offerData?.subsidies && offerData.subsidies.length > 0;
-  const hasDynamicSubsidyPercent =
-    offer.dynamicSubsidyPercent && offer.dynamicSubsidyPercent.length > 0;
+  const hasDynamicSubsidies =
+    offer.dynamicSubsidies && offer.dynamicSubsidies.length > 0;
 
+  // 1. Сначала проверяем dynamicDataMap (если есть)
   if (hasDynamicSubsidy) {
     const subsidies = offerData.subsidies
       .map((rule: any) => rule.subsidyPercent)
@@ -103,8 +87,9 @@ export const getDisplaySubsidy = (
     return { display: `${minSubsidy}% — ${maxSubsidy}%`, type: "dynamic" };
   }
 
-  if (hasDynamicSubsidyPercent) {
-    const subsidies = offer.dynamicSubsidyPercent
+  // 2. Затем проверяем offer.dynamicSubsidies (из самого оффера)
+  if (hasDynamicSubsidies) {
+    const subsidies = offer.dynamicSubsidies
       .map((rule: any) => rule.subsidyPercent)
       .filter((val: number) => val !== undefined && val !== null)
       .sort((a: number, b: number) => a - b);
@@ -121,10 +106,12 @@ export const getDisplaySubsidy = (
     return { display: `${minSubsidy}% — ${maxSubsidy}%`, type: "dynamic" };
   }
 
+  // 3. Если есть фиксированная субсидия
   if (offer.subsidyPercent > 0) {
     return { display: `${offer.subsidyPercent}%`, type: "fixed" };
   }
 
+  // 4. Нет субсидии
   return { display: "—", type: "none" };
 };
 

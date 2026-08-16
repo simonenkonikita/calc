@@ -4,6 +4,10 @@ import { Request, Response } from "express";
 import { OfferService } from "../../services/OfferService";
 import { CreateOfferDTO, UpdateOfferDTO } from "../../dtos/OfferDto";
 import { BaseController } from "./base.controller";
+// 🔥 Добавляем импорты для работы с БД
+import { AppDataSource } from "../../data-source";
+import { DynamicRate } from "../../entities/DynamicRate";
+import { DynamicSubsidy } from "../../entities/DynamicSubsidy";
 
 const offerService = new OfferService();
 
@@ -142,12 +146,42 @@ export class OfferController extends BaseController {
 
   /**
    * Полное удаление оффера (hard delete)
+   * 🔥 Удаляем все связанные записи перед удалением оффера
    */
   async hardDelete(req: Request, res: Response) {
     try {
       const { id } = req.params;
       console.log(`🗑️ Hard deleting offer ${id}`);
 
+      // 🔥 Проверяем, существует ли оффер
+      const offer = await offerService.getOfferById(id);
+      if (!offer) {
+        return this.handleNotFound(res, "Offer");
+      }
+
+      // 🔥 Получаем репозитории
+      const rateRepository = AppDataSource.getRepository(DynamicRate);
+      const subsidyRepository = AppDataSource.getRepository(DynamicSubsidy);
+
+      // 🔥 1. Удаляем все связанные динамические ставки
+      const rates = await rateRepository.find({ where: { offerId: id } });
+      console.log(`📊 Found ${rates.length} rates to delete`);
+      for (const rate of rates) {
+        await rateRepository.delete(rate.id);
+        console.log(`🗑️ Deleted rate ${rate.id}`);
+      }
+
+      // 🔥 2. Удаляем все связанные динамические субсидии
+      const subsidies = await subsidyRepository.find({
+        where: { offerId: id },
+      });
+      console.log(`📊 Found ${subsidies.length} subsidies to delete`);
+      for (const subsidy of subsidies) {
+        await subsidyRepository.delete(subsidy.id);
+        console.log(`🗑️ Deleted subsidy ${subsidy.id}`);
+      }
+
+      // 🔥 3. Теперь удаляем сам оффер (hard delete)
       await offerService.hardDeleteOffer(id);
       console.log("✅ Offer hard deleted");
 
@@ -156,7 +190,14 @@ export class OfferController extends BaseController {
         message: "Offer permanently deleted",
       });
     } catch (error) {
-      this.handleError(res, error, "Failed to hard delete offer");
+      console.error("❌ Error hard deleting offer:", error);
+      res.status(500).json({
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to hard delete offer",
+      });
     }
   }
 

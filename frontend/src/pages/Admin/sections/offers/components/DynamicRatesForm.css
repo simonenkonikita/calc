@@ -1,190 +1,211 @@
 /* frontend/src/pages/Admin/sections/offers/components/DynamicRatesForm.css */
 
 .dynamic-form {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: #f9fafb;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
+  margin: 1rem 0;
 }
 
 .dynamic-form-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .dynamic-form-header h4 {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: #1f2937;
 }
 
-.dynamic-form .admin-table-wrapper {
-  background: white;
-  border-radius: 0.375rem;
-  overflow: hidden;
+.dynamic-form-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
-.dynamic-form .admin-table {
+.admin-table-wrapper {
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+}
+
+.admin-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
 }
 
-.dynamic-form .admin-table th {
+.admin-table thead th {
+  background: #f1f3f5;
+  padding: 0.5rem;
   text-align: left;
-  padding: 0.3rem 0.4rem;
+  border-bottom: 2px solid #dee2e6;
   font-weight: 600;
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #6b7280;
-  border-bottom: 2px solid #e5e7eb;
-  background: #f8fafc;
+  white-space: nowrap;
 }
 
-.dynamic-form .admin-table td {
-  padding: 0.2rem 0.3rem;
-  border-bottom: 1px solid #f3f4f6;
+.admin-table tbody td {
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid #dee2e6;
   vertical-align: middle;
 }
 
-.dynamic-form .admin-table input,
-.dynamic-form .admin-table select {
-  padding: 0.15rem 0.3rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.25rem;
-  font-size: 0.7rem;
+.admin-table select,
+.admin-table input {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.8rem;
   background: white;
-  width: 100%;
 }
 
-.dynamic-form .admin-table input:focus,
-.dynamic-form .admin-table select:focus {
+.admin-table select:focus,
+.admin-table input:focus {
   outline: none;
-  border-color: #818cf8;
-}
-
-.dynamic-form .admin-table .checkbox-cell {
-  text-align: center;
-}
-
-.dynamic-form .admin-table .checkbox-cell input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: #818cf8;
-}
-
-.complex-params {
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  background: white;
-  border-radius: 0.375rem;
-  border: 1px solid #e5e7eb;
-}
-
-.complex-params-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 0.25rem;
-  font-size: 0.6rem;
-  font-weight: 600;
-  color: #6b7280;
-  padding: 0.25rem 0;
-}
-
-.complex-params-row {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 0.25rem;
-  margin-top: 0.25rem;
-}
-
-.complex-params-row input {
-  padding: 0.1rem 0.2rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.25rem;
-  font-size: 0.6rem;
-  width: 100%;
-}
-
-.complex-params-row input:focus {
-  outline: none;
-  border-color: #818cf8;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .admin-btn-secondary {
-  background: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #e5e7eb;
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.375rem 0.75rem;
   border-radius: 0.25rem;
   cursor: pointer;
-  transition: all 0.2s;
-  padding: 0.2rem 0.5rem;
-  font-size: 0.7rem;
+  font-size: 0.875rem;
+  transition: background 0.2s;
 }
 
 .admin-btn-secondary:hover {
-  background: #e5e5e5;
-}
-
-.admin-btn-danger {
-  background: #fef2f2;
-  color: #ef4444;
-  border: 1px solid #fecaca;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  padding: 0.1rem 0.3rem;
-  font-size: 0.6rem;
-}
-
-.admin-btn-danger:hover {
-  background: #fee2e2;
+  background: #5a6268;
 }
 
 .admin-btn-sm {
-  padding: 0.15rem 0.4rem;
-  font-size: 0.7rem;
-  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
 }
 
 .admin-btn-xs {
-  padding: 0.1rem 0.3rem;
-  font-size: 0.6rem;
-  border-radius: 0.2rem;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.7rem;
+}
+
+.admin-btn-danger {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.admin-btn-danger:hover {
+  background: #c82333;
+}
+
+/* Complex section styles */
+.complex-section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.complex-section-header {
+  margin-bottom: 1rem;
+}
+
+.complex-section-header h5 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+.complex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1rem;
+}
+
+.complex-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.complex-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.complex-card-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #495057;
+}
+
+.complex-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.complex-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.complex-field-group label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.complex-field-group input {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  background: white;
+  width: 100%;
+}
+
+.complex-field-group input:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.complex-rate-field {
+  grid-column: 1 / 2;
+}
+
+.complex-description-field {
+  grid-column: 2 / 3;
+}
+
+.complex-priority-field {
+  grid-column: 1 / 2;
 }
 
 @media (max-width: 768px) {
-  .complex-params-grid,
-  .complex-params-row {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .dynamic-form {
-    padding: 0.5rem;
+  .complex-grid {
+    grid-template-columns: 1fr;
   }
 
-  .dynamic-form .admin-table {
-    font-size: 0.6rem;
+  .complex-card-body {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .dynamic-form .admin-table input,
-  .dynamic-form .admin-table select {
-    font-size: 0.6rem;
-    padding: 0.1rem 0.2rem;
-  }
-
-  .complex-params-grid,
-  .complex-params-row {
-    grid-template-columns: repeat(2, 1fr);
+  .complex-field-group {
+    grid-column: 1 / -1;
   }
 }

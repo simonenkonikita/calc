@@ -9,10 +9,10 @@ interface OfferRowProps {
 export const OfferRow: React.FC<OfferRowProps> = ({ offer }) => {
   const getDisplaySubsidy = () => {
     const hasDynamicSubsidy =
-      offer.dynamicSubsidyPercent && offer.dynamicSubsidyPercent.length > 0;
+      offer.dynamicSubsidies && offer.dynamicSubsidies.length > 0;
 
     if (hasDynamicSubsidy) {
-      const subsidies = offer.dynamicSubsidyPercent
+      const subsidies = offer.dynamicSubsidies
         .map((rule: any) => rule.subsidyPercent)
         .filter((val: number) => val !== undefined && val !== null)
         .sort((a: number, b: number) => a - b);
@@ -37,20 +37,6 @@ export const OfferRow: React.FC<OfferRowProps> = ({ offer }) => {
   };
 
   const getDisplayRate = () => {
-    const hasDynamicRatesIU =
-      offer.dynamicRatesIU && offer.dynamicRatesIU.length > 0;
-
-    if (hasDynamicRatesIU) {
-      return offer.dynamicRatesIU.map((rule: any, i: number) => (
-        <div key={i} className="dynamic-rate-item">
-          <span className="dynamic-rate-value">{rule.rate}%</span>
-          <span className="dynamic-rate-condition">
-            {rule.description || `ПВ от ${rule.minPVPercent}%`}
-          </span>
-        </div>
-      ));
-    }
-
     return (
       <>
         {offer.shortRate && (

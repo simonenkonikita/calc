@@ -3,7 +3,12 @@
 import { useState, useEffect } from "react";
 import { DynamicData } from "../types";
 import adminApi from "../../../../../services/adminApi";
-import { AdminOffer, AdminBank, AdminProgram, AdminComplex } from "../../../types/admin.types";
+import {
+  AdminOffer,
+  AdminBank,
+  AdminProgram,
+  AdminComplex,
+} from "../../../types/admin.types";
 
 export const useOffersData = () => {
   const [offers, setOffers] = useState<AdminOffer[]>([]);
@@ -12,27 +17,35 @@ export const useOffersData = () => {
   const [complexes, setComplexes] = useState<AdminComplex[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBankId, setSelectedBankId] = useState<string>("");
-  const [dynamicDataMap, setDynamicDataMap] = useState<Record<string, DynamicData>>({});
+  const [dynamicDataMap, setDynamicDataMap] = useState<
+    Record<string, DynamicData>
+  >({});
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [offersData, banksData, programsData, complexesData] = await Promise.all([
-        adminApi.getOffers(),
-        adminApi.getBanks(),
-        adminApi.getPrograms(),
-        adminApi.getComplexes(),
-      ]);
+
+      const [offersData, banksData, programsData, complexesData] =
+        await Promise.all([
+          adminApi.getOffers(),
+          adminApi.getBanks(),
+          adminApi.getPrograms(),
+          adminApi.getComplexes(),
+        ]);
+
       setOffers(Array.isArray(offersData) ? offersData : []);
       setBanks(Array.isArray(banksData) ? banksData : []);
       setPrograms(Array.isArray(programsData) ? programsData : []);
       setComplexes(Array.isArray(complexesData) ? complexesData : []);
 
+      // 🔥 Выбираем первый активный банк по умолчанию
       if (banksData.length > 0 && !selectedBankId) {
-        setSelectedBankId(banksData[0].id);
+        const firstActiveBank = banksData.find((b: AdminBank) => b.isActive);
+        setSelectedBankId(firstActiveBank?.id || banksData[0].id);
       }
 
-      await loadDynamicData(offersData);
+      // 🔥 Загружаем динамические данные из офферов
+      loadDynamicDataFromOffers(offersData);
     } catch (error) {
       console.error("Error loading data:", error);
       alert("Ошибка при загрузке данных");
@@ -41,7 +54,30 @@ export const useOffersData = () => {
     }
   };
 
-  const loadDynamicData = async (offersData: AdminOffer[]) => {
+  // 🔥 Функция: загружает динамические данные из самих офферов
+  const loadDynamicDataFromOffers = (offersData: AdminOffer[]) => {
+    const dataMap: Record<string, DynamicData> = {};
+
+    for (const offer of offersData) {
+      // 🔥 Проверяем, есть ли динамические данные прямо в оффере
+      // Используем явную проверку на undefined и приводим к массиву
+      const rates = offer.dynamicRates ?? [];
+      const subsidies = offer.dynamicSubsidies ?? [];
+
+      dataMap[offer.id] = {
+        rates: Array.isArray(rates) ? rates : [],
+        subsidies: Array.isArray(subsidies) ? subsidies : [],
+      };
+    }
+
+    setDynamicDataMap(dataMap);
+    console.log(
+      `📊 Loaded dynamic data from offers: ${Object.keys(dataMap).length} offers processed`,
+    );
+  };
+
+  // 🔥 Загрузка динамических данных через API (используется как fallback или при refresh)
+  const loadDynamicDataFromAPI = async (offersData: AdminOffer[]) => {
     const dataMap: Record<string, DynamicData> = {};
     for (const offer of offersData) {
       try {
@@ -54,7 +90,10 @@ export const useOffersData = () => {
           subsidies: Array.isArray(subsidies) ? subsidies : [],
         };
       } catch (error) {
-        console.error(`Error loading dynamic data for offer ${offer.id}:`, error);
+        console.error(
+          `Error loading dynamic data for offer ${offer.id}:`,
+          error,
+        );
         dataMap[offer.id] = { rates: [], subsidies: [] };
       }
     }

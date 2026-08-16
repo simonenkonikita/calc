@@ -1,5 +1,7 @@
 // frontend/src/pages/Admin/types/admin.types.ts
 
+import { DynamicRate, DynamicSubsidy } from "../sections/offers";
+
 export interface AdminBank {
   id: string;
   name: string;
@@ -105,12 +107,9 @@ export interface AdminOffer {
   trancheSecondDate: string | null;
   complexes: string[];
   subsidyCalculationMethod: string | null;
-  dynamicRatesIU: any | null;
-  dynamicSubsidyPercent: any | null;
   thresholdTolerance: number | null;
   thresholdToleranceType: string | null;
   roundingStrategy: string | null;
-  twoContractSubsidies: any | null;
   minLoanTermYears: number | null;
   description: string | null;
   isActive: boolean;
@@ -118,6 +117,8 @@ export interface AdminOffer {
   programId: string;
   bank?: AdminBank;
   programEntity?: AdminProgram;
+  dynamicRates?: DynamicRate[];
+  dynamicSubsidies?: DynamicSubsidy[];
   createdAt?: string;
   updatedAt?: string;
 }

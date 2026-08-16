@@ -588,17 +588,36 @@ export const adminApi = {
     const response = await fetch(`${API_URL}/admin/dynamic-subsidies/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete subsidy");
-  },
 
-  async hardDeleteDynamicSubsidy(id: string): Promise<void> {
-    const response = await fetch(
-      `${API_URL}/admin/dynamic-subsidies/${id}/hard`,
-      {
-        method: "DELETE",
-      },
-    );
-    if (!response.ok) throw new Error("Failed to hard delete subsidy");
+    // 🔥 Проверяем статус ответа
+    if (!response.ok) {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = {};
+      }
+      throw new Error(
+        errorData.error ||
+          errorData.message ||
+          `HTTP error! status: ${response.status}`,
+      );
+    }
+
+    // 🔥 Для DELETE запросов не нужно парсить тело (или оно может быть пустым)
+    // Просто проверяем, что ответ успешный
+    try {
+      const data = await response.json();
+      // Если ответ имеет структуру { success: true, ... }
+      if (data && typeof data === "object" && "success" in data) {
+        if (!data.success) {
+          throw new Error(data.error || "Delete failed");
+        }
+      }
+    } catch (e) {
+      // Если тело ответа пустое или невалидный JSON - игнорируем
+      // Это нормально для DELETE запросов
+    }
   },
 
   async updateDynamicSubsidiesPriorities(
@@ -664,6 +683,57 @@ export const adminApi = {
       `${API_URL}/admin/offers/${offerId}/dynamic-subsidies`,
     );
     return handleResponse<any[]>(response);
+  },
+
+  // frontend/src/services/adminApi.ts
+
+  // Добавьте эти методы в раздел "ДИНАМИЧЕСКИЕ СТАВКИ ДЛЯ ОФФЕРОВ" или создайте новый раздел
+
+  // ============================================================
+  // ДИНАМИЧЕСКИЕ СТАВКИ - HARD DELETE
+  // ============================================================
+  async hardDeleteDynamicRate(id: string): Promise<void> {
+    const response = await fetch(`${API_URL}/admin/dynamic-rates/${id}/hard`, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = {};
+      }
+      throw new Error(
+        errorData.error ||
+          errorData.message ||
+          `HTTP error! status: ${response.status}`,
+      );
+    }
+  },
+
+  // ============================================================
+  // ДИНАМИЧЕСКИЕ СУБСИДИИ - HARD DELETE
+  // ============================================================
+  async hardDeleteDynamicSubsidy(id: string): Promise<void> {
+    const response = await fetch(
+      `${API_URL}/admin/dynamic-subsidies/${id}/hard`,
+      {
+        method: "DELETE",
+      },
+    );
+    if (!response.ok) {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = {};
+      }
+      throw new Error(
+        errorData.error ||
+          errorData.message ||
+          `HTTP error! status: ${response.status}`,
+      );
+    }
   },
 };
 

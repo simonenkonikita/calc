@@ -5,7 +5,10 @@ import { calculateFullMortgage } from "../services/calculations/result/calculate
 import { ComplexService } from "../services/ComplexService";
 import { OfferService } from "../services/OfferService";
 import { ConfigService } from "../services/ConfigService";
-import { getMortgageSurcharge } from "../utils/mortgageSurcharges";
+import {
+  getMortgageSurcharge,
+  findPricePerSquareMeter,
+} from "../utils/mortgageSurcharges";
 import { PRICE_PER_SQUARE_METER_DEFAULT } from "../data/constants";
 import { ApartmentType } from "../entities/ApartmentType";
 import { Offer } from "../entities/Offer";
@@ -37,20 +40,24 @@ export const calculate = async (req: Request, res: Response) => {
       apartmentType?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT;
 
     // 3. Наценка за специальные режимы (без ПВ / частичный ПВ)
-    const surcharge = getMortgageSurcharge(
+    // 🔥 Добавляем await
+    const surcharge = await getMortgageSurcharge(
       formData.complex,
       formData.apartmentType,
       formData.mortgageWithoutDownPayment,
       formData.mortgagePartialDownPayment,
     );
 
+    // 🔥 Теперь surcharge - это число, а не Promise
     const finalPricePerM2 =
       formData.mortgageWithoutDownPayment || formData.mortgagePartialDownPayment
         ? basePrice + surcharge
         : basePrice;
 
     // 4. Получаем офферы из БД с загрузкой всех связей
-    const offers: Offer[] = await offerService.getOffersByComplex(formData.complex);
+    const offers: Offer[] = await offerService.getOffersByComplex(
+      formData.complex,
+    );
 
     // 5. Получаем Variables из БД
     const variables = await configService.getVariables();
@@ -103,11 +110,14 @@ export const getComplexTypes = async (req: Request, res: Response) => {
       });
     }
 
-    const types = complex.apartmentTypes?.map((at: ApartmentType) => at.type) || [];
+    const types =
+      complex.apartmentTypes?.map((at: ApartmentType) => at.type) || [];
     res.json({ success: true, data: types });
   } catch (error) {
     console.error("Error getting apartment types:", error);
-    res.status(500).json({ success: false, error: "Failed to get apartment types" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to get apartment types" });
   }
 };
 
@@ -137,7 +147,8 @@ export const getPricePerSquareMeter = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      data: apartmentType?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT,
+      data:
+        apartmentType?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT,
     });
   } catch (error) {
     console.error("Error getting price:", error);

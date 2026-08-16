@@ -19,7 +19,7 @@ interface FormSectionProps {
     field: K,
     value: CalculatorFormData[K],
   ) => void;
-  onCalculate?: () => void; // ✅ Добавляем проп для кнопки расчёта
+  onCalculate?: () => void;
   isCalculating?: boolean;
 }
 

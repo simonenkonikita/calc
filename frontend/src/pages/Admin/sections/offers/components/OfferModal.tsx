@@ -45,13 +45,12 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   const [showSubsidiesForm, setShowSubsidiesForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // 🔥 Сохраняем исходные данные для отслеживания изменений
+  const [initialOfferId, setInitialOfferId] = useState<string | null>(null);
 
-  // 🔥 Определяем тип программы по programId
+  // Определяем тип программы
   const selectedProgram = programs.find((p) => p.id === formData.programId);
   const programType = selectedProgram?.type || "";
-  const programLabel = selectedProgram?.label || "";
-
-  // 🔥 Проверки для отображения полей
   const isFamily = programType === "family";
   const isIT = programType === "it";
   const isFamilyOrIT = isFamily || isIT;
@@ -59,7 +58,9 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   const isTranche = programType === "tranche";
   const isTwoContracts = formData.isTwoContracts || false;
 
-  // Инициализация формы
+  // ============================================================
+  // ИНИЦИАЛИЗАЦИЯ ФОРМЫ
+  // ============================================================
   useEffect(() => {
     if (isCreating) {
       const initialBankId = selectedBankId || "";
@@ -78,7 +79,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         trancheFirstPercent: null,
         trancheSecondDate: null,
         complexes: [],
-        subsidyCalculationMethod: null,
+        subsidyCalculationMethod: "standard",
         thresholdTolerance: null,
         thresholdToleranceType: null,
         roundingStrategy: null,
@@ -88,11 +89,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         bankId: initialBankId,
         programId: "",
       });
+
+      resetDynamicForms();
       setShowRatesForm(false);
       setShowSubsidiesForm(false);
-      resetDynamicForms();
       setErrors({});
+      setInitialOfferId(null);
     } else if (editingOffer) {
+      // Загружаем основные данные
       setFormData({
         program: editingOffer.program,
         rate: editingOffer.rate,
@@ -107,7 +111,8 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         trancheFirstPercent: editingOffer.trancheFirstPercent,
         trancheSecondDate: editingOffer.trancheSecondDate,
         complexes: editingOffer.complexes || [],
-        subsidyCalculationMethod: editingOffer.subsidyCalculationMethod,
+        subsidyCalculationMethod:
+          editingOffer.subsidyCalculationMethod || "standard",
         thresholdTolerance: editingOffer.thresholdTolerance,
         thresholdToleranceType: editingOffer.thresholdToleranceType,
         roundingStrategy: editingOffer.roundingStrategy,
@@ -117,14 +122,15 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         bankId: editingOffer.bankId,
         programId: editingOffer.programId,
       });
-      if (editingOffer.id) {
-        loadDynamicData(editingOffer.id);
-      }
+
+      // 🔥 Загружаем динамические данные из editingOffer
+      loadDynamicDataFromOffer(editingOffer);
       setErrors({});
+      setInitialOfferId(editingOffer.id);
     }
   }, [isCreating, editingOffer, selectedBankId]);
 
-  // 🔥 Эффект для сброса флагов при смене программы
+  // Сброс флагов при смене программы
   useEffect(() => {
     if (!isFamilyOrIT) {
       setFormData((prev) => ({
@@ -142,7 +148,17 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         trancheSecondDate: null,
       }));
     }
-  }, [programType, isFamilyOrIT, isTranche]);
+    if (!isShortTerm) {
+      setFormData((prev) => ({
+        ...prev,
+        subsidyCalculationMethod: null,
+      }));
+    }
+  }, [programType, isFamilyOrIT, isTranche, isShortTerm]);
+
+  // ============================================================
+  // РАБОТА С ДИНАМИЧЕСКИМИ ДАННЫМИ
+  // ============================================================
 
   const resetDynamicForms = () => {
     setDynamicRates([
@@ -167,6 +183,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         },
       },
     ]);
+
     setDynamicSubsidies([
       {
         minPVPercent: null,
@@ -184,24 +201,127 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     ]);
   };
 
-  const loadDynamicData = async (offerId: string) => {
-    try {
-      const [rates, subsidies] = await Promise.all([
-        adminApi.getOfferRates(offerId),
-        adminApi.getOfferSubsidies(offerId),
+  // 🔥 Загружает динамические данные из объекта offer
+  const loadDynamicDataFromOffer = (offer: AdminOffer) => {
+    console.log("📊 Loading dynamic data from offer:", offer);
+
+    // 1. Загружаем динамические ставки
+    if (
+      offer.dynamicRates &&
+      Array.isArray(offer.dynamicRates) &&
+      offer.dynamicRates.length > 0
+    ) {
+      const rates = offer.dynamicRates.map((rate: any) => {
+        const hasComplexCondition =
+          rate.conditionMetadata &&
+          (rate.conditionMetadata.pvMin !== null ||
+            rate.conditionMetadata.pvMax !== null ||
+            rate.conditionMetadata.amountMin !== null ||
+            rate.conditionMetadata.amountMax !== null ||
+            rate.conditionMetadata.termMin !== null ||
+            rate.conditionMetadata.termMax !== null);
+
+        return {
+          id: rate.id,
+          conditionType: rate.conditionType || "pv",
+          condition: rate.condition || "gte",
+          value: rate.value || null,
+          minValue: rate.minValue || null,
+          maxValue: rate.maxValue || null,
+          rate: rate.rate || 0,
+          priority: rate.priority || 0,
+          description: rate.description || "",
+          isActive: rate.isActive !== undefined ? rate.isActive : true,
+          useComplexCondition: hasComplexCondition || false,
+          conditionMetadata: rate.conditionMetadata || {
+            pvMin: null,
+            pvMax: null,
+            amountMin: null,
+            amountMax: null,
+            termMin: null,
+            termMax: null,
+          },
+        };
+      });
+
+      setDynamicRates(rates);
+      setShowRatesForm(true);
+      console.log(
+        `📊 Loaded ${rates.length} dynamic rates (${rates.filter((r) => r.useComplexCondition).length} complex)`,
+      );
+    } else {
+      setDynamicRates([
+        {
+          conditionType: "pv",
+          condition: "gte",
+          value: null,
+          minValue: null,
+          maxValue: null,
+          rate: 0,
+          priority: 0,
+          description: "",
+          isActive: true,
+          useComplexCondition: false,
+          conditionMetadata: {
+            pvMin: null,
+            pvMax: null,
+            amountMin: null,
+            amountMax: null,
+            termMin: null,
+            termMax: null,
+          },
+        },
       ]);
-      if (rates && rates.length > 0) {
-        setDynamicRates(rates);
-        setShowRatesForm(true);
-      }
-      if (subsidies && subsidies.length > 0) {
-        setDynamicSubsidies(subsidies);
-        setShowSubsidiesForm(true);
-      }
-    } catch (error) {
-      console.error("Error loading dynamic data:", error);
+      setShowRatesForm(false);
+    }
+
+    // 2. Загружаем динамические субсидии
+    if (
+      offer.dynamicSubsidies &&
+      Array.isArray(offer.dynamicSubsidies) &&
+      offer.dynamicSubsidies.length > 0
+    ) {
+      const subsidies = offer.dynamicSubsidies.map((subsidy: any) => ({
+        id: subsidy.id,
+        minPVPercent: subsidy.minPVPercent || null,
+        maxPVPercent: subsidy.maxPVPercent || null,
+        minAmount: subsidy.minAmount || null,
+        maxAmount: subsidy.maxAmount || null,
+        minTerm: subsidy.minTerm || null,
+        maxTerm: subsidy.maxTerm || null,
+        subsidyPercent: subsidy.subsidyPercent || 0,
+        priority: subsidy.priority || 0,
+        description: subsidy.description || "",
+        roundingStrategy: subsidy.roundingStrategy || null,
+        isActive: subsidy.isActive !== undefined ? subsidy.isActive : true,
+      }));
+
+      setDynamicSubsidies(subsidies);
+      setShowSubsidiesForm(true);
+      console.log(`📊 Loaded ${subsidies.length} dynamic subsidies`);
+    } else {
+      setDynamicSubsidies([
+        {
+          minPVPercent: null,
+          maxPVPercent: null,
+          minAmount: null,
+          maxAmount: null,
+          minTerm: null,
+          maxTerm: null,
+          subsidyPercent: 0,
+          priority: 0,
+          description: "",
+          roundingStrategy: null,
+          isActive: true,
+        },
+      ]);
+      setShowSubsidiesForm(false);
     }
   };
+
+  // ============================================================
+  // ОБРАБОТЧИКИ ФОРМЫ
+  // ============================================================
 
   const handleChange = (field: keyof AdminOffer, value: any) => {
     setFormData({ ...formData, [field]: value });
@@ -223,6 +343,119 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         complexes: [...currentComplexes, complexName],
       });
     }
+  };
+
+  // 🔥 Обработчик удаления ставки
+  const handleRateDelete = (rate: DynamicRate) => {
+    if (rate.id) {
+      // Сразу удаляем из БД
+      adminApi
+        .hardDeleteDynamicRate(rate.id)
+        .then(() => console.log(`🗑️ Rate ${rate.id} deleted from DB`))
+        .catch((error) =>
+          console.error(`❌ Failed to delete rate ${rate.id}:`, error),
+        );
+    }
+    // Удаляем из UI
+    setDynamicRates((prev) => prev.filter((r) => r.id !== rate.id));
+  };
+
+  // 🔥 Обработчик удаления субсидии
+  const handleSubsidyDelete = (subsidy: DynamicSubsidy) => {
+    if (subsidy.id) {
+      // Сразу удаляем из БД
+      adminApi
+        .hardDeleteDynamicSubsidy(subsidy.id)
+        .then(() => console.log(`🗑️ Subsidy ${subsidy.id} deleted from DB`))
+        .catch((error) =>
+          console.error(`❌ Failed to delete subsidy ${subsidy.id}:`, error),
+        );
+    }
+    // Удаляем из UI
+    setDynamicSubsidies((prev) => prev.filter((s) => s.id !== subsidy.id));
+  };
+
+  // 🔥 Обработчик переключения формы ставок
+  const handleToggleRatesForm = () => {
+    if (showRatesForm) {
+      // Если скрываем форму - удаляем все ставки из БД
+      const rateIds = dynamicRates.filter((r) => r.id).map((r) => r.id);
+      for (const id of rateIds) {
+        adminApi
+          .hardDeleteDynamicRate(id)
+          .then(() => console.log(`🗑️ Rate ${id} deleted from DB`))
+          .catch((error) =>
+            console.error(`❌ Failed to delete rate ${id}:`, error),
+          );
+      }
+      // Очищаем UI
+      setDynamicRates([]);
+    } else {
+      // Если показываем форму - добавляем пустую строку
+      if (dynamicRates.length === 0) {
+        setDynamicRates([
+          {
+            conditionType: "pv",
+            condition: "gte",
+            value: null,
+            minValue: null,
+            maxValue: null,
+            rate: 0,
+            priority: 0,
+            description: "",
+            isActive: true,
+            useComplexCondition: false,
+            conditionMetadata: {
+              pvMin: null,
+              pvMax: null,
+              amountMin: null,
+              amountMax: null,
+              termMin: null,
+              termMax: null,
+            },
+          },
+        ]);
+      }
+    }
+    setShowRatesForm(!showRatesForm);
+  };
+
+  // 🔥 Обработчик переключения формы субсидий
+  const handleToggleSubsidiesForm = () => {
+    if (showSubsidiesForm) {
+      // Если скрываем форму - удаляем все субсидии из БД
+      const subsidyIds = dynamicSubsidies.filter((s) => s.id).map((s) => s.id);
+      for (const id of subsidyIds) {
+        adminApi
+          .hardDeleteDynamicSubsidy(id)
+          .then(() => console.log(`🗑️ Subsidy ${id} deleted from DB`))
+          .catch((error) =>
+            console.error(`❌ Failed to delete subsidy ${id}:`, error),
+          );
+      }
+      // Очищаем UI
+      setDynamicSubsidies([]);
+    } else {
+      // Если показываем форму - добавляем пустую строку
+      if (dynamicSubsidies.length === 0) {
+        setDynamicSubsidies([
+          {
+            minPVPercent: null,
+            maxPVPercent: null,
+            minAmount: null,
+            maxAmount: null,
+            minTerm: null,
+            maxTerm: null,
+            subsidyPercent: 0,
+            priority: 0,
+            description: "",
+            roundingStrategy: null,
+            isActive: true,
+          },
+        ]);
+      }
+    }
+    setShowSubsidiesForm(!showSubsidiesForm);
   };
 
   const validate = (): boolean => {
@@ -248,6 +481,10 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  // ============================================================
+  // ОТПРАВКА ФОРМЫ
+  // ============================================================
+
   const handleSubmit = async () => {
     if (!validate()) {
       return;
@@ -258,35 +495,37 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
       let offer: AdminOffer;
 
-      if (isCreating) {
-        offer = await adminApi.createOffer({
-          program: formData.program || "Новый оффер",
-          rate: formData.rate || 0,
-          twoRate: formData.twoRate || null,
-          shortRate: formData.shortRate || null,
-          subsidyPercent: formData.subsidyPercent || 0,
-          minPVPercent: formData.minPVPercent || 20.1,
-          durationMonths: formData.durationMonths || null,
-          isTwoContracts: formData.isTwoContracts || false,
-          excessLimit: formData.excessLimit || false,
-          isTranche: formData.isTranche || false,
-          trancheFirstPercent: formData.trancheFirstPercent || null,
-          trancheSecondDate: formData.trancheSecondDate || null,
-          complexes: formData.complexes || [],
-          subsidyCalculationMethod: formData.subsidyCalculationMethod || null,
-          thresholdTolerance: formData.thresholdTolerance || null,
-          thresholdToleranceType: formData.thresholdToleranceType || null,
-          roundingStrategy: formData.roundingStrategy || null,
-          minLoanTermYears: formData.minLoanTermYears || null,
-          description: formData.description || null,
-          isActive: true,
-          bankId: formData.bankId,
-          programId: formData.programId,
-        });
+      const offerData = {
+        program: formData.program || "Новый оффер",
+        rate: formData.rate || 0,
+        twoRate: formData.twoRate || null,
+        shortRate: formData.shortRate || null,
+        subsidyPercent: formData.subsidyPercent || 0,
+        minPVPercent: formData.minPVPercent || 20.1,
+        durationMonths: formData.durationMonths || null,
+        isTwoContracts: formData.isTwoContracts || false,
+        excessLimit: formData.excessLimit || false,
+        isTranche: formData.isTranche || false,
+        trancheFirstPercent: formData.trancheFirstPercent || null,
+        trancheSecondDate: formData.trancheSecondDate || null,
+        complexes: formData.complexes || [],
+        subsidyCalculationMethod: formData.subsidyCalculationMethod || null,
+        thresholdTolerance: formData.thresholdTolerance || null,
+        thresholdToleranceType: formData.thresholdToleranceType || null,
+        roundingStrategy: formData.roundingStrategy || null,
+        minLoanTermYears: formData.minLoanTermYears || null,
+        description: formData.description || null,
+        isActive: formData.isActive !== undefined ? formData.isActive : true,
+        bankId: formData.bankId,
+        programId: formData.programId,
+      };
 
-        await createDynamicData(offer.id);
+      if (isCreating) {
+        offer = await adminApi.createOffer(offerData);
+        await saveDynamicData(offer.id);
       } else if (editingOffer) {
-        offer = await adminApi.updateOffer(editingOffer.id, formData);
+        offer = await adminApi.updateOffer(editingOffer.id, offerData);
+        await saveDynamicData(editingOffer.id);
       }
 
       onRefresh();
@@ -300,63 +539,233 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     }
   };
 
-  const createDynamicData = async (offerId: string) => {
+  const saveDynamicData = async (offerId: string) => {
     try {
+      console.log("💾 Starting saveDynamicData for offer:", offerId);
+
+      // ============================================================
+      // 1. СОХРАНЯЕМ ДИНАМИЧЕСКИЕ СТАВКИ
+      // ============================================================
       if (showRatesForm) {
-        for (const rate of dynamicRates) {
-          if (rate.rate > 0) {
-            const rateData: any = {
-              conditionType: rate.conditionType,
-              condition: rate.condition,
-              value: rate.value || null,
-              minValue: rate.minValue || null,
-              maxValue: rate.maxValue || null,
-              rate: rate.rate,
-              priority: rate.priority || 0,
-              description: rate.description || "",
-              isActive: true,
-            };
-            if (rate.useComplexCondition && rate.conditionMetadata) {
-              rateData.conditionMetadata = rate.conditionMetadata;
+        // Получаем существующие ставки из БД
+        const existingRates = await adminApi.getOfferDynamicRates(offerId);
+        console.log(`📊 Found ${existingRates.length} existing rates in DB`);
+
+        // Получаем ID ставок, которые остались в UI
+        const keptRateIds = dynamicRates.filter((r) => r.id).map((r) => r.id);
+
+        // Удаляем те, которых нет в UI (осиротевшие)
+        for (const rate of existingRates) {
+          if (rate.id && !keptRateIds.includes(rate.id)) {
+            try {
+              await adminApi.hardDeleteDynamicRate(rate.id);
+              console.log(`🗑️ Deleted orphan rate ${rate.id}`);
+            } catch (error) {
+              console.error(`❌ Failed to delete rate ${rate.id}:`, error);
             }
-            await adminApi.createDynamicRate(offerId, rateData);
+          }
+        }
+
+        // Создаем новые или обновляем существующие ставки из UI
+        let createdCount = 0;
+        for (const rate of dynamicRates) {
+          // Проверяем, что ставка валидна
+          const isValid =
+            rate.rate > 0 ||
+            (rate.description && rate.description.trim() !== "");
+
+          if (!isValid) continue;
+
+          const rateData: any = {
+            conditionType: rate.conditionType || "pv",
+            condition: rate.condition || "gte",
+            value: rate.value || null,
+            minValue: rate.minValue || null,
+            maxValue: rate.maxValue || null,
+            rate: rate.rate,
+            priority: rate.priority || 0,
+            description: rate.description || "",
+            isActive: true,
+          };
+
+          if (rate.useComplexCondition && rate.conditionMetadata) {
+            rateData.conditionMetadata = rate.conditionMetadata;
+          }
+
+          if (rate.id) {
+            // Обновляем существующую
+            try {
+              await adminApi.updateDynamicRate(rate.id, rateData);
+              console.log(`✅ Updated rate ${rate.id}: ${rate.rate}%`);
+            } catch (error) {
+              console.error(`❌ Failed to update rate ${rate.id}:`, error);
+            }
+          } else {
+            // Создаем новую
+            try {
+              const created = await adminApi.createDynamicRate(
+                offerId,
+                rateData,
+              );
+              createdCount++;
+              console.log(`✅ Created rate ${created.id}: ${rate.rate}%`);
+            } catch (error) {
+              console.error(`❌ Failed to create rate:`, error);
+            }
+          }
+        }
+        console.log(
+          `📊 Processed rates: ${createdCount} new, ${dynamicRates.filter((r) => r.id).length} existing`,
+        );
+      } else {
+        // 🔥 Если форма скрыта - удаляем все ставки из БД
+        console.log(
+          `📊 Rates form is hidden, deleting all rates for offer ${offerId}`,
+        );
+        const existingRates = await adminApi.getOfferDynamicRates(offerId);
+        for (const rate of existingRates) {
+          if (rate.id) {
+            try {
+              await adminApi.hardDeleteDynamicRate(rate.id);
+              console.log(`🗑️ Deleted rate ${rate.id}`);
+            } catch (error) {
+              console.error(`❌ Failed to delete rate ${rate.id}:`, error);
+            }
           }
         }
       }
 
+      // ============================================================
+      // 2. СОХРАНЯЕМ ДИНАМИЧЕСКИЕ СУБСИДИИ
+      // ============================================================
       if (showSubsidiesForm) {
+        const existingSubsidies =
+          await adminApi.getOfferDynamicSubsidies(offerId);
+        console.log(
+          `📊 Found ${existingSubsidies.length} existing subsidies in DB`,
+        );
+
+        const keptSubsidyIds = dynamicSubsidies
+          .filter((s) => s.id)
+          .map((s) => s.id);
+
+        // Удаляем те, которых нет в UI (осиротевшие)
+        for (const subsidy of existingSubsidies) {
+          if (subsidy.id && !keptSubsidyIds.includes(subsidy.id)) {
+            try {
+              await adminApi.hardDeleteDynamicSubsidy(subsidy.id);
+              console.log(`🗑️ Deleted orphan subsidy ${subsidy.id}`);
+            } catch (error) {
+              console.error(
+                `❌ Failed to delete subsidy ${subsidy.id}:`,
+                error,
+              );
+            }
+          }
+        }
+
+        // Создаем новые или обновляем существующие субсидии из UI
+        let createdCount = 0;
         for (const subsidy of dynamicSubsidies) {
-          if (subsidy.subsidyPercent > 0) {
-            await adminApi.createDynamicSubsidy(offerId, {
-              minPVPercent: subsidy.minPVPercent || null,
-              maxPVPercent: subsidy.maxPVPercent || null,
-              minAmount: subsidy.minAmount || null,
-              maxAmount: subsidy.maxAmount || null,
-              minTerm: subsidy.minTerm || null,
-              maxTerm: subsidy.maxTerm || null,
-              subsidyPercent: subsidy.subsidyPercent,
-              priority: subsidy.priority || 0,
-              description: subsidy.description || "",
-              roundingStrategy: subsidy.roundingStrategy || null,
-              isActive: true,
-            });
+          // Проверяем, что субсидия валидна
+          const isValid =
+            subsidy.subsidyPercent > 0 ||
+            (subsidy.description && subsidy.description.trim() !== "") ||
+            subsidy.minPVPercent !== null ||
+            subsidy.maxPVPercent !== null ||
+            subsidy.minAmount !== null ||
+            subsidy.maxAmount !== null ||
+            subsidy.minTerm !== null ||
+            subsidy.maxTerm !== null;
+
+          if (!isValid) continue;
+
+          const subsidyData = {
+            minPVPercent: subsidy.minPVPercent || null,
+            maxPVPercent: subsidy.maxPVPercent || null,
+            minAmount: subsidy.minAmount || null,
+            maxAmount: subsidy.maxAmount || null,
+            minTerm: subsidy.minTerm || null,
+            maxTerm: subsidy.maxTerm || null,
+            subsidyPercent: subsidy.subsidyPercent,
+            priority: subsidy.priority || 0,
+            description: subsidy.description || "",
+            roundingStrategy: subsidy.roundingStrategy || null,
+            isActive: true,
+          };
+
+          if (subsidy.id) {
+            // Обновляем существующую
+            try {
+              await adminApi.updateDynamicSubsidy(subsidy.id, subsidyData);
+              console.log(
+                `✅ Updated subsidy ${subsidy.id}: ${subsidy.subsidyPercent}%`,
+              );
+            } catch (error) {
+              console.error(
+                `❌ Failed to update subsidy ${subsidy.id}:`,
+                error,
+              );
+            }
+          } else {
+            // Создаем новую
+            try {
+              const created = await adminApi.createDynamicSubsidy(
+                offerId,
+                subsidyData,
+              );
+              createdCount++;
+              console.log(
+                `✅ Created subsidy ${created.id}: ${subsidy.subsidyPercent}%`,
+              );
+            } catch (error) {
+              console.error(`❌ Failed to create subsidy:`, error);
+            }
+          }
+        }
+        console.log(
+          `📊 Processed subsidies: ${createdCount} new, ${dynamicSubsidies.filter((s) => s.id).length} existing`,
+        );
+      } else {
+        // 🔥 Если форма скрыта - удаляем все субсидии из БД
+        console.log(
+          `📊 Subsidies form is hidden, deleting all subsidies for offer ${offerId}`,
+        );
+        const existingSubsidies =
+          await adminApi.getOfferDynamicSubsidies(offerId);
+        for (const subsidy of existingSubsidies) {
+          if (subsidy.id) {
+            try {
+              await adminApi.hardDeleteDynamicSubsidy(subsidy.id);
+              console.log(`🗑️ Deleted subsidy ${subsidy.id}`);
+            } catch (error) {
+              console.error(
+                `❌ Failed to delete subsidy ${subsidy.id}:`,
+                error,
+              );
+            }
           }
         }
       }
+
+      console.log("✅ All dynamic data saved successfully!");
     } catch (error) {
-      console.error("Error creating dynamic data:", error);
+      console.error("❌ Error saving dynamic data:", error);
+      throw error;
     }
   };
+
+  // ============================================================
+  // РЕНДЕР
+  // ============================================================
 
   if (!isOpen) return null;
 
   const activeBanks = banks.filter((b) => b.isActive);
   const activePrograms = programs.filter((p) => p.isActive);
-
   const isBankLocked = isCreating && selectedBankId;
   const selectedBankName = banks.find((b) => b.id === selectedBankId)?.name;
 
-  // 🔥 Получаем текст для чекбокса "2 договора"
   const getTwoContractsLabel = () => {
     if (isFamily) return "Семейная ипотека (2 договора)";
     if (isIT) return "ИТ ипотека (2 договора)";
@@ -364,8 +773,11 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay modal-fullscreen" onClick={onClose}>
+      <div
+        className="modal-content modal-fullscreen-content"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <h2>{isCreating ? "➕ Создать оффер" : "✏️ Редактировать оффер"}</h2>
           <button className="modal-close" onClick={onClose}>
@@ -375,7 +787,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
         <div className="modal-body">
           <div className="modal-form-grid">
-            {/* Статус - только при редактировании */}
+            {/* Статус */}
             <div className="form-group">
               <label htmlFor="isActive" className="form-label">
                 Статус
@@ -392,6 +804,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                 <option value="inactive">❌ Неактивен</option>
               </select>
             </div>
+
             {/* Банк */}
             <div className="form-group">
               <label htmlFor="bankId" className="form-label required">
@@ -472,7 +885,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               )}
             </div>
 
-            {/* 🔥 Опции - только для семейной и ИТ ипотеки */}
+            {/* Опции для семейной и ИТ ипотеки */}
             {isFamilyOrIT && (
               <div className="form-group form-checkboxes full-width">
                 <label className="form-label">Опции</label>
@@ -483,7 +896,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                       checked={formData.isTwoContracts || false}
                       onChange={(e) => {
                         const checked = e.target.checked;
-                        // 🔥 Если включаем 2 договора - снимаем сверхлимит
                         if (checked) {
                           handleChange("excessLimit", false);
                         }
@@ -498,7 +910,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                       checked={formData.excessLimit || false}
                       onChange={(e) => {
                         const checked = e.target.checked;
-                        // 🔥 Если включаем сверхлимит - снимаем 2 договора
                         if (checked) {
                           handleChange("isTwoContracts", false);
                         }
@@ -511,7 +922,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               </div>
             )}
 
-            {/* 🔥 Поля для траншевой ипотеки */}
+            {/* Поля для траншевой ипотеки */}
             {isTranche && (
               <>
                 <div className="form-group">
@@ -550,7 +961,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               </>
             )}
 
-            {/* 🔥 Ставка */}
+            {/* Ставка */}
             <div className="form-group full-width">
               <div className="field-with-action">
                 <div className="field-with-action-left">
@@ -575,17 +986,17 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                 <div className="field-with-action-right">
                   <button
                     type="button"
-                    onClick={() => setShowRatesForm(!showRatesForm)}
+                    onClick={handleToggleRatesForm}
                     className={`action-btn ${showRatesForm ? "active" : ""}`}
                   >
-                    📊 {showRatesForm ? "Скрыть" : "Добавить"} динамическую
+                    📊 {showRatesForm ? "Убрать" : "Добавить"} динамическую
                     ставку
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* 🔥 Двухставочная ставка - сразу под ставкой, если включен 2 договора */}
+            {/* Двухставочная ставка */}
             {isFamilyOrIT && isTwoContracts && (
               <div className="form-group full-width">
                 <div className="field-with-action">
@@ -608,14 +1019,12 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                       placeholder="0.00"
                     />
                   </div>
-                  <div className="field-with-action-right">
-                    {/* Пустой блок для выравнивания */}
-                  </div>
+                  <div className="field-with-action-right" />
                 </div>
               </div>
             )}
 
-            {/* Субсидия с кнопкой динамической субсидии */}
+            {/* Субсидия */}
             <div className="form-group full-width">
               <div className="field-with-action">
                 <div className="field-with-action-left">
@@ -640,10 +1049,10 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                 <div className="field-with-action-right">
                   <button
                     type="button"
-                    onClick={() => setShowSubsidiesForm(!showSubsidiesForm)}
+                    onClick={handleToggleSubsidiesForm}
                     className={`action-btn ${showSubsidiesForm ? "active" : ""}`}
                   >
-                    💰 {showSubsidiesForm ? "Скрыть" : "Добавить"} динамическую
+                    💰 {showSubsidiesForm ? "Убрать" : "Добавить"} динамическую
                     субсидию
                   </button>
                 </div>
@@ -674,27 +1083,32 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               )}
             </div>
 
-            {/* Срок кредита */}
-            <div className="form-group">
-              <label htmlFor="durationMonths" className="form-label">
-                Срок кредита (мес.)
-              </label>
-              <input
-                id="durationMonths"
-                type="number"
-                value={formData.durationMonths || ""}
-                onChange={(e) =>
-                  handleChange(
-                    "durationMonths",
-                    parseInt(e.target.value) || null,
-                  )
-                }
-                className="form-input"
-                placeholder="Например: 360"
-              />
-            </div>
+            {/* Срок субсидированной ставки */}
+            {isShortTerm && (
+              <div className="form-group">
+                <label htmlFor="durationMonths" className="form-label">
+                  Срок субсидированной ставки (мес.)
+                </label>
+                <input
+                  id="durationMonths"
+                  type="number"
+                  value={formData.durationMonths || ""}
+                  onChange={(e) =>
+                    handleChange(
+                      "durationMonths",
+                      parseInt(e.target.value) || null,
+                    )
+                  }
+                  className="form-input"
+                  placeholder="Например: 36"
+                />
+                <span className="form-hint">
+                  Период, в течение которого действует субсидированная ставка
+                </span>
+              </div>
+            )}
 
-            {/* Короткий срок - только для программы short */}
+            {/* Короткий срок */}
             {isShortTerm && (
               <div className="form-group">
                 <label htmlFor="shortRate" className="form-label">
@@ -717,6 +1131,59 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               </div>
             )}
 
+            {/* Метод расчета субсидии */}
+            {isShortTerm && (
+              <div className="form-group full-width">
+                <label className="form-label">
+                  Метод расчета платежа в субсидированный период
+                </label>
+                <div className="subsidy-method-group">
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="subsidyCalculationMethod"
+                      value="onlyPercent"
+                      checked={
+                        formData.subsidyCalculationMethod === "onlyPercent"
+                      }
+                      onChange={(e) =>
+                        handleChange("subsidyCalculationMethod", e.target.value)
+                      }
+                    />
+                    <span className="radio-content">
+                      <span className="radio-title">Только проценты</span>
+                      <span className="radio-description">
+                        В субсидированный период платятся только проценты, тело
+                        кредита не погашается
+                      </span>
+                    </span>
+                  </label>
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="subsidyCalculationMethod"
+                      value="standard"
+                      checked={formData.subsidyCalculationMethod === "standard"}
+                      onChange={(e) =>
+                        handleChange("subsidyCalculationMethod", e.target.value)
+                      }
+                    />
+                    <span className="radio-content">
+                      <span className="radio-title">Стандартный аннуитет</span>
+                      <span className="radio-description">
+                        В субсидированный период применяется стандартный
+                        аннуитетный платеж
+                      </span>
+                    </span>
+                  </label>
+                </div>
+                <span className="form-hint">
+                  Выберите метод расчета ежемесячного платежа на период действия
+                  субсидии
+                </span>
+              </div>
+            )}
+
             {/* Описание */}
             <div className="form-group full-width">
               <label htmlFor="description" className="form-label">
@@ -732,7 +1199,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               />
             </div>
 
-            {/* ЖК */}
+            {/* Жилые комплексы */}
             <div className="form-group full-width">
               <label className="form-label">Жилые комплексы</label>
               <div className="complexes-grid">
@@ -752,13 +1219,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
             </div>
           </div>
 
-          <div className="modal-divider"></div>
+          <div className="modal-divider" />
 
           {/* Динамические формы */}
           {showRatesForm && (
             <DynamicRatesForm
               rates={dynamicRates}
               onRatesChange={setDynamicRates}
+              onRateDelete={handleRateDelete}
             />
           )}
 
@@ -766,6 +1234,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
             <DynamicSubsidiesForm
               subsidies={dynamicSubsidies}
               onSubsidiesChange={setDynamicSubsidies}
+              onSubsidyDelete={handleSubsidyDelete}
             />
           )}
         </div>

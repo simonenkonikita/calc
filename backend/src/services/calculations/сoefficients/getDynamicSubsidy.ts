@@ -10,17 +10,37 @@ const checkCondition = (
   amount: number,
   term: number,
 ): boolean => {
+  // 🔥 Если есть функция условия - используем её
   if (rule.conditionFn) {
     return rule.conditionFn(pv, amount, term);
   }
 
-  const minAmount = rule.minAmount ?? 0;
-  const maxAmount = rule.maxAmount ?? Infinity;
-
-  if (amount >= minAmount && amount < maxAmount) {
-    return true;
+  // 🔥 Проверяем по диапазонам (minTerm, maxTerm и т.д.)
+  // Проверка по ПВ
+  if (rule.minPVPercent !== undefined && rule.minPVPercent !== null) {
+    if (pv < rule.minPVPercent) return false;
+  }
+  if (rule.maxPVPercent !== undefined && rule.maxPVPercent !== null) {
+    if (pv > rule.maxPVPercent) return false;
   }
 
+  // Проверка по сумме
+  if (rule.minAmount !== undefined && rule.minAmount !== null) {
+    if (amount < rule.minAmount) return false;
+  }
+  if (rule.maxAmount !== undefined && rule.maxAmount !== null) {
+    if (amount > rule.maxAmount) return false;
+  }
+
+  // 🔥 Проверка по сроку (в годах)
+  if (rule.minTerm !== undefined && rule.minTerm !== null) {
+    if (term < rule.minTerm) return false;
+  }
+  if (rule.maxTerm !== undefined && rule.maxTerm !== null) {
+    if (term > rule.maxTerm) return false;
+  }
+
+  // 🔥 Проверка по простому условию (type + condition + value)
   if (rule.type && rule.condition && rule.value !== undefined) {
     let actualValue: number;
     switch (rule.type) {
@@ -53,9 +73,13 @@ const checkCondition = (
     }
   }
 
-  return false;
+  // Если нет никаких условий - считаем что подходит
+  return true;
 };
 
+// ============================================================
+// ФУНКЦИЯ ДЛЯ РАБОТЫ С OFFER (из БД)
+// ============================================================
 export const getDynamicSubsidy = (
   offer: Offer,
   pvPercent: number,
@@ -64,77 +88,99 @@ export const getDynamicSubsidy = (
 ): number => {
   const dynamicSubsidies = offer.dynamicSubsidies || [];
 
-  if (dynamicSubsidies.length > 0) {
-    // 🔥 Исправление: правильное преобразование с обработкой null
-    const rules: DynamicRateRule[] = dynamicSubsidies
-      .filter((s) => s.isActive !== false)
-      .map((subsidy) => {
-        // 🔥 Преобразуем null → undefined для roundingStrategy
-        const roundingStrategy = subsidy.roundingStrategy as
-          | "up"
-          | "down"
-          | undefined;
+  console.log(`🔍 getDynamicSubsidy called for offer ${offer.id}:`, {
+    pvPercent,
+    mortgageAmount,
+    loanTerm,
+    dynamicSubsidiesCount: dynamicSubsidies.length,
+  });
 
-        // 🔥 Преобразуем conditionMetadata для toleranceType
-        const toleranceType = subsidy.conditionMetadata?.toleranceType as
-          | "fixed"
-          | "percent"
-          | undefined;
-
-        return {
-          minPVPercent: subsidy.minPVPercent,
-          maxPVPercent: subsidy.maxPVPercent,
-          minAmount: subsidy.minAmount,
-          maxAmount: subsidy.maxAmount,
-          minTerm: subsidy.minTerm,
-          maxTerm: subsidy.maxTerm,
-          subsidyPercent: subsidy.subsidyPercent,
-          priority: subsidy.priority,
-          description: subsidy.description,
-          roundingStrategy: roundingStrategy, // ← теперь правильный тип
-          conditionMetadata: subsidy.conditionMetadata,
-          conditionFn: subsidy.conditionMetadata?.conditionFn,
-          type: subsidy.conditionMetadata?.type,
-          condition: subsidy.conditionMetadata?.condition,
-          value: subsidy.conditionMetadata?.value,
-          tolerance: subsidy.conditionMetadata?.tolerance,
-          toleranceType: toleranceType, // ← теперь правильный тип
-        };
-      });
-
-    const hasThresholdRules = rules.some(
-      (rule) => rule.minAmount !== undefined || rule.maxAmount !== undefined,
+  if (dynamicSubsidies.length === 0) {
+    console.log(
+      "ℹ️ No dynamic subsidies, using fixed subsidy:",
+      offer.subsidyPercent,
     );
+    return offer.subsidyPercent ?? 0;
+  }
 
-    if (hasThresholdRules) {
-      // 🔥 Исправление: преобразуем null → undefined для tolerance
-      const globalTolerance = offer.thresholdTolerance ?? undefined;
-      const globalToleranceType =
-        (offer.thresholdToleranceType as "fixed" | "percent") ?? "percent";
+  // 🔥 Сортируем по приоритету (меньше = выше приоритет)
+  const sortedSubsidies = [...dynamicSubsidies]
+    .filter((s) => s.isActive !== false)
+    .sort((a, b) => (a.priority || 0) - (b.priority || 0));
 
-      const subsidy = getThresholdSubsidy(
-        mortgageAmount,
-        rules,
-        globalTolerance,
-        globalToleranceType,
-      );
+  console.log(
+    "📊 Sorted subsidies:",
+    sortedSubsidies.map((s) => ({
+      id: s.id,
+      minTerm: s.minTerm,
+      maxTerm: s.maxTerm,
+      subsidyPercent: s.subsidyPercent,
+      priority: s.priority,
+    })),
+  );
 
-      if (subsidy > 0) {
-        return subsidy;
-      }
-    }
+  // 🔥 Преобразуем в правила для checkCondition
+  const rules: DynamicRateRule[] = sortedSubsidies.map((subsidy) => ({
+    minPVPercent: subsidy.minPVPercent ?? undefined,
+    maxPVPercent: subsidy.maxPVPercent ?? undefined,
+    minAmount: subsidy.minAmount ?? undefined,
+    maxAmount: subsidy.maxAmount ?? undefined,
+    minTerm: subsidy.minTerm ?? undefined,
+    maxTerm: subsidy.maxTerm ?? undefined,
+    subsidyPercent: subsidy.subsidyPercent,
+    priority: subsidy.priority,
+    description: subsidy.description,
+    roundingStrategy: subsidy.roundingStrategy as "up" | "down" | undefined,
+    conditionMetadata: subsidy.conditionMetadata,
+  }));
 
-    const sortedRules = [...rules].sort(
-      (a, b) => (b.priority || 0) - (a.priority || 0),
-    );
+  // 🔥 Проверяем каждое правило
+  for (const rule of rules) {
+    const isMatch = checkCondition(rule, pvPercent, mortgageAmount, loanTerm);
 
-    for (const rule of sortedRules) {
-      const isMatch = checkCondition(rule, pvPercent, mortgageAmount, loanTerm);
-      if (isMatch && rule.subsidyPercent !== undefined) {
-        return rule.subsidyPercent;
-      }
+    console.log(`🔍 Rule check:`, {
+      minTerm: rule.minTerm,
+      maxTerm: rule.maxTerm,
+      subsidyPercent: rule.subsidyPercent,
+      isMatch,
+    });
+
+    if (isMatch && rule.subsidyPercent !== undefined) {
+      console.log(`✅ Selected subsidy: ${rule.subsidyPercent}%`);
+      return rule.subsidyPercent;
     }
   }
 
+  // 🔥 Если ничего не подошло - возвращаем фиксированную субсидию
+  console.log(
+    `ℹ️ No dynamic subsidy matched, using fixed: ${offer.subsidyPercent}%`,
+  );
   return offer.subsidyPercent ?? 0;
+};
+
+// ============================================================
+// ФУНКЦИЯ ДЛЯ РАБОТЫ С ПРАВИЛАМИ (из JSONB)
+// ============================================================
+export const getDynamicSubsidyFromRules = (
+  rules: DynamicRateRule[],
+  pvPercent: number,
+  mortgageAmount: number,
+  loanTerm: number = 30,
+): number => {
+  if (!rules || rules.length === 0) {
+    return 0;
+  }
+
+  const sortedRules = [...rules].sort(
+    (a, b) => (a.priority || 0) - (b.priority || 0),
+  );
+
+  for (const rule of sortedRules) {
+    const isMatch = checkCondition(rule, pvPercent, mortgageAmount, loanTerm);
+    if (isMatch && rule.subsidyPercent !== undefined) {
+      return rule.subsidyPercent;
+    }
+  }
+
+  return 0;
 };
