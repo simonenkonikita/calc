@@ -89,18 +89,16 @@ export class SubsidyController extends BaseController {
         return this.handleNotFound(res, "Offer");
       }
 
-      // Создаем субсидию
+      // 🔥 Создаем субсидию с новыми полями
       const subsidy = subsidyRepository.create({
-        minPVPercent: data.minPVPercent || null,
-        maxPVPercent: data.maxPVPercent || null,
-        minAmount: data.minAmount || null,
-        maxAmount: data.maxAmount || null,
-        minTerm: data.minTerm || null,
-        maxTerm: data.maxTerm || null,
-        subsidyPercent: data.subsidyPercent || 0,
+        conditionType: data.conditionType || "pv",
+        condition: data.condition || "gte",
+        value: data.value !== undefined ? data.value : null,
+        minValue: data.minValue !== undefined ? data.minValue : null,
+        maxValue: data.maxValue !== undefined ? data.maxValue : null,
+        rate: data.rate || 0,
         priority: data.priority || 0,
         description: data.description || "",
-        roundingStrategy: data.roundingStrategy || null,
         conditionMetadata: data.conditionMetadata || null,
         isActive: data.isActive !== undefined ? data.isActive : true,
         offerId: offerId,
@@ -146,25 +144,37 @@ export class SubsidyController extends BaseController {
         return this.handleNotFound(res, "Dynamic subsidy");
       }
 
-      // Обновляем только переданные поля
-      if (data.minPVPercent !== undefined)
-        subsidy.minPVPercent = data.minPVPercent;
-      if (data.maxPVPercent !== undefined)
-        subsidy.maxPVPercent = data.maxPVPercent;
-      if (data.minAmount !== undefined) subsidy.minAmount = data.minAmount;
-      if (data.maxAmount !== undefined) subsidy.maxAmount = data.maxAmount;
-      if (data.minTerm !== undefined) subsidy.minTerm = data.minTerm;
-      if (data.maxTerm !== undefined) subsidy.maxTerm = data.maxTerm;
-      if (data.subsidyPercent !== undefined)
-        subsidy.subsidyPercent = data.subsidyPercent;
-      if (data.priority !== undefined) subsidy.priority = data.priority;
-      if (data.description !== undefined)
+      // 🔥 Обновляем только переданные поля (новые)
+      if (data.conditionType !== undefined) {
+        subsidy.conditionType = data.conditionType;
+      }
+      if (data.condition !== undefined) {
+        subsidy.condition = data.condition;
+      }
+      if (data.value !== undefined) {
+        subsidy.value = data.value;
+      }
+      if (data.minValue !== undefined) {
+        subsidy.minValue = data.minValue;
+      }
+      if (data.maxValue !== undefined) {
+        subsidy.maxValue = data.maxValue;
+      }
+      if (data.rate !== undefined) {
+        subsidy.rate = data.rate;
+      }
+      if (data.priority !== undefined) {
+        subsidy.priority = data.priority;
+      }
+      if (data.description !== undefined) {
         subsidy.description = data.description;
-      if (data.roundingStrategy !== undefined)
-        subsidy.roundingStrategy = data.roundingStrategy;
-      if (data.conditionMetadata !== undefined)
+      }
+      if (data.conditionMetadata !== undefined) {
         subsidy.conditionMetadata = data.conditionMetadata;
-      if (data.isActive !== undefined) subsidy.isActive = data.isActive;
+      }
+      if (data.isActive !== undefined) {
+        subsidy.isActive = data.isActive;
+      }
 
       await subsidyRepository.save(subsidy);
 
@@ -313,18 +323,16 @@ export class SubsidyController extends BaseController {
       // Копируем субсидии
       const copied = [];
       for (const subsidy of sourceSubsidies) {
-        // Создаем новый объект субсидии без системных полей
+        // 🔥 Создаем новый объект субсидии с новыми полями
         const subsidyData = {
-          minPVPercent: subsidy.minPVPercent,
-          maxPVPercent: subsidy.maxPVPercent,
-          minAmount: subsidy.minAmount,
-          maxAmount: subsidy.maxAmount,
-          minTerm: subsidy.minTerm,
-          maxTerm: subsidy.maxTerm,
-          subsidyPercent: subsidy.subsidyPercent,
+          conditionType: subsidy.conditionType,
+          condition: subsidy.condition,
+          value: subsidy.value,
+          minValue: subsidy.minValue,
+          maxValue: subsidy.maxValue,
+          rate: subsidy.rate,
           priority: subsidy.priority,
           description: subsidy.description,
-          roundingStrategy: subsidy.roundingStrategy,
           conditionMetadata: subsidy.conditionMetadata,
           isActive: subsidy.isActive,
           offerId: targetOfferId,

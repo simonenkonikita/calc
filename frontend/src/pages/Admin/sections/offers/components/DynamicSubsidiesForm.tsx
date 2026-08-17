@@ -7,7 +7,7 @@ import "./DynamicSubsidiesForm.css";
 interface DynamicSubsidiesFormProps {
   subsidies: DynamicSubsidy[];
   onSubsidiesChange: (subsidies: DynamicSubsidy[]) => void;
-  onSubsidyDelete?: (subsidy: DynamicSubsidy) => void; // 🔥 Добавляем callback
+  onSubsidyDelete?: (subsidy: DynamicSubsidy) => void;
 }
 
 export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
@@ -19,17 +19,50 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
     onSubsidiesChange([
       ...subsidies,
       {
-        minPVPercent: null,
-        maxPVPercent: null,
-        minAmount: null,
-        maxAmount: null,
-        minTerm: null,
-        maxTerm: null,
-        subsidyPercent: 0,
+        conditionType: "pv",
+        condition: "gte",
+        value: null,
+        minValue: null,
+        maxValue: null,
+        rate: 0, // ← теперь rate вместо subsidyPercent
         priority: subsidies.length,
         description: "",
-        roundingStrategy: null,
         isActive: true,
+        useComplexCondition: false,
+        conditionMetadata: {
+          pvMin: null,
+          pvMax: null,
+          amountMin: null,
+          amountMax: null,
+          termMin: null,
+          termMax: null,
+        },
+      },
+    ]);
+  };
+
+  const addComplexRow = () => {
+    onSubsidiesChange([
+      ...subsidies,
+      {
+        conditionType: "pv",
+        condition: "gte",
+        value: null,
+        minValue: null,
+        maxValue: null,
+        rate: 0,
+        priority: subsidies.length,
+        description: "",
+        isActive: true,
+        useComplexCondition: true,
+        conditionMetadata: {
+          pvMin: null,
+          pvMax: null,
+          amountMin: null,
+          amountMax: null,
+          termMin: null,
+          termMax: null,
+        },
       },
     ]);
   };
@@ -41,8 +74,6 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
     }
 
     const removedSubsidy = subsidies[index];
-
-    // 🔥 Если у удаляемой строки есть ID, вызываем колбэк для удаления из БД
     if (removedSubsidy.id && onSubsidyDelete) {
       onSubsidyDelete(removedSubsidy);
     }
@@ -60,179 +91,365 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
     onSubsidiesChange(updated);
   };
 
+  const updateMetadata = (
+    index: number,
+    field: keyof DynamicSubsidy["conditionMetadata"],
+    value: any,
+  ) => {
+    const updated = [...subsidies];
+    if (!updated[index].conditionMetadata) {
+      updated[index].conditionMetadata = {};
+    }
+    updated[index].conditionMetadata![field] = value !== "" ? value : null;
+    onSubsidiesChange(updated);
+  };
+
+  const simpleSubsidies = subsidies.filter((s) => !s.useComplexCondition);
+  const complexSubsidies = subsidies.filter((s) => s.useComplexCondition);
+
   return (
     <div className="dynamic-form">
       <div className="dynamic-form-header">
         <h4>💰 Динамические субсидии</h4>
-        <button onClick={addRow} className="admin-btn-secondary admin-btn-sm">
-          + Добавить условие
-        </button>
+        <div className="dynamic-form-actions">
+          <button onClick={addRow} className="admin-btn-secondary admin-btn-sm">
+            + Добавить простое условие
+          </button>
+          <button
+            onClick={addComplexRow}
+            className="admin-btn-secondary admin-btn-sm"
+          >
+            + Добавить сложное условие
+          </button>
+        </div>
       </div>
-      <div className="admin-table-wrapper">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>ПВ от</th>
-              <th>ПВ до</th>
-              <th>Сумма от</th>
-              <th>Сумма до</th>
-              <th>Срок от</th>
-              <th>Срок до</th>
-              <th>Субсидия</th>
-              <th>Приор</th>
-              <th>Описание</th>
-              <th>Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {subsidies.map((subsidy, index) => (
-              <tr key={index}>
-                <td>
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="от"
-                    value={subsidy.minPVPercent ?? ""}
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "minPVPercent",
-                        e.target.value ? parseFloat(e.target.value) : null,
-                      )
-                    }
-                    style={{ width: "60px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="до"
-                    value={subsidy.maxPVPercent ?? ""}
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "maxPVPercent",
-                        e.target.value ? parseFloat(e.target.value) : null,
-                      )
-                    }
-                    style={{ width: "60px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    placeholder="от"
-                    value={subsidy.minAmount ?? ""}
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "minAmount",
-                        e.target.value ? parseFloat(e.target.value) : null,
-                      )
-                    }
-                    style={{ width: "80px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    placeholder="до"
-                    value={subsidy.maxAmount ?? ""}
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "maxAmount",
-                        e.target.value ? parseFloat(e.target.value) : null,
-                      )
-                    }
-                    style={{ width: "80px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    placeholder="от"
-                    value={subsidy.minTerm ?? ""}
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "minTerm",
-                        e.target.value ? parseInt(e.target.value) : null,
-                      )
-                    }
-                    style={{ width: "50px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    placeholder="до"
-                    value={subsidy.maxTerm ?? ""}
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "maxTerm",
-                        e.target.value ? parseInt(e.target.value) : null,
-                      )
-                    }
-                    style={{ width: "50px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="%"
-                    value={subsidy.subsidyPercent ?? ""}
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "subsidyPercent",
-                        parseFloat(e.target.value) || 0,
-                      )
-                    }
-                    style={{ width: "60px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    placeholder="Приор"
-                    value={subsidy.priority ?? ""}
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "priority",
-                        parseInt(e.target.value) || 0,
-                      )
-                    }
-                    style={{ width: "50px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    placeholder="Описание"
-                    value={subsidy.description || ""}
-                    onChange={(e) =>
-                      updateRow(index, "description", e.target.value)
-                    }
-                    style={{ width: "80px" }}
-                  />
-                </td>
-                <td>
-                  <button
-                    onClick={() => removeRow(index)}
-                    className="admin-btn-danger admin-btn-xs"
-                  >
-                    ✕
-                  </button>
-                </td>
+
+      {/* ============================================================
+          ПРОСТЫЕ УСЛОВИЯ (КАК У СТАВОК!)
+          ============================================================ */}
+      {simpleSubsidies.length > 0 && (
+        <div className="admin-table-wrapper">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Тип</th>
+                <th>Условие</th>
+                <th>Значение</th>
+                <th>Субсидия</th>
+                <th>Приор</th>
+                <th>Описание</th>
+                <th>Действия</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {simpleSubsidies.map((subsidy, index) => {
+                const originalIndex = subsidies.findIndex((s) => s === subsidy);
+                return (
+                  <tr key={originalIndex}>
+                    <td>
+                      <select
+                        value={subsidy.conditionType}
+                        onChange={(e) =>
+                          updateRow(
+                            originalIndex,
+                            "conditionType",
+                            e.target.value,
+                          )
+                        }
+                      >
+                        <option value="pv">ПВ</option>
+                        <option value="amount">Сумма</option>
+                        <option value="term">Срок</option>
+                      </select>
+                    </td>
+                    <td>
+                      <select
+                        value={subsidy.condition}
+                        onChange={(e) =>
+                          updateRow(originalIndex, "condition", e.target.value)
+                        }
+                      >
+                        <option value="gte">≥</option>
+                        <option value="lte">≤</option>
+                        <option value="lt">&lt;</option>
+                        <option value="gt">&gt;</option>
+                        <option value="eq">=</option>
+                      </select>
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="Знач"
+                        value={subsidy.value ?? ""}
+                        onChange={(e) =>
+                          updateRow(
+                            originalIndex,
+                            "value",
+                            e.target.value ? parseFloat(e.target.value) : null,
+                          )
+                        }
+                        style={{ width: "80px" }}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="Субсидия"
+                        value={subsidy.rate ?? ""}
+                        onChange={(e) =>
+                          updateRow(
+                            originalIndex,
+                            "rate",
+                            parseFloat(e.target.value) || 0,
+                          )
+                        }
+                        style={{ width: "70px" }}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        placeholder="Приор"
+                        value={subsidy.priority ?? ""}
+                        onChange={(e) =>
+                          updateRow(
+                            originalIndex,
+                            "priority",
+                            parseInt(e.target.value) || 0,
+                          )
+                        }
+                        style={{ width: "50px" }}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        placeholder="Описание"
+                        value={subsidy.description || ""}
+                        onChange={(e) =>
+                          updateRow(
+                            originalIndex,
+                            "description",
+                            e.target.value,
+                          )
+                        }
+                        style={{ width: "80px" }}
+                      />
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => removeRow(originalIndex)}
+                        className="admin-btn-danger admin-btn-xs"
+                      >
+                        ✕
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ============================================================
+          СЛОЖНЫЕ УСЛОВИЯ (КАК У СТАВОК!)
+          ============================================================ */}
+      {complexSubsidies.length > 0 && (
+        <div className="complex-section">
+          <div className="complex-section-header">
+            <h5>🔧 Сложные условия</h5>
+          </div>
+          <div className="admin-table-wrapper">
+            <table className="admin-table complex-table">
+              <thead>
+                <tr>
+                  <th>ПВ от</th>
+                  <th>ПВ до</th>
+                  <th>Сумма от</th>
+                  <th>Сумма до</th>
+                  <th>Срок от</th>
+                  <th>Срок до</th>
+                  <th>Субсидия</th>
+                  <th>Приор</th>
+                  <th>Описание</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                {complexSubsidies.map((subsidy, index) => {
+                  const originalIndex = subsidies.findIndex(
+                    (s) => s === subsidy,
+                  );
+                  return (
+                    <tr key={originalIndex} className="complex-row">
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          placeholder="от"
+                          value={subsidy.conditionMetadata?.pvMin ?? ""}
+                          onChange={(e) =>
+                            updateMetadata(
+                              originalIndex,
+                              "pvMin",
+                              e.target.value,
+                            )
+                          }
+                          style={{ width: "70px" }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          placeholder="до"
+                          value={subsidy.conditionMetadata?.pvMax ?? ""}
+                          onChange={(e) =>
+                            updateMetadata(
+                              originalIndex,
+                              "pvMax",
+                              e.target.value,
+                            )
+                          }
+                          style={{ width: "70px" }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          placeholder="от"
+                          value={subsidy.conditionMetadata?.amountMin ?? ""}
+                          onChange={(e) =>
+                            updateMetadata(
+                              originalIndex,
+                              "amountMin",
+                              e.target.value,
+                            )
+                          }
+                          style={{ width: "70px" }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          placeholder="до"
+                          value={subsidy.conditionMetadata?.amountMax ?? ""}
+                          onChange={(e) =>
+                            updateMetadata(
+                              originalIndex,
+                              "amountMax",
+                              e.target.value,
+                            )
+                          }
+                          style={{ width: "70px" }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          placeholder="от"
+                          value={subsidy.conditionMetadata?.termMin ?? ""}
+                          onChange={(e) =>
+                            updateMetadata(
+                              originalIndex,
+                              "termMin",
+                              e.target.value,
+                            )
+                          }
+                          style={{ width: "70px" }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          placeholder="до"
+                          value={subsidy.conditionMetadata?.termMax ?? ""}
+                          onChange={(e) =>
+                            updateMetadata(
+                              originalIndex,
+                              "termMax",
+                              e.target.value,
+                            )
+                          }
+                          style={{ width: "70px" }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="Субсидия"
+                          value={subsidy.rate ?? ""}
+                          onChange={(e) =>
+                            updateRow(
+                              originalIndex,
+                              "rate",
+                              parseFloat(e.target.value) || 0,
+                            )
+                          }
+                          style={{ width: "70px" }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          placeholder="Приор"
+                          value={subsidy.priority ?? ""}
+                          onChange={(e) =>
+                            updateRow(
+                              originalIndex,
+                              "priority",
+                              parseInt(e.target.value) || 0,
+                            )
+                          }
+                          style={{ width: "50px" }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          placeholder="Описание"
+                          value={subsidy.description || ""}
+                          onChange={(e) =>
+                            updateRow(
+                              originalIndex,
+                              "description",
+                              e.target.value,
+                            )
+                          }
+                          style={{ width: "80px" }}
+                        />
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => removeRow(originalIndex)}
+                          className="admin-btn-danger admin-btn-xs"
+                        >
+                          ✕
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {subsidies.length === 0 && (
+        <div className="empty-state">
+          <p>
+            Нет динамических субсидий. Нажмите "Добавить простое условие" или
+            "Добавить сложное условие".
+          </p>
+        </div>
+      )}
     </div>
   );
 };

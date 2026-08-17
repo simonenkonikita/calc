@@ -45,10 +45,8 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   const [showSubsidiesForm, setShowSubsidiesForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  // 🔥 Сохраняем исходные данные для отслеживания изменений
   const [initialOfferId, setInitialOfferId] = useState<string | null>(null);
 
-  // Определяем тип программы
   const selectedProgram = programs.find((p) => p.id === formData.programId);
   const programType = selectedProgram?.type || "";
   const isFamily = programType === "family";
@@ -59,8 +57,9 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   const isTwoContracts = formData.isTwoContracts || false;
 
   // ============================================================
-  // ИНИЦИАЛИЗАЦИЯ ФОРМЫ
+  // ИНИЦИАЛИЗАЦИЯ
   // ============================================================
+
   useEffect(() => {
     if (isCreating) {
       const initialBankId = selectedBankId || "";
@@ -96,7 +95,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       setErrors({});
       setInitialOfferId(null);
     } else if (editingOffer) {
-      // Загружаем основные данные
       setFormData({
         program: editingOffer.program,
         rate: editingOffer.rate,
@@ -123,7 +121,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         programId: editingOffer.programId,
       });
 
-      // 🔥 Загружаем динамические данные из editingOffer
       loadDynamicDataFromOffer(editingOffer);
       setErrors({});
       setInitialOfferId(editingOffer.id);
@@ -157,10 +154,11 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   }, [programType, isFamilyOrIT, isTranche, isShortTerm]);
 
   // ============================================================
-  // РАБОТА С ДИНАМИЧЕСКИМИ ДАННЫМИ
+  // ДИНАМИЧЕСКИЕ ДАННЫЕ
   // ============================================================
 
   const resetDynamicForms = () => {
+    // Ставки
     setDynamicRates([
       {
         conditionType: "pv",
@@ -184,24 +182,31 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       },
     ]);
 
+    // Субсидии - ТА ЖЕ СТРУКТУРА, ЧТО И У СТАВОК!
     setDynamicSubsidies([
       {
-        minPVPercent: null,
-        maxPVPercent: null,
-        minAmount: null,
-        maxAmount: null,
-        minTerm: null,
-        maxTerm: null,
-        subsidyPercent: 0,
+        conditionType: "pv",
+        condition: "gte",
+        value: null,
+        minValue: null,
+        maxValue: null,
+        rate: 0,
         priority: 0,
         description: "",
-        roundingStrategy: null,
         isActive: true,
+        useComplexCondition: false,
+        conditionMetadata: {
+          pvMin: null,
+          pvMax: null,
+          amountMin: null,
+          amountMax: null,
+          termMin: null,
+          termMax: null,
+        },
       },
     ]);
   };
 
-  // 🔥 Загружает динамические данные из объекта offer
   const loadDynamicDataFromOffer = (offer: AdminOffer) => {
     console.log("📊 Loading dynamic data from offer:", offer);
 
@@ -275,26 +280,44 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       setShowRatesForm(false);
     }
 
-    // 2. Загружаем динамические субсидии
+    // 2. Загружаем динамические субсидии - НОВАЯ СТРУКТУРА!
     if (
       offer.dynamicSubsidies &&
       Array.isArray(offer.dynamicSubsidies) &&
       offer.dynamicSubsidies.length > 0
     ) {
-      const subsidies = offer.dynamicSubsidies.map((subsidy: any) => ({
-        id: subsidy.id,
-        minPVPercent: subsidy.minPVPercent || null,
-        maxPVPercent: subsidy.maxPVPercent || null,
-        minAmount: subsidy.minAmount || null,
-        maxAmount: subsidy.maxAmount || null,
-        minTerm: subsidy.minTerm || null,
-        maxTerm: subsidy.maxTerm || null,
-        subsidyPercent: subsidy.subsidyPercent || 0,
-        priority: subsidy.priority || 0,
-        description: subsidy.description || "",
-        roundingStrategy: subsidy.roundingStrategy || null,
-        isActive: subsidy.isActive !== undefined ? subsidy.isActive : true,
-      }));
+      const subsidies = offer.dynamicSubsidies.map((subsidy: any) => {
+        const hasComplexCondition =
+          subsidy.conditionMetadata &&
+          (subsidy.conditionMetadata.pvMin !== null ||
+            subsidy.conditionMetadata.pvMax !== null ||
+            subsidy.conditionMetadata.amountMin !== null ||
+            subsidy.conditionMetadata.amountMax !== null ||
+            subsidy.conditionMetadata.termMin !== null ||
+            subsidy.conditionMetadata.termMax !== null);
+
+        return {
+          id: subsidy.id,
+          conditionType: subsidy.conditionType || "pv",
+          condition: subsidy.condition || "gte",
+          value: subsidy.value || null,
+          minValue: subsidy.minValue || null,
+          maxValue: subsidy.maxValue || null,
+          rate: subsidy.rate || 0, // ← было subsidyPercent
+          priority: subsidy.priority || 0,
+          description: subsidy.description || "",
+          isActive: subsidy.isActive !== undefined ? subsidy.isActive : true,
+          useComplexCondition: hasComplexCondition || false,
+          conditionMetadata: subsidy.conditionMetadata || {
+            pvMin: null,
+            pvMax: null,
+            amountMin: null,
+            amountMax: null,
+            termMin: null,
+            termMax: null,
+          },
+        };
+      });
 
       setDynamicSubsidies(subsidies);
       setShowSubsidiesForm(true);
@@ -302,17 +325,24 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     } else {
       setDynamicSubsidies([
         {
-          minPVPercent: null,
-          maxPVPercent: null,
-          minAmount: null,
-          maxAmount: null,
-          minTerm: null,
-          maxTerm: null,
-          subsidyPercent: 0,
+          conditionType: "pv",
+          condition: "gte",
+          value: null,
+          minValue: null,
+          maxValue: null,
+          rate: 0,
           priority: 0,
           description: "",
-          roundingStrategy: null,
           isActive: true,
+          useComplexCondition: false,
+          conditionMetadata: {
+            pvMin: null,
+            pvMax: null,
+            amountMin: null,
+            amountMax: null,
+            termMin: null,
+            termMax: null,
+          },
         },
       ]);
       setShowSubsidiesForm(false);
@@ -320,7 +350,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   };
 
   // ============================================================
-  // ОБРАБОТЧИКИ ФОРМЫ
+  // ОБРАБОТЧИКИ
   // ============================================================
 
   const handleChange = (field: keyof AdminOffer, value: any) => {
@@ -345,10 +375,8 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     }
   };
 
-  // 🔥 Обработчик удаления ставки
   const handleRateDelete = (rate: DynamicRate) => {
     if (rate.id) {
-      // Сразу удаляем из БД
       adminApi
         .hardDeleteDynamicRate(rate.id)
         .then(() => console.log(`🗑️ Rate ${rate.id} deleted from DB`))
@@ -356,14 +384,11 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           console.error(`❌ Failed to delete rate ${rate.id}:`, error),
         );
     }
-    // Удаляем из UI
     setDynamicRates((prev) => prev.filter((r) => r.id !== rate.id));
   };
 
-  // 🔥 Обработчик удаления субсидии
   const handleSubsidyDelete = (subsidy: DynamicSubsidy) => {
     if (subsidy.id) {
-      // Сразу удаляем из БД
       adminApi
         .hardDeleteDynamicSubsidy(subsidy.id)
         .then(() => console.log(`🗑️ Subsidy ${subsidy.id} deleted from DB`))
@@ -371,14 +396,11 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           console.error(`❌ Failed to delete subsidy ${subsidy.id}:`, error),
         );
     }
-    // Удаляем из UI
     setDynamicSubsidies((prev) => prev.filter((s) => s.id !== subsidy.id));
   };
 
-  // 🔥 Обработчик переключения формы ставок
   const handleToggleRatesForm = () => {
     if (showRatesForm) {
-      // Если скрываем форму - удаляем все ставки из БД
       const rateIds = dynamicRates.filter((r) => r.id).map((r) => r.id);
       for (const id of rateIds) {
         adminApi
@@ -388,10 +410,8 @@ export const OfferModal: React.FC<OfferModalProps> = ({
             console.error(`❌ Failed to delete rate ${id}:`, error),
           );
       }
-      // Очищаем UI
       setDynamicRates([]);
     } else {
-      // Если показываем форму - добавляем пустую строку
       if (dynamicRates.length === 0) {
         setDynamicRates([
           {
@@ -420,10 +440,8 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     setShowRatesForm(!showRatesForm);
   };
 
-  // 🔥 Обработчик переключения формы субсидий
   const handleToggleSubsidiesForm = () => {
     if (showSubsidiesForm) {
-      // Если скрываем форму - удаляем все субсидии из БД
       const subsidyIds = dynamicSubsidies.filter((s) => s.id).map((s) => s.id);
       for (const id of subsidyIds) {
         adminApi
@@ -433,24 +451,29 @@ export const OfferModal: React.FC<OfferModalProps> = ({
             console.error(`❌ Failed to delete subsidy ${id}:`, error),
           );
       }
-      // Очищаем UI
       setDynamicSubsidies([]);
     } else {
-      // Если показываем форму - добавляем пустую строку
       if (dynamicSubsidies.length === 0) {
         setDynamicSubsidies([
           {
-            minPVPercent: null,
-            maxPVPercent: null,
-            minAmount: null,
-            maxAmount: null,
-            minTerm: null,
-            maxTerm: null,
-            subsidyPercent: 0,
+            conditionType: "pv",
+            condition: "gte",
+            value: null,
+            minValue: null,
+            maxValue: null,
+            rate: 0,
             priority: 0,
             description: "",
-            roundingStrategy: null,
             isActive: true,
+            useComplexCondition: false,
+            conditionMetadata: {
+              pvMin: null,
+              pvMax: null,
+              amountMin: null,
+              amountMax: null,
+              termMin: null,
+              termMax: null,
+            },
           },
         ]);
       }
@@ -482,7 +505,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   };
 
   // ============================================================
-  // ОТПРАВКА ФОРМЫ
+  // СОХРАНЕНИЕ
   // ============================================================
 
   const handleSubmit = async () => {
@@ -544,17 +567,12 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       console.log("💾 Starting saveDynamicData for offer:", offerId);
 
       // ============================================================
-      // 1. СОХРАНЯЕМ ДИНАМИЧЕСКИЕ СТАВКИ
+      // 1. СОХРАНЯЕМ СТАВКИ
       // ============================================================
       if (showRatesForm) {
-        // Получаем существующие ставки из БД
         const existingRates = await adminApi.getOfferDynamicRates(offerId);
-        console.log(`📊 Found ${existingRates.length} existing rates in DB`);
-
-        // Получаем ID ставок, которые остались в UI
         const keptRateIds = dynamicRates.filter((r) => r.id).map((r) => r.id);
 
-        // Удаляем те, которых нет в UI (осиротевшие)
         for (const rate of existingRates) {
           if (rate.id && !keptRateIds.includes(rate.id)) {
             try {
@@ -566,14 +584,11 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           }
         }
 
-        // Создаем новые или обновляем существующие ставки из UI
         let createdCount = 0;
         for (const rate of dynamicRates) {
-          // Проверяем, что ставка валидна
           const isValid =
             rate.rate > 0 ||
             (rate.description && rate.description.trim() !== "");
-
           if (!isValid) continue;
 
           const rateData: any = {
@@ -593,7 +608,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           }
 
           if (rate.id) {
-            // Обновляем существующую
             try {
               await adminApi.updateDynamicRate(rate.id, rateData);
               console.log(`✅ Updated rate ${rate.id}: ${rate.rate}%`);
@@ -601,7 +615,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               console.error(`❌ Failed to update rate ${rate.id}:`, error);
             }
           } else {
-            // Создаем новую
             try {
               const created = await adminApi.createDynamicRate(
                 offerId,
@@ -618,10 +631,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           `📊 Processed rates: ${createdCount} new, ${dynamicRates.filter((r) => r.id).length} existing`,
         );
       } else {
-        // 🔥 Если форма скрыта - удаляем все ставки из БД
-        console.log(
-          `📊 Rates form is hidden, deleting all rates for offer ${offerId}`,
-        );
         const existingRates = await adminApi.getOfferDynamicRates(offerId);
         for (const rate of existingRates) {
           if (rate.id) {
@@ -636,20 +645,15 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       }
 
       // ============================================================
-      // 2. СОХРАНЯЕМ ДИНАМИЧЕСКИЕ СУБСИДИИ
+      // 2. СОХРАНЯЕМ СУБСИДИИ (НОВАЯ СТРУКТУРА!)
       // ============================================================
       if (showSubsidiesForm) {
         const existingSubsidies =
           await adminApi.getOfferDynamicSubsidies(offerId);
-        console.log(
-          `📊 Found ${existingSubsidies.length} existing subsidies in DB`,
-        );
-
         const keptSubsidyIds = dynamicSubsidies
           .filter((s) => s.id)
           .map((s) => s.id);
 
-        // Удаляем те, которых нет в UI (осиротевшие)
         for (const subsidy of existingSubsidies) {
           if (subsidy.id && !keptSubsidyIds.includes(subsidy.id)) {
             try {
@@ -664,43 +668,37 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           }
         }
 
-        // Создаем новые или обновляем существующие субсидии из UI
         let createdCount = 0;
         for (const subsidy of dynamicSubsidies) {
-          // Проверяем, что субсидия валидна
           const isValid =
-            subsidy.subsidyPercent > 0 ||
+            subsidy.rate > 0 ||
             (subsidy.description && subsidy.description.trim() !== "") ||
-            subsidy.minPVPercent !== null ||
-            subsidy.maxPVPercent !== null ||
-            subsidy.minAmount !== null ||
-            subsidy.maxAmount !== null ||
-            subsidy.minTerm !== null ||
-            subsidy.maxTerm !== null;
+            subsidy.value !== null ||
+            subsidy.minValue !== null ||
+            subsidy.maxValue !== null;
 
           if (!isValid) continue;
 
-          const subsidyData = {
-            minPVPercent: subsidy.minPVPercent || null,
-            maxPVPercent: subsidy.maxPVPercent || null,
-            minAmount: subsidy.minAmount || null,
-            maxAmount: subsidy.maxAmount || null,
-            minTerm: subsidy.minTerm || null,
-            maxTerm: subsidy.maxTerm || null,
-            subsidyPercent: subsidy.subsidyPercent,
+          const subsidyData: any = {
+            conditionType: subsidy.conditionType || "pv",
+            condition: subsidy.condition || "gte",
+            value: subsidy.value || null,
+            minValue: subsidy.minValue || null,
+            maxValue: subsidy.maxValue || null,
+            rate: subsidy.rate, // ← теперь rate вместо subsidyPercent!
             priority: subsidy.priority || 0,
             description: subsidy.description || "",
-            roundingStrategy: subsidy.roundingStrategy || null,
             isActive: true,
           };
 
+          if (subsidy.useComplexCondition && subsidy.conditionMetadata) {
+            subsidyData.conditionMetadata = subsidy.conditionMetadata;
+          }
+
           if (subsidy.id) {
-            // Обновляем существующую
             try {
               await adminApi.updateDynamicSubsidy(subsidy.id, subsidyData);
-              console.log(
-                `✅ Updated subsidy ${subsidy.id}: ${subsidy.subsidyPercent}%`,
-              );
+              console.log(`✅ Updated subsidy ${subsidy.id}: ${subsidy.rate}%`);
             } catch (error) {
               console.error(
                 `❌ Failed to update subsidy ${subsidy.id}:`,
@@ -708,16 +706,13 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               );
             }
           } else {
-            // Создаем новую
             try {
               const created = await adminApi.createDynamicSubsidy(
                 offerId,
                 subsidyData,
               );
               createdCount++;
-              console.log(
-                `✅ Created subsidy ${created.id}: ${subsidy.subsidyPercent}%`,
-              );
+              console.log(`✅ Created subsidy ${created.id}: ${subsidy.rate}%`);
             } catch (error) {
               console.error(`❌ Failed to create subsidy:`, error);
             }
@@ -727,10 +722,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           `📊 Processed subsidies: ${createdCount} new, ${dynamicSubsidies.filter((s) => s.id).length} existing`,
         );
       } else {
-        // 🔥 Если форма скрыта - удаляем все субсидии из БД
-        console.log(
-          `📊 Subsidies form is hidden, deleting all subsidies for offer ${offerId}`,
-        );
         const existingSubsidies =
           await adminApi.getOfferDynamicSubsidies(offerId);
         for (const subsidy of existingSubsidies) {

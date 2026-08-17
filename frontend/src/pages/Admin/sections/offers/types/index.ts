@@ -24,19 +24,27 @@ export interface DynamicRate {
   };
 }
 
+// 🔥 НОВАЯ СТРУКТУРА ДЛЯ СУБСИДИЙ (ИДЕНТИЧНАЯ СТАВКАМ!)
 export interface DynamicSubsidy {
   id?: string;
-  minPVPercent: number | null;
-  maxPVPercent: number | null;
-  minAmount: number | null;
-  maxAmount: number | null;
-  minTerm: number | null;
-  maxTerm: number | null;
-  subsidyPercent: number;
+  conditionType: string; // ← было minPVPercent
+  condition: string; // ← было maxPVPercent
+  value: number | null; // ← было minAmount
+  minValue: number | null; // ← было maxAmount
+  maxValue: number | null; // ← было minTerm
+  rate: number; // ← было subsidyPercent
   priority: number;
   description: string;
-  roundingStrategy: string | null;
   isActive: boolean;
+  useComplexCondition?: boolean;
+  conditionMetadata?: {
+    pvMin?: number | null;
+    pvMax?: number | null;
+    amountMin?: number | null;
+    amountMax?: number | null;
+    termMin?: number | null;
+    termMax?: number | null;
+  };
 }
 
 export interface DynamicData {
@@ -56,7 +64,9 @@ export interface OfferCardProps {
   onHardDelete: (id: string) => void;
   getDisplayRate: (offer: AdminOffer) => React.ReactNode;
   getDisplaySubsidy: (offer: AdminOffer) => { display: string; type: string };
-  renderComplexesList: (complexes: string[] | null | undefined) => React.ReactNode; 
+  renderComplexesList: (
+    complexes: string[] | null | undefined,
+  ) => React.ReactNode;
 }
 
 export interface ProgramGroupProps {

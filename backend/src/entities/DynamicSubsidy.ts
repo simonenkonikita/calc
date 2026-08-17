@@ -16,28 +16,31 @@ export class DynamicSubsidy {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  // 🔥 Условия для применения субсидии
-  @Column({ type: "decimal", precision: 5, scale: 2, nullable: true })
-  minPVPercent: number;
+  // ============================================================
+  // 🔥 УСЛОВИЯ (КАК В DYNAMIC_RATE)
+  // ============================================================
 
-  @Column({ type: "decimal", precision: 5, scale: 2, nullable: true })
-  maxPVPercent: number;
+  @Column({ type: "varchar", length: 20, nullable: true })
+  conditionType: string;
+
+  @Column({ type: "varchar", length: 10, nullable: true })
+  condition: string;
 
   @Column({ type: "decimal", precision: 12, scale: 2, nullable: true })
-  minAmount: number;
+  value: number | null;
 
   @Column({ type: "decimal", precision: 12, scale: 2, nullable: true })
-  maxAmount: number;
+  minValue: number | null;
 
-  @Column({ type: "int", nullable: true })
-  minTerm: number;
+  @Column({ type: "decimal", precision: 12, scale: 2, nullable: true })
+  maxValue: number | null;
 
-  @Column({ type: "int", nullable: true })
-  maxTerm: number;
+  // ============================================================
+  // 🔥 РЕЗУЛЬТАТ (СУБСИДИЯ В %)
+  // ============================================================
 
-  // 🔥 Результат
   @Column({ type: "decimal", precision: 5, scale: 2 })
-  subsidyPercent: number;
+  rate: number; // ← переименовали с subsidyPercent
 
   @Column({ type: "int", default: 0 })
   priority: number;
@@ -45,9 +48,9 @@ export class DynamicSubsidy {
   @Column({ type: "text", nullable: true })
   description: string;
 
-  // 🔥 Дополнительные параметры
-  @Column({ type: "varchar", length: 20, nullable: true })
-  roundingStrategy: string | null;
+  // ============================================================
+  // 🔥 ДОПОЛНИТЕЛЬНЫЕ ПАРАМЕТРЫ
+  // ============================================================
 
   @Column({ type: "jsonb", nullable: true })
   conditionMetadata: any;
@@ -61,7 +64,10 @@ export class DynamicSubsidy {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // 🔥 Связь с оффером
+  // ============================================================
+  // 🔥 СВЯЗЬ С ОФФЕРОМ
+  // ============================================================
+
   @ManyToOne(() => Offer, (offer) => offer.dynamicSubsidies)
   @JoinColumn({ name: "offerId" })
   offer: Offer;

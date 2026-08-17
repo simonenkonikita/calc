@@ -40,7 +40,6 @@ export const calculate = async (req: Request, res: Response) => {
       apartmentType?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT;
 
     // 3. Наценка за специальные режимы (без ПВ / частичный ПВ)
-    // 🔥 Добавляем await
     const surcharge = await getMortgageSurcharge(
       formData.complex,
       formData.apartmentType,
@@ -48,13 +47,12 @@ export const calculate = async (req: Request, res: Response) => {
       formData.mortgagePartialDownPayment,
     );
 
-    // 🔥 Теперь surcharge - это число, а не Promise
     const finalPricePerM2 =
       formData.mortgageWithoutDownPayment || formData.mortgagePartialDownPayment
         ? basePrice + surcharge
         : basePrice;
 
-    // 4. Получаем офферы из БД с загрузкой всех связей
+    // 4. Получаем офферы из БД
     const offers: Offer[] = await offerService.getOffersByComplex(
       formData.complex,
     );
@@ -62,7 +60,7 @@ export const calculate = async (req: Request, res: Response) => {
     // 5. Получаем Variables из БД
     const variables = await configService.getVariables();
 
-    // 6. Вызываем калькулятор напрямую с Offer[] (без адаптера!)
+    // 6. Вызываем калькулятор
     const result = calculateFullMortgage(
       formData,
       offers,
@@ -75,6 +73,8 @@ export const calculate = async (req: Request, res: Response) => {
       data: result,
       meta: {
         pricePerSquareMeter: finalPricePerM2,
+        surcharges: apartmentType?.surcharges || null,
+        surchargeApplied: surcharge,
         banksCount: offers.length,
       },
     });
@@ -111,7 +111,16 @@ export const getComplexTypes = async (req: Request, res: Response) => {
     }
 
     const types =
-      complex.apartmentTypes?.map((at: ApartmentType) => at.type) || [];
+      complex.apartmentTypes?.map((at: ApartmentType) => ({
+        type: at.type,
+        pricePerSquareMeter: at.pricePerSquareMeter,
+        surcharges: at.surcharges || {
+          withoutDownPayment: 0,
+          partialDownPayment: 0,
+        },
+        isActive: at.isActive,
+      })) || [];
+
     res.json({ success: true, data: types });
   } catch (error) {
     console.error("Error getting apartment types:", error);
@@ -145,10 +154,24 @@ export const getPricePerSquareMeter = async (req: Request, res: Response) => {
       (at: ApartmentType) => at.type === type,
     );
 
+    if (!apartmentType) {
+      return res.status(404).json({
+        success: false,
+        error: "Apartment type not found",
+      });
+    }
+
+    // 🔥 Возвращаем объект с ценой и surcharges
     res.json({
       success: true,
-      data:
-        apartmentType?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT,
+      data: {
+        pricePerSquareMeter:
+          apartmentType.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT,
+        surcharges: apartmentType.surcharges || {
+          withoutDownPayment: 0,
+          partialDownPayment: 0,
+        },
+      },
     });
   } catch (error) {
     console.error("Error getting price:", error);

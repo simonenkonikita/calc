@@ -28,6 +28,23 @@ export interface SimpleDynamicRateDTO {
 }
 
 // ============================================================
+// 🔥 НОВЫЙ DTO ДЛЯ ДИНАМИЧЕСКИХ СУБСИДИЙ (единый с DynamicRate)
+// ============================================================
+export interface DynamicSubsidyDTO {
+  id?: string;
+  conditionType: string; // "pv" | "amount" | "term"
+  condition: string; // "gte" | "lte" | "between" | "lt" | "gt" | "eq"
+  value: number | null;
+  minValue: number | null;
+  maxValue: number | null;
+  rate: number; // ← было subsidyPercent
+  priority: number;
+  description: string | null;
+  conditionMetadata: any;
+  isActive: boolean;
+}
+
+// ============================================================
 // DTO для создания/обновления оффера
 // ============================================================
 export interface CreateOfferDTO {
@@ -117,7 +134,7 @@ export interface OfferResponseDTO {
     description: string;
   };
 
-  // Динамические ставки и субсидии (связи)
+  // Динамические ставки (единая структура)
   dynamicRates: {
     id: string;
     conditionType: string;
@@ -128,21 +145,22 @@ export interface OfferResponseDTO {
     rate: number;
     priority: number;
     description: string;
+    conditionMetadata: any;
     isActive: boolean;
   }[];
 
+  // 🔥 Динамические субсидии (ТА ЖЕ СТРУКТУРА, ЧТО И У СТАВОК!)
   dynamicSubsidies: {
     id: string;
-    minPVPercent: number | null;
-    maxPVPercent: number | null;
-    minAmount: number | null;
-    maxAmount: number | null;
-    minTerm: number | null;
-    maxTerm: number | null;
-    subsidyPercent: number;
+    conditionType: string; // ← было minPVPercent
+    condition: string; // ← было maxPVPercent
+    value: number | null; // ← было minAmount
+    minValue: number | null; // ← было maxAmount
+    maxValue: number | null; // ← было minTerm
+    rate: number; // ← было subsidyPercent
     priority: number;
     description: string;
-    roundingStrategy: string | null;
+    conditionMetadata: any;
     isActive: boolean;
   }[];
 

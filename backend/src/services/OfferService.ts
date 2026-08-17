@@ -465,8 +465,36 @@ export class OfferService {
             description: offer.programEntity.description,
           }
         : (null as any),
-      dynamicRates: offer.dynamicRates || [],
-      dynamicSubsidies: offer.dynamicSubsidies || [],
+      // 🔥 Маппинг динамических ставок
+      dynamicRates:
+        offer.dynamicRates?.map((rate) => ({
+          id: rate.id,
+          conditionType: rate.conditionType,
+          condition: rate.condition,
+          value: rate.value,
+          minValue: rate.minValue,
+          maxValue: rate.maxValue,
+          rate: rate.rate,
+          priority: rate.priority,
+          description: rate.description,
+          conditionMetadata: rate.conditionMetadata,
+          isActive: rate.isActive,
+        })) || [],
+      // 🔥 Маппинг динамических субсидий (НОВАЯ СТРУКТУРА!)
+      dynamicSubsidies:
+        offer.dynamicSubsidies?.map((subsidy) => ({
+          id: subsidy.id,
+          conditionType: subsidy.conditionType, // ← новое поле
+          condition: subsidy.condition, // ← новое поле
+          value: subsidy.value, // ← новое поле
+          minValue: subsidy.minValue, // ← новое поле
+          maxValue: subsidy.maxValue, // ← новое поле
+          rate: subsidy.rate, // ← было subsidyPercent
+          priority: subsidy.priority,
+          description: subsidy.description,
+          conditionMetadata: subsidy.conditionMetadata,
+          isActive: subsidy.isActive,
+        })) || [],
       createdAt: offer.createdAt,
       updatedAt: offer.updatedAt,
     };

@@ -1,5 +1,5 @@
 import { useMemo, ChangeEvent } from "react";
-import { housingPrices } from "../../data/complexPrice/complexPriceData";
+import { housingPrices } from "../../data/complexPrice/_complexPriceData";
 import {
   PRICE_PER_SQUARE_METER_DEFAULT,
   MAX_DOWN_PAYMENT_PERCENT,
