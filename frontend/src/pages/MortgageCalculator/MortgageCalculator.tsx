@@ -60,7 +60,7 @@ export const MortgageCalculator: React.FC = () => {
                   </div>
                   <button
                     className="error-retry-btn"
-                    onClick={calculateResults} // ✅ используем calculateResults
+                    onClick={calculateResults}
                   >
                     Повторить
                   </button>
@@ -71,7 +71,7 @@ export const MortgageCalculator: React.FC = () => {
             <FormSection
               formData={formData}
               onInputChange={handleInputChange}
-              onCalculate={handleCalculate} // ✅ передаём кнопку расчёта
+              onCalculate={handleCalculate}
               isCalculating={isCalculating}
             />
           </div>

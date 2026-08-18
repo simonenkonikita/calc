@@ -7,9 +7,8 @@ import { OfferService } from "../services/OfferService";
 import { ConfigService } from "../services/ConfigService";
 import {
   getMortgageSurcharge,
-  findPricePerSquareMeter,
-  getPriceInfo, // ✅ Добавляем импорт
-} from "../utils/mortgageSurcharges";
+  getPriceInfo,
+} from "../utils/mortgageSurcharges"; // ✅ Используем утилиту
 import { PRICE_PER_SQUARE_METER_DEFAULT } from "../data/constants";
 import { ApartmentType } from "../entities/ApartmentType";
 import { Offer } from "../entities/Offer";
@@ -21,9 +20,9 @@ const configService = new ConfigService();
 
 export const calculate = async (req: Request, res: Response) => {
   try {
-    const { formData, surcharges: clientSurcharges } = req.body;
+    const { formData } = req.body;
 
-    // 1. Получаем ЖК
+    // 1. Получаем ЖК из БД
     const complex = await complexService.getComplexByName(formData.complex);
     if (!complex) {
       return res.status(404).json({
@@ -32,24 +31,24 @@ export const calculate = async (req: Request, res: Response) => {
       });
     }
 
-    // 2. Получаем тип квартиры и цену за м²
+    // 2. Получаем тип квартиры
     const apartmentType = complex.apartmentTypes?.find(
       (at: ApartmentType) => at.type === formData.apartmentType,
     );
 
-    const basePrice =
-      apartmentType?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT;
-
-    // ✅ Используем наценки от клиента, если они переданы, или загружаем из БД
-    let surcharges = clientSurcharges;
-    if (!surcharges && apartmentType) {
-      surcharges = apartmentType.surcharges || {
-        withoutDownPayment: 0,
-        partialDownPayment: 0,
-      };
+    if (!apartmentType) {
+      return res.status(404).json({
+        success: false,
+        error: "Apartment type not found",
+      });
     }
 
-    // 3. Наценка за специальные режимы (без ПВ / частичный ПВ)
+    // 3. Базовая цена из БД
+    const basePrice =
+      Number(apartmentType.pricePerSquareMeter) ||
+      PRICE_PER_SQUARE_METER_DEFAULT;
+
+    // 4. 🔥 Используем утилиту для расчета наценки
     const surcharge = await getMortgageSurcharge(
       formData.complex,
       formData.apartmentType,
@@ -57,20 +56,31 @@ export const calculate = async (req: Request, res: Response) => {
       formData.mortgagePartialDownPayment,
     );
 
+    // 5. Финальная цена
     const finalPricePerM2 =
       formData.mortgageWithoutDownPayment || formData.mortgagePartialDownPayment
         ? basePrice + surcharge
         : basePrice;
 
-    // 4. Получаем офферы из БД
+    // 6. Получаем surcharges для ответа
+    const priceInfo = await getPriceInfo(
+      formData.complex,
+      formData.apartmentType,
+    );
+    const surcharges = priceInfo?.surcharges || {
+      withoutDownPayment: 0,
+      partialDownPayment: 0,
+    };
+
+    // 7. Получаем офферы
     const offers: Offer[] = await offerService.getOffersByComplex(
       formData.complex,
     );
 
-    // 5. Получаем Variables из БД
+    // 8. Получаем Variables
     const variables = await configService.getVariables();
 
-    // 6. Вызываем калькулятор
+    // 9. Вызываем калькулятор
     const result = calculateFullMortgage(
       formData,
       offers,
@@ -78,17 +88,21 @@ export const calculate = async (req: Request, res: Response) => {
       finalPricePerM2 || PRICE_PER_SQUARE_METER_DEFAULT,
     );
 
+    // 10. Возвращаем результат
     res.json({
       success: true,
       data: {
         ...result,
-        surcharges, // ✅ Возвращаем наценки клиенту
+        surcharges,
       },
       meta: {
-        pricePerSquareMeter: finalPricePerM2,
-        surcharges: surcharges || null,
+        basePricePerSquareMeter: basePrice,
+        finalPricePerSquareMeter: finalPricePerM2,
+        surcharges: surcharges,
         surchargeApplied: surcharge,
         banksCount: offers.length,
+        apartmentTypeId: apartmentType.id,
+        complexId: complex.id,
       },
     });
   } catch (error) {
@@ -116,18 +130,19 @@ export const getComplexes = async (req: Request, res: Response) => {
       specialOffers: c.specialOffers || [],
       materialsLink: c.materialsLink,
       isActive: c.isActive,
-      apartmentTypes: c.apartmentTypes?.map((at: ApartmentType) => ({
-        id: at.id,
-        type: at.type,
-        pricePerSquareMeter: at.pricePerSquareMeter,
-        surcharges: at.surcharges || {
-          withoutDownPayment: 0,
-          partialDownPayment: 0,
-        },
-        isActive: at.isActive,
-      })) || [],
+      apartmentTypes:
+        c.apartmentTypes?.map((at: ApartmentType) => ({
+          id: at.id,
+          type: at.type,
+          pricePerSquareMeter: at.pricePerSquareMeter,
+          surcharges: at.surcharges || {
+            withoutDownPayment: 0,
+            partialDownPayment: 0,
+          },
+          isActive: at.isActive,
+        })) || [],
     }));
-    
+
     res.json({ success: true, data: complexData });
   } catch (error) {
     console.error("Error getting complexes:", error);
@@ -231,7 +246,7 @@ export const getSurcharges = async (req: Request, res: Response) => {
     }
 
     const priceInfo = await getPriceInfo(complex, type);
-    
+
     if (!priceInfo) {
       return res.status(404).json({
         success: false,
@@ -248,9 +263,9 @@ export const getSurcharges = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error getting surcharges:", error);
-    res.status(500).json({ 
-      success: false, 
-      error: "Failed to get surcharges" 
+    res.status(500).json({
+      success: false,
+      error: "Failed to get surcharges",
     });
   }
 };
@@ -262,10 +277,10 @@ export const getAvailableBanks = async (req: Request, res: Response) => {
     // ✅ Получаем банки с наценками
     const offers = await offerService.getOffersByComplex(complexName);
     const complex = await complexService.getComplexByName(complexName);
-    
+
     // Находим тип квартиры для получения наценок
     const apartmentTypeData = complex?.apartmentTypes?.find(
-      (at: ApartmentType) => at.type === apartmentType
+      (at: ApartmentType) => at.type === apartmentType,
     );
 
     const banks = offers.map((offer: Offer) => ({
