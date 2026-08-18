@@ -64,7 +64,7 @@ export const api = {
    */
   async getPrice(complex: string, type: string) {
     const response = await fetch(
-      `${API_URL}/calculator/price?complex=${encodeURIComponent(complex)}&type=${encodeURIComponent(type)}`,
+      `${API_URL}/calculator/price-per-square-meter?complex=${encodeURIComponent(complex)}&type=${encodeURIComponent(type)}`,
     );
     return response.json();
   },

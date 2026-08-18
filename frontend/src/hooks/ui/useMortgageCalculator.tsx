@@ -8,10 +8,8 @@ import { defaultFormData } from "../../data/defaultFormData";
 import { useMortgageData } from "../api/useMortgageData";
 
 export const useMortgageCalculator = () => {
-  // 🔥 Данные теперь в отдельном хуке
   const { results, isCalculating, error, calculate, clearCache } =
     useMortgageData();
-
   const [formData, setFormData] = useState<CalculatorFormData>(defaultFormData);
   const [selectedOfferIndex, setSelectedOfferIndex] = useState<number | null>(
     null,

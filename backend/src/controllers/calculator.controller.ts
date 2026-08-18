@@ -8,6 +8,7 @@ import { ConfigService } from "../services/ConfigService";
 import {
   getMortgageSurcharge,
   findPricePerSquareMeter,
+  getPriceInfo, // ✅ Добавляем импорт
 } from "../utils/mortgageSurcharges";
 import { PRICE_PER_SQUARE_METER_DEFAULT } from "../data/constants";
 import { ApartmentType } from "../entities/ApartmentType";
@@ -20,7 +21,7 @@ const configService = new ConfigService();
 
 export const calculate = async (req: Request, res: Response) => {
   try {
-    const { formData } = req.body;
+    const { formData, surcharges: clientSurcharges } = req.body;
 
     // 1. Получаем ЖК
     const complex = await complexService.getComplexByName(formData.complex);
@@ -38,6 +39,15 @@ export const calculate = async (req: Request, res: Response) => {
 
     const basePrice =
       apartmentType?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT;
+
+    // ✅ Используем наценки от клиента, если они переданы, или загружаем из БД
+    let surcharges = clientSurcharges;
+    if (!surcharges && apartmentType) {
+      surcharges = apartmentType.surcharges || {
+        withoutDownPayment: 0,
+        partialDownPayment: 0,
+      };
+    }
 
     // 3. Наценка за специальные режимы (без ПВ / частичный ПВ)
     const surcharge = await getMortgageSurcharge(
@@ -70,10 +80,13 @@ export const calculate = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      data: result,
+      data: {
+        ...result,
+        surcharges, // ✅ Возвращаем наценки клиенту
+      },
       meta: {
         pricePerSquareMeter: finalPricePerM2,
-        surcharges: apartmentType?.surcharges || null,
+        surcharges: surcharges || null,
         surchargeApplied: surcharge,
         banksCount: offers.length,
       },
@@ -90,8 +103,32 @@ export const calculate = async (req: Request, res: Response) => {
 export const getComplexes = async (req: Request, res: Response) => {
   try {
     const complexes = await complexService.getAllComplexes();
-    const complexNames = complexes.map((c: Complex) => c.name);
-    res.json({ success: true, data: complexNames });
+    // ✅ Возвращаем полную информацию, а не только имена
+    const complexData = complexes.map((c: Complex) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      status: c.status,
+      description: c.description,
+      banks: c.banks || [],
+      paymentTerms: c.paymentTerms || [],
+      promotions: c.promotions || [],
+      specialOffers: c.specialOffers || [],
+      materialsLink: c.materialsLink,
+      isActive: c.isActive,
+      apartmentTypes: c.apartmentTypes?.map((at: ApartmentType) => ({
+        id: at.id,
+        type: at.type,
+        pricePerSquareMeter: at.pricePerSquareMeter,
+        surcharges: at.surcharges || {
+          withoutDownPayment: 0,
+          partialDownPayment: 0,
+        },
+        isActive: at.isActive,
+      })) || [],
+    }));
+    
+    res.json({ success: true, data: complexData });
   } catch (error) {
     console.error("Error getting complexes:", error);
     res.status(500).json({ success: false, error: "Failed to get complexes" });
@@ -112,6 +149,7 @@ export const getComplexTypes = async (req: Request, res: Response) => {
 
     const types =
       complex.apartmentTypes?.map((at: ApartmentType) => ({
+        id: at.id,
         type: at.type,
         pricePerSquareMeter: at.pricePerSquareMeter,
         surcharges: at.surcharges || {
@@ -179,16 +217,86 @@ export const getPricePerSquareMeter = async (req: Request, res: Response) => {
   }
 };
 
+// ✅ НОВЫЙ ЭНДПОИНТ: Получение только наценок
+export const getSurcharges = async (req: Request, res: Response) => {
+  try {
+    const complex = req.query.complex as string;
+    const type = req.query.type as string;
+
+    if (!complex || !type) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing parameters: complex and type are required",
+      });
+    }
+
+    const priceInfo = await getPriceInfo(complex, type);
+    
+    if (!priceInfo) {
+      return res.status(404).json({
+        success: false,
+        error: "Price info not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        surcharges: priceInfo.surcharges,
+        pricePerSquareMeter: priceInfo.pricePerSquareMeter,
+      },
+    });
+  } catch (error) {
+    console.error("Error getting surcharges:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: "Failed to get surcharges" 
+    });
+  }
+};
+
 export const getAvailableBanks = async (req: Request, res: Response) => {
   try {
-    const { complexName } = req.params;
+    const { complexName, apartmentType } = req.params;
 
+    // ✅ Получаем банки с наценками
     const offers = await offerService.getOffersByComplex(complexName);
-    const banks = Array.from(
-      new Set(offers.map((offer: Offer) => offer.bank.name)),
+    const complex = await complexService.getComplexByName(complexName);
+    
+    // Находим тип квартиры для получения наценок
+    const apartmentTypeData = complex?.apartmentTypes?.find(
+      (at: ApartmentType) => at.type === apartmentType
     );
 
-    res.json({ success: true, data: banks });
+    const banks = offers.map((offer: Offer) => ({
+      name: offer.bank.name,
+      bankId: offer.bank.id,
+      offers: [offer],
+    }));
+
+    // Группируем по банкам
+    const banksMap = new Map();
+    banks.forEach((bank: any) => {
+      if (!banksMap.has(bank.name)) {
+        banksMap.set(bank.name, {
+          name: bank.name,
+          bankId: bank.bankId,
+          offers: [],
+        });
+      }
+      banksMap.get(bank.name).offers.push(...bank.offers);
+    });
+
+    res.json({
+      success: true,
+      data: {
+        banks: Array.from(banksMap.values()),
+        surcharges: apartmentTypeData?.surcharges || {
+          withoutDownPayment: 0,
+          partialDownPayment: 0,
+        },
+      },
+    });
   } catch (error) {
     console.error("Error getting banks:", error);
     res.status(500).json({ success: false, error: "Failed to get banks" });
