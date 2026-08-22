@@ -13,7 +13,8 @@ ENV VITE_API_URL=$VITE_API_URL
 ARG VITE_ADMIN_PASSWORD
 ENV VITE_ADMIN_PASSWORD=$VITE_ADMIN_PASSWORD
 
-RUN npm run build
+# RUN npm run build
+RUN npx vite build
 
 # ============================================================
 # ФИНАЛЬНЫЙ ОБРАЗ
