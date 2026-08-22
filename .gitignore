@@ -71,5 +71,6 @@ coverage/
 *.tmp
 *.temp
 .cache/
-.bashrc
 *.pgpass
+*.bashrc
+.bashrc
