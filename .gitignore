@@ -93,3 +93,11 @@ coverage/
 *.temp
 .cache/
 
+# ============================================================
+# ИГНОР ФАЙЛОВ
+# ============================================================
+
+backend/src/services/calculations/сoefficients/_getDynamicValue.ts
+backend/src/services/calculations/сoefficients/_getThresholdSubsidy.ts
+backend/src/utils/programHelpers.ts
+
