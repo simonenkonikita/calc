@@ -115,7 +115,10 @@ export const FormSection: React.FC<FormSectionProps> = ({
   // ПРОВЕРКА: достаточно ли ПВ для полной оплаты
   // ============================================================
   const isFullPayment = useMemo(() => {
-    return formData.manualDownPayment >= calculateObjectCost;
+    return (
+      calculateObjectCost > 0 &&
+      formData.manualDownPayment >= calculateObjectCost
+    );
   }, [formData.manualDownPayment, calculateObjectCost]);
 
   // ============================================================

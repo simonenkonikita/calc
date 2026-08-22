@@ -1,6 +1,6 @@
 // hooks/useMortgageCalculator.ts
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import { CalculatorFormData } from "../../utils/types";
 import { formatMoney } from "../../utils/formatMoney";
 import { DEFAULT_MIN_PV_PERCENT } from "../../data/constants";

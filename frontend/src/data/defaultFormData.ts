@@ -3,8 +3,8 @@ import { CalculatorFormData } from "../utils/types";
 import { DEFAULT_LOAN_TERM_YEARS } from "./constants";
 
 export const defaultFormData: CalculatorFormData = {
-  complex: "ЖК Сады у моря 3",
-  apartmentType: "Студия",
+  complex: "",
+  apartmentType: "",
   area: 30,
   manualObjectCost: null,
   considerDepositInCost: false,
