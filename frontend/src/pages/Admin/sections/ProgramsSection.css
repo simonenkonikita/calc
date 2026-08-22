@@ -1,0 +1,383 @@
+/* frontend/src/pages/Admin/sections/ProgramsSection.css */
+
+/* ============================================================
+   ОБЩИЙ КОНТЕЙНЕР
+   ============================================================ */
+.programs-section .admin-section {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid #eaeaea;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.programs-section .admin-section:hover {
+  border-color: #d4d4d4;
+}
+
+/* ============================================================
+   ТУЛБАР
+   ============================================================ */
+.programs-section .admin-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.programs-section .admin-toolbar .admin-btn-secondary {
+  padding: 0.4rem 1rem;
+  background: #ffffff;
+  color: #1a1a1a;
+  border: 1px solid #eaeaea;
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.programs-section .admin-toolbar .admin-btn-secondary:hover {
+  background: #f5f5f5;
+}
+
+/* ============================================================
+   ТАБЛИЦА
+   ============================================================ */
+.programs-section .admin-table-wrapper {
+  border: 1px solid #eaeaea;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.programs-section .admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.programs-section .admin-table thead {
+  background: #fafafa;
+}
+
+.programs-section .admin-table th {
+  text-align: left;
+  padding: 0.6rem 0.9rem;
+  font-weight: 500;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #888;
+  border-bottom: 1px solid #eaeaea;
+  white-space: nowrap;
+}
+
+.programs-section .admin-table td {
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+  color: #1a1a1a;
+}
+
+.programs-section .admin-table tbody tr {
+  transition: background 0.1s ease;
+}
+
+.programs-section .admin-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.programs-section .admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ============================================================
+   ЯЧЕЙКИ ТАБЛИЦЫ
+   ============================================================ */
+.programs-section .program-type {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.programs-section .program-label {
+  font-weight: 500;
+}
+
+.programs-section .program-icon {
+  font-size: 1.5rem;
+  display: inline-block;
+  text-align: center;
+  min-width: 32px;
+}
+
+.programs-section .program-color-preview {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid #eaeaea;
+  vertical-align: middle;
+}
+
+.programs-section .program-description {
+  font-size: 0.8rem;
+  color: #555;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   СТАТУСЫ
+   ============================================================ */
+.programs-section .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.programs-section .status-badge.active {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.programs-section .status-badge.inactive {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+/* ============================================================
+   ИНПУТЫ ДЛЯ РЕДАКТИРОВАНИЯ
+   ============================================================ */
+.programs-section .admin-table input,
+.programs-section .admin-table select {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #eaeaea;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  width: 100%;
+  min-width: 60px;
+  background: #ffffff;
+  transition: border-color 0.15s;
+  color: #1a1a1a;
+}
+
+.programs-section .admin-table input:focus,
+.programs-section .admin-table select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.programs-section .admin-table input[type="color"] {
+  padding: 0;
+  width: 40px;
+  height: 32px;
+  border: 1px solid #eaeaea;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.programs-section .admin-table input[type="color"]:focus {
+  border-color: #3b82f6;
+}
+
+.programs-section .admin-table .icon-input {
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* ============================================================
+   КНОПКИ ДЕЙСТВИЙ
+   ============================================================ */
+.programs-section .admin-actions {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.programs-section .admin-actions button {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+.programs-section .admin-btn-primary {
+  background: #f5f5f5;
+  color: #1a1a1a;
+  border: 1px solid #eaeaea;
+}
+
+.programs-section .admin-btn-primary:hover {
+  background: #e5e5e5;
+}
+
+.programs-section .admin-btn-success {
+  background: #ecfdf5;
+  color: #10b981;
+  border: 1px solid #a7f3d0;
+}
+
+.programs-section .admin-btn-success:hover {
+  background: #d1fae5;
+}
+
+.programs-section .admin-btn-danger {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+}
+
+.programs-section .admin-btn-danger:hover {
+  background: #fee2e2;
+}
+
+/* ============================================================
+   ПУСТОЕ СОСТОЯНИЕ
+   ============================================================ */
+.programs-section .empty-state {
+  text-align: center;
+  color: #888;
+  padding: 2rem 1.5rem;
+  font-size: 0.85rem;
+}
+
+/* ============================================================
+   АДАПТИВ
+   ============================================================ */
+@media (max-width: 768px) {
+  .programs-section .admin-table {
+    font-size: 0.75rem;
+  }
+
+  .programs-section .admin-table th,
+  .programs-section .admin-table td {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .programs-section .program-description {
+    max-width: 120px;
+  }
+
+  .programs-section .admin-actions button {
+    padding: 0.15rem 0.3rem;
+    min-width: 24px;
+    min-height: 24px;
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .programs-section .admin-table {
+    font-size: 0.65rem;
+  }
+
+  .programs-section .admin-table th,
+  .programs-section .admin-table td {
+    padding: 0.25rem 0.35rem;
+  }
+
+  .programs-section .program-description {
+    max-width: 80px;
+  }
+
+  .programs-section .admin-table input,
+  .programs-section .admin-table select {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.2rem;
+    min-width: 40px;
+  }
+
+  .programs-section .admin-table input[type="color"] {
+    width: 30px;
+    height: 24px;
+  }
+
+  .programs-section .program-icon {
+    font-size: 1.1rem;
+  }
+
+  .programs-section .program-color-preview {
+    width: 18px;
+    height: 18px;
+  }
+
+  .programs-section .admin-actions button {
+    padding: 0.1rem 0.25rem;
+    min-width: 20px;
+    min-height: 20px;
+    font-size: 0.6rem;
+  }
+}
+
+.programs-section .admin-table td {
+  vertical-align: middle;
+}
+
+.programs-section .admin-table input[type="color"] {
+  cursor: pointer;
+}
+
+.programs-section .admin-table input[type="number"] {
+  text-align: center;
+}
+
+.programs-section .admin-table code {
+  background: #f3f4f6;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  color: #374151;
+}
+
+.programs-section .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.programs-section .status-badge.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.programs-section .status-badge.inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.programs-section .admin-btn-sm {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  .programs-section .admin-table {
+    min-width: 700px;
+  }
+}

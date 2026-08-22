@@ -1,0 +1,64 @@
+/* frontend/src/pages/Admin/sections/ConfigSection.css */
+
+/* ============================================================
+   CONFIG SECTION
+   ============================================================ */
+.config-section .config-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.config-section .config-form .full-width {
+  grid-column: 1 / -1;
+}
+
+.config-section .config-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.config-section .config-form .form-group label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.config-section .config-form .form-group input,
+.config-section .config-form .form-group select,
+.config-section .config-form .form-group textarea {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #eaeaea;
+  border-radius: 0.375rem;
+  font-size: 0.9rem;
+  transition: border-color 0.15s;
+  background: #ffffff;
+  width: 100%;
+}
+
+.config-section .config-form .form-group input:focus,
+.config-section .config-form .form-group select:focus,
+.config-section .config-form .form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.config-section .config-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eaeaea;
+}
+
+@media (max-width: 768px) {
+  .config-section .config-form {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}

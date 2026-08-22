@@ -1,0 +1,344 @@
+.mortgage-calculator-page {
+  max-width: 100%;
+  margin: 0 auto;
+  background: #f3f4f6;
+  min-height: 100vh;
+  padding: 30px;
+}
+
+.calculator {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.calculator-form-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  top: 90px;
+  max-height: 100vh;
+}
+
+/* 🔥 Карточка результатов */
+.results-white-card {
+  background: white;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  padding: 1.25rem;
+  margin-bottom: 0;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* 🔥 Пустое состояние для ResultsCalcSection */
+.results-white-card .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  min-height: 100px;
+}
+
+.results-white-card .empty-state .empty-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.results-white-card .empty-state .empty-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.25rem 0;
+}
+
+.results-white-card .empty-state .empty-description {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* 🔥 Состояние загрузки */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+  font-size: 1.125rem;
+  color: #667eea;
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner p {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 🔥 Состояние ошибки */
+.error-state {
+  background: #fee2e2;
+  border: 1px solid #ef4444;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  color: #dc2626;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.error-icon {
+  font-size: 1.5rem;
+}
+
+.error-text {
+  flex: 1;
+}
+
+.error-text strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.error-text p {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+}
+
+.error-retry-btn {
+  padding: 0.4rem 1.2rem;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.error-retry-btn:hover {
+  background: #b91c1c;
+}
+
+/* 🔥 Пустое состояние для результатов справа */
+.empty-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 400px;
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.empty-results-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+}
+
+.empty-results-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-results-description {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Адаптив для планшетов */
+@media (max-width: 1200px) {
+  .mortgage-calculator-page {
+    padding: 1.5rem;
+    overflow: visible;
+  }
+
+  .calculator {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .calculator-form-wrapper {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .calculator-form {
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .calculator-results {
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .empty-results {
+    min-height: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mortgage-calculator-page {
+    padding: 1rem;
+  }
+
+  .calculator {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .calculator-form-wrapper {
+    gap: 1rem;
+  }
+
+  .results-white-card {
+    padding: 1rem;
+  }
+
+  .results-white-card .empty-state {
+    min-height: 80px;
+    padding: 1rem 0.5rem;
+  }
+
+  .results-white-card .empty-state .empty-icon {
+    font-size: 1.5rem;
+  }
+
+  .results-white-card .empty-state .empty-title {
+    font-size: 0.85rem;
+  }
+
+  .results-white-card .empty-state .empty-description {
+    font-size: 0.75rem;
+  }
+
+  .error-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .error-retry-btn {
+    width: 100%;
+  }
+
+  .empty-results {
+    padding: 1.5rem;
+    font-size: 1rem;
+    min-height: 150px;
+  }
+
+  .empty-results-icon {
+    font-size: 2rem;
+  }
+
+  .empty-results-title {
+    font-size: 0.95rem;
+  }
+
+  .empty-results-description {
+    font-size: 0.8rem;
+  }
+
+  .loading-state {
+    min-height: 80px;
+  }
+
+  .spinner {
+    width: 28px;
+    height: 28px;
+    border-width: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mortgage-calculator-page {
+    padding: 0.5rem;
+  }
+
+  .calculator {
+    gap: 0.75rem;
+  }
+
+  .results-white-card {
+    padding: 0.75rem;
+  }
+
+  .results-white-card .empty-state {
+    min-height: 60px;
+    padding: 0.75rem 0.25rem;
+  }
+
+  .results-white-card .empty-state .empty-icon {
+    font-size: 1.25rem;
+  }
+
+  .results-white-card .empty-state .empty-title {
+    font-size: 0.8rem;
+  }
+
+  .results-white-card .empty-state .empty-description {
+    font-size: 0.7rem;
+  }
+
+  .empty-results {
+    min-height: 120px;
+    padding: 1rem;
+  }
+
+  .empty-results-icon {
+    font-size: 1.5rem;
+  }
+
+  .empty-results-title {
+    font-size: 0.85rem;
+  }
+
+  .empty-results-description {
+    font-size: 0.75rem;
+  }
+}

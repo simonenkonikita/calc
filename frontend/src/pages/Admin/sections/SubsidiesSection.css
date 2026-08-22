@@ -1,0 +1,20 @@
+/* frontend/src/pages/Admin/sections/SubsidiesSection.css */
+
+.subsidies-section .subsidy-percent {
+  font-weight: 600;
+  color: #10b981;
+}
+
+.subsidies-section .subsidy-range {
+  color: #555;
+  font-size: 0.8rem;
+}
+
+.subsidies-section .subsidy-description {
+  font-size: 0.75rem;
+  color: #888;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,0 +1,68 @@
+/* frontend/src/pages/Admin/components/ApartmentTypesSection.css */
+
+.apartment-types-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #fafafa;
+  border-radius: 0.5rem;
+  border: 1px solid #eaeaea;
+}
+
+.apartment-types-section .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.apartment-types-section .section-header h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.apartment-types-section .type-row {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.apartment-types-section .type-row:last-child {
+  border-bottom: none;
+}
+
+.apartment-types-section .type-cell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.apartment-types-section .type-cell input,
+.apartment-types-section .type-cell select {
+  width: 100%;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid #eaeaea;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  background: #ffffff;
+}
+
+.apartment-types-section .type-cell input:focus,
+.apartment-types-section .type-cell select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.apartment-types-section .type-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.apartment-types-section .empty-state {
+  text-align: center;
+  color: #888;
+  padding: 1.5rem;
+  font-size: 0.85rem;
+}
