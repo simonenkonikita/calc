@@ -3,18 +3,18 @@ version: "3.8"
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: ipoteka_postgres_dev
+    container_name: ipoteka_postgres
     restart: always
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_DATABASE}
     volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
-      - ipoteka_network_dev
+      - ipoteka_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
       interval: 10s
@@ -22,13 +22,11 @@ services:
       retries: 5
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: ipoteka_backend_dev
+    image: cr.yandex/${YC_REGISTRY_ID}/ipoteka-backend:latest
+    container_name: ipoteka_backend
     restart: always
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: ${PORT:-3001}
       DB_HOST: postgres
       DB_PORT: 5432
@@ -42,30 +40,22 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - ipoteka_network_dev
-    volumes:
-      - ./backend:/app # 🔥 Hot-reload для разработки
-      - /app/node_modules # Игнорируем node_modules внутри контейнера
+      - ipoteka_network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_URL: ${VITE_API_URL:-/api}
-        VITE_ADMIN_PASSWORD: ${VITE_ADMIN_PASSWORD:-admin123}
-    container_name: ipoteka_frontend_dev
+    image: cr.yandex/${YC_REGISTRY_ID}/ipoteka-frontend:latest
+    container_name: ipoteka_frontend
     restart: always
     ports:
       - "80:80"
     depends_on:
       - backend
     networks:
-      - ipoteka_network_dev
+      - ipoteka_network
 
 volumes:
-  postgres_data_dev:
+  postgres_data:
 
 networks:
-  ipoteka_network_dev:
+  ipoteka_network:
     driver: bridge
