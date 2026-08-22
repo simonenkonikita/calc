@@ -10,23 +10,31 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Clean Docker cache
+        run: docker builder prune -af
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:latest
+          buildkitd-flags: --debug
 
       - name: Login to Yandex Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: cr.yandex
           username: json_key
           password: ${{ secrets.YC_SA_JSON_KEY }}
 
       - name: Build and push backend
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: ./backend
           push: true
+          platforms: linux/amd64
           tags: |
             cr.yandex/${{ secrets.YC_REGISTRY_ID }}/ipoteka-backend:latest
             cr.yandex/${{ secrets.YC_REGISTRY_ID }}/ipoteka-backend:${{ github.sha }}
@@ -34,10 +42,11 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build and push frontend
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: ./frontend
           push: true
+          platforms: linux/amd64
           tags: |
             cr.yandex/${{ secrets.YC_REGISTRY_ID }}/ipoteka-frontend:latest
             cr.yandex/${{ secrets.YC_REGISTRY_ID }}/ipoteka-frontend:${{ github.sha }}
@@ -48,7 +57,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Deploy to VM via SSH
-        uses: appleboy/ssh-action@v0.1.5
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
@@ -56,15 +65,6 @@ jobs:
           script: |
             cd /home/simonenkonikita/ipoteka || exit 1
 
-            # Скачиваем новые образы
-            docker pull cr.yandex/${{ secrets.YC_REGISTRY_ID }}/ipoteka-backend:latest
-            docker pull cr.yandex/${{ secrets.YC_REGISTRY_ID }}/ipoteka-frontend:latest
-
-            # Останавливаем и удаляем старые контейнеры
-            docker-compose -f docker-compose.prod.yml down
-
-            # Запускаем заново
-            docker-compose -f docker-compose.prod.yml up -d
-
-            # Очищаем старые образы
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
             docker system prune -f
