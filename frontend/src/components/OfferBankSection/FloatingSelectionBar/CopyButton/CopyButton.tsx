@@ -3,8 +3,7 @@ import React from "react";
 
 import "./CopyButton.css";
 import { BankProgramResult } from "../../../../utils/types";
-import { useCopySelectedOffers } from "../../../../hooks/useCopySelectedOffers";
-
+import { useCopySelectedOffers } from "../../../../hooks/ui/useCopySelectedOffers";
 
 interface CopyButtonProps {
   selectedCards: Set<number>;

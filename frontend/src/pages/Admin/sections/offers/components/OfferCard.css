@@ -1,0 +1,286 @@
+/* frontend/src/pages/Admin/sections/offers/components/OfferCard.css */
+
+.offer-card {
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid #f3f4f6;
+  transition: all 0.2s;
+  padding: 0.75rem 1rem;
+}
+
+.offer-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.offer-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.offer-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.offer-card-title .offer-program-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1f2937;
+}
+
+.offer-card-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.offer-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* 🔥 Верхняя часть с деталями */
+.offer-details-top {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.25rem 1rem;
+}
+
+/* 🔥 Строка с ЖК внизу */
+.offer-complexes-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #e5e7eb;
+  flex-wrap: wrap;
+}
+
+.offer-complexes-row .detail-label {
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 0.85rem;
+  min-width: 40px;
+}
+
+.offer-complexes-row .complexes-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: #1f2937;
+}
+
+/* 🔥 Описание */
+.offer-description {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.offer-description .detail-label {
+  color: #6b7280;
+  font-weight: 500;
+  min-width: 70px;
+}
+
+.offer-description .detail-value {
+  color: #1f2937;
+}
+
+.offer-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+}
+
+.offer-detail-item .detail-label {
+  color: #6b7280;
+  font-weight: 500;
+  min-width: 70px;
+}
+
+.offer-detail-item .detail-value {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.offer-card-footer {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.dynamic-info {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+}
+
+.dynamic-info .dynamic-label {
+  color: #6b7280;
+}
+
+.dynamic-info .dynamic-value {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* Статусы */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Субсидии */
+.subsidy-cell {
+  min-width: 80px;
+}
+
+.subsidy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.subsidy-fixed {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.subsidy-dynamic {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.subsidy-none {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.subsidy-dynamic-icon {
+  font-size: 0.6rem;
+}
+
+/* Ставки */
+.rate-cell {
+  font-size: 0.85rem;
+}
+
+.rate-static-container {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.rate-main {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.rate-short {
+  font-size: 0.75rem;
+  color: #059669;
+  font-weight: 600;
+}
+
+.rate-two {
+  font-size: 0.75rem;
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+.rate-dynamic-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.rate-dynamic-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+}
+
+.rate-dynamic-value {
+  font-weight: 700;
+  color: #111827;
+}
+
+.rate-dynamic-condition {
+  color: #6b7280;
+  font-size: 0.65rem;
+}
+
+@media (max-width: 768px) {
+  .offer-details-top {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .offer-detail-item {
+    font-size: 0.75rem;
+  }
+
+  .offer-detail-item .detail-label {
+    min-width: 60px;
+  }
+
+  .offer-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .offer-card-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .offer-complexes-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .offer-details-top {
+    grid-template-columns: 1fr;
+  }
+
+  .offer-complexes-row .complexes-list {
+    font-size: 0.7rem;
+  }
+}

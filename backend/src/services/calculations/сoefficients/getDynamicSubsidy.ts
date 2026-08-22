@@ -1,119 +1,100 @@
-// src/hooks/coefficients/getDynamicSubsidy.ts
+// backend/src/services/calculations/coefficients/getDynamicSubsidy.ts
 
-import { DynamicRateRule, BankOffer } from "../../../types/types";
-import { getThresholdSubsidy } from "./getThresholdSubsidy";
+import { DynamicSubsidy } from "../../../entities/DynamicSubsidy";
 
 /**
- * Проверка условия правила
+ * Проверка условий из metadata
  */
-const checkCondition = (
-  rule: DynamicRateRule,
+const checkMetadataConditions = (
+  meta: DynamicSubsidy['conditionMetadata'],
   pv: number,
   amount: number,
   term: number,
 ): boolean => {
-  // 1. Если есть conditionFn - используем её
-  if (rule.conditionFn) {
-    return rule.conditionFn(pv, amount, term);
+  if (!meta) return true; // пустой metadata = всегда true
+
+  if (meta.amountMin !== undefined && amount < meta.amountMin) return false;
+  if (meta.amountMax !== undefined && amount > meta.amountMax) return false;
+  if (meta.pvMin !== undefined && pv < meta.pvMin) return false;
+  if (meta.pvMax !== undefined && pv > meta.pvMax) return false;
+  if (meta.termMin !== undefined && term < meta.termMin) return false;
+  if (meta.termMax !== undefined && term > meta.termMax) return false;
+
+  return true;
+};
+
+/**
+ * Получение порогового значения (amountMin)
+ */
+const getThresholdAmount = (subsidy: DynamicSubsidy): number | null => {
+  return subsidy.conditionMetadata?.amountMin ?? null;
+};
+
+/**
+ * Применение пороговой логики (всегда UP, всегда в процентах)
+ */
+const applyThreshold = (
+  amount: number,
+  subsidy: DynamicSubsidy,
+  globalTolerance: number = 0,
+): number => {
+  const threshold = getThresholdAmount(subsidy);
+  if (threshold === null) return amount;
+
+  const tolerance = subsidy.tolerance ?? globalTolerance;
+  if (tolerance <= 0) return amount;
+
+  const toleranceValue = amount * (tolerance / 100);
+  const diff = threshold - amount;
+
+  if (amount < threshold && diff <= toleranceValue) {
+    return threshold; // подтягиваем к порогу
   }
 
-  // 2. Если есть minAmount/maxAmount - проверяем диапазон
-  const minAmount = rule.minAmount ?? 0;
-  const maxAmount = rule.maxAmount ?? Infinity;
-
-  if (amount >= minAmount && amount < maxAmount) {
-    return true;
-  }
-
-  // 3. JSON-совместимые условия
-  if (rule.type && rule.condition && rule.value !== undefined) {
-    let actualValue: number;
-    switch (rule.type) {
-      case "pv":
-        actualValue = pv;
-        break;
-      case "amount":
-        actualValue = amount;
-        break;
-      case "term":
-        actualValue = term;
-        break;
-      default:
-        return false;
-    }
-
-    switch (rule.condition) {
-      case "gte":
-        return actualValue >= rule.value;
-      case "lte":
-        return actualValue <= rule.value;
-      case "lt":
-        return actualValue < rule.value;
-      case "gt":
-        return actualValue > rule.value;
-      case "eq":
-        return actualValue === rule.value;
-      default:
-        return false;
-    }
-  }
-
-  return false;
+  return amount;
 };
 
 /**
  * Получение динамической субсидии
  */
 export const getDynamicSubsidy = (
-  bankOffer: BankOffer,
+  subsidies: DynamicSubsidy[],
   pvPercent: number,
   mortgageAmount: number,
   loanTerm: number = 30,
+  globalTolerance: number = 0,
 ): number => {
-  if (
-    bankOffer.dynamicSubsidyPercent &&
-    bankOffer.dynamicSubsidyPercent.length > 0
-  ) {
-    const rules = bankOffer.dynamicSubsidyPercent;
+  if (!subsidies || subsidies.length === 0) {
+    return 0;
+  }
 
-    // 🔥 ПРОВЕРЯЕМ НАЛИЧИЕ ПОРОГОВЫХ ПРАВИЛ
-    const hasThresholdRules = rules.some(
-      (rule) => rule.minAmount !== undefined || rule.maxAmount !== undefined,
-    );
+  // Сортируем по приоритету (от высшего к низшему)
+  const sorted = [...subsidies]
+    .filter(s => s.isActive !== false)
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
-    if (hasThresholdRules) {
-      // Используем пороговую логику с погрешностью
-      const globalTolerance = bankOffer.thresholdTolerance;
-      const globalToleranceType = bankOffer.thresholdToleranceType ?? "percent";
+  // 🔥 ПЕРВЫЙ ПРОХОД: с пороговой логикой
+  for (const subsidy of sorted) {
+    const threshold = getThresholdAmount(subsidy);
+    if (threshold === null) continue;
 
-      const subsidy = getThresholdSubsidy(
-        mortgageAmount,
-        rules,
-        globalTolerance,
-        globalToleranceType,
-      );
+    const adjustedAmount = applyThreshold(mortgageAmount, subsidy, globalTolerance);
 
-      if (subsidy > 0) {
-        return subsidy;
-      }
-    }
-
-    // 🔥 ЕСЛИ ПОРОГОВАЯ ЛОГИКА НЕ СРАБОТАЛА - ИСПОЛЬЗУЕМ ОБЫЧНУЮ
-    const sortedRules = [...rules].sort(
-      (a, b) => (b.priority || 0) - (a.priority || 0),
-    );
-
-    for (const rule of sortedRules) {
-      const isMatch = checkCondition(rule, pvPercent, mortgageAmount, loanTerm);
-
-      if (isMatch) {
-        if (rule.subsidyPercent !== undefined) {
-          return rule.subsidyPercent;
-        }
-      }
+    if (checkMetadataConditions(subsidy.conditionMetadata, pvPercent, adjustedAmount, loanTerm)) {
+      return typeof subsidy.subsidyPercent === 'string'
+        ? parseFloat(subsidy.subsidyPercent)
+        : subsidy.subsidyPercent;
     }
   }
 
-  // Если ничего не подошло - возвращаем базовую субсидию
-  return bankOffer.subsidyPercent ?? 0;
+  // 🔥 ВТОРОЙ ПРОХОД: без пороговой логики
+  for (const subsidy of sorted) {
+    if (checkMetadataConditions(subsidy.conditionMetadata, pvPercent, mortgageAmount, loanTerm)) {
+      return typeof subsidy.subsidyPercent === 'string'
+        ? parseFloat(subsidy.subsidyPercent)
+        : subsidy.subsidyPercent;
+    }
+  }
+
+  return 0;
 };

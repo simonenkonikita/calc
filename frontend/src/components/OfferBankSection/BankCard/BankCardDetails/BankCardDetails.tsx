@@ -107,7 +107,7 @@ export const BankCardDetails: React.FC<BankCardDetailsProps> = ({
           },
           {
             label: "Субсидия в %:",
-            value: `${offer.subsidyPercent?.toFixed(1) || 0}%`,
+            value: `${Number(offer.subsidyPercent)?.toFixed(2) || 0}%`,
             className: "positive",
           },
         ]

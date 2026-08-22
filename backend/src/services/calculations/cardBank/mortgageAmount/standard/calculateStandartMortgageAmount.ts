@@ -1,3 +1,4 @@
+import { Offer } from "../../../../../entities/Offer";
 import {
   BankOffer,
   Variables,
@@ -11,7 +12,7 @@ interface calculateStandartMortgageAmount {
   remainingAmount: number;
   downPaymentAmount: number; // D32
   userDownPaymentPercent: number; // $B$8
-  bankOffer: BankOffer;
+  offer: Offer;
   variables: Variables;
   isSpecialMortgageMode: boolean;
 }

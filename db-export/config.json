@@ -1,0 +1,1 @@
+[{"id":"d184580a-9482-4acc-94a9-e487390d4187","key":"app_config","value":{"bankOrder": ["Сбербанк", "Альфа-Банк", "Совкомбанк", "ВТБ", "Уралсиб", "Дом.РФ Банк"], "maxLoanTerm": 30, "depositAmount": 30000, "defaultComplex": "ЖК Лермонтов", "minDownPayment": 20.1},"updated_at":"2026-08-11T00:07:41.2773"}]

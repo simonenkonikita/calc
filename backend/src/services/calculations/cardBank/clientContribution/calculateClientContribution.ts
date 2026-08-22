@@ -1,5 +1,6 @@
 // src/hooks/calculations/bankProgram/steps/calculateClientContribution.ts
 
+import { Offer } from "../../../../entities/Offer";
 import {
   BankOffer,
   Variables,
@@ -14,7 +15,7 @@ interface CalculateClientContributionParams {
   downPaymentAmount: number;
   ownFunds: number;
   userDownPaymentPercent: number;
-  bankOffer: BankOffer;
+  offer: Offer;
   variables: Variables;
   isSpecialMortgageMode: boolean;
   coefficients: BankCoefficients;
@@ -33,7 +34,7 @@ export const calculateClientContribution = (
     isFamilyOrIt,
     objectCost,
     userDownPaymentPercent,
-    bankOffer,
+    offer,
     variables,
     coefficients,
   } = params;
@@ -46,7 +47,7 @@ export const calculateClientContribution = (
       downPaymentAmount,
       ownFunds,
       userDownPaymentPercent,
-      bankOffer,
+      offer,
       variables,
       isSpecialMortgageMode,
       coefficients,

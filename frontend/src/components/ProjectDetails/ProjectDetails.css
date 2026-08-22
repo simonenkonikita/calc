@@ -1,0 +1,119 @@
+/* src/pages/ProjectsPage/components/ProjectDetails/ProjectDetails.css */
+.project-details-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  min-height: 500px;
+}
+
+.details-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.details-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.details-section {
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+}
+
+.details-section.half {
+  padding: 1rem 1.25rem;
+}
+
+.section-label {
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #333;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.section-value.price {
+  font-size: 1rem;
+}
+
+/* Специальные секции */
+.details-section.highlight {
+  background: linear-gradient(135deg, #e8f0fe 0%, #dbeafe 100%);
+  border: 1px solid rgba(102, 126, 234, 0.15);
+}
+
+.details-section.highlight .section-label {
+  color: #667eea;
+}
+
+.details-section.special {
+  background: linear-gradient(135deg, #fef9e7 0%, #fdf3d0 100%);
+  border: 1px solid rgba(212, 168, 71, 0.2);
+}
+
+.details-section.special .section-label {
+  color: #b8860b;
+}
+
+.mortgage-modern-section {
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.programs-modern-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+/* Адаптив для деталей */
+@media (max-width: 992px) {
+  .details-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .details-content {
+    padding: 1rem;
+  }
+
+  .details-section {
+    padding: 1rem;
+  }
+
+  .details-section.half {
+    padding: 0.75rem 1rem;
+  }
+
+  .details-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .details-section {
+    padding: 0.75rem;
+  }
+
+  .details-section.half {
+    padding: 0.5rem 0.75rem;
+  }
+}

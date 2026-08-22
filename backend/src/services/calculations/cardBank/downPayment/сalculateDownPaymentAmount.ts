@@ -1,3 +1,4 @@
+import { Offer } from "../../../../entities/Offer";
 import {
   BankOffer,
   Variables,
@@ -15,7 +16,7 @@ interface DownPaymentAmountParams {
   contractAmount: number;
   userDownPaymentPercent: number;
   manualDownPayment: number;
-  bankOffer: BankOffer;
+  offer: Offer;
   variables: Variables;
   isSpecialMortgageMode: boolean;
   remainingAmount: number;
@@ -32,7 +33,7 @@ export const calculateDownPaymentAmount = (
     contractAmount,
     userDownPaymentPercent,
     manualDownPayment,
-    bankOffer,
+    offer,
     variables,
     isSpecialMortgageMode,
     remainingAmount,
@@ -40,7 +41,10 @@ export const calculateDownPaymentAmount = (
     coefficients,
   } = params;
 
-  if (bankOffer.type === "family" && bankOffer.isTwoContracts === true) {
+  // 🔥 Получаем тип программы
+  const programType = offer.programEntity?.type || "base";
+
+  if (programType === "family" && offer.isTwoContracts === true) {
     return calculateFamilyTwoContractsDownPayment({
       objectCost,
       downPayment,
@@ -50,13 +54,13 @@ export const calculateDownPaymentAmount = (
       isSpecialMortgageMode,
       coefficients,
       variables,
-      bankOffer,
+      offer,
       remainingAmount,
       noSubsidyInflate,
     });
   }
 
-  if (bankOffer.type === "family" && bankOffer.excessLimit === true) {
+  if (programType === "family" && offer.excessLimit === true) {
     return calculateFamilyExcessLimitDownPayment({
       objectCost,
       downPayment,
@@ -66,13 +70,13 @@ export const calculateDownPaymentAmount = (
       isSpecialMortgageMode,
       coefficients,
       variables,
-      bankOffer,
+      offer,
       remainingAmount,
       noSubsidyInflate,
     });
   }
 
-  if (bankOffer.type === "family") {
+  if (programType === "family") {
     return calculateFamilyDownPayment({
       objectCost,
       downPayment,
@@ -82,7 +86,7 @@ export const calculateDownPaymentAmount = (
       isSpecialMortgageMode,
       coefficients,
       variables,
-      bankOffer,
+      offer,
       remainingAmount,
       noSubsidyInflate,
     });
@@ -95,6 +99,6 @@ export const calculateDownPaymentAmount = (
     isSpecialMortgageMode,
     userDownPaymentPercent,
     objectCost,
-    bankOffer,
+    offer,
   });
 };

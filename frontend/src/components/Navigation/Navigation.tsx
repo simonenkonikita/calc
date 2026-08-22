@@ -22,9 +22,21 @@ const Navigation = () => {
           <li className={location.pathname === "/calculator" ? "active" : ""}>
             <Link to="/calculator">Калькулятор</Link>
           </li>
-              <li className={location.pathname === "/projects" ? "active" : ""}>
+          <li className={location.pathname === "/projects" ? "active" : ""}>
             <Link to="/projects">Проекты</Link>
           </li>
+          <li className={location.pathname === "/admin" ? "active" : ""}>
+            <Link to="/admin">
+              <span className="admin-icon">⚙️</span> Админка
+            </Link>
+          </li>
+          {/*  <li
+            className={
+              location.pathname === "/mortgage-programs" ? "active" : ""
+            }
+          >
+            <Link to="/mortgage-programs">Ипотечные программы</Link>
+          </li> */}
           {/*   <li className={location.pathname === "/results" ? "active" : ""}>
             <Link to="/results">Результаты</Link>
           </li> */}

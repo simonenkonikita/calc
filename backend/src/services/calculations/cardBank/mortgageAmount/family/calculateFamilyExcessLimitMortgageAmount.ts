@@ -1,3 +1,4 @@
+import { Offer } from "../../../../../entities/Offer";
 import {
   BankOffer,
   Variables,
@@ -12,7 +13,7 @@ interface calculateFamilyExcessLimitMortgageAmount {
   remainingAmount: number;
   downPaymentAmount: number; // D32
   userDownPaymentPercent: number; // $B$8
-  bankOffer: BankOffer;
+  offer: Offer;
   variables: Variables;
   isSpecialMortgageMode: boolean;
   coefficients: BankCoefficients;
@@ -28,13 +29,15 @@ export const calculateFamilyExcessLimitMortgageAmount = (
     remainingAmount,
     downPaymentAmount,
     userDownPaymentPercent,
-    bankOffer,
+    offer,
     variables,
     isSpecialMortgageMode,
     coefficients,
   } = params;
 
-  const limit = variables.minExcessAmounts?.[bankOffer.bank] || 6000000;
+  const bankName = offer.bank?.name || "";
+  const limit = variables.minExcessAmounts?.[bankName] || 7500000;
+
   const maxLimit = variables.maxFamilyMortgageSum || 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;

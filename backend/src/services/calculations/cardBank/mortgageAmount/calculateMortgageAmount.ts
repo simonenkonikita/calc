@@ -1,3 +1,4 @@
+import { Offer } from "../../../../entities/Offer";
 import {
   BankOffer,
   Variables,
@@ -17,7 +18,7 @@ interface CalculateMortgageAmountParams {
   remainingAmount: number;
   downPaymentAmount: number;
   userDownPaymentPercent: number;
-  bankOffer: BankOffer;
+  offer: Offer;
   variables: Variables;
   isFamilyOrIt: boolean;
   isSpecialMortgageMode: boolean;
@@ -34,13 +35,15 @@ export const calculateMortgageAmount = (
     remainingAmount,
     downPaymentAmount,
     userDownPaymentPercent,
-    bankOffer,
+    offer,
     variables,
     isSpecialMortgageMode,
     coefficients,
   } = params;
 
-  if (bankOffer.type === "tranche" || bankOffer.isTranche === true) {
+  const programType = offer.programEntity?.type || "base";
+
+  if (programType === "tranche" || offer.isTranche === true) {
     return calculateTrancheMortgageAmount({
       objectCost,
       contractAmount,
@@ -48,13 +51,13 @@ export const calculateMortgageAmount = (
       remainingAmount,
       downPaymentAmount,
       userDownPaymentPercent,
-      bankOffer,
+      offer,
       variables,
       isSpecialMortgageMode,
     });
   }
 
-  if (bankOffer.type === "family" && bankOffer.isTwoContracts === true) {
+  if (programType === "family" && offer.isTwoContracts === true) {
     return calculateFamilyTwoContractsMortgageAmount({
       objectCost,
       contractAmount,
@@ -62,14 +65,14 @@ export const calculateMortgageAmount = (
       remainingAmount,
       downPaymentAmount,
       userDownPaymentPercent,
-      bankOffer,
+      offer,
       variables,
       isSpecialMortgageMode,
       coefficients,
     });
   }
 
-  if (bankOffer.type === "family" && bankOffer.excessLimit === true) {
+  if (programType === "family" && offer.excessLimit === true) {
     return calculateFamilyExcessLimitMortgageAmount({
       objectCost,
       contractAmount,
@@ -77,14 +80,14 @@ export const calculateMortgageAmount = (
       remainingAmount,
       downPaymentAmount,
       userDownPaymentPercent,
-      bankOffer,
+      offer,
       variables,
       isSpecialMortgageMode,
       coefficients,
     });
   }
 
-  if (bankOffer.type === "family") {
+  if (programType === "family") {
     return calculateFamilyMortgageAmount({
       objectCost,
       contractAmount,
@@ -92,7 +95,7 @@ export const calculateMortgageAmount = (
       remainingAmount,
       downPaymentAmount,
       userDownPaymentPercent,
-      bankOffer,
+      offer,
       variables,
       isSpecialMortgageMode,
       coefficients,
@@ -121,7 +124,7 @@ export const calculateMortgageAmount = (
     remainingAmount,
     downPaymentAmount,
     userDownPaymentPercent,
-    bankOffer,
+    offer,
     variables,
     isSpecialMortgageMode,
   });

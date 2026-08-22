@@ -1,11 +1,12 @@
-// src/hooks/calculations/bankProgram/coefficients/calculateDynamicSubsidy.ts
+// backend/src/services/calculations/coefficients/calculateDynamicSubsidy.ts
 
-import { BankCoefficients, BankOffer, Variables } from "../../../types/types";
-import { calculateContractAmountWithSubsidy } from "./calculateContractAmountWithSubsidy";
+import { Offer } from "../../../entities/Offer";
+import { BankCoefficients, Variables } from "../../../types/types";
 import { getDynamicSubsidy } from "./getDynamicSubsidy";
+import { calculateContractAmountWithSubsidy } from "./calculateContractAmountWithSubsidy";
 
 interface CalculateDynamicSubsidyParams {
-  bankOffer: BankOffer;
+  offer: Offer;
   userDownPaymentPercent: number;
   objectCost: number;
   downPayment: number;
@@ -23,7 +24,7 @@ export const calculateDynamicSubsidy = (
   params: CalculateDynamicSubsidyParams,
 ): number => {
   const {
-    bankOffer,
+    offer,
     userDownPaymentPercent,
     objectCost,
     downPayment,
@@ -37,71 +38,33 @@ export const calculateDynamicSubsidy = (
     isTwoContracts = false,
   } = params;
 
-  let subsidyPercent = bankOffer.subsidyPercent || 0;
-  let сontractAmount = objectCost;
+  let subsidyPercent = offer.subsidyPercent || 0;
+  let contractAmount = objectCost;
   let initialMortgage = remainingAmount;
 
   let iterations = 0;
   const MAX_ITERATIONS = 20;
   const CONVERGENCE_THRESHOLD = 1;
 
-  if (isTwoContracts) {
-    while (iterations < MAX_ITERATIONS) {
-      iterations++;
+  while (iterations < MAX_ITERATIONS) {
+    iterations++;
 
-      const newSubsidy = getDynamicSubsidy(
-        bankOffer,
+    let newSubsidy: number;
+    if (isTwoContracts) {
+      newSubsidy = getDynamicSubsidy(
+        offer.dynamicSubsidies,
         userDownPaymentPercent,
         initialMortgage - variables.familyMortgageLimit,
         loanTermYears,
       );
-
-      if (newSubsidy === subsidyPercent && iterations > 1) {
-        break;
-      }
-
-      if (newSubsidy !== undefined) {
-        subsidyPercent = newSubsidy;
-      }
-
-      сontractAmount = calculateContractAmountWithSubsidy(
-        objectCost,
-        downPayment,
-        remainingAmount,
+    } else {
+      newSubsidy = getDynamicSubsidy(
+        offer.dynamicSubsidies,
         userDownPaymentPercent,
-        manualDownPayment,
-        bankOffer,
-        variables,
-        noSubsidyInflate,
-        isSpecialMortgageMode,
-        coefficients,
-        subsidyPercent,
+        initialMortgage,
+        loanTermYears,
       );
-
-      const downPaymentFromContract =
-        сontractAmount * (userDownPaymentPercent / 100);
-
-      const newMortgage = сontractAmount - downPaymentFromContract;
-
-      if (Math.abs(newMortgage - initialMortgage) < CONVERGENCE_THRESHOLD) {
-        initialMortgage = newMortgage;
-        break;
-      }
-
-      initialMortgage = newMortgage;
     }
-    return subsidyPercent;
-  }
-
-  while (iterations < MAX_ITERATIONS) {
-    iterations++;
-
-    const newSubsidy = getDynamicSubsidy(
-      bankOffer,
-      userDownPaymentPercent,
-      initialMortgage,
-      loanTermYears,
-    );
 
     if (newSubsidy === subsidyPercent && iterations > 1) {
       break;
@@ -111,13 +74,13 @@ export const calculateDynamicSubsidy = (
       subsidyPercent = newSubsidy;
     }
 
-    const newContractAmount = calculateContractAmountWithSubsidy(
+    contractAmount = calculateContractAmountWithSubsidy(
       objectCost,
       downPayment,
       remainingAmount,
       userDownPaymentPercent,
       manualDownPayment,
-      bankOffer,
+      offer,
       variables,
       noSubsidyInflate,
       isSpecialMortgageMode,
@@ -126,9 +89,8 @@ export const calculateDynamicSubsidy = (
     );
 
     const downPaymentFromContract =
-      newContractAmount * (userDownPaymentPercent / 100);
-
-    const newMortgage = newContractAmount - downPaymentFromContract;
+      contractAmount * (userDownPaymentPercent / 100);
+    const newMortgage = contractAmount - downPaymentFromContract;
 
     if (Math.abs(newMortgage - initialMortgage) < CONVERGENCE_THRESHOLD) {
       initialMortgage = newMortgage;
@@ -137,5 +99,6 @@ export const calculateDynamicSubsidy = (
 
     initialMortgage = newMortgage;
   }
+
   return subsidyPercent;
 };

@@ -1,0 +1,18 @@
+/* frontend/src/pages/Admin/sections/BanksSection.css */
+
+/* ============================================================
+   BANKS SECTION
+   ============================================================ */
+.banks-section .admin-section .admin-table .bank-name {
+  font-weight: 500;
+}
+
+.banks-section .admin-section .admin-table .bank-slug {
+  color: #888;
+  font-size: 0.75rem;
+}
+
+.banks-section .admin-section .admin-table .bank-rate-highlight {
+  font-weight: 600;
+  color: #3b82f6;
+}

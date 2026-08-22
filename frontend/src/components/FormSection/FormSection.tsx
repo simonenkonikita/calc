@@ -1,7 +1,7 @@
-import { useMemo, ChangeEvent } from "react";
-import { housingPrices } from "../../data/complexPrice/complexPriceData";
+// FormSection.tsx - исправленная версия
+
+import { useMemo, ChangeEvent, useEffect } from "react";
 import {
-  PRICE_PER_SQUARE_METER_DEFAULT,
   MAX_DOWN_PAYMENT_PERCENT,
   MIN_DOWN_PAYMENT_PERCENT,
   MAX_AREA,
@@ -11,7 +11,9 @@ import {
 } from "../../data/constants";
 import { CalculatorFormData } from "../../utils/types";
 import "./FormSection.css";
-import { useConfig } from "../../hooks/useConfig";
+import { useConfig } from "../../hooks/api/useConfig";
+import { useComplexData } from "../../hooks/api/useComplexData";
+import { usePriceData } from "../../hooks/api/usePriceData";
 
 interface FormSectionProps {
   formData: CalculatorFormData;
@@ -19,30 +21,74 @@ interface FormSectionProps {
     field: K,
     value: CalculatorFormData[K],
   ) => void;
+  onCalculate?: () => void;
+  isCalculating?: boolean;
 }
 
 export const FormSection: React.FC<FormSectionProps> = ({
   formData,
   onInputChange,
+  onCalculate,
+  isCalculating = false,
 }) => {
   const { config, loading: configLoading } = useConfig();
   const DEPOSIT_AMOUNT = config?.depositAmount ?? 30000;
 
-  // Получаем список уникальных ЖК
-  const complexes = useMemo(() => {
-    return Array.from(new Set(housingPrices.map((item) => item.complexName)));
-  }, []);
+  // Загружаем данные о ЖК и типах квартир из API
+  const {
+    complexes,
+    apartmentTypes,
+    loading: complexesLoading,
+    error: complexesError,
+    loadApartmentTypes,
+  } = useComplexData();
 
-  // Получаем типы квартир для выбранного ЖК
-  const getApartmentTypes = (complex: string): string[] => {
-    return housingPrices
-      .filter((item) => item.complexName === complex)
-      .map((item) => item.apartmentType);
-  };
+  // Загружаем цену для выбранного ЖК и типа квартиры
+  const { priceData, loading: priceLoading, fetchPrice } = usePriceData();
 
+  // Загружаем типы квартир при изменении ЖК
+  useEffect(() => {
+    if (formData.complex) {
+      loadApartmentTypes(formData.complex);
+    }
+  }, [formData.complex, loadApartmentTypes]);
+
+  // Загружаем цену при изменении ЖК и типа квартиры
+  useEffect(() => {
+    if (formData.complex && formData.apartmentType) {
+      fetchPrice(formData.complex, formData.apartmentType);
+    }
+  }, [formData.complex, formData.apartmentType, fetchPrice]);
+
+  // Получаем доступные типы квартир из API данных
   const availableTypes = useMemo(() => {
-    return getApartmentTypes(formData.complex);
-  }, [formData.complex]);
+    return apartmentTypes.map((item) => item.type);
+  }, [apartmentTypes]);
+
+  // Получаем цену за м² из API
+  const pricePerSquareMeter = useMemo(() => {
+    if (priceData) {
+      // Если включена ипотека без ПВ или с частичным ПВ, добавляем наценку
+      if (formData.mortgageWithoutDownPayment) {
+        return (
+          priceData.pricePerSquareMeter +
+          (priceData.surcharges?.withoutDownPayment || 0)
+        );
+      }
+      if (formData.mortgagePartialDownPayment) {
+        return (
+          priceData.pricePerSquareMeter +
+          (priceData.surcharges?.partialDownPayment || 0)
+        );
+      }
+      return priceData.pricePerSquareMeter;
+    }
+    return 0; // Возвращаем 0, если данных нет
+  }, [
+    priceData,
+    formData.mortgageWithoutDownPayment,
+    formData.mortgagePartialDownPayment,
+  ]);
 
   // ============================================================
   // РАСЧЕТ БАЗОВОЙ СТОИМОСТИ ОБЪЕКТА (без учета брони)
@@ -52,20 +98,8 @@ export const FormSection: React.FC<FormSectionProps> = ({
       return formData.manualObjectCost;
     }
 
-    const pricePerM2 =
-      housingPrices.find(
-        (item) =>
-          item.complexName === formData.complex &&
-          item.apartmentType === formData.apartmentType,
-      )?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT;
-
-    return formData.area * pricePerM2;
-  }, [
-    formData.manualObjectCost,
-    formData.complex,
-    formData.apartmentType,
-    formData.area,
-  ]);
+    return formData.area * pricePerSquareMeter;
+  }, [formData.manualObjectCost, formData.area, pricePerSquareMeter]);
 
   // ============================================================
   // РАСЧЕТ ФИНАЛЬНОЙ СТОИМОСТИ ОБЪЕКТА (с учетом брони)
@@ -81,7 +115,10 @@ export const FormSection: React.FC<FormSectionProps> = ({
   // ПРОВЕРКА: достаточно ли ПВ для полной оплаты
   // ============================================================
   const isFullPayment = useMemo(() => {
-    return formData.manualDownPayment >= calculateObjectCost;
+    return (
+      calculateObjectCost > 0 &&
+      formData.manualDownPayment >= calculateObjectCost
+    );
   }, [formData.manualDownPayment, calculateObjectCost]);
 
   // ============================================================
@@ -294,18 +331,26 @@ export const FormSection: React.FC<FormSectionProps> = ({
   // ============================================================
   const handleComplexChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const newComplex = e.target.value;
-    const types = getApartmentTypes(newComplex);
     onInputChange("complex", newComplex);
-    if (types.length > 0) {
-      onInputChange("apartmentType", types[0]);
-    }
+    // Сбрасываем тип квартиры при смене ЖК
+    onInputChange("apartmentType", "");
   };
 
-  // Если конфиг загружается, показываем индикатор
-  if (configLoading) {
+  // Если конфиг загружается или данные комплексов загружаются, показываем индикатор
+  if (configLoading || complexesLoading) {
     return (
       <div className="form-section">
         <div className="loading-config">Загрузка конфигурации...</div>
+      </div>
+    );
+  }
+
+  if (complexesError) {
+    return (
+      <div className="form-section">
+        <div className="error-message">
+          Ошибка загрузки данных: {complexesError}
+        </div>
       </div>
     );
   }
@@ -320,6 +365,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
             <div className="field">
               <label>Жилой комплекс</label>
               <select value={formData.complex} onChange={handleComplexChange}>
+                <option value="">Выберите ЖК</option>
                 {complexes.map((complex) => (
                   <option key={complex} value={complex}>
                     {complex}
@@ -335,13 +381,18 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                   onInputChange("apartmentType", e.target.value)
                 }
+                disabled={!formData.complex || availableTypes.length === 0}
               >
+                <option value="">Выберите тип</option>
                 {availableTypes.map((type) => (
                   <option key={type} value={type}>
                     {type}
                   </option>
                 ))}
               </select>
+              {priceLoading && (
+                <span className="loading-price">Загрузка цены...</span>
+              )}
             </div>
 
             <div className="field">
@@ -517,6 +568,21 @@ export const FormSection: React.FC<FormSectionProps> = ({
           </div>
         </div>
       </div>
+
+      {/* ✅ Кнопка "Рассчитать" */}
+      {onCalculate && (
+        <div className="form-actions">
+          <button
+            className="calculate-btn"
+            onClick={onCalculate}
+            disabled={
+              isCalculating || !formData.complex || !formData.apartmentType
+            }
+          >
+            {isCalculating ? "Расчёт..." : "🔄 Рассчитать"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

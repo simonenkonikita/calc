@@ -1,10 +1,11 @@
 // src/hooks/calculations/bankProgram/steps/adjustTwoContracts.ts
 
+import { Offer } from "../../../../../entities/Offer";
 import { BankOffer, Variables } from "../../../../../types/types";
 import { getDynamicSubsidy } from "../../../сoefficients/getDynamicSubsidy";
 
 interface AdjustTwoContractsParams {
-  bankOffer: BankOffer;
+  offer: Offer;
   objectCost: number;
   ownFunds: number;
   mortgageAmount: number;
@@ -35,7 +36,7 @@ export const adjustTwoContracts = (
   params: AdjustTwoContractsParams,
 ): AdjustTwoContractsResult => {
   const {
-    bankOffer,
+    offer,
     objectCost,
     ownFunds,
     mortgageAmount,
@@ -58,12 +59,9 @@ export const adjustTwoContracts = (
   // ============================================================
   let secondContractSubsidyPercent = actualSubsidyPercent;
 
-  if (
-    bankOffer.dynamicSubsidyPercent &&
-    bankOffer.dynamicSubsidyPercent.length > 0
-  ) {
+  if (offer.dynamicSubsidies && offer.dynamicSubsidies.length > 0) {
     secondContractSubsidyPercent = getDynamicSubsidy(
-      bankOffer,
+      offer.dynamicSubsidies,
       userDownPaymentPercent,
       secondContract,
       loanTermYears,
@@ -128,12 +126,9 @@ export const adjustTwoContracts = (
       changed = true;
 
       // Пересчитываем субсидию
-      if (
-        bankOffer.dynamicSubsidyPercent &&
-        bankOffer.dynamicSubsidyPercent.length > 0
-      ) {
+      if (offer.dynamicSubsidies && offer.dynamicSubsidies.length > 0) {
         secondContractSubsidyPercent = getDynamicSubsidy(
-          bankOffer,
+          offer.dynamicSubsidies,
           userDownPaymentPercent,
           secondContract,
           loanTermYears,

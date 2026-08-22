@@ -1,27 +1,21 @@
 // ============================================================
 // ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ СУБСИДИИ ПО ВТОРОМУ ДОГОВОРУ
 
-import { BankOffer } from "../../../types/types";
+import { Offer } from "../../../entities/Offer";
 import { getDynamicSubsidy } from "./getDynamicSubsidy";
 
 // ============================================================
 export const getDynamicSubsidyForSecondContract = (
-  bankOffer: BankOffer,
+  offer: Offer,
   secondContractAmount: number,
   userDownPaymentPercent: number,
   loanTermYears: number,
 ): number => {
-  // Проверяем, есть ли динамические субсидии для второго договора
-  if (
-    bankOffer.twoContractSubsidies &&
-    bankOffer.twoContractSubsidies.length > 0
-  ) {
-    // Используем существующую логику getDynamicSubsidy с переданной суммой второго договора
+  // 🔥 Используем offer.dynamicSubsidies (из БД)
+  if (offer.dynamicSubsidies && offer.dynamicSubsidies.length > 0) {
+    // Передаем весь offer, а не только массив
     const result = getDynamicSubsidy(
-      {
-        ...bankOffer,
-        dynamicSubsidyPercent: bankOffer.twoContractSubsidies,
-      },
+      offer,
       userDownPaymentPercent,
       secondContractAmount,
       loanTermYears,
@@ -30,5 +24,5 @@ export const getDynamicSubsidyForSecondContract = (
   }
 
   // Fallback: используем базовую субсидию
-  return bankOffer.subsidyPercent || 0;
+  return offer.subsidyPercent ?? 0;
 };

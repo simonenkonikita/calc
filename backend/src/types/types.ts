@@ -1,4 +1,5 @@
-// Типы данных
+import { RefObject } from "react";
+import { DynamicSubsidy } from "../entities/DynamicSubsidy";
 
 // Расширенный тип для хранения оригинального индекса
 export interface BankProgramResultWithIndex extends BankProgramResult {
@@ -128,6 +129,23 @@ export interface OfferBankSectionProps {
   loanTermYears: number;
   area: number;
   complexName: string;
+
+  // 🔥 Фильтры
+  selectedBankFilter: string;
+  selectedProgramTypeFilter: string;
+  showOverstatement: boolean;
+  onBankFilterChange: (filter: string) => void;
+  onProgramTypeFilterChange: (filter: string) => void;
+  onToggleOverstatement: (value: boolean) => void;
+  onResetFilters: () => void;
+
+  // Ref для фильтров
+  filtersRef?: React.RefObject<{
+    selectedBankFilter: string;
+    selectedProgramTypeFilter: string;
+    selectedCards: Set<number>;
+    showOverstatement?: boolean;
+  }>;
 }
 
 // ========== БАНКОВСКИЕ ПРОГРАММЫ (из JSON) ==========
@@ -139,35 +157,55 @@ export type ProgramType =
   | "it"
   | "tranche";
 
+// ============================================================
+// ТИП ДЛЯ СТАВОК
+// ============================================================
+
+/**
+ * Правило для динамической ставки
+ */
 export interface DynamicRateRule {
-  // Для простых условий (JSON-совместимые)
-  type?: "pv" | "amount" | "term";
-  condition?: "gte" | "lte" | "lt" | "gt" | "eq";
-  value?: number;
-  // Для сложных условий (функции)
-  conditionFn?: (pv: number, amount: number, term: number) => boolean;
-  rateFn?: (baseRate: number, pv: number, amount: number) => number;
+  // 🔥 УСЛОВИЯ
+  conditionMetadata?: {
+    amountMin?: number;
+    amountMax?: number;
+    pvMin?: number;
+    pvMax?: number;
+    termMin?: number;
+    termMax?: number;
+  };
+  // 🔥 ПОРОГОВАЯ ЛОГИКА (всегда доступна, даже без условий)
+  tolerance?: number; // всегда в процентах, всегда up
   // Результат
-  subsidyPercent?: number;
-  rate?: number;
-  priority?: number;
+  rate: number;
   description?: string;
-  // 🔥 НОВЫЕ ПОЛЯ ДЛЯ ПОРОГОВОЙ ЛОГИКИ
-  minAmount?: number;
-  /** Максимальная сумма для диапазона (для пороговой логики) */
-  maxAmount?: number;
-  tolerance?: number;
-  /** Коэффициент погрешности для этого правила (переопределяет глобальный) */
-  toleranceType?: "fixed" | "percent";
-  /** Стратегия округления для этого правила */
-  roundingStrategy?: "up" | "down";
+  isActive?: boolean;
 }
 
-// 🔥 НОВЫЙ ТИП для простых динамических ставок (только ПВ -> ставка)
-export interface SimpleDynamicRate {
-  minPVPercent: number; // Минимальный ПВ для этой ставки
-  rate: number; // Ставка при этом ПВ
-  description?: string; // Описание условия
+// ============================================================
+// ТИП ДЛЯ СУБСИДИЙ
+// ============================================================
+
+/**
+ * Правило для динамической субсидии
+ */
+export interface DynamicSubsidyRule {
+  // 🔥 УСЛОВИЯ
+  conditionMetadata?: {
+    amountMin?: number;
+    amountMax?: number;
+    pvMin?: number;
+    pvMax?: number;
+    termMin?: number;
+    termMax?: number;
+  };
+  // 🔥 ПОРОГОВАЯ ЛОГИКА (всегда доступна, даже без условий)
+  tolerance?: number; // всегда в процентах, всегда up
+  // Результат
+  subsidyPercent: number;
+  priority?: number;
+  description?: string;
+  isActive?: boolean;
 }
 
 export interface BankOffer {
@@ -184,17 +222,12 @@ export interface BankOffer {
   shortRate?: number; //
   subsidyCalculationMethod?: "onlyPercent" | "standard";
   dynamicRates?: DynamicRateRule[];
-  dynamicRatesIU?: SimpleDynamicRate[];
-  dynamicSubsidyPercent?: DynamicRateRule[];
+  dynamicSubsidies?: DynamicRateRule[];
   isTranche?: boolean;
   trancheFirstPercent?: number; // % от стоимости объекта для первого транша (например, 19.9%)
   trancheSecondDate?: string; // дата выдачи второго транша (например, "2027-02-01")
   /** Глобальный коэффициент погрешности (по умолчанию 100000) */
   thresholdTolerance?: number;
-  thresholdToleranceType?: "fixed" | "percent";
-  /** Глобальная стратегия округления (по умолчанию 'up') */
-  roundingStrategy?: "up" | "down";
-  twoContractSubsidies?: DynamicRateRule[];
   complexes?: string[];
   minLoanTermYears?: number;
   description?: string;

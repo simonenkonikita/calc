@@ -1,4 +1,5 @@
-// ========== РАСЧЕТ БУДУЩЕЙ СТОИМОСТИ (ОСТАТКА ДОЛГА) ==========
+// backend/src/services/calculations/bankProgram/steps/payment/calculateFutureValue.ts
+
 export const calculateFutureValue = (
   rate: number,
   months: number,
@@ -14,8 +15,7 @@ export const calculateFutureValue = (
   }
 
   const powerFactor = Math.pow(1 + monthlyRate, months);
-  const result =
-    amount * powerFactor - (payment * (powerFactor - 1)) / monthlyRate;
+  const result = amount * powerFactor - (payment * (powerFactor - 1)) / monthlyRate;
 
   return Math.max(0, result);
 };

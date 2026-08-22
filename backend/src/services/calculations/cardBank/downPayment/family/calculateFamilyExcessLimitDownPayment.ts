@@ -1,3 +1,4 @@
+import { Offer } from "../../../../../entities/Offer";
 import {
   BankCoefficients,
   Variables,
@@ -13,7 +14,7 @@ interface calculateFamilyExcessLimitDownPayment {
   isSpecialMortgageMode: boolean;
   coefficients: BankCoefficients;
   variables: Variables;
-  bankOffer: BankOffer;
+  offer: Offer;
   remainingAmount: number;
   noSubsidyInflate: boolean;
 }
@@ -30,7 +31,7 @@ export const calculateFamilyExcessLimitDownPayment = (
     isSpecialMortgageMode,
     coefficients,
     variables,
-    bankOffer,
+    offer,
     remainingAmount,
   } = params;
 
@@ -44,7 +45,7 @@ export const calculateFamilyExcessLimitDownPayment = (
   const downPaymentFromContract =
     contractAmount * (userDownPaymentPercent / 100);
 
-  const contractAmountMinPV = contractAmount * (bankOffer.minPVPercent / 100);
+  const contractAmountMinPV = contractAmount * (offer.minPVPercent / 100);
 
   const summCreditWithoutPV =
     remainingAmount * coefficients.requiredCoeffWithoutPV +

@@ -1,13 +1,12 @@
-import {
-  BankOffer,
-  Variables,
-  BankCoefficients,
-  ContractAmountResult,
-} from "../../../../types/types";
+// backend/src/services/calculations/bankProgram/steps/calculateContractAmount.ts
+
+import { Offer } from "../../../../entities/Offer";
+import { Variables, BankCoefficients, ContractAmountResult } from "../../../../types/types";
 import { calculateFamilyContractAmount } from "./family/calculateFamilyContractAmount";
 import { calculateFamilyExcessLimitContractAmount } from "./family/calculateFamilyExcessLimitContractAmount";
 import { calculateFamilyTwoContractAmount } from "./family/calculateFamilyTwoContractAmount";
 import { calculateStandardContractAmount } from "./standard/calculateStandardContractAmount";
+
 
 export const calculateContractAmount = (
   objectCost: number,
@@ -15,19 +14,21 @@ export const calculateContractAmount = (
   remainingAmount: number,
   userDownPaymentPercent: number,
   manualDownPayment: number,
-  bankOffer: BankOffer,
+  offer: Offer,
   variables: Variables,
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
 ): ContractAmountResult => {
-  if (bankOffer.type === "family" && bankOffer.isTwoContracts === true) {
+  const programType = offer.programEntity?.type || 'base';
+
+  if (programType === "family" && offer.isTwoContracts === true) {
     return calculateFamilyTwoContractAmount(
       objectCost,
       downPayment,
       remainingAmount,
       userDownPaymentPercent,
-      bankOffer,
+      offer,
       variables,
       noSubsidyInflate,
       isSpecialMortgageMode,
@@ -35,13 +36,13 @@ export const calculateContractAmount = (
     );
   }
 
-  if (bankOffer.type === "family" && bankOffer.excessLimit === true) {
+  if (programType === "family" && offer.excessLimit === true) {
     return calculateFamilyExcessLimitContractAmount(
       objectCost,
       downPayment,
       remainingAmount,
       userDownPaymentPercent,
-      bankOffer,
+      offer,
       variables,
       noSubsidyInflate,
       isSpecialMortgageMode,
@@ -49,13 +50,13 @@ export const calculateContractAmount = (
     );
   }
 
-  if (bankOffer.type === "family") {
+  if (programType === "family") {
     return calculateFamilyContractAmount(
       objectCost,
       downPayment,
       remainingAmount,
       userDownPaymentPercent,
-      bankOffer,
+      offer,
       variables,
       noSubsidyInflate,
       isSpecialMortgageMode,
@@ -68,7 +69,7 @@ export const calculateContractAmount = (
     downPayment,
     remainingAmount,
     userDownPaymentPercent,
-    bankOffer,
+    offer,
     variables,
     noSubsidyInflate,
     isSpecialMortgageMode,

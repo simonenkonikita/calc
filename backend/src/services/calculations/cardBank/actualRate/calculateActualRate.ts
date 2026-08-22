@@ -1,8 +1,10 @@
-import { BankOffer } from "../../../../types/types";
+// backend/src/services/calculations/bankProgram/steps/calculateActualRate.ts
+
+import { Offer } from "../../../../entities/Offer";
 import { getDynamicRate } from "../../сoefficients/getDynamicRate";
 
 interface CalculateActualRateParams {
-  bankOffer: BankOffer;
+  offer: Offer;
   manualDownPayment: number;
   objectCost: number;
   userDownPaymentPercent: number;
@@ -14,7 +16,7 @@ export const calculateActualRate = (
   params: CalculateActualRateParams,
 ): number => {
   const {
-    bankOffer,
+    offer,
     manualDownPayment,
     objectCost,
     userDownPaymentPercent,
@@ -22,18 +24,19 @@ export const calculateActualRate = (
     loanTermYears,
   } = params;
 
-  // 1. Определяем ПВ для расчета ставки
+  // Рассчитываем ПВ для ставки
   const pvForRate =
     manualDownPayment > 0 && objectCost > 0
       ? (manualDownPayment / objectCost) * 100
       : userDownPaymentPercent;
 
-  // 2. Получаем актуальную ставку
+  // 🔥 Передаем массив dynamicRates, а не весь offer
   const actualRate = getDynamicRate(
-    bankOffer,
+    offer.dynamicRates || [], // массив DynamicRate[]
     pvForRate,
     mortgageAmount,
     loanTermYears,
+    offer.rate, // дефолтная ставка
   );
 
   return actualRate;

@@ -1,5 +1,6 @@
 // src/hooks/calculations/bankProgram/mortgageAmount/tranche/calculateTrancheMortgageAmount.ts
 
+import { Offer } from "../../../../../entities/Offer";
 import { BankOffer, Variables } from "../../../../../types/types";
 
 export interface TrancheMortgageResult {
@@ -16,7 +17,7 @@ interface CalculateTrancheMortgageAmountParams {
   remainingAmount: number;
   downPaymentAmount: number;
   userDownPaymentPercent: number;
-  bankOffer: BankOffer;
+  offer: Offer;
   variables: Variables;
   isSpecialMortgageMode: boolean;
 }
@@ -28,7 +29,7 @@ export const calculateTrancheMortgageAmount = (
     contractAmount,
     downPaymentAmount,
     userDownPaymentPercent,
-    bankOffer,
+    offer,
     objectCost,
     downPayment,
   } = params;
@@ -40,10 +41,10 @@ export const calculateTrancheMortgageAmount = (
   const mortgageAmount = contractAmount - downPaymentAmount;
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
   // 2. Получаем процент первого транша из оффера (по умолчанию 19.9%)
-  const baseTranchePercent = bankOffer.trancheFirstPercent || 19.9;
+  const baseTranchePercent = offer.trancheFirstPercent || 19.9;
 
   // 3. Минимальный ПВ (обычно 20.1%)
-  const minPVPercent = bankOffer.minPVPercent || 20.1;
+  const minPVPercent = offer.minPVPercent || 20.1;
   const targetTotal = contractAmount * MIN_PERCENT_TRANCHE; // 40% от суммы в договоре
   const trancheSumm = contractAmount * (downPayment / contractAmount);
 

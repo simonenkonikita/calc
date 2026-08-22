@@ -9,7 +9,7 @@ import {
   SBERBANK_EXCESS_RATES,
 } from "../rates/sberbankRates";
 import { BankOffer } from "../../utils/types";
-import { COMPLEXES_FAMILY } from "../complexPrice/complexPriceData";
+import { COMPLEXES_FAMILY } from "../complexPrice/CONSTRUCTION";
 
 export const SBERBANK_OFFERS: BankOffer[] = [
   {

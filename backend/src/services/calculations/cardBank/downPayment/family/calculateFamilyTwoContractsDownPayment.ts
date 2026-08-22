@@ -1,5 +1,6 @@
 // src/hooks/payment/downPayment/addContractAmount/Family/calculateFamilyDownPayment.ts
 
+import { Offer } from "../../../../../entities/Offer";
 import {
   BankCoefficients,
   Variables,
@@ -15,7 +16,7 @@ interface calculateFamilyTwoContractsDownPayment {
   isSpecialMortgageMode: boolean;
   coefficients: BankCoefficients;
   variables: Variables;
-  bankOffer: BankOffer;
+  offer: Offer;
   remainingAmount: number;
   noSubsidyInflate: boolean;
 }
@@ -32,7 +33,7 @@ export const calculateFamilyTwoContractsDownPayment = (
     isSpecialMortgageMode,
     coefficients,
     variables,
-    bankOffer,
+    offer,
     remainingAmount,
   } = params;
 
@@ -47,7 +48,7 @@ export const calculateFamilyTwoContractsDownPayment = (
   const downPaymentFromContract =
     contractAmount * (userDownPaymentPercent / 100);
 
-  const contractAmountMinPV = contractAmount * (bankOffer.minPVPercent / 100);
+  const contractAmountMinPV = contractAmount * (offer.minPVPercent / 100);
 
   const summCreditWithoutPV =
     remainingAmount * coefficients.requiredCoeffWithoutPV +
