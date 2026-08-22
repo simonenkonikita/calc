@@ -130,6 +130,21 @@ export interface OfferBankSectionProps {
   loanTermYears: number;
   area: number;
   complexName: string;
+
+  // 🔥 Фильтры
+  selectedBankFilter: string;
+  selectedProgramTypeFilter: string;
+  showOverstatement: boolean;
+  onBankFilterChange: (filter: string) => void;
+  onProgramTypeFilterChange: (filter: string) => void;
+  onToggleOverstatement: (value: boolean) => void;
+  onResetFilters: () => void;
+  filtersRef?: React.RefObject<{
+    selectedBankFilter: string;
+    selectedProgramTypeFilter: string;
+    selectedCards: Set<number>;
+    showOverstatement?: boolean;
+  }>;
 }
 
 // ========== БАНКОВСКИЕ ПРОГРАММЫ (из JSON) ==========

@@ -1,4 +1,6 @@
-import React, { useMemo, useState } from "react";
+// OfferBankSection.tsx
+
+import React, { useMemo, useState, useEffect } from "react";
 import type {
   BankProgramResultWithIndex,
   OfferBankSectionProps,
@@ -8,7 +10,6 @@ import "./OfferBankSection.css";
 import { getProgramCategory } from "../../utils/category/getProgramCategory";
 
 import { BankFilters } from "./BankFilters/BankFilters";
-
 import { NoResults } from "./NoResults/NoResults";
 import { BankGroup } from "./BankCard/BankGroup/BankGroup";
 import { FloatingSelectionBar } from "./FloatingSelectionBar/FloatingSelectionBar";
@@ -23,12 +24,38 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   loanTermYears,
   area,
   complexName,
+  // 🔥 Фильтры из пропсов
+  selectedBankFilter,
+  selectedProgramTypeFilter,
+  showOverstatement,
+  onBankFilterChange,
+  onProgramTypeFilterChange,
+  onToggleOverstatement,
+  onResetFilters,
+  filtersRef,
 }) => {
-  const [showOverstatement, setShowOverstatement] = useState(false);
-  const [selectedBankFilter, setSelectedBankFilter] = useState<string>("all");
-  const [selectedProgramTypeFilter, setSelectedProgramTypeFilter] =
-    useState<string>("all");
   const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set());
+
+  // 🔥 Синхронизируем фильтры с ref
+  useEffect(() => {
+    if (filtersRef?.current) {
+      filtersRef.current.selectedBankFilter = selectedBankFilter;
+      filtersRef.current.selectedProgramTypeFilter = selectedProgramTypeFilter;
+      filtersRef.current.showOverstatement = showOverstatement;
+    }
+  }, [
+    selectedBankFilter,
+    selectedProgramTypeFilter,
+    showOverstatement,
+    filtersRef,
+  ]);
+
+  // 🔥 Синхронизируем выбранные карточки с ref
+  useEffect(() => {
+    if (filtersRef?.current) {
+      filtersRef.current.selectedCards = selectedCards;
+    }
+  }, [selectedCards, filtersRef]);
 
   const isSpecialMortgageMode = useMemo(() => {
     return mortgageWithoutDownPayment || mortgagePartialDownPayment;
@@ -63,7 +90,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
     return filtered;
   }, [bankResults, selectedBankFilter, selectedProgramTypeFilter]);
 
-  // ✅ Создаем массив с индексами для передачи в BankGroup
   const filteredResultsWithIndex = useMemo(() => {
     return filteredBankResults.map((offer, index) => ({
       ...offer,
@@ -114,11 +140,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
     categoryKey: string,
   ) => {
     return bankData[categoryKey] && bankData[categoryKey].length > 0;
-  };
-
-  const resetFilters = () => {
-    setSelectedBankFilter("all");
-    setSelectedProgramTypeFilter("all");
   };
 
   const getProgramTypeLabel = (type: string): string => {
@@ -173,16 +194,16 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
           uniqueProgramTypes={uniqueProgramTypes}
           isFiltersActive={isFiltersActive}
           showOverstatement={showOverstatement}
-          onBankFilterChange={setSelectedBankFilter}
-          onProgramTypeFilterChange={setSelectedProgramTypeFilter}
-          onResetFilters={resetFilters}
-          onToggleOverstatement={setShowOverstatement}
+          onBankFilterChange={onBankFilterChange}
+          onProgramTypeFilterChange={onProgramTypeFilterChange}
+          onResetFilters={onResetFilters}
+          onToggleOverstatement={onToggleOverstatement}
           getProgramTypeLabel={getProgramTypeLabel}
         />
       </div>
 
       {sortedBanks.length === 0 ? (
-        <NoResults onReset={resetFilters} />
+        <NoResults onReset={onResetFilters} />
       ) : (
         sortedBanks.map((bankName) => (
           <BankGroup

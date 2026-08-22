@@ -23,6 +23,7 @@ export const useMortgageCalculator = () => {
     selectedBankFilter: "all",
     selectedProgramTypeFilter: "all",
     selectedCards: new Set<number>(),
+    showOverstatement: false,
   });
 
   /*   // 🔥 Автоматический расчет при изменении формы

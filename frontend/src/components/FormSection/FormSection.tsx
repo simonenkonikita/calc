@@ -1,8 +1,8 @@
 // FormSection.tsx - исправленная версия
 
 import { useMemo, ChangeEvent, useEffect } from "react";
-import { 
-  MAX_DOWN_PAYMENT_PERCENT, 
+import {
+  MAX_DOWN_PAYMENT_PERCENT,
   MIN_DOWN_PAYMENT_PERCENT,
   MAX_AREA,
   MIN_AREA,
@@ -44,11 +44,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
   } = useComplexData();
 
   // Загружаем цену для выбранного ЖК и типа квартиры
-  const {
-    priceData,
-    loading: priceLoading,
-    fetchPrice,
-  } = usePriceData();
+  const { priceData, loading: priceLoading, fetchPrice } = usePriceData();
 
   // Загружаем типы квартир при изменении ЖК
   useEffect(() => {
@@ -74,15 +70,25 @@ export const FormSection: React.FC<FormSectionProps> = ({
     if (priceData) {
       // Если включена ипотека без ПВ или с частичным ПВ, добавляем наценку
       if (formData.mortgageWithoutDownPayment) {
-        return priceData.pricePerSquareMeter + (priceData.surcharges?.withoutDownPayment || 0);
+        return (
+          priceData.pricePerSquareMeter +
+          (priceData.surcharges?.withoutDownPayment || 0)
+        );
       }
       if (formData.mortgagePartialDownPayment) {
-        return priceData.pricePerSquareMeter + (priceData.surcharges?.partialDownPayment || 0);
+        return (
+          priceData.pricePerSquareMeter +
+          (priceData.surcharges?.partialDownPayment || 0)
+        );
       }
       return priceData.pricePerSquareMeter;
     }
     return 0; // Возвращаем 0, если данных нет
-  }, [priceData, formData.mortgageWithoutDownPayment, formData.mortgagePartialDownPayment]);
+  }, [
+    priceData,
+    formData.mortgageWithoutDownPayment,
+    formData.mortgagePartialDownPayment,
+  ]);
 
   // ============================================================
   // РАСЧЕТ БАЗОВОЙ СТОИМОСТИ ОБЪЕКТА (без учета брони)
@@ -93,11 +99,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
     }
 
     return formData.area * pricePerSquareMeter;
-  }, [
-    formData.manualObjectCost,
-    formData.area,
-    pricePerSquareMeter,
-  ]);
+  }, [formData.manualObjectCost, formData.area, pricePerSquareMeter]);
 
   // ============================================================
   // РАСЧЕТ ФИНАЛЬНОЙ СТОИМОСТИ ОБЪЕКТА (с учетом брони)
@@ -343,7 +345,9 @@ export const FormSection: React.FC<FormSectionProps> = ({
   if (complexesError) {
     return (
       <div className="form-section">
-        <div className="error-message">Ошибка загрузки данных: {complexesError}</div>
+        <div className="error-message">
+          Ошибка загрузки данных: {complexesError}
+        </div>
       </div>
     );
   }
@@ -383,7 +387,9 @@ export const FormSection: React.FC<FormSectionProps> = ({
                   </option>
                 ))}
               </select>
-              {priceLoading && <span className="loading-price">Загрузка цены...</span>}
+              {priceLoading && (
+                <span className="loading-price">Загрузка цены...</span>
+              )}
             </div>
 
             <div className="field">
@@ -566,7 +572,9 @@ export const FormSection: React.FC<FormSectionProps> = ({
           <button
             className="calculate-btn"
             onClick={onCalculate}
-            disabled={isCalculating || !formData.complex || !formData.apartmentType}
+            disabled={
+              isCalculating || !formData.complex || !formData.apartmentType
+            }
           >
             {isCalculating ? "Расчёт..." : "🔄 Рассчитать"}
           </button>

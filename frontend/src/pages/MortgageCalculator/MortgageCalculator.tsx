@@ -1,5 +1,6 @@
-import React from "react";
+// MortgageCalculator.tsx
 
+import React, { useEffect } from "react";
 import "./MortgageCalculator.css";
 import { ResultsCalcSection } from "../../components/ResultsCalcSection/ResultsCalcSection";
 import { OfferBankSection } from "../../components/OfferBankSection/OfferBankSection";
@@ -18,11 +19,63 @@ export const MortgageCalculator: React.FC = () => {
     calculateResults,
     clearCache,
     _filtersRef,
+    _updateFilters,
+    _getFilters,
   } = useMortgageCalculator();
 
   const handleCalculate = () => {
     clearCache();
     calculateResults();
+  };
+
+  // 🔥 Получаем текущие фильтры
+  const currentFilters = _getFilters?.() || {
+    selectedBankFilter: "all",
+    selectedProgramTypeFilter: "all",
+    selectedCards: new Set<number>(),
+    showOverstatement: false,
+  };
+
+  // 🔥 Функции обновления фильтров с автоматическим перерасчетом
+  const handleBankFilterChange = (filter: string) => {
+    _updateFilters?.({ selectedBankFilter: filter });
+    // 🔥 Автоматический перерасчет после изменения фильтра
+    setTimeout(() => {
+      clearCache();
+      calculateResults();
+    }, 100);
+  };
+
+  const handleProgramTypeFilterChange = (filter: string) => {
+    _updateFilters?.({ selectedProgramTypeFilter: filter });
+    // 🔥 Автоматический перерасчет после изменения фильтра
+    setTimeout(() => {
+      clearCache();
+      calculateResults();
+    }, 100);
+  };
+
+  const handleToggleOverstatement = (value: boolean) => {
+    _updateFilters?.({ showOverstatement: value });
+    // 🔥 Автоматический перерасчет после изменения фильтра
+    setTimeout(() => {
+      clearCache();
+      calculateResults();
+    }, 100);
+  };
+
+  const handleResetFilters = () => {
+    _updateFilters?.({
+      selectedBankFilter: "all",
+      selectedProgramTypeFilter: "all",
+      selectedCards: new Set<number>(),
+      showOverstatement: false,
+    });
+    // 🔥 Автоматический перерасчет после сброса фильтров
+    setTimeout(() => {
+      clearCache();
+      calculateResults();
+    }, 100);
   };
 
   return (
@@ -89,6 +142,16 @@ export const MortgageCalculator: React.FC = () => {
               loanTermYears={formData.loanTerm || 30}
               area={formData.area}
               complexName={formData.complex}
+              // 🔥 Передаем фильтры и колбэки
+              selectedBankFilter={currentFilters.selectedBankFilter}
+              selectedProgramTypeFilter={
+                currentFilters.selectedProgramTypeFilter
+              }
+              showOverstatement={currentFilters.showOverstatement}
+              onBankFilterChange={handleBankFilterChange}
+              onProgramTypeFilterChange={handleProgramTypeFilterChange}
+              onToggleOverstatement={handleToggleOverstatement}
+              onResetFilters={handleResetFilters}
               filtersRef={_filtersRef}
             />
           )}
