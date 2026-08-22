@@ -1,47 +1,42 @@
 // backend/src/dtos/OfferDto.ts
 
 // ============================================================
-// DTO для динамических ставок (JSON-совместимые)
+// DTO для динамических ставок (НОВАЯ СТРУКТУРА)
 // ============================================================
-export interface DynamicRateRuleDTO {
-  type?: "pv" | "amount" | "term";
-  condition?: "gte" | "lte" | "lt" | "gt" | "eq";
-  value?: number | null;
-  minAmount?: number | null;
-  maxAmount?: number | null;
-  rate?: number | null;
-  subsidyPercent?: number | null;
-  priority?: number;
-  description?: string;
-  tolerance?: number | null;
-  toleranceType?: "fixed" | "percent" | null;
-  roundingStrategy?: "up" | "down" | null;
-}
-
-// ============================================================
-// DTO для простых динамических ставок
-// ============================================================
-export interface SimpleDynamicRateDTO {
-  minPVPercent: number;
+export interface DynamicRateDTO {
+  id?: string;
+  conditionMetadata: {
+    amountMin?: number;
+    amountMax?: number;
+    pvMin?: number;
+    pvMax?: number;
+    termMin?: number;
+    termMax?: number;
+  };
   rate: number;
-  description?: string;
+  priority?: number;
+  description?: string | null;
+  isActive?: boolean;
 }
 
 // ============================================================
-// 🔥 НОВЫЙ DTO ДЛЯ ДИНАМИЧЕСКИХ СУБСИДИЙ (единый с DynamicRate)
+// DTO для динамических субсидий (НОВАЯ СТРУКТУРА)
 // ============================================================
 export interface DynamicSubsidyDTO {
   id?: string;
-  conditionType: string; // "pv" | "amount" | "term"
-  condition: string; // "gte" | "lte" | "between" | "lt" | "gt" | "eq"
-  value: number | null;
-  minValue: number | null;
-  maxValue: number | null;
-  rate: number; // ← было subsidyPercent
-  priority: number;
-  description: string | null;
-  conditionMetadata: any;
-  isActive: boolean;
+  conditionMetadata: {
+    amountMin?: number;
+    amountMax?: number;
+    pvMin?: number;
+    pvMax?: number;
+    termMin?: number;
+    termMax?: number;
+  };
+  tolerance?: number; // всегда в процентах
+  subsidyPercent: number;
+  priority?: number;
+  description?: string | null;
+  isActive?: boolean;
 }
 
 // ============================================================
@@ -82,6 +77,12 @@ export interface CreateOfferDTO {
   roundingStrategy?: string | null;
   minLoanTermYears?: number | null;
   description?: string | null;
+
+  // 🔥 Динамические ставки
+  dynamicRates?: Omit<DynamicRateDTO, "id">[];
+
+  // 🔥 Динамические субсидии
+  dynamicSubsidies?: Omit<DynamicSubsidyDTO, "id">[];
 }
 
 export interface UpdateOfferDTO extends Partial<CreateOfferDTO> {
@@ -124,6 +125,11 @@ export interface OfferResponseDTO {
     name: string;
     slug: string;
     baseRate: number;
+    minPVPercent?: number;
+    isActive?: boolean;
+    displayOrder?: number;
+    createdAt?: Date;
+    updatedAt?: Date;
   };
   programEntity: {
     id: string;
@@ -132,35 +138,44 @@ export interface OfferResponseDTO {
     icon: string;
     color: string;
     description: string;
+    isActive?: boolean;
+    displayOrder?: number;
+    createdAt?: Date;
+    updatedAt?: Date;
   };
 
-  // Динамические ставки (единая структура)
+  // 🔥 Динамические ставки (НОВАЯ СТРУКТУРА)
   dynamicRates: {
     id: string;
-    conditionType: string;
-    condition: string;
-    value: number | null;
-    minValue: number | null;
-    maxValue: number | null;
+    conditionMetadata: {
+      amountMin?: number;
+      amountMax?: number;
+      pvMin?: number;
+      pvMax?: number;
+      termMin?: number;
+      termMax?: number;
+    };
     rate: number;
     priority: number;
-    description: string;
-    conditionMetadata: any;
+    description: string | null;
     isActive: boolean;
   }[];
 
-  // 🔥 Динамические субсидии (ТА ЖЕ СТРУКТУРА, ЧТО И У СТАВОК!)
+  // 🔥 Динамические субсидии (НОВАЯ СТРУКТУРА)
   dynamicSubsidies: {
     id: string;
-    conditionType: string; // ← было minPVPercent
-    condition: string; // ← было maxPVPercent
-    value: number | null; // ← было minAmount
-    minValue: number | null; // ← было maxAmount
-    maxValue: number | null; // ← было minTerm
-    rate: number; // ← было subsidyPercent
+    conditionMetadata: {
+      amountMin?: number;
+      amountMax?: number;
+      pvMin?: number;
+      pvMax?: number;
+      termMin?: number;
+      termMax?: number;
+    };
+    tolerance: number;
+    subsidyPercent: number;
     priority: number;
-    description: string;
-    conditionMetadata: any;
+    description: string | null;
     isActive: boolean;
   }[];
 
@@ -215,4 +230,28 @@ export interface OfferFiltersDTO {
   minPVPercent?: number;
   maxPVPercent?: number;
   search?: string;
+}
+
+// ============================================================
+// ⚠️ Устаревшие DTO (для обратной совместимости, можно удалить позже)
+// ============================================================
+export interface DynamicRateRuleDTO {
+  type?: "pv" | "amount" | "term";
+  condition?: "gte" | "lte" | "lt" | "gt" | "eq";
+  value?: number | null;
+  minAmount?: number | null;
+  maxAmount?: number | null;
+  rate?: number | null;
+  subsidyPercent?: number | null;
+  priority?: number;
+  description?: string;
+  tolerance?: number | null;
+  toleranceType?: "fixed" | "percent" | null;
+  roundingStrategy?: "up" | "down" | null;
+}
+
+export interface SimpleDynamicRateDTO {
+  minPVPercent: number;
+  rate: number;
+  description?: string;
 }

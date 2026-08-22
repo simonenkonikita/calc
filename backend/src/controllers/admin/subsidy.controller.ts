@@ -89,17 +89,13 @@ export class SubsidyController extends BaseController {
         return this.handleNotFound(res, "Offer");
       }
 
-      // 🔥 Создаем субсидию с новыми полями
+      // 🔥 Создаем субсидию с новой структурой
       const subsidy = subsidyRepository.create({
-        conditionType: data.conditionType || "pv",
-        condition: data.condition || "gte",
-        value: data.value !== undefined ? data.value : null,
-        minValue: data.minValue !== undefined ? data.minValue : null,
-        maxValue: data.maxValue !== undefined ? data.maxValue : null,
-        rate: data.rate || 0,
+        conditionMetadata: data.conditionMetadata || {},
+        tolerance: data.tolerance || 0,
+        subsidyPercent: data.subsidyPercent || data.rate || 0,
         priority: data.priority || 0,
-        description: data.description || "",
-        conditionMetadata: data.conditionMetadata || null,
+        description: data.description || null,
         isActive: data.isActive !== undefined ? data.isActive : true,
         offerId: offerId,
       });
@@ -144,37 +140,23 @@ export class SubsidyController extends BaseController {
         return this.handleNotFound(res, "Dynamic subsidy");
       }
 
-      // 🔥 Обновляем только переданные поля (новые)
-      if (data.conditionType !== undefined) {
-        subsidy.conditionType = data.conditionType;
-      }
-      if (data.condition !== undefined) {
-        subsidy.condition = data.condition;
-      }
-      if (data.value !== undefined) {
-        subsidy.value = data.value;
-      }
-      if (data.minValue !== undefined) {
-        subsidy.minValue = data.minValue;
-      }
-      if (data.maxValue !== undefined) {
-        subsidy.maxValue = data.maxValue;
-      }
-      if (data.rate !== undefined) {
-        subsidy.rate = data.rate;
-      }
-      if (data.priority !== undefined) {
-        subsidy.priority = data.priority;
-      }
-      if (data.description !== undefined) {
-        subsidy.description = data.description;
-      }
+      // 🔥 Обновляем только новые поля
       if (data.conditionMetadata !== undefined) {
-        subsidy.conditionMetadata = data.conditionMetadata;
+        subsidy.conditionMetadata = {
+          ...subsidy.conditionMetadata,
+          ...data.conditionMetadata,
+        };
       }
-      if (data.isActive !== undefined) {
-        subsidy.isActive = data.isActive;
+      if (data.tolerance !== undefined) subsidy.tolerance = data.tolerance;
+      if (data.subsidyPercent !== undefined) {
+        subsidy.subsidyPercent = data.subsidyPercent;
+      } else if (data.rate !== undefined) {
+        subsidy.subsidyPercent = data.rate; // для обратной совместимости
       }
+      if (data.priority !== undefined) subsidy.priority = data.priority;
+      if (data.description !== undefined)
+        subsidy.description = data.description;
+      if (data.isActive !== undefined) subsidy.isActive = data.isActive;
 
       await subsidyRepository.save(subsidy);
 
@@ -323,22 +305,17 @@ export class SubsidyController extends BaseController {
       // Копируем субсидии
       const copied = [];
       for (const subsidy of sourceSubsidies) {
-        // 🔥 Создаем новый объект субсидии с новыми полями
-        const subsidyData = {
-          conditionType: subsidy.conditionType,
-          condition: subsidy.condition,
-          value: subsidy.value,
-          minValue: subsidy.minValue,
-          maxValue: subsidy.maxValue,
-          rate: subsidy.rate,
+        // 🔥 Создаем новый объект субсидии с новой структурой
+        const newSubsidy = subsidyRepository.create({
+          conditionMetadata: subsidy.conditionMetadata || {},
+          tolerance: subsidy.tolerance || 0,
+          subsidyPercent: subsidy.subsidyPercent,
           priority: subsidy.priority,
           description: subsidy.description,
-          conditionMetadata: subsidy.conditionMetadata,
           isActive: subsidy.isActive,
           offerId: targetOfferId,
-        };
+        });
 
-        const newSubsidy = subsidyRepository.create(subsidyData);
         await subsidyRepository.save(newSubsidy);
         copied.push(newSubsidy);
       }

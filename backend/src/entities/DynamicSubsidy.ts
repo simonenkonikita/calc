@@ -2,12 +2,12 @@
 
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
+  PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { Offer } from "./Offer";
 
@@ -16,62 +16,44 @@ export class DynamicSubsidy {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  // ============================================================
-  // 🔥 УСЛОВИЯ (КАК В DYNAMIC_RATE)
-  // ============================================================
+  @Column({ name: "offer_id" })
+  offerId: string;
 
-  @Column({ type: "varchar", length: 20, nullable: true })
-  conditionType: string;
-
-  @Column({ type: "varchar", length: 10, nullable: true })
-  condition: string;
-
-  @Column({ type: "decimal", precision: 12, scale: 2, nullable: true })
-  value: number | null;
-
-  @Column({ type: "decimal", precision: 12, scale: 2, nullable: true })
-  minValue: number | null;
-
-  @Column({ type: "decimal", precision: 12, scale: 2, nullable: true })
-  maxValue: number | null;
-
-  // ============================================================
-  // 🔥 РЕЗУЛЬТАТ (СУБСИДИЯ В %)
-  // ============================================================
-
-  @Column({ type: "decimal", precision: 5, scale: 2 })
-  rate: number; // ← переименовали с subsidyPercent
-
-  @Column({ type: "int", default: 0 })
-  priority: number;
-
-  @Column({ type: "text", nullable: true })
-  description: string;
-
-  // ============================================================
-  // 🔥 ДОПОЛНИТЕЛЬНЫЕ ПАРАМЕТРЫ
-  // ============================================================
-
-  @Column({ type: "jsonb", nullable: true })
-  conditionMetadata: any;
-
-  @Column({ type: "boolean", default: true })
-  isActive: boolean;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  // ============================================================
-  // 🔥 СВЯЗЬ С ОФФЕРОМ
-  // ============================================================
-
-  @ManyToOne(() => Offer, (offer) => offer.dynamicSubsidies)
-  @JoinColumn({ name: "offerId" })
+  @ManyToOne(() => Offer)
+  @JoinColumn({ name: "offer_id" })
   offer: Offer;
 
-  @Column()
-  offerId: string;
+  // 🔥 УСЛОВИЯ
+  @Column({ name: "condition_metadata", type: "jsonb", default: {} })
+  conditionMetadata: {
+    amountMin?: number;
+    amountMax?: number;
+    pvMin?: number;
+    pvMax?: number;
+    termMin?: number;
+    termMax?: number;
+  };
+
+  // 🔥 ПОРОГОВАЯ ЛОГИКА (только для субсидий)
+  @Column({ type: "numeric", default: 0 })
+  tolerance: number; // всегда в процентах
+
+  // Результат
+  @Column({ type: "numeric" })
+  subsidyPercent: number;
+
+  @Column({ default: 0 })
+  priority: number;
+
+  @Column({ nullable: true })
+  description?: string;
+
+  @Column({ name: "is_active", default: true })
+  isActive: boolean;
+
+  @CreateDateColumn({ name: "created_at" })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: "updated_at" })
+  updatedAt: Date;
 }

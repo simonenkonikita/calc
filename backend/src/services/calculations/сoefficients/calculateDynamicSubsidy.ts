@@ -52,14 +52,14 @@ export const calculateDynamicSubsidy = (
     let newSubsidy: number;
     if (isTwoContracts) {
       newSubsidy = getDynamicSubsidy(
-        offer,
+        offer.dynamicSubsidies,
         userDownPaymentPercent,
         initialMortgage - variables.familyMortgageLimit,
         loanTermYears,
       );
     } else {
       newSubsidy = getDynamicSubsidy(
-        offer,
+        offer.dynamicSubsidies,
         userDownPaymentPercent,
         initialMortgage,
         loanTermYears,
@@ -88,7 +88,8 @@ export const calculateDynamicSubsidy = (
       subsidyPercent,
     );
 
-    const downPaymentFromContract = contractAmount * (userDownPaymentPercent / 100);
+    const downPaymentFromContract =
+      contractAmount * (userDownPaymentPercent / 100);
     const newMortgage = contractAmount - downPaymentFromContract;
 
     if (Math.abs(newMortgage - initialMortgage) < CONVERGENCE_THRESHOLD) {

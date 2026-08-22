@@ -41,7 +41,7 @@ export const calculateSubsidyAmount = (
 
     if (offer.dynamicSubsidies && offer.dynamicSubsidies.length > 0) {
       secondContractSubsidyPercent = getDynamicSubsidy(
-        offer,
+        offer.dynamicSubsidies,
         userDownPaymentPercent,
         secondContract,
         loanTermYears,

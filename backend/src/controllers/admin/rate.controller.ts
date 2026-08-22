@@ -89,17 +89,12 @@ export class RateController extends BaseController {
         return this.handleNotFound(res, "Offer");
       }
 
-      // Создаем ставку
+      // 🔥 Создаем ставку с новой структурой
       const rate = rateRepository.create({
-        conditionType: data.conditionType || "pv",
-        condition: data.condition || "gte",
-        value: data.value || null,
-        minValue: data.minValue || null,
-        maxValue: data.maxValue || null,
-        conditionMetadata: data.conditionMetadata || null,
+        conditionMetadata: data.conditionMetadata || {},
         rate: data.rate || 0,
         priority: data.priority || 0,
-        description: data.description || "",
+        description: data.description || null,
         isActive: data.isActive !== undefined ? data.isActive : true,
         offerId: offerId,
       });
@@ -144,15 +139,13 @@ export class RateController extends BaseController {
         return this.handleNotFound(res, "Dynamic rate");
       }
 
-      // Обновляем только переданные поля
-      if (data.conditionType !== undefined)
-        rate.conditionType = data.conditionType;
-      if (data.condition !== undefined) rate.condition = data.condition;
-      if (data.value !== undefined) rate.value = data.value;
-      if (data.minValue !== undefined) rate.minValue = data.minValue;
-      if (data.maxValue !== undefined) rate.maxValue = data.maxValue;
-      if (data.conditionMetadata !== undefined)
-        rate.conditionMetadata = data.conditionMetadata;
+      // 🔥 Обновляем только новые поля
+      if (data.conditionMetadata !== undefined) {
+        rate.conditionMetadata = {
+          ...rate.conditionMetadata,
+          ...data.conditionMetadata,
+        };
+      }
       if (data.rate !== undefined) rate.rate = data.rate;
       if (data.priority !== undefined) rate.priority = data.priority;
       if (data.description !== undefined) rate.description = data.description;

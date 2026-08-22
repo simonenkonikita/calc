@@ -453,6 +453,11 @@ export class OfferService {
             name: offer.bank.name,
             slug: offer.bank.slug,
             baseRate: offer.bank.baseRate,
+            minPVPercent: offer.bank.minPVPercent,
+            isActive: offer.bank.isActive,
+            displayOrder: offer.bank.displayOrder,
+            createdAt: offer.bank.createdAt,
+            updatedAt: offer.bank.updatedAt,
           }
         : (null as any),
       programEntity: offer.programEntity
@@ -463,36 +468,31 @@ export class OfferService {
             icon: offer.programEntity.icon,
             color: offer.programEntity.color,
             description: offer.programEntity.description,
+            isActive: offer.programEntity.isActive,
+            displayOrder: offer.programEntity.displayOrder,
+            createdAt: offer.programEntity.createdAt,
+            updatedAt: offer.programEntity.updatedAt,
           }
         : (null as any),
-      // 🔥 Маппинг динамических ставок
+      // 🔥 Исправленный маппинг динамических ставок (только новые поля)
       dynamicRates:
         offer.dynamicRates?.map((rate) => ({
           id: rate.id,
-          conditionType: rate.conditionType,
-          condition: rate.condition,
-          value: rate.value,
-          minValue: rate.minValue,
-          maxValue: rate.maxValue,
+          conditionMetadata: rate.conditionMetadata || {},
           rate: rate.rate,
-          priority: rate.priority,
-          description: rate.description,
-          conditionMetadata: rate.conditionMetadata,
+          priority: rate.priority || 0,
+          description: rate.description || null,
           isActive: rate.isActive,
         })) || [],
-      // 🔥 Маппинг динамических субсидий (НОВАЯ СТРУКТУРА!)
+      // 🔥 Исправленный маппинг динамических субсидий (только новые поля)
       dynamicSubsidies:
         offer.dynamicSubsidies?.map((subsidy) => ({
           id: subsidy.id,
-          conditionType: subsidy.conditionType, // ← новое поле
-          condition: subsidy.condition, // ← новое поле
-          value: subsidy.value, // ← новое поле
-          minValue: subsidy.minValue, // ← новое поле
-          maxValue: subsidy.maxValue, // ← новое поле
-          rate: subsidy.rate, // ← было subsidyPercent
-          priority: subsidy.priority,
-          description: subsidy.description,
-          conditionMetadata: subsidy.conditionMetadata,
+          conditionMetadata: subsidy.conditionMetadata || {},
+          tolerance: subsidy.tolerance || 0,
+          subsidyPercent: subsidy.subsidyPercent,
+          priority: subsidy.priority || 0,
+          description: subsidy.description || null,
           isActive: subsidy.isActive,
         })) || [],
       createdAt: offer.createdAt,

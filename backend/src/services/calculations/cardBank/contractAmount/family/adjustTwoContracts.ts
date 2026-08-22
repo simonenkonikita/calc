@@ -61,7 +61,7 @@ export const adjustTwoContracts = (
 
   if (offer.dynamicSubsidies && offer.dynamicSubsidies.length > 0) {
     secondContractSubsidyPercent = getDynamicSubsidy(
-      offer,
+      offer.dynamicSubsidies,
       userDownPaymentPercent,
       secondContract,
       loanTermYears,
@@ -128,7 +128,7 @@ export const adjustTwoContracts = (
       // Пересчитываем субсидию
       if (offer.dynamicSubsidies && offer.dynamicSubsidies.length > 0) {
         secondContractSubsidyPercent = getDynamicSubsidy(
-          offer,
+          offer.dynamicSubsidies,
           userDownPaymentPercent,
           secondContract,
           loanTermYears,

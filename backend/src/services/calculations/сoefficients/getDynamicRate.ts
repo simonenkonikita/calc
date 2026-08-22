@@ -1,20 +1,59 @@
 // backend/src/services/calculations/coefficients/getDynamicRate.ts
 
-import { Offer } from "../../../entities/Offer";
-import { getDynamicValue } from "./getDynamicValue";
+import { DynamicRate } from "../../../entities/DynamicRate";
 
+/**
+ * Проверка условий из metadata
+ */
+const checkMetadataConditions = (
+  meta: DynamicRate["conditionMetadata"],
+  pv: number,
+  amount: number,
+  term: number,
+): boolean => {
+  if (!meta) return false;
+
+  if (meta.amountMin !== undefined && amount < meta.amountMin) return false;
+  if (meta.amountMax !== undefined && amount > meta.amountMax) return false;
+  if (meta.pvMin !== undefined && pv < meta.pvMin) return false;
+  if (meta.pvMax !== undefined && pv > meta.pvMax) return false;
+  if (meta.termMin !== undefined && term < meta.termMin) return false;
+  if (meta.termMax !== undefined && term > meta.termMax) return false;
+
+  return true;
+};
+
+/**
+ * Получение динамической ставки
+ */
 export const getDynamicRate = (
-  offer: Offer,
+  rates: DynamicRate[],
   pvPercent: number,
   mortgageAmount: number,
   loanTerm: number = 30,
+  defaultRate: number,
 ): number => {
-  return getDynamicValue(
-    offer.dynamicRates || [],
-    pvPercent,
-    mortgageAmount,
-    loanTerm,
-    offer.rate,
-    true,
-  );
+  if (!rates || rates.length === 0) {
+    return defaultRate;
+  }
+
+  // Сортируем по приоритету (от высшего к низшему)
+  const sorted = [...rates]
+    .filter((r) => r.isActive !== false)
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+  for (const rate of sorted) {
+    if (
+      checkMetadataConditions(
+        rate.conditionMetadata,
+        pvPercent,
+        mortgageAmount,
+        loanTerm,
+      )
+    ) {
+      return typeof rate.rate === "string" ? parseFloat(rate.rate) : rate.rate;
+    }
+  }
+
+  return defaultRate;
 };

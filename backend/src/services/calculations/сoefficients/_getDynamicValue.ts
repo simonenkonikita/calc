@@ -2,7 +2,7 @@
 
 import { DynamicRate } from "../../../entities/DynamicRate";
 import { DynamicSubsidy } from "../../../entities/DynamicSubsidy";
-import { getThresholdSubsidy } from "./getThresholdSubsidy";
+import { getThresholdSubsidy } from "./_getThresholdSubsidy";
 
 type DynamicEntity = DynamicRate | DynamicSubsidy;
 

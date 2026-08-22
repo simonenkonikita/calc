@@ -4,47 +4,39 @@ import { AdminBank, AdminOffer } from "../../../types/admin.types";
 
 export interface DynamicRate {
   id?: string;
-  conditionType: string;
-  condition: string;
-  value: number | null;
-  minValue: number | null;
-  maxValue: number | null;
+  // 🔥 ТОЛЬКО conditionMetadata (сложные условия)
+  conditionMetadata: {
+    amountMin?: number | null;
+    amountMax?: number | null;
+    pvMin?: number | null;
+    pvMax?: number | null;
+    termMin?: number | null;
+    termMax?: number | null;
+  };
   rate: number;
   priority: number;
   description: string;
   isActive: boolean;
-  useComplexCondition?: boolean;
-  conditionMetadata?: {
-    pvMin?: number | null;
-    pvMax?: number | null;
-    amountMin?: number | null;
-    amountMax?: number | null;
-    termMin?: number | null;
-    termMax?: number | null;
-  };
 }
 
 // 🔥 НОВАЯ СТРУКТУРА ДЛЯ СУБСИДИЙ (ИДЕНТИЧНАЯ СТАВКАМ!)
 export interface DynamicSubsidy {
   id?: string;
-  conditionType: string; // ← было minPVPercent
-  condition: string; // ← было maxPVPercent
-  value: number | null; // ← было minAmount
-  minValue: number | null; // ← было maxAmount
-  maxValue: number | null; // ← было minTerm
-  rate: number; // ← было subsidyPercent
-  priority: number;
-  description: string;
-  isActive: boolean;
-  useComplexCondition?: boolean;
-  conditionMetadata?: {
-    pvMin?: number | null;
-    pvMax?: number | null;
+  // 🔥 ТОЛЬКО conditionMetadata (сложные условия)
+  conditionMetadata: {
     amountMin?: number | null;
     amountMax?: number | null;
+    pvMin?: number | null;
+    pvMax?: number | null;
     termMin?: number | null;
     termMax?: number | null;
   };
+  // 🔥 Пороговая логика (только для субсидий)
+  tolerance: number; // всегда в процентах
+  subsidyPercent: number; // ← было rate
+  priority: number;
+  description: string;
+  isActive: boolean;
 }
 
 export interface DynamicData {

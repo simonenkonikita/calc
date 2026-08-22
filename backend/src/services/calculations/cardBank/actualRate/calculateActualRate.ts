@@ -24,16 +24,19 @@ export const calculateActualRate = (
     loanTermYears,
   } = params;
 
+  // Рассчитываем ПВ для ставки
   const pvForRate =
     manualDownPayment > 0 && objectCost > 0
       ? (manualDownPayment / objectCost) * 100
       : userDownPaymentPercent;
 
+  // 🔥 Передаем массив dynamicRates, а не весь offer
   const actualRate = getDynamicRate(
-    offer,
+    offer.dynamicRates || [], // массив DynamicRate[]
     pvForRate,
     mortgageAmount,
     loanTermYears,
+    offer.rate, // дефолтная ставка
   );
 
   return actualRate;

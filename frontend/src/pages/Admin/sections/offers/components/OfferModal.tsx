@@ -158,51 +158,38 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   // ============================================================
 
   const resetDynamicForms = () => {
-    // Ставки
     setDynamicRates([
       {
-        conditionType: "pv",
-        condition: "gte",
-        value: null,
-        minValue: null,
-        maxValue: null,
+        conditionMetadata: {
+          amountMin: null,
+          amountMax: null,
+          pvMin: null,
+          pvMax: null,
+          termMin: null,
+          termMax: null,
+        },
         rate: 0,
         priority: 0,
         description: "",
         isActive: true,
-        useComplexCondition: false,
-        conditionMetadata: {
-          pvMin: null,
-          pvMax: null,
-          amountMin: null,
-          amountMax: null,
-          termMin: null,
-          termMax: null,
-        },
       },
     ]);
 
-    // Субсидии - ТА ЖЕ СТРУКТУРА, ЧТО И У СТАВОК!
     setDynamicSubsidies([
       {
-        conditionType: "pv",
-        condition: "gte",
-        value: null,
-        minValue: null,
-        maxValue: null,
-        rate: 0,
-        priority: 0,
-        description: "",
-        isActive: true,
-        useComplexCondition: false,
         conditionMetadata: {
-          pvMin: null,
-          pvMax: null,
           amountMin: null,
           amountMax: null,
+          pvMin: null,
+          pvMax: null,
           termMin: null,
           termMax: null,
         },
+        tolerance: 0.5,
+        subsidyPercent: 0,
+        priority: 0,
+        description: "",
+        isActive: true,
       },
     ]);
   };
@@ -216,108 +203,67 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       Array.isArray(offer.dynamicRates) &&
       offer.dynamicRates.length > 0
     ) {
-      const rates = offer.dynamicRates.map((rate: any) => {
-        const hasComplexCondition =
-          rate.conditionMetadata &&
-          (rate.conditionMetadata.pvMin !== null ||
-            rate.conditionMetadata.pvMax !== null ||
-            rate.conditionMetadata.amountMin !== null ||
-            rate.conditionMetadata.amountMax !== null ||
-            rate.conditionMetadata.termMin !== null ||
-            rate.conditionMetadata.termMax !== null);
-
-        return {
-          id: rate.id,
-          conditionType: rate.conditionType || "pv",
-          condition: rate.condition || "gte",
-          value: rate.value || null,
-          minValue: rate.minValue || null,
-          maxValue: rate.maxValue || null,
-          rate: rate.rate || 0,
-          priority: rate.priority || 0,
-          description: rate.description || "",
-          isActive: rate.isActive !== undefined ? rate.isActive : true,
-          useComplexCondition: hasComplexCondition || false,
-          conditionMetadata: rate.conditionMetadata || {
-            pvMin: null,
-            pvMax: null,
-            amountMin: null,
-            amountMax: null,
-            termMin: null,
-            termMax: null,
-          },
-        };
-      });
+      const rates = offer.dynamicRates.map((rate: any) => ({
+        id: rate.id,
+        conditionMetadata: rate.conditionMetadata || {
+          amountMin: null,
+          amountMax: null,
+          pvMin: null,
+          pvMax: null,
+          termMin: null,
+          termMax: null,
+        },
+        rate: rate.rate || 0,
+        priority: rate.priority || 0,
+        description: rate.description || "",
+        isActive: rate.isActive !== undefined ? rate.isActive : true,
+      }));
 
       setDynamicRates(rates);
       setShowRatesForm(true);
-      console.log(
-        `📊 Loaded ${rates.length} dynamic rates (${rates.filter((r) => r.useComplexCondition).length} complex)`,
-      );
+      console.log(`📊 Loaded ${rates.length} dynamic rates`);
     } else {
       setDynamicRates([
         {
-          conditionType: "pv",
-          condition: "gte",
-          value: null,
-          minValue: null,
-          maxValue: null,
+          conditionMetadata: {
+            amountMin: null,
+            amountMax: null,
+            pvMin: null,
+            pvMax: null,
+            termMin: null,
+            termMax: null,
+          },
           rate: 0,
           priority: 0,
           description: "",
           isActive: true,
-          useComplexCondition: false,
-          conditionMetadata: {
-            pvMin: null,
-            pvMax: null,
-            amountMin: null,
-            amountMax: null,
-            termMin: null,
-            termMax: null,
-          },
         },
       ]);
       setShowRatesForm(false);
     }
 
-    // 2. Загружаем динамические субсидии - НОВАЯ СТРУКТУРА!
+    // 2. Загружаем динамические субсидии
     if (
       offer.dynamicSubsidies &&
       Array.isArray(offer.dynamicSubsidies) &&
       offer.dynamicSubsidies.length > 0
     ) {
-      const subsidies = offer.dynamicSubsidies.map((subsidy: any) => {
-        const hasComplexCondition =
-          subsidy.conditionMetadata &&
-          (subsidy.conditionMetadata.pvMin !== null ||
-            subsidy.conditionMetadata.pvMax !== null ||
-            subsidy.conditionMetadata.amountMin !== null ||
-            subsidy.conditionMetadata.amountMax !== null ||
-            subsidy.conditionMetadata.termMin !== null ||
-            subsidy.conditionMetadata.termMax !== null);
-
-        return {
-          id: subsidy.id,
-          conditionType: subsidy.conditionType || "pv",
-          condition: subsidy.condition || "gte",
-          value: subsidy.value || null,
-          minValue: subsidy.minValue || null,
-          maxValue: subsidy.maxValue || null,
-          rate: subsidy.rate || 0, // ← было subsidyPercent
-          priority: subsidy.priority || 0,
-          description: subsidy.description || "",
-          isActive: subsidy.isActive !== undefined ? subsidy.isActive : true,
-          useComplexCondition: hasComplexCondition || false,
-          conditionMetadata: subsidy.conditionMetadata || {
-            pvMin: null,
-            pvMax: null,
-            amountMin: null,
-            amountMax: null,
-            termMin: null,
-            termMax: null,
-          },
-        };
-      });
+      const subsidies = offer.dynamicSubsidies.map((subsidy: any) => ({
+        id: subsidy.id,
+        conditionMetadata: subsidy.conditionMetadata || {
+          amountMin: null,
+          amountMax: null,
+          pvMin: null,
+          pvMax: null,
+          termMin: null,
+          termMax: null,
+        },
+        tolerance: subsidy.tolerance ?? 0.5,
+        subsidyPercent: subsidy.subsidyPercent || 0,
+        priority: subsidy.priority || 0,
+        description: subsidy.description || "",
+        isActive: subsidy.isActive !== undefined ? subsidy.isActive : true,
+      }));
 
       setDynamicSubsidies(subsidies);
       setShowSubsidiesForm(true);
@@ -325,24 +271,19 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     } else {
       setDynamicSubsidies([
         {
-          conditionType: "pv",
-          condition: "gte",
-          value: null,
-          minValue: null,
-          maxValue: null,
-          rate: 0,
-          priority: 0,
-          description: "",
-          isActive: true,
-          useComplexCondition: false,
           conditionMetadata: {
-            pvMin: null,
-            pvMax: null,
             amountMin: null,
             amountMax: null,
+            pvMin: null,
+            pvMax: null,
             termMin: null,
             termMax: null,
           },
+          tolerance: 0.5,
+          subsidyPercent: 0,
+          priority: 0,
+          description: "",
+          isActive: true,
         },
       ]);
       setShowSubsidiesForm(false);
@@ -415,24 +356,18 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       if (dynamicRates.length === 0) {
         setDynamicRates([
           {
-            conditionType: "pv",
-            condition: "gte",
-            value: null,
-            minValue: null,
-            maxValue: null,
+            conditionMetadata: {
+              amountMin: null,
+              amountMax: null,
+              pvMin: null,
+              pvMax: null,
+              termMin: null,
+              termMax: null,
+            },
             rate: 0,
             priority: 0,
             description: "",
             isActive: true,
-            useComplexCondition: false,
-            conditionMetadata: {
-              pvMin: null,
-              pvMax: null,
-              amountMin: null,
-              amountMax: null,
-              termMin: null,
-              termMax: null,
-            },
           },
         ]);
       }
@@ -456,24 +391,19 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       if (dynamicSubsidies.length === 0) {
         setDynamicSubsidies([
           {
-            conditionType: "pv",
-            condition: "gte",
-            value: null,
-            minValue: null,
-            maxValue: null,
-            rate: 0,
-            priority: 0,
-            description: "",
-            isActive: true,
-            useComplexCondition: false,
             conditionMetadata: {
-              pvMin: null,
-              pvMax: null,
               amountMin: null,
               amountMax: null,
+              pvMin: null,
+              pvMax: null,
               termMin: null,
               termMax: null,
             },
+            tolerance: 0.5,
+            subsidyPercent: 0,
+            priority: 0,
+            description: "",
+            isActive: true,
           },
         ]);
       }
@@ -591,21 +521,13 @@ export const OfferModal: React.FC<OfferModalProps> = ({
             (rate.description && rate.description.trim() !== "");
           if (!isValid) continue;
 
-          const rateData: any = {
-            conditionType: rate.conditionType || "pv",
-            condition: rate.condition || "gte",
-            value: rate.value || null,
-            minValue: rate.minValue || null,
-            maxValue: rate.maxValue || null,
+          const rateData = {
+            conditionMetadata: rate.conditionMetadata || {},
             rate: rate.rate,
             priority: rate.priority || 0,
             description: rate.description || "",
             isActive: true,
           };
-
-          if (rate.useComplexCondition && rate.conditionMetadata) {
-            rateData.conditionMetadata = rate.conditionMetadata;
-          }
 
           if (rate.id) {
             try {
@@ -645,7 +567,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       }
 
       // ============================================================
-      // 2. СОХРАНЯЕМ СУБСИДИИ (НОВАЯ СТРУКТУРА!)
+      // 2. СОХРАНЯЕМ СУБСИДИИ
       // ============================================================
       if (showSubsidiesForm) {
         const existingSubsidies =
@@ -671,34 +593,25 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         let createdCount = 0;
         for (const subsidy of dynamicSubsidies) {
           const isValid =
-            subsidy.rate > 0 ||
-            (subsidy.description && subsidy.description.trim() !== "") ||
-            subsidy.value !== null ||
-            subsidy.minValue !== null ||
-            subsidy.maxValue !== null;
-
+            subsidy.subsidyPercent > 0 ||
+            (subsidy.description && subsidy.description.trim() !== "");
           if (!isValid) continue;
 
-          const subsidyData: any = {
-            conditionType: subsidy.conditionType || "pv",
-            condition: subsidy.condition || "gte",
-            value: subsidy.value || null,
-            minValue: subsidy.minValue || null,
-            maxValue: subsidy.maxValue || null,
-            rate: subsidy.rate, // ← теперь rate вместо subsidyPercent!
+          const subsidyData = {
+            conditionMetadata: subsidy.conditionMetadata || {},
+            tolerance: subsidy.tolerance || 0,
+            subsidyPercent: subsidy.subsidyPercent,
             priority: subsidy.priority || 0,
             description: subsidy.description || "",
             isActive: true,
           };
 
-          if (subsidy.useComplexCondition && subsidy.conditionMetadata) {
-            subsidyData.conditionMetadata = subsidy.conditionMetadata;
-          }
-
           if (subsidy.id) {
             try {
               await adminApi.updateDynamicSubsidy(subsidy.id, subsidyData);
-              console.log(`✅ Updated subsidy ${subsidy.id}: ${subsidy.rate}%`);
+              console.log(
+                `✅ Updated subsidy ${subsidy.id}: ${subsidy.subsidyPercent}%`,
+              );
             } catch (error) {
               console.error(
                 `❌ Failed to update subsidy ${subsidy.id}:`,
@@ -712,7 +625,9 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                 subsidyData,
               );
               createdCount++;
-              console.log(`✅ Created subsidy ${created.id}: ${subsidy.rate}%`);
+              console.log(
+                `✅ Created subsidy ${created.id}: ${subsidy.subsidyPercent}%`,
+              );
             } catch (error) {
               console.error(`❌ Failed to create subsidy:`, error);
             }

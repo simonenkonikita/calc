@@ -1,7 +1,5 @@
 // frontend/src/pages/Admin/types/admin.types.ts
 
-import { DynamicRate, DynamicSubsidy } from "../sections/offers";
-
 export interface AdminBank {
   id: string;
   name: string;
@@ -58,39 +56,62 @@ export interface AdminProgram {
   updatedAt?: string;
 }
 
+// ============================================================
+// 🔥 НОВАЯ СТРУКТУРА ДЛЯ ДИНАМИЧЕСКИХ СТАВОК
+// ============================================================
 export interface AdminRate {
   id: string;
   offerId: string;
-  conditionType: "pv" | "amount" | "term";
-  condition: "gte" | "lte" | "lt" | "gt" | "eq";
-  value: number | null;
-  minValue: number | null;
-  maxValue: number | null;
+
+  // 🔥 ТОЛЬКО conditionMetadata (сложные условия)
+  conditionMetadata: {
+    amountMin?: number | null;
+    amountMax?: number | null;
+    pvMin?: number | null;
+    pvMax?: number | null;
+    termMin?: number | null;
+    termMax?: number | null;
+  };
+
   rate: number;
   priority: number;
-  description: string;
+  description: string | null;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
 
+// ============================================================
+// 🔥 НОВАЯ СТРУКТУРА ДЛЯ ДИНАМИЧЕСКИХ СУБСИДИЙ
+// ============================================================
 export interface AdminSubsidy {
   id: string;
   offerId: string;
-  minPVPercent: number | null;
-  maxPVPercent: number | null;
-  minAmount: number | null;
-  maxAmount: number | null;
-  minTerm: number | null;
-  maxTerm: number | null;
+
+  // 🔥 ТОЛЬКО conditionMetadata (сложные условия)
+  conditionMetadata: {
+    amountMin?: number | null;
+    amountMax?: number | null;
+    pvMin?: number | null;
+    pvMax?: number | null;
+    termMin?: number | null;
+    termMax?: number | null;
+  };
+
+  // 🔥 Пороговая логика (только для субсидий)
+  tolerance: number; // всегда в процентах
+
   subsidyPercent: number;
   priority: number;
-  description: string;
+  description: string | null;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
 
+// ============================================================
+// 🔥 НОВАЯ СТРУКТУРА ДЛЯ OFFER
+// ============================================================
 export interface AdminOffer {
   id: string;
   program: string;
@@ -117,8 +138,13 @@ export interface AdminOffer {
   programId: string;
   bank?: AdminBank;
   programEntity?: AdminProgram;
-  dynamicRates?: DynamicRate[];
-  dynamicSubsidies?: DynamicSubsidy[];
+
+  // 🔥 Динамические ставки (новая структура)
+  dynamicRates?: AdminRate[];
+
+  // 🔥 Динамические субсидии (новая структура)
+  dynamicSubsidies?: AdminSubsidy[];
+
   createdAt?: string;
   updatedAt?: string;
 }
@@ -131,4 +157,39 @@ export interface AdminConfig {
   bankOrder: string[];
   createdAt?: string;
   updatedAt?: string;
+}
+
+// ============================================================
+// 🔥 DTO ДЛЯ СОЗДАНИЯ/ОБНОВЛЕНИЯ (фронтенд -> бэкенд)
+// ============================================================
+
+export interface CreateAdminRateDTO {
+  conditionMetadata: {
+    amountMin?: number | null;
+    amountMax?: number | null;
+    pvMin?: number | null;
+    pvMax?: number | null;
+    termMin?: number | null;
+    termMax?: number | null;
+  };
+  rate: number;
+  priority?: number;
+  description?: string | null;
+  isActive?: boolean;
+}
+
+export interface CreateAdminSubsidyDTO {
+  conditionMetadata: {
+    amountMin?: number | null;
+    amountMax?: number | null;
+    pvMin?: number | null;
+    pvMax?: number | null;
+    termMin?: number | null;
+    termMax?: number | null;
+  };
+  tolerance?: number; // всегда в процентах
+  subsidyPercent: number;
+  priority?: number;
+  description?: string | null;
+  isActive?: boolean;
 }
