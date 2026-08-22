@@ -1,6 +1,3 @@
-import { RefObject } from "react";
-import { DynamicSubsidy } from "../entities/DynamicSubsidy";
-
 // Расширенный тип для хранения оригинального индекса
 export interface BankProgramResultWithIndex extends BankProgramResult {
   _originalIndex: number;
@@ -118,34 +115,6 @@ export interface ObjectCalculationResult {
   downPayment: number; // ПВ (рассчитанный)
   remainingAmount: number; // Сумма для расчета (objectCost - downPayment)
   pricePerSquareMeter: number; // Цена за м2 (из справочника)
-}
-
-export interface OfferBankSectionProps {
-  bankResults: BankProgramResult[];
-  onSelectOffer: (index: number) => void;
-  formatMoney: (amount: number) => string;
-  mortgageWithoutDownPayment?: boolean;
-  mortgagePartialDownPayment?: boolean;
-  loanTermYears: number;
-  area: number;
-  complexName: string;
-
-  // 🔥 Фильтры
-  selectedBankFilter: string;
-  selectedProgramTypeFilter: string;
-  showOverstatement: boolean;
-  onBankFilterChange: (filter: string) => void;
-  onProgramTypeFilterChange: (filter: string) => void;
-  onToggleOverstatement: (value: boolean) => void;
-  onResetFilters: () => void;
-
-  // Ref для фильтров
-  filtersRef?: React.RefObject<{
-    selectedBankFilter: string;
-    selectedProgramTypeFilter: string;
-    selectedCards: Set<number>;
-    showOverstatement?: boolean;
-  }>;
 }
 
 // ========== БАНКОВСКИЕ ПРОГРАММЫ (из JSON) ==========

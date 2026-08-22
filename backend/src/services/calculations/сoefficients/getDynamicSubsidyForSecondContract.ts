@@ -15,7 +15,7 @@ export const getDynamicSubsidyForSecondContract = (
   if (offer.dynamicSubsidies && offer.dynamicSubsidies.length > 0) {
     // Передаем весь offer, а не только массив
     const result = getDynamicSubsidy(
-      offer,
+      offer.dynamicSubsidies,
       userDownPaymentPercent,
       secondContractAmount,
       loanTermYears,
