@@ -1,0 +1,78 @@
+# docker-compose.yml
+version: "3.8"
+
+services:
+  # ============================================================
+  # POSTGRESQL БАЗА ДАННЫХ
+  # ============================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: ipoteka_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - ipoteka_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================
+  # БЭКЕНД
+  # ============================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ipoteka_backend
+    restart: always
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3001}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost}
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ipoteka_network
+
+  # ============================================================
+  # ФРОНТЕНД
+  # ============================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+        VITE_ADMIN_PASSWORD: ${VITE_ADMIN_PASSWORD:-admin123}
+    container_name: ipoteka_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - ipoteka_network
+
+volumes:
+  postgres_data:
+
+networks:
+  ipoteka_network:
+    driver: bridge
