@@ -532,13 +532,6 @@ export const adminApi = {
     if (!response.ok) throw new Error("Failed to delete rate");
   },
 
-  async hardDeleteDynamicRate(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/dynamic-rates/${id}/hard`, {
-      method: "DELETE",
-    });
-    if (!response.ok) throw new Error("Failed to hard delete rate");
-  },
-
   async updateDynamicRatesPriorities(
     rates: { id: string; priority: number }[],
   ): Promise<any[]> {

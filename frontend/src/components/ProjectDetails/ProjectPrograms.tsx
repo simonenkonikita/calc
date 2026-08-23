@@ -1,7 +1,7 @@
 // src/pages/ProjectsPage/components/ProjectDetails/ProjectPrograms.tsx
 import React, { useState, useMemo } from "react";
 import "./ProjectPrograms.css";
-import { ProjectInfo } from "../../utils/types";
+import { BankOffer, ProjectInfo } from "../../utils/types";
 import { ProgramCard } from "../ProgramCard/ProgramCard";
 import { OfferRow } from "../OfferRow/OfferRow";
 
@@ -63,7 +63,7 @@ export const ProjectPrograms: React.FC<ProjectProgramsProps> = ({
             >
               {isExpanded && program.offers.length > 0 && (
                 <div className="offers-list">
-                  {program.offers.map((offer, idx) => (
+                  {program.offers.map((offer: BankOffer, idx: number) => (
                     <OfferRow key={idx} offer={offer} />
                   ))}
                 </div>
