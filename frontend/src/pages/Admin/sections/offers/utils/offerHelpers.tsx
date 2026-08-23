@@ -89,10 +89,12 @@ export const getDisplaySubsidy = (
 
   // 2. Затем проверяем offer.dynamicSubsidies (из самого оффера)
   if (hasDynamicSubsidies) {
-    const subsidies = offer.dynamicSubsidies
-      .map((rule: any) => rule.subsidyPercent)
-      .filter((val: number) => val !== undefined && val !== null)
-      .sort((a: number, b: number) => a - b);
+    const subsidies =
+      offer.dynamicSubsidies ||
+      []
+        .map((rule: any) => rule.subsidyPercent)
+        .filter((val: number) => val !== undefined && val !== null)
+        .sort((a: number, b: number) => a - b);
 
     if (subsidies.length === 0) return { display: "—", type: "none" };
 

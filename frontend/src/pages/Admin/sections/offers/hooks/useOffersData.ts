@@ -65,8 +65,8 @@ export const useOffersData = () => {
       const subsidies = offer.dynamicSubsidies ?? [];
 
       dataMap[offer.id] = {
-        rates: Array.isArray(rates) ? rates : [],
-        subsidies: Array.isArray(subsidies) ? subsidies : [],
+        rates: (Array.isArray(rates) ? rates : []) as any,
+        subsidies: (Array.isArray(subsidies) ? subsidies : []) as any,
       };
     }
 
