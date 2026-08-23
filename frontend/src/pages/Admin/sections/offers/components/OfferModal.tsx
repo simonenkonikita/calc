@@ -344,12 +344,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     if (showRatesForm) {
       const rateIds = dynamicRates.filter((r) => r.id).map((r) => r.id);
       for (const id of rateIds) {
-        adminApi
-          .hardDeleteDynamicRate(id)
-          .then(() => console.log(`🗑️ Rate ${id} deleted from DB`))
-          .catch((error) =>
-            console.error(`❌ Failed to delete rate ${id}:`, error),
-          );
+        if (id) {
+          adminApi
+            .hardDeleteDynamicRate(id)
+            .then(() => console.log(`🗑️ Rate ${id} deleted from DB`))
+            .catch((error) =>
+              console.error(`❌ Failed to delete rate ${id}:`, error),
+            );
+        }
       }
       setDynamicRates([]);
     } else {
@@ -379,12 +381,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     if (showSubsidiesForm) {
       const subsidyIds = dynamicSubsidies.filter((s) => s.id).map((s) => s.id);
       for (const id of subsidyIds) {
-        adminApi
-          .hardDeleteDynamicSubsidy(id)
-          .then(() => console.log(`🗑️ Subsidy ${id} deleted from DB`))
-          .catch((error) =>
-            console.error(`❌ Failed to delete subsidy ${id}:`, error),
-          );
+        if (id) {
+          adminApi
+            .hardDeleteDynamicSubsidy(id)
+            .then(() => console.log(`🗑️ Subsidy ${id} deleted from DB`))
+            .catch((error) =>
+              console.error(`❌ Failed to delete subsidy ${id}:`, error),
+            );
+        }
       }
       setDynamicSubsidies([]);
     } else {

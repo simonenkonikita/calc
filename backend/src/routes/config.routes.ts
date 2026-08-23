@@ -5,7 +5,7 @@ import { DEPOSIT_AMOUNT } from "../data/complexPrice/CONSTRUCTION";
 
 const router = Router();
 
-router.get("/config", (req, res) => {
+router.get("/", (req, res) => {
   res.json({
     success: true,
     data: {
