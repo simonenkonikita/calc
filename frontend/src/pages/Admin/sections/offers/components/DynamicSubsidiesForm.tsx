@@ -1,6 +1,6 @@
 // frontend/src/pages/Admin/sections/offers/components/DynamicSubsidiesForm.tsx
 
-import React from "react";
+import React, { useState } from "react";
 import { DynamicSubsidy } from "../types";
 import "./DynamicSubsidiesForm.css";
 
@@ -8,14 +8,22 @@ interface DynamicSubsidiesFormProps {
   subsidies: DynamicSubsidy[];
   onSubsidiesChange: (subsidies: DynamicSubsidy[]) => void;
   onSubsidyDelete?: (subsidy: DynamicSubsidy) => void;
+  isEditMode?: boolean; // 🔥 Новый пропс для режима редактирования
+  onEditModeToggle?: () => void; // 🔥 Переключение режима
 }
 
 export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
   subsidies,
   onSubsidiesChange,
   onSubsidyDelete,
+  isEditMode = false,
+  onEditModeToggle,
 }) => {
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+
+  // 🔥 Добавление строки с правильным priority (начинается с 1)
   const addRow = () => {
+    const newPriority = subsidies.length + 1;
     onSubsidiesChange([
       ...subsidies,
       {
@@ -29,13 +37,29 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
         },
         tolerance: 0.5,
         subsidyPercent: 0,
-        priority: subsidies.length,
+        priority: newPriority,
         description: "",
         isActive: true,
       },
     ]);
   };
 
+  // 🔥 Дублирование строки
+  const duplicateRow = (index: number) => {
+    const originalSubsidy = subsidies[index];
+    const newPriority = subsidies.length + 1;
+
+    const duplicatedSubsidy = {
+      ...originalSubsidy,
+      id: undefined,
+      priority: newPriority,
+      conditionMetadata: { ...originalSubsidy.conditionMetadata },
+    };
+
+    onSubsidiesChange([...subsidies, duplicatedSubsidy]);
+  };
+
+  // 🔥 Удаление строки с перенумерацией оставшихся
   const removeRow = (index: number) => {
     if (subsidies.length <= 1) {
       alert("Должна быть хотя бы одна строка");
@@ -47,7 +71,54 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
       onSubsidyDelete(removedSubsidy);
     }
 
-    onSubsidiesChange(subsidies.filter((_, i) => i !== index));
+    const filteredSubsidies = subsidies.filter((_, i) => i !== index);
+    const renumberedSubsidies = filteredSubsidies.map((subsidy, idx) => ({
+      ...subsidy,
+      priority: idx + 1,
+    }));
+    onSubsidiesChange(renumberedSubsidies);
+  };
+
+  // 🔥 Перетаскивание строк
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    if (!isEditMode) return; // 🔥 Запрещаем drag в режиме просмотра
+    setDragIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(index));
+    setTimeout(() => {
+      (e.target as HTMLElement).classList.add("dragging");
+    }, 0);
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    (e.target as HTMLElement).classList.remove("dragging");
+    setDragIndex(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (!isEditMode) return; // 🔥 Запрещаем drag в режиме просмотра
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    if (!isEditMode) return;
+    e.preventDefault();
+    const dragIndexNum = parseInt(e.dataTransfer.getData("text/plain"));
+
+    if (dragIndexNum === dropIndex) return;
+
+    const newSubsidies = [...subsidies];
+    const [draggedItem] = newSubsidies.splice(dragIndexNum, 1);
+    newSubsidies.splice(dropIndex, 0, draggedItem);
+
+    const renumberedSubsidies = newSubsidies.map((subsidy, idx) => ({
+      ...subsidy,
+      priority: idx + 1,
+    }));
+
+    onSubsidiesChange(renumberedSubsidies);
+    setDragIndex(null);
   };
 
   const updateRow = (
@@ -55,6 +126,7 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
     field: keyof DynamicSubsidy,
     value: any,
   ) => {
+    if (!isEditMode) return;
     const updated = [...subsidies];
     updated[index] = { ...updated[index], [field]: value };
     onSubsidiesChange(updated);
@@ -65,6 +137,7 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
     field: keyof DynamicSubsidy["conditionMetadata"],
     value: any,
   ) => {
+    if (!isEditMode) return;
     const updated = [...subsidies];
     updated[index].conditionMetadata = {
       ...updated[index].conditionMetadata,
@@ -73,151 +146,324 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
     onSubsidiesChange(updated);
   };
 
+  // 🔥 Рендер ячейки в режиме просмотра
+  const renderViewValue = (value: any, placeholder: string = "-") => {
+    if (value === null || value === undefined || value === "") {
+      return <span className="view-empty">{placeholder}</span>;
+    }
+    return <span className="view-value">{value}</span>;
+  };
+
   return (
     <div className="dynamic-form">
       <div className="dynamic-form-header">
         <h4>💰 Динамические субсидии</h4>
-        <button onClick={addRow} className="admin-btn-secondary admin-btn-sm">
-          + Добавить условие
-        </button>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          {!isEditMode && onEditModeToggle && (
+            <button
+              onClick={onEditModeToggle}
+              className="admin-btn-edit admin-btn-sm"
+            >
+              ✏️ Редактировать
+            </button>
+          )}
+          {isEditMode && (
+            <>
+              <button
+                onClick={addRow}
+                className="admin-btn-secondary admin-btn-sm"
+              >
+                + Добавить условие
+              </button>
+              {subsidies.length > 1 && (
+                <button
+                  onClick={() => {
+                    if (confirm("Очистить все строки?")) {
+                      onSubsidiesChange([
+                        {
+                          conditionMetadata: {
+                            amountMin: null,
+                            amountMax: null,
+                            pvMin: null,
+                            pvMax: null,
+                            termMin: null,
+                            termMax: null,
+                          },
+                          tolerance: 0.5,
+                          subsidyPercent: 0,
+                          priority: 1,
+                          description: "",
+                          isActive: true,
+                        },
+                      ]);
+                    }
+                  }}
+                  className="admin-btn-danger admin-btn-sm"
+                >
+                  🗑️ Очистить все
+                </button>
+              )}
+              {onEditModeToggle && (
+                <button
+                  onClick={onEditModeToggle}
+                  className="admin-btn-save admin-btn-sm"
+                >
+                  💾 Сохранить
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       <div className="admin-table-wrapper">
-        <table className="admin-table">
+        <table className={`admin-table ${!isEditMode ? "view-mode" : ""}`}>
           <thead>
             <tr>
-              <th>Сумма от</th>
-              <th>Сумма до</th>
-              <th>ПВ от (%)</th>
-              <th>ПВ до (%)</th>
-              <th>Срок от </th>
-              <th>Срок до</th>
-              <th>Субсидия (%)</th>
-              <th>Приор</th>
-              <th>Описание</th>
-              <th>Действия</th>
+              {isEditMode && <th style={{ width: "40px" }}>↕</th>}
+              <th style={{ width: "50px" }}>№</th>
+              <th style={{ minWidth: "120px" }}>Сумма от</th>
+              <th style={{ minWidth: "120px" }}>Сумма до</th>
+              <th style={{ minWidth: "110px" }}>ПВ от (%)</th>
+              <th style={{ minWidth: "110px" }}>ПВ до (%)</th>
+              <th style={{ minWidth: "100px" }}>Срок от</th>
+              <th style={{ minWidth: "100px" }}>Срок до</th>
+              <th style={{ minWidth: "120px" }}>Субсидия (%)</th>
+              <th style={{ minWidth: "100px" }}>Приоритет</th>
+              <th style={{ minWidth: "150px" }}>Описание</th>
+              {isEditMode && <th style={{ width: "100px" }}>Действия</th>}
             </tr>
           </thead>
           <tbody>
             {subsidies.map((subsidy, index) => (
-              <tr key={index}>
-                <td>
-                  <input
-                    type="number"
-                    placeholder="от"
-                    value={subsidy.conditionMetadata.amountMin ?? ""}
-                    onChange={(e) =>
-                      updateMetadata(index, "amountMin", e.target.value)
-                    }
-                    style={{ width: "80px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    placeholder="до"
-                    value={subsidy.conditionMetadata.amountMax ?? ""}
-                    onChange={(e) =>
-                      updateMetadata(index, "amountMax", e.target.value)
-                    }
-                    style={{ width: "80px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="от"
-                    value={subsidy.conditionMetadata.pvMin ?? ""}
-                    onChange={(e) =>
-                      updateMetadata(index, "pvMin", e.target.value)
-                    }
-                    style={{ width: "60px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="до"
-                    value={subsidy.conditionMetadata.pvMax ?? ""}
-                    onChange={(e) =>
-                      updateMetadata(index, "pvMax", e.target.value)
-                    }
-                    style={{ width: "60px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    placeholder="от"
-                    value={subsidy.conditionMetadata.termMin ?? ""}
-                    onChange={(e) =>
-                      updateMetadata(index, "termMin", e.target.value)
-                    }
-                    style={{ width: "50px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    placeholder="до"
-                    value={subsidy.conditionMetadata.termMax ?? ""}
-                    onChange={(e) =>
-                      updateMetadata(index, "termMax", e.target.value)
-                    }
-                    style={{ width: "50px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="%"
-                    value={subsidy.subsidyPercent ?? ""}
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "subsidyPercent",
-                        parseFloat(e.target.value) || 0,
-                      )
-                    }
-                    style={{ width: "60px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    placeholder="Приор"
-                    value={subsidy.priority ?? ""}
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "priority",
-                        parseInt(e.target.value) || 0,
-                      )
-                    }
-                    style={{ width: "50px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    placeholder="Описание"
-                    value={subsidy.description || ""}
-                    onChange={(e) =>
-                      updateRow(index, "description", e.target.value)
-                    }
-                    style={{ width: "100px" }}
-                  />
-                </td>
-                <td>
-                  <button
-                    onClick={() => removeRow(index)}
-                    className="admin-btn-danger admin-btn-xs"
+              <tr
+                key={index}
+                draggable={isEditMode}
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, index)}
+                className={dragIndex === index ? "drag-over" : ""}
+                style={{ cursor: isEditMode ? "grab" : "default" }}
+              >
+                {isEditMode && (
+                  <td
+                    style={{
+                      textAlign: "center",
+                      color: "#9ca3af",
+                      fontSize: "1.1rem",
+                    }}
                   >
-                    ✕
-                  </button>
+                    <span className="drag-handle">⠿</span>
+                  </td>
+                )}
+                <td
+                  style={{
+                    textAlign: "center",
+                    fontWeight: 600,
+                    color: "#6b7280",
+                  }}
+                >
+                  {index + 1}
                 </td>
+                <td>
+                  {isEditMode ? (
+                    <input
+                      type="number"
+                      placeholder="Например: 1000000"
+                      value={subsidy.conditionMetadata.amountMin ?? ""}
+                      onChange={(e) =>
+                        updateMetadata(index, "amountMin", e.target.value)
+                      }
+                      className="form-input form-input-lg"
+                      style={{ width: "100%" }}
+                    />
+                  ) : (
+                    renderViewValue(
+                      subsidy.conditionMetadata.amountMin,
+                      "Не указан",
+                    )
+                  )}
+                </td>
+                <td>
+                  {isEditMode ? (
+                    <input
+                      type="number"
+                      placeholder="Например: 8000000"
+                      value={subsidy.conditionMetadata.amountMax ?? ""}
+                      onChange={(e) =>
+                        updateMetadata(index, "amountMax", e.target.value)
+                      }
+                      className="form-input form-input-lg"
+                      style={{ width: "100%" }}
+                    />
+                  ) : (
+                    renderViewValue(
+                      subsidy.conditionMetadata.amountMax,
+                      "Не указан",
+                    )
+                  )}
+                </td>
+                <td>
+                  {isEditMode ? (
+                    <input
+                      type="number"
+                      step="0.1"
+                      placeholder="Например: 20.1"
+                      value={subsidy.conditionMetadata.pvMin ?? ""}
+                      onChange={(e) =>
+                        updateMetadata(index, "pvMin", e.target.value)
+                      }
+                      className="form-input form-input-lg"
+                      style={{ width: "100%" }}
+                    />
+                  ) : (
+                    renderViewValue(
+                      subsidy.conditionMetadata.pvMin,
+                      "Не указан",
+                    )
+                  )}
+                </td>
+                <td>
+                  {isEditMode ? (
+                    <input
+                      type="number"
+                      step="0.1"
+                      placeholder="Например: 30.0"
+                      value={subsidy.conditionMetadata.pvMax ?? ""}
+                      onChange={(e) =>
+                        updateMetadata(index, "pvMax", e.target.value)
+                      }
+                      className="form-input form-input-lg"
+                      style={{ width: "100%" }}
+                    />
+                  ) : (
+                    renderViewValue(
+                      subsidy.conditionMetadata.pvMax,
+                      "Не указан",
+                    )
+                  )}
+                </td>
+                <td>
+                  {isEditMode ? (
+                    <input
+                      type="number"
+                      placeholder="Например: 1"
+                      value={subsidy.conditionMetadata.termMin ?? ""}
+                      onChange={(e) =>
+                        updateMetadata(index, "termMin", e.target.value)
+                      }
+                      className="form-input form-input-lg"
+                      style={{ width: "100%" }}
+                    />
+                  ) : (
+                    renderViewValue(
+                      subsidy.conditionMetadata.termMin,
+                      "Не указан",
+                    )
+                  )}
+                </td>
+                <td>
+                  {isEditMode ? (
+                    <input
+                      type="number"
+                      placeholder="Например: 30"
+                      value={subsidy.conditionMetadata.termMax ?? ""}
+                      onChange={(e) =>
+                        updateMetadata(index, "termMax", e.target.value)
+                      }
+                      className="form-input form-input-lg"
+                      style={{ width: "100%" }}
+                    />
+                  ) : (
+                    renderViewValue(
+                      subsidy.conditionMetadata.termMax,
+                      "Не указан",
+                    )
+                  )}
+                </td>
+                <td>
+                  {isEditMode ? (
+                    <input
+                      type="number"
+                      step="0.1"
+                      placeholder="Например: 15.0"
+                      value={subsidy.subsidyPercent ?? ""}
+                      onChange={(e) =>
+                        updateRow(
+                          index,
+                          "subsidyPercent",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
+                      className="form-input form-input-lg"
+                      style={{ width: "100%" }}
+                    />
+                  ) : (
+                    renderViewValue(subsidy.subsidyPercent, "Не указан")
+                  )}
+                </td>
+                <td>
+                  {isEditMode ? (
+                    <input
+                      type="number"
+                      placeholder="Например: 1"
+                      value={subsidy.priority ?? ""}
+                      onChange={(e) =>
+                        updateRow(
+                          index,
+                          "priority",
+                          parseInt(e.target.value) || 0,
+                        )
+                      }
+                      className="form-input form-input-lg"
+                      style={{ width: "100%" }}
+                    />
+                  ) : (
+                    renderViewValue(subsidy.priority, "Не указан")
+                  )}
+                </td>
+                <td>
+                  {isEditMode ? (
+                    <input
+                      placeholder="Описание условия"
+                      value={subsidy.description || ""}
+                      onChange={(e) =>
+                        updateRow(index, "description", e.target.value)
+                      }
+                      className="form-input form-input-lg"
+                      style={{ width: "100%" }}
+                    />
+                  ) : (
+                    renderViewValue(subsidy.description, "Нет описания")
+                  )}
+                </td>
+                {isEditMode && (
+                  <td>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "0.3rem",
+                        alignItems: "center",
+                      }}
+                    >
+                      <button
+                        onClick={() => duplicateRow(index)}
+                        className="admin-btn-duplicate admin-btn-xs"
+                        title="Дублировать строку"
+                      >
+                        📋
+                      </button>
+                      <button
+                        onClick={() => removeRow(index)}
+                        className="admin-btn-danger admin-btn-xs"
+                        title="Удалить строку"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

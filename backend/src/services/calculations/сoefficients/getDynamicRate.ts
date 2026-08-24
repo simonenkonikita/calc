@@ -13,12 +13,12 @@ const checkMetadataConditions = (
 ): boolean => {
   if (!meta) return false;
 
-  if (meta.amountMin !== undefined && amount < meta.amountMin) return false;
-  if (meta.amountMax !== undefined && amount > meta.amountMax) return false;
-  if (meta.pvMin !== undefined && pv < meta.pvMin) return false;
-  if (meta.pvMax !== undefined && pv > meta.pvMax) return false;
-  if (meta.termMin !== undefined && term < meta.termMin) return false;
-  if (meta.termMax !== undefined && term > meta.termMax) return false;
+  if (meta.amountMin != null && amount < meta.amountMin) return false;
+  if (meta.amountMax != null && amount > meta.amountMax) return false;
+  if (meta.pvMin != null && pv < meta.pvMin) return false;
+  if (meta.pvMax != null && pv > meta.pvMax) return false;
+  if (meta.termMin != null && term < meta.termMin) return false;
+  if (meta.termMax != null && term > meta.termMax) return false;
 
   return true;
 };
