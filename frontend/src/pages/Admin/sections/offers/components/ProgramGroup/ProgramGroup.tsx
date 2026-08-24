@@ -1,9 +1,10 @@
-// frontend/src/pages/Admin/sections/offers/components/ProgramGroup.tsx
+// frontend/src/pages/Admin/sections/offers/components/ProgramGroup/ProgramGroup.tsx
 
 import React from "react";
 import { ProgramGroupProps } from "../../types";
-import { OfferCard } from "../OfferCard";
+
 import "./ProgramGroup.css";
+import { OfferCard } from "../OfferCard";
 
 export const ProgramGroup: React.FC<ProgramGroupProps> = ({
   programLabel,
@@ -50,7 +51,7 @@ export const ProgramGroup: React.FC<ProgramGroupProps> = ({
             <span className="status-badge active">✅ Активен</span>
           ) : (
             <span className="status-badge inactive">
-              ❌ Программа не активен
+              ❌ Программа не активна
             </span>
           )}
         </div>
