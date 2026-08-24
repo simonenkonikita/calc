@@ -37,7 +37,7 @@ export const getDisplayRate = (
   dynamicDataMap?: Record<string, DynamicData> | DynamicData,
 ): DisplayRateResult => {
   // 🔥 Проверяем, передан ли dynamicDataMap
-  let rates = null;
+  let rates: any[] | null = null;
 
   if (dynamicDataMap) {
     // Если это прямой объект DynamicData (как в OfferCard)
@@ -48,7 +48,7 @@ export const getDisplayRate = (
       const offerData = (dynamicDataMap as Record<string, DynamicData>)[
         offer.id
       ];
-      rates = offerData?.rates;
+      rates = offerData?.rates || null;
     }
   }
 
@@ -59,7 +59,7 @@ export const getDisplayRate = (
 
   const hasDynamicRates = rates && rates.length > 0;
 
-  if (hasDynamicRates) {
+  if (hasDynamicRates && rates) {
     // Собираем все ставки с условиями
     const conditions = rates.map((rule: any) => {
       let conditionDisplay = "";
@@ -89,14 +89,14 @@ export const getDisplayRate = (
         conditionDisplay = rule.description || "";
       }
       return {
-        rate: rule.rate,
+        rate: rule.rate || 0,
         conditionDisplay: conditionDisplay || "Без условий",
       };
     });
 
     const rateValues = conditions.map((c) => c.rate).sort((a, b) => a - b);
-    const minRate = rateValues[0];
-    const maxRate = rateValues[rateValues.length - 1];
+    const minRate = rateValues[0] || 0;
+    const maxRate = rateValues[rateValues.length - 1] || 0;
 
     return {
       display:
@@ -132,7 +132,7 @@ export const getDisplaySubsidy = (
   console.log(`🔍 getDisplaySubsidy for offer ${offer.id}:`, offer);
 
   // 🔥 Проверяем, передан ли dynamicDataMap
-  let subsidies = null;
+  let subsidies: any[] | null = null;
 
   if (dynamicDataMap) {
     // Если это прямой объект DynamicData (как в OfferCard)
@@ -144,7 +144,7 @@ export const getDisplaySubsidy = (
       const offerData = (dynamicDataMap as Record<string, DynamicData>)[
         offer.id
       ];
-      subsidies = offerData?.subsidies;
+      subsidies = offerData?.subsidies || null;
       console.log(`📊 Got subsidies from Record:`, subsidies);
     }
   }
@@ -164,44 +164,47 @@ export const getDisplaySubsidy = (
     console.log(`📊 Found ${subsidies.length} subsidies`);
 
     // Собираем все субсидии с условиями
-    const conditions = subsidies
-      .map((rule: any) => {
-        const val = parseFloat(rule.subsidyPercent);
-        if (isNaN(val) || val <= 0) return null;
+    const conditions: Array<{
+      subsidyPercent: number;
+      conditionDisplay: string;
+    }> = [];
 
-        let conditionDisplay = "";
-        if (rule.conditionMetadata) {
-          const meta = rule.conditionMetadata;
-          const parts = [];
-          if (meta.pvMin !== null && meta.pvMin !== undefined) {
-            parts.push(`ПВ от ${meta.pvMin}%`);
-          }
-          if (meta.pvMax !== null && meta.pvMax !== undefined) {
-            parts.push(`ПВ до ${meta.pvMax}%`);
-          }
-          if (meta.amountMin !== null && meta.amountMin !== undefined) {
-            parts.push(`Сумма от ${meta.amountMin}`);
-          }
-          if (meta.amountMax !== null && meta.amountMax !== undefined) {
-            parts.push(`Сумма до ${meta.amountMax}`);
-          }
-          if (meta.termMin !== null && meta.termMin !== undefined) {
-            parts.push(`Срок от ${meta.termMin}`);
-          }
-          if (meta.termMax !== null && meta.termMax !== undefined) {
-            parts.push(`Срок до ${meta.termMax}`);
-          }
-          conditionDisplay = parts.join(", ");
-        } else {
-          conditionDisplay = rule.description || "";
+    for (const rule of subsidies) {
+      const val = parseFloat(rule.subsidyPercent);
+      if (isNaN(val) || val <= 0) continue;
+
+      let conditionDisplay = "";
+      if (rule.conditionMetadata) {
+        const meta = rule.conditionMetadata;
+        const parts = [];
+        if (meta.pvMin !== null && meta.pvMin !== undefined) {
+          parts.push(`ПВ от ${meta.pvMin}%`);
         }
+        if (meta.pvMax !== null && meta.pvMax !== undefined) {
+          parts.push(`ПВ до ${meta.pvMax}%`);
+        }
+        if (meta.amountMin !== null && meta.amountMin !== undefined) {
+          parts.push(`Сумма от ${meta.amountMin}`);
+        }
+        if (meta.amountMax !== null && meta.amountMax !== undefined) {
+          parts.push(`Сумма до ${meta.amountMax}`);
+        }
+        if (meta.termMin !== null && meta.termMin !== undefined) {
+          parts.push(`Срок от ${meta.termMin}`);
+        }
+        if (meta.termMax !== null && meta.termMax !== undefined) {
+          parts.push(`Срок до ${meta.termMax}`);
+        }
+        conditionDisplay = parts.join(", ");
+      } else {
+        conditionDisplay = rule.description || "";
+      }
 
-        return {
-          subsidyPercent: val,
-          conditionDisplay: conditionDisplay || "Без условий",
-        };
-      })
-      .filter((item: any) => item !== null);
+      conditions.push({
+        subsidyPercent: val,
+        conditionDisplay: conditionDisplay || "Без условий",
+      });
+    }
 
     if (conditions.length === 0) {
       return { display: "—", type: "none" };
