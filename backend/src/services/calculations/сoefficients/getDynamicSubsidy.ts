@@ -6,19 +6,19 @@ import { DynamicSubsidy } from "../../../entities/DynamicSubsidy";
  * Проверка условий из metadata
  */
 const checkMetadataConditions = (
-  meta: DynamicSubsidy['conditionMetadata'],
+  meta: DynamicSubsidy["conditionMetadata"],
   pv: number,
   amount: number,
   term: number,
 ): boolean => {
   if (!meta) return true; // пустой metadata = всегда true
 
-  if (meta.amountMin !== undefined && amount < meta.amountMin) return false;
-  if (meta.amountMax !== undefined && amount > meta.amountMax) return false;
-  if (meta.pvMin !== undefined && pv < meta.pvMin) return false;
-  if (meta.pvMax !== undefined && pv > meta.pvMax) return false;
-  if (meta.termMin !== undefined && term < meta.termMin) return false;
-  if (meta.termMax !== undefined && term > meta.termMax) return false;
+  if (meta.amountMin != null && amount < meta.amountMin) return false;
+  if (meta.amountMax != null && amount > meta.amountMax) return false;
+  if (meta.pvMin != null && pv < meta.pvMin) return false;
+  if (meta.pvMax != null && pv > meta.pvMax) return false;
+  if (meta.termMin != null && term < meta.termMin) return false;
+  if (meta.termMax != null && term > meta.termMax) return false;
 
   return true;
 };
@@ -70,7 +70,7 @@ export const getDynamicSubsidy = (
 
   // Сортируем по приоритету (от высшего к низшему)
   const sorted = [...subsidies]
-    .filter(s => s.isActive !== false)
+    .filter((s) => s.isActive !== false)
     .sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
   // 🔥 ПЕРВЫЙ ПРОХОД: с пороговой логикой
@@ -78,10 +78,21 @@ export const getDynamicSubsidy = (
     const threshold = getThresholdAmount(subsidy);
     if (threshold === null) continue;
 
-    const adjustedAmount = applyThreshold(mortgageAmount, subsidy, globalTolerance);
+    const adjustedAmount = applyThreshold(
+      mortgageAmount,
+      subsidy,
+      globalTolerance,
+    );
 
-    if (checkMetadataConditions(subsidy.conditionMetadata, pvPercent, adjustedAmount, loanTerm)) {
-      return typeof subsidy.subsidyPercent === 'string'
+    if (
+      checkMetadataConditions(
+        subsidy.conditionMetadata,
+        pvPercent,
+        adjustedAmount,
+        loanTerm,
+      )
+    ) {
+      return typeof subsidy.subsidyPercent === "string"
         ? parseFloat(subsidy.subsidyPercent)
         : subsidy.subsidyPercent;
     }
@@ -89,8 +100,15 @@ export const getDynamicSubsidy = (
 
   // 🔥 ВТОРОЙ ПРОХОД: без пороговой логики
   for (const subsidy of sorted) {
-    if (checkMetadataConditions(subsidy.conditionMetadata, pvPercent, mortgageAmount, loanTerm)) {
-      return typeof subsidy.subsidyPercent === 'string'
+    if (
+      checkMetadataConditions(
+        subsidy.conditionMetadata,
+        pvPercent,
+        mortgageAmount,
+        loanTerm,
+      )
+    ) {
+      return typeof subsidy.subsidyPercent === "string"
         ? parseFloat(subsidy.subsidyPercent)
         : subsidy.subsidyPercent;
     }

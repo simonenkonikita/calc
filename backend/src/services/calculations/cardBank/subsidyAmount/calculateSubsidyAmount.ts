@@ -54,7 +54,24 @@ export const calculateSubsidyAmount = (
       secondContract * (secondContractSubsidyPercent / 100);
     subsidyAmount = secondContractSubsidyAmount;
   } else {
-    subsidyAmount = mortgageAmount * (actualSubsidyPercent / 100);
+    // 🔥 Для обычных программ тоже проверяем динамические субсидии
+    let effectiveSubsidyPercent = actualSubsidyPercent;
+
+    if (offer.dynamicSubsidies && offer.dynamicSubsidies.length > 0) {
+      const dynamicSubsidy = getDynamicSubsidy(
+        offer.dynamicSubsidies,
+        userDownPaymentPercent,
+        mortgageAmount,
+        loanTermYears,
+      );
+
+      // Используем динамическую субсидию, если она найдена
+      if (dynamicSubsidy > 0) {
+        effectiveSubsidyPercent = dynamicSubsidy;
+      }
+    }
+
+    subsidyAmount = mortgageAmount * (effectiveSubsidyPercent / 100);
   }
 
   return {
