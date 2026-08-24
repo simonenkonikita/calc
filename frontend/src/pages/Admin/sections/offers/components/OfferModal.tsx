@@ -43,6 +43,8 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   );
   const [showRatesForm, setShowRatesForm] = useState(false);
   const [showSubsidiesForm, setShowSubsidiesForm] = useState(false);
+  const [ratesEditMode, setRatesEditMode] = useState(false);
+  const [subsidiesEditMode, setSubsidiesEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [initialOfferId, setInitialOfferId] = useState<string | null>(null);
@@ -92,6 +94,8 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       resetDynamicForms();
       setShowRatesForm(false);
       setShowSubsidiesForm(false);
+      setRatesEditMode(false);
+      setSubsidiesEditMode(false);
       setErrors({});
       setInitialOfferId(null);
     } else if (editingOffer) {
@@ -124,6 +128,9 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       loadDynamicDataFromOffer(editingOffer);
       setErrors({});
       setInitialOfferId(editingOffer.id);
+      // По умолчанию открываем в режиме просмотра
+      setRatesEditMode(false);
+      setSubsidiesEditMode(false);
     }
   }, [isCreating, editingOffer, selectedBankId]);
 
@@ -169,7 +176,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           termMax: null,
         },
         rate: 0,
-        priority: 0,
+        priority: 1,
         description: "",
         isActive: true,
       },
@@ -187,7 +194,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         },
         tolerance: 0.5,
         subsidyPercent: 0,
-        priority: 0,
+        priority: 1,
         description: "",
         isActive: true,
       },
@@ -234,7 +241,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
             termMax: null,
           },
           rate: 0,
-          priority: 0,
+          priority: 1,
           description: "",
           isActive: true,
         },
@@ -281,7 +288,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           },
           tolerance: 0.5,
           subsidyPercent: 0,
-          priority: 0,
+          priority: 1,
           description: "",
           isActive: true,
         },
@@ -342,6 +349,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
   const handleToggleRatesForm = () => {
     if (showRatesForm) {
+      // При закрытии формы удаляем все ставки из БД
       const rateIds = dynamicRates.filter((r) => r.id).map((r) => r.id);
       for (const id of rateIds) {
         if (id) {
@@ -354,6 +362,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         }
       }
       setDynamicRates([]);
+      setRatesEditMode(false);
     } else {
       if (dynamicRates.length === 0) {
         setDynamicRates([
@@ -367,18 +376,21 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               termMax: null,
             },
             rate: 0,
-            priority: 0,
+            priority: 1,
             description: "",
             isActive: true,
           },
         ]);
       }
+      // Если есть данные, открываем в режиме просмотра
+      setRatesEditMode(false);
     }
     setShowRatesForm(!showRatesForm);
   };
 
   const handleToggleSubsidiesForm = () => {
     if (showSubsidiesForm) {
+      // При закрытии формы удаляем все субсидии из БД
       const subsidyIds = dynamicSubsidies.filter((s) => s.id).map((s) => s.id);
       for (const id of subsidyIds) {
         if (id) {
@@ -391,6 +403,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         }
       }
       setDynamicSubsidies([]);
+      setSubsidiesEditMode(false);
     } else {
       if (dynamicSubsidies.length === 0) {
         setDynamicSubsidies([
@@ -405,14 +418,24 @@ export const OfferModal: React.FC<OfferModalProps> = ({
             },
             tolerance: 0.5,
             subsidyPercent: 0,
-            priority: 0,
+            priority: 1,
             description: "",
             isActive: true,
           },
         ]);
       }
+      setSubsidiesEditMode(false);
     }
     setShowSubsidiesForm(!showSubsidiesForm);
+  };
+
+  // 🔥 Обработчики переключения режимов редактирования для динамических форм
+  const handleRatesEditToggle = () => {
+    setRatesEditMode(!ratesEditMode);
+  };
+
+  const handleSubsidiesEditToggle = () => {
+    setSubsidiesEditMode(!subsidiesEditMode);
   };
 
   const validate = (): boolean => {
@@ -1131,12 +1154,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
           <div className="modal-divider" />
 
-          {/* Динамические формы */}
+          {/* Динамические формы с режимами редактирования */}
           {showRatesForm && (
             <DynamicRatesForm
               rates={dynamicRates}
               onRatesChange={setDynamicRates}
               onRateDelete={handleRateDelete}
+              isEditMode={ratesEditMode}
+              onEditModeToggle={handleRatesEditToggle}
             />
           )}
 
@@ -1145,6 +1170,8 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               subsidies={dynamicSubsidies}
               onSubsidiesChange={setDynamicSubsidies}
               onSubsidyDelete={handleSubsidyDelete}
+              isEditMode={subsidiesEditMode}
+              onEditModeToggle={handleSubsidiesEditToggle}
             />
           )}
         </div>

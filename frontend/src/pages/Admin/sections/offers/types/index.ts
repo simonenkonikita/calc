@@ -1,6 +1,7 @@
 // frontend/src/pages/Admin/sections/offers/types/index.ts
 
 import { AdminBank, AdminOffer } from "../../../types/admin.types";
+import { DisplayRateResult, DisplaySubsidyResult } from "../utils/offerHelpers";
 
 export interface DynamicRate {
   id?: string;
@@ -54,8 +55,15 @@ export interface OfferCardProps {
   onDelete: (id: string) => void;
   onRestore: (id: string) => void;
   onHardDelete: (id: string) => void;
-  getDisplayRate: (offer: AdminOffer) => React.ReactNode;
-  getDisplaySubsidy: (offer: AdminOffer) => { display: string; type: string };
+  // 🔥 Обновленные типы
+  getDisplayRate: (
+    offer: AdminOffer,
+    dynamicDataMap?: Record<string, DynamicData> | DynamicData,
+  ) => DisplayRateResult;
+  getDisplaySubsidy: (
+    offer: AdminOffer,
+    dynamicDataMap?: Record<string, DynamicData> | DynamicData,
+  ) => DisplaySubsidyResult;
   renderComplexesList: (
     complexes: string[] | null | undefined,
   ) => React.ReactNode;

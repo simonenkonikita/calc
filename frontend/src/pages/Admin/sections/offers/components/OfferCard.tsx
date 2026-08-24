@@ -2,7 +2,9 @@
 
 import React from "react";
 import { OfferCardProps } from "../types";
+
 import "./OfferCard.css";
+import { DynamicInfoPopup } from "./DynamicInfoPopup";
 
 export const OfferCard: React.FC<OfferCardProps> = ({
   offer,
@@ -18,7 +20,9 @@ export const OfferCard: React.FC<OfferCardProps> = ({
   getDisplaySubsidy,
   renderComplexesList,
 }) => {
-  const subsidy = getDisplaySubsidy(offer);
+  // 🔥 Получаем данные с деталями
+  const rateResult = getDisplayRate(offer, dynamicData);
+  const subsidyResult = getDisplaySubsidy(offer, dynamicData);
 
   // 🔥 Логика: оффер активен ТОЛЬКО если активны ВСЕ три
   const isOfferEffectiveActive =
@@ -30,6 +34,41 @@ export const OfferCard: React.FC<OfferCardProps> = ({
     if (!bankIsActive) return "Банк неактивен";
     if (!programIsActive) return "Программа неактивна";
     return "Неизвестная причина";
+  };
+
+  // 🔥 Рендер ставки
+  const renderRateDisplay = () => {
+    if (rateResult.type === "dynamic" && rateResult.details) {
+      return (
+        <DynamicInfoPopup
+          type="rate"
+          display={rateResult.display as string}
+          details={rateResult.details}
+        />
+      );
+    }
+    return rateResult.display;
+  };
+
+  // 🔥 Рендер субсидии
+  const renderSubsidyDisplay = () => {
+    if (subsidyResult.type === "dynamic" && subsidyResult.details) {
+      return (
+        <DynamicInfoPopup
+          type="subsidy"
+          display={subsidyResult.display}
+          details={subsidyResult.details}
+        />
+      );
+    }
+
+    // Фиксированная или отсутствующая субсидия
+    const typeClass = subsidyResult.type === "fixed" ? "fixed" : "none";
+    return (
+      <span className={`subsidy-badge subsidy-${typeClass}`}>
+        {subsidyResult.display}
+      </span>
+    );
   };
 
   return (
@@ -61,7 +100,6 @@ export const OfferCard: React.FC<OfferCardProps> = ({
           >
             📋
           </button>
-          {/* 🔥 Используем isOfferEffectiveActive для отображения кнопок */}
           {!isOfferEffectiveActive ? (
             <button
               onClick={() => onRestore(offer.id)}
@@ -97,27 +135,13 @@ export const OfferCard: React.FC<OfferCardProps> = ({
           <div className="offer-detail-item">
             <span className="detail-label">Ставка:</span>
             <span className="detail-value rate-cell">
-              {getDisplayRate(offer)}
+              {renderRateDisplay()}
             </span>
           </div>
           <div className="offer-detail-item">
             <span className="detail-label">Субсидия:</span>
             <span className="detail-value subsidy-cell">
-              <span
-                className={`subsidy-badge subsidy-${subsidy.type}`}
-                title={
-                  subsidy.type === "dynamic"
-                    ? "Динамическая субсидия"
-                    : subsidy.type === "fixed"
-                      ? "Фиксированная субсидия"
-                      : "Нет субсидии"
-                }
-              >
-                {subsidy.display}
-                {subsidy.type === "dynamic" && (
-                  <span className="subsidy-dynamic-icon">📊</span>
-                )}
-              </span>
+              {renderSubsidyDisplay()}
             </span>
           </div>
           <div className="offer-detail-item">
