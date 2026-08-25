@@ -91,6 +91,43 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         programId: "",
       });
 
+      const resetDynamicForms = () => {
+        setDynamicRates([
+          {
+            conditionMetadata: {
+              amountMin: null,
+              amountMax: null,
+              pvMin: null,
+              pvMax: null,
+              termMin: null,
+              termMax: null,
+            },
+            rate: 0,
+            priority: 1,
+            description: "",
+            isActive: true,
+          },
+        ]);
+
+        setDynamicSubsidies([
+          {
+            conditionMetadata: {
+              amountMin: null,
+              amountMax: null,
+              pvMin: null,
+              pvMax: null,
+              termMin: null,
+              termMax: null,
+            },
+            tolerance: 0.5,
+            subsidyPercent: 0,
+            priority: 1,
+            description: "",
+            isActive: true,
+          },
+        ]);
+      };
+
       resetDynamicForms();
       setShowRatesForm(false);
       setShowSubsidiesForm(false);
