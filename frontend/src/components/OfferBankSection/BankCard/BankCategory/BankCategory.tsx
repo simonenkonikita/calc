@@ -17,6 +17,10 @@ interface BankCategoryProps {
   loanTermYears: number;
   formatMoney: (amount: number) => string;
   onCardClick: (index: number) => void;
+  getDynamicDataForOffer?: (offer: BankProgramResultWithIndex) => {
+    dynamicRateData?: any;
+    dynamicSubsidyData?: any;
+  } | null;
 }
 
 export const BankCategory: React.FC<BankCategoryProps> = ({
@@ -29,6 +33,7 @@ export const BankCategory: React.FC<BankCategoryProps> = ({
   loanTermYears,
   formatMoney,
   onCardClick,
+  getDynamicDataForOffer,
 }) => {
   return (
     <div className="category-group">
@@ -48,6 +53,8 @@ export const BankCategory: React.FC<BankCategoryProps> = ({
           const isTrancheUnavailable =
             offer.type === "tranche" && !isTrancheAvailable(complexName);
 
+          const dynamicData = getDynamicDataForOffer?.(offer);
+
           return (
             <BankCard
               key={offer._originalIndex}
@@ -62,6 +69,8 @@ export const BankCategory: React.FC<BankCategoryProps> = ({
               loanTermYears={loanTermYears}
               formatMoney={formatMoney}
               onClick={onCardClick}
+              dynamicRateData={dynamicData?.dynamicRateData}
+              dynamicSubsidyData={dynamicData?.dynamicSubsidyData}
             />
           );
         })}

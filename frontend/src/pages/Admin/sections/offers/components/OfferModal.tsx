@@ -164,67 +164,33 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   // ДИНАМИЧЕСКИЕ ДАННЫЕ
   // ============================================================
 
-  const resetDynamicForms = () => {
-    setDynamicRates([
-      {
-        conditionMetadata: {
-          amountMin: null,
-          amountMax: null,
-          pvMin: null,
-          pvMax: null,
-          termMin: null,
-          termMax: null,
-        },
-        rate: 0,
-        priority: 1,
-        description: "",
-        isActive: true,
-      },
-    ]);
-
-    setDynamicSubsidies([
-      {
-        conditionMetadata: {
-          amountMin: null,
-          amountMax: null,
-          pvMin: null,
-          pvMax: null,
-          termMin: null,
-          termMax: null,
-        },
-        tolerance: 0.5,
-        subsidyPercent: 0,
-        priority: 1,
-        description: "",
-        isActive: true,
-      },
-    ]);
-  };
-
   const loadDynamicDataFromOffer = (offer: AdminOffer) => {
     console.log("📊 Loading dynamic data from offer:", offer);
 
-    // 1. Загружаем динамические ставки
+    // 1. Загружаем динамические ставки - СОРТИРУЕМ ПО PRIORITY
     if (
       offer.dynamicRates &&
       Array.isArray(offer.dynamicRates) &&
       offer.dynamicRates.length > 0
     ) {
-      const rates = offer.dynamicRates.map((rate: any) => ({
-        id: rate.id,
-        conditionMetadata: rate.conditionMetadata || {
-          amountMin: null,
-          amountMax: null,
-          pvMin: null,
-          pvMax: null,
-          termMin: null,
-          termMax: null,
-        },
-        rate: rate.rate || 0,
-        priority: rate.priority || 0,
-        description: rate.description || "",
-        isActive: rate.isActive !== undefined ? rate.isActive : true,
-      }));
+      const rates = offer.dynamicRates
+        .map((rate: any) => ({
+          id: rate.id,
+          conditionMetadata: rate.conditionMetadata || {
+            amountMin: null,
+            amountMax: null,
+            pvMin: null,
+            pvMax: null,
+            termMin: null,
+            termMax: null,
+          },
+          rate: rate.rate || 0,
+          priority: rate.priority || 0,
+          description: rate.description || "",
+          isActive: rate.isActive !== undefined ? rate.isActive : true,
+        }))
+        // 🔥 СОРТИРУЕМ ПО PRIORITY (по возрастанию)
+        .sort((a, b) => (a.priority || 0) - (b.priority || 0));
 
       setDynamicRates(rates);
       setShowRatesForm(true);
@@ -249,28 +215,31 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       setShowRatesForm(false);
     }
 
-    // 2. Загружаем динамические субсидии
+    // 2. Загружаем динамические субсидии - СОРТИРУЕМ ПО PRIORITY
     if (
       offer.dynamicSubsidies &&
       Array.isArray(offer.dynamicSubsidies) &&
       offer.dynamicSubsidies.length > 0
     ) {
-      const subsidies = offer.dynamicSubsidies.map((subsidy: any) => ({
-        id: subsidy.id,
-        conditionMetadata: subsidy.conditionMetadata || {
-          amountMin: null,
-          amountMax: null,
-          pvMin: null,
-          pvMax: null,
-          termMin: null,
-          termMax: null,
-        },
-        tolerance: subsidy.tolerance ?? 0.5,
-        subsidyPercent: subsidy.subsidyPercent || 0,
-        priority: subsidy.priority || 0,
-        description: subsidy.description || "",
-        isActive: subsidy.isActive !== undefined ? subsidy.isActive : true,
-      }));
+      const subsidies = offer.dynamicSubsidies
+        .map((subsidy: any) => ({
+          id: subsidy.id,
+          conditionMetadata: subsidy.conditionMetadata || {
+            amountMin: null,
+            amountMax: null,
+            pvMin: null,
+            pvMax: null,
+            termMin: null,
+            termMax: null,
+          },
+          tolerance: subsidy.tolerance ?? 0.5,
+          subsidyPercent: subsidy.subsidyPercent || 0,
+          priority: subsidy.priority || 0,
+          description: subsidy.description || "",
+          isActive: subsidy.isActive !== undefined ? subsidy.isActive : true,
+        }))
+        // 🔥 СОРТИРУЕМ ПО PRIORITY (по возрастанию)
+        .sort((a, b) => (a.priority || 0) - (b.priority || 0));
 
       setDynamicSubsidies(subsidies);
       setShowSubsidiesForm(true);
@@ -296,7 +265,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       setShowSubsidiesForm(false);
     }
   };
-
   // ============================================================
   // ОБРАБОТЧИКИ
   // ============================================================

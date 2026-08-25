@@ -21,6 +21,10 @@ interface BankGroupProps {
     bankData: Record<string, BankProgramResultWithIndex[]>,
     categoryKey: string,
   ) => boolean;
+  getDynamicDataForOffer?: (offer: BankProgramResultWithIndex) => {
+    dynamicRateData?: any;
+    dynamicSubsidyData?: any;
+  } | null;
 }
 
 export const BankGroup: React.FC<BankGroupProps> = ({
@@ -35,6 +39,7 @@ export const BankGroup: React.FC<BankGroupProps> = ({
   formatMoney,
   onCardClick,
   hasProgramsInCategory,
+  getDynamicDataForOffer,
 }) => {
   const hasAnyPrograms = Object.values(bankData).some((arr) => arr.length > 0);
 
@@ -69,6 +74,7 @@ export const BankGroup: React.FC<BankGroupProps> = ({
               loanTermYears={loanTermYears}
               formatMoney={formatMoney}
               onCardClick={onCardClick}
+              getDynamicDataForOffer={getDynamicDataForOffer}
             />
           );
         })}

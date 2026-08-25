@@ -4,7 +4,7 @@ import React from "react";
 import { OfferCardProps } from "../types";
 
 import "./OfferCard.css";
-import { DynamicInfoPopup } from "./DynamicInfoPopup";
+import { DynamicInfoPopup } from "../../../../../components/DynamicInfo/DynamicInfoPopup";
 
 export const OfferCard: React.FC<OfferCardProps> = ({
   offer,

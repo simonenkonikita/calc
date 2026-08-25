@@ -15,6 +15,7 @@ import { BankProgramResultWithIndex } from "../../../utils/types";
 import { getLimitBadge } from "../../../utils/badge/getLimitBadge";
 import { getExcessBadgeTwoContract } from "../../../utils/badge/getExcessBadgeTwoContract";
 import { getLoanTermBadge } from "../../../utils/badge/getLoanTermBadge";
+import { DynamicInfoPopup } from "../../DynamicInfo/DynamicInfoPopup";
 
 interface BankCardProps {
   offer: BankProgramResultWithIndex;
@@ -28,6 +29,28 @@ interface BankCardProps {
   loanTermYears: number;
   formatMoney: (amount: number) => string;
   onClick: (index: number) => void;
+  dynamicRateData?: {
+    display: string;
+    details: {
+      min: number;
+      max: number;
+      conditions: Array<{
+        rate?: number;
+        conditionDisplay: string;
+      }>;
+    };
+  };
+  dynamicSubsidyData?: {
+    display: string;
+    details: {
+      min: number;
+      max: number;
+      conditions: Array<{
+        subsidyPercent?: number;
+        conditionDisplay: string;
+      }>;
+    };
+  };
 }
 
 export const BankCard: React.FC<BankCardProps> = ({
@@ -42,6 +65,8 @@ export const BankCard: React.FC<BankCardProps> = ({
   loanTermYears,
   formatMoney,
   onClick,
+  dynamicRateData,
+  dynamicSubsidyData,
 }) => {
   // Получаем все бейджи
   const badge = getBadge(offer);
@@ -76,6 +101,40 @@ export const BankCard: React.FC<BankCardProps> = ({
         isTwoContracts={isTwoContracts}
         formatMoney={formatMoney}
       />
+
+      {(dynamicRateData || dynamicSubsidyData) && (
+        <div className="bank-card-dynamic-info">
+          {dynamicRateData && (
+            <span className="dynamic-badge-wrapper">
+              <span className="dynamic-badge-label">📊 Ставка:</span>
+              <DynamicInfoPopup
+                type="rate"
+                display={dynamicRateData.display}
+                details={dynamicRateData.details}
+                bankName={offer.bank}
+                programName={offer.program}
+              />
+            </span>
+          )}
+
+          {dynamicRateData && dynamicSubsidyData && (
+            <span className="dynamic-badge-divider">|</span>
+          )}
+
+          {dynamicSubsidyData && (
+            <span className="dynamic-badge-wrapper">
+              <span className="dynamic-badge-label">💰 Субсидия:</span>
+              <DynamicInfoPopup
+                type="subsidy"
+                display={dynamicSubsidyData.display}
+                details={dynamicSubsidyData.details}
+                bankName={offer.bank}
+                programName={offer.program}
+              />
+            </span>
+          )}
+        </div>
+      )}
 
       <BankCardDetails
         offer={offer}

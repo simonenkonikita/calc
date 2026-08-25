@@ -59,14 +59,19 @@ export const useOffersData = () => {
     const dataMap: Record<string, DynamicData> = {};
 
     for (const offer of offersData) {
-      // 🔥 Проверяем, есть ли динамические данные прямо в оффере
-      // Используем явную проверку на undefined и приводим к массиву
-      const rates = offer.dynamicRates ?? [];
-      const subsidies = offer.dynamicSubsidies ?? [];
+      // 🔥 Сортируем ставки по priority
+      const rates = (offer.dynamicRates ?? [])
+        .map((rate: any) => ({ ...rate }))
+        .sort((a, b) => (a.priority || 0) - (b.priority || 0));
+
+      // 🔥 Сортируем субсидии по priority
+      const subsidies = (offer.dynamicSubsidies ?? [])
+        .map((subsidy: any) => ({ ...subsidy }))
+        .sort((a, b) => (a.priority || 0) - (b.priority || 0));
 
       dataMap[offer.id] = {
-        rates: (Array.isArray(rates) ? rates : []) as any,
-        subsidies: (Array.isArray(subsidies) ? subsidies : []) as any,
+        rates: Array.isArray(rates) ? rates : [],
+        subsidies: Array.isArray(subsidies) ? subsidies : [],
       };
     }
 
