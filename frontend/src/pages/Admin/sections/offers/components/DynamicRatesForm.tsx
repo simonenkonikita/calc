@@ -20,6 +20,8 @@ export const DynamicRatesForm: React.FC<DynamicRatesFormProps> = ({
   onEditModeToggle,
 }) => {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  // 🔥 Локальное состояние для хранения временных значений полей
+  const [tempValues, setTempValues] = useState<Record<number, string>>({});
 
   // 🔥 Добавление строки
   const addRow = () => {
@@ -78,7 +80,7 @@ export const DynamicRatesForm: React.FC<DynamicRatesFormProps> = ({
     onRatesChange(renumberedRates);
   };
 
-  // 🔥 Перетаскивание строк
+  // 🔥 Перетаскивание строк - ТОЛЬКО через drag handle
   const handleDragStart = (e: React.DragEvent, index: number) => {
     if (!isEditMode) return;
     setDragIndex(index);
@@ -149,6 +151,29 @@ export const DynamicRatesForm: React.FC<DynamicRatesFormProps> = ({
     return <span className="view-value">{value}</span>;
   };
 
+  // 🔥 Сортируем rates по priority перед отображением
+  const sortedRates = [...rates].sort(
+    (a, b) => (a.priority || 0) - (b.priority || 0),
+  );
+
+  // 🔥 Получить значение для поля ввода
+  const getInputValue = (rate: DynamicRate, index: number) => {
+    // Если есть временное значение - используем его
+    if (tempValues[index] !== undefined) {
+      return tempValues[index];
+    }
+    // Иначе берем из данных
+    return rate.rate ?? "";
+  };
+
+  // 🔥 Обработчик изменения поля
+  const handleRateChange = (index: number, value: string) => {
+    // Сохраняем временное значение
+    setTempValues((prev) => ({ ...prev, [index]: value }));
+    // Если поле пустое - записываем 0
+    updateRow(index, "rate", value === "" ? 0 : parseFloat(value) || 0);
+  };
+
   return (
     <div className="dynamic-form">
       <div className="dynamic-form-header">
@@ -174,6 +199,7 @@ export const DynamicRatesForm: React.FC<DynamicRatesFormProps> = ({
                 <button
                   onClick={() => {
                     if (confirm("Очистить все строки?")) {
+                      setTempValues({});
                       onRatesChange([
                         {
                           conditionMetadata: {
@@ -229,16 +255,11 @@ export const DynamicRatesForm: React.FC<DynamicRatesFormProps> = ({
             </tr>
           </thead>
           <tbody>
-            {rates.map((rate, index) => (
+            {sortedRates.map((rate, index) => (
               <tr
                 key={index}
-                draggable={isEditMode}
-                onDragStart={(e) => handleDragStart(e, index)}
-                onDragEnd={handleDragEnd}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, index)}
                 className={dragIndex === index ? "drag-over" : ""}
-                style={{ cursor: isEditMode ? "grab" : "default" }}
+                style={{ cursor: "default" }}
               >
                 {isEditMode && (
                   <td
@@ -248,7 +269,16 @@ export const DynamicRatesForm: React.FC<DynamicRatesFormProps> = ({
                       fontSize: "1.1rem",
                     }}
                   >
-                    <span className="drag-handle">⠿</span>
+                    <span
+                      className="drag-handle"
+                      draggable={isEditMode}
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragEnd={handleDragEnd}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, index)}
+                    >
+                      ⠿
+                    </span>
                   </td>
                 )}
                 <td
@@ -370,16 +400,20 @@ export const DynamicRatesForm: React.FC<DynamicRatesFormProps> = ({
                       type="number"
                       step="0.01"
                       placeholder="Например: 15.5"
-                      value={rate.rate ?? ""}
-                      onChange={(e) =>
-                        updateRow(
-                          index,
-                          "rate",
-                          parseFloat(e.target.value) || 0,
-                        )
-                      }
+                      value={getInputValue(rate, index)}
+                      onChange={(e) => handleRateChange(index, e.target.value)}
                       className="form-input form-input-lg"
                       style={{ width: "100%" }}
+                      onBlur={() => {
+                        // При потере фокуса очищаем временное значение, если оно есть
+                        if (tempValues[index] !== undefined) {
+                          setTempValues((prev) => {
+                            const newValues = { ...prev };
+                            delete newValues[index];
+                            return newValues;
+                          });
+                        }
+                      }}
                     />
                   ) : (
                     renderViewValue(rate.rate, "Не указан")

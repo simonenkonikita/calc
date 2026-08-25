@@ -8,8 +8,8 @@ interface DynamicSubsidiesFormProps {
   subsidies: DynamicSubsidy[];
   onSubsidiesChange: (subsidies: DynamicSubsidy[]) => void;
   onSubsidyDelete?: (subsidy: DynamicSubsidy) => void;
-  isEditMode?: boolean; // 🔥 Новый пропс для режима редактирования
-  onEditModeToggle?: () => void; // 🔥 Переключение режима
+  isEditMode?: boolean;
+  onEditModeToggle?: () => void;
 }
 
 export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
@@ -20,6 +20,8 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
   onEditModeToggle,
 }) => {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  // 🔥 Локальное состояние для хранения временных значений полей
+  const [tempValues, setTempValues] = useState<Record<number, string>>({});
 
   // 🔥 Добавление строки с правильным priority (начинается с 1)
   const addRow = () => {
@@ -79,9 +81,9 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
     onSubsidiesChange(renumberedSubsidies);
   };
 
-  // 🔥 Перетаскивание строк
+  // 🔥 Перетаскивание строк - ТОЛЬКО через drag handle
   const handleDragStart = (e: React.DragEvent, index: number) => {
-    if (!isEditMode) return; // 🔥 Запрещаем drag в режиме просмотра
+    if (!isEditMode) return;
     setDragIndex(index);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", String(index));
@@ -96,7 +98,7 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
   };
 
   const handleDragOver = (e: React.DragEvent) => {
-    if (!isEditMode) return; // 🔥 Запрещаем drag в режиме просмотра
+    if (!isEditMode) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
@@ -154,6 +156,33 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
     return <span className="view-value">{value}</span>;
   };
 
+  // 🔥 Сортируем subsidies по priority перед отображением
+  const sortedSubsidies = [...subsidies].sort(
+    (a, b) => (a.priority || 0) - (b.priority || 0),
+  );
+
+  // 🔥 Получить значение для поля ввода
+  const getInputValue = (subsidy: DynamicSubsidy, index: number) => {
+    // Если есть временное значение - используем его
+    if (tempValues[index] !== undefined) {
+      return tempValues[index];
+    }
+    // Иначе берем из данных
+    return subsidy.subsidyPercent ?? "";
+  };
+
+  // 🔥 Обработчик изменения поля
+  const handleSubsidyChange = (index: number, value: string) => {
+    // Сохраняем временное значение
+    setTempValues((prev) => ({ ...prev, [index]: value }));
+    // Если поле пустое - записываем 0
+    updateRow(
+      index,
+      "subsidyPercent",
+      value === "" ? 0 : parseFloat(value) || 0,
+    );
+  };
+
   return (
     <div className="dynamic-form">
       <div className="dynamic-form-header">
@@ -179,6 +208,7 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
                 <button
                   onClick={() => {
                     if (confirm("Очистить все строки?")) {
+                      setTempValues({});
                       onSubsidiesChange([
                         {
                           conditionMetadata: {
@@ -235,16 +265,11 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
             </tr>
           </thead>
           <tbody>
-            {subsidies.map((subsidy, index) => (
+            {sortedSubsidies.map((subsidy, index) => (
               <tr
                 key={index}
-                draggable={isEditMode}
-                onDragStart={(e) => handleDragStart(e, index)}
-                onDragEnd={handleDragEnd}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, index)}
                 className={dragIndex === index ? "drag-over" : ""}
-                style={{ cursor: isEditMode ? "grab" : "default" }}
+                style={{ cursor: "default" }}
               >
                 {isEditMode && (
                   <td
@@ -254,7 +279,16 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
                       fontSize: "1.1rem",
                     }}
                   >
-                    <span className="drag-handle">⠿</span>
+                    <span
+                      className="drag-handle"
+                      draggable={isEditMode}
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragEnd={handleDragEnd}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, index)}
+                    >
+                      ⠿
+                    </span>
                   </td>
                 )}
                 <td
@@ -388,16 +422,22 @@ export const DynamicSubsidiesForm: React.FC<DynamicSubsidiesFormProps> = ({
                       type="number"
                       step="0.1"
                       placeholder="Например: 15.0"
-                      value={subsidy.subsidyPercent ?? ""}
+                      value={getInputValue(subsidy, index)}
                       onChange={(e) =>
-                        updateRow(
-                          index,
-                          "subsidyPercent",
-                          parseFloat(e.target.value) || 0,
-                        )
+                        handleSubsidyChange(index, e.target.value)
                       }
                       className="form-input form-input-lg"
                       style={{ width: "100%" }}
+                      onBlur={() => {
+                        // При потере фокуса очищаем временное значение, если оно есть
+                        if (tempValues[index] !== undefined) {
+                          setTempValues((prev) => {
+                            const newValues = { ...prev };
+                            delete newValues[index];
+                            return newValues;
+                          });
+                        }
+                      }}
                     />
                   ) : (
                     renderViewValue(subsidy.subsidyPercent, "Не указан")

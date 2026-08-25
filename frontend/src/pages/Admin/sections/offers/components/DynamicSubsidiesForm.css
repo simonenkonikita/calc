@@ -69,12 +69,13 @@
   vertical-align: middle;
 }
 
-/* 🔥 Стили для drag-and-drop */
+/* 🔥 Стили для drag-and-drop - ТОЛЬКО НА DRAG HANDLE */
 .dynamic-form .admin-table tbody tr {
   transition:
     background-color 0.2s,
     transform 0.2s;
   user-select: none;
+  cursor: default !important; /* 🔥 Убираем cursor: grab со всей строки */
 }
 
 .dynamic-form .admin-table tbody tr:hover {
@@ -82,7 +83,7 @@
 }
 
 .dynamic-form .admin-table tbody tr:active {
-  cursor: grabbing;
+  cursor: default !important; /* 🔥 Убираем grabbing со всей строки */
 }
 
 .dynamic-form .admin-table tbody tr.dragging {
@@ -99,21 +100,32 @@
   border-bottom: none;
 }
 
-/* 🔥 Drag handle */
+/* 🔥 Drag handle - ТОЛЬКО ЗДЕСЬ МОЖНО ПЕРЕТАСКИВАТЬ */
 .drag-handle {
   display: inline-block;
   font-size: 1.2rem;
   color: #9ca3af;
   cursor: grab;
   user-select: none;
-  transition: color 0.2s;
+  transition: all 0.2s;
   line-height: 1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: transparent;
 }
 
 .drag-handle:hover {
-  color: #6b7280;
+  color: #4b5563;
+  background: #f3f4f6;
 }
 
+.drag-handle:active {
+  cursor: grabbing;
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+/* 🔥 Убираем cursor: grabbing при активном состоянии строки */
 .dynamic-form .admin-table tbody tr:active .drag-handle {
   cursor: grabbing;
 }
@@ -395,6 +407,7 @@
 
   .drag-handle {
     font-size: 1rem;
+    padding: 3px 6px;
   }
 
   /* Адаптив для режима просмотра */
@@ -453,6 +466,7 @@
 
   .drag-handle {
     font-size: 0.9rem;
+    padding: 2px 4px;
   }
 
   /* Адаптив для режима просмотра */

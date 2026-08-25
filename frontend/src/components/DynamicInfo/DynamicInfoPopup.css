@@ -1,0 +1,330 @@
+/* frontend/src/pages/Admin/sections/offers/components/DynamicInfoPopup/DynamicInfoPopup.css */
+
+.dynamic-info-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dynamic-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #d1d5db;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.dynamic-info-icon:hover {
+  background: #818cf8;
+  color: white;
+  border-color: #818cf8;
+  transform: scale(1.1);
+}
+
+/* 🔥 Оверлей модального окна */
+.dynamic-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 🔥 Модальное окно */
+.dynamic-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 520px;
+  width: 90%;
+  max-height: 80vh;
+  padding: 28px 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideUp 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+@keyframes modalSlideUp {
+  from {
+    transform: translateY(20px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 🔥 Заголовок модального окна */
+.dynamic-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f3f4f6;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.dynamic-modal-title-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dynamic-modal-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-title-icon {
+  font-size: 1.2rem;
+}
+
+/* 🔥 Подзаголовок с банком и программой */
+.dynamic-modal-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #6b7280;
+  flex-wrap: wrap;
+}
+
+.modal-bank {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.modal-program {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.modal-divider {
+  color: #d1d5db;
+  font-weight: 300;
+}
+
+/* 🔥 Кнопка закрытия */
+.dynamic-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.dynamic-modal-close:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+/* 🔥 Диапазон значений */
+.dynamic-modal-range {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #4f46e5;
+  background: #eef2ff;
+  padding: 8px 16px;
+  border-radius: 12px;
+  margin: 12px 0 16px 0;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* 🔥 Тело модального окна */
+.dynamic-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 4px;
+  flex: 1;
+}
+
+.dynamic-modal-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dynamic-modal-body::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.dynamic-modal-body::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.dynamic-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* 🔥 Элемент условия */
+.dynamic-modal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #fafafa;
+  border-radius: 8px;
+  transition: background 0.2s;
+  border: 1px solid #f3f4f6;
+}
+
+.dynamic-modal-item:hover {
+  background: #f3f4f6;
+}
+
+.modal-item-value {
+  font-weight: 700;
+  color: #1f2937;
+  min-width: 60px;
+  background: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+}
+
+.modal-item-description {
+  color: #4b5563;
+  flex: 1;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* 🔥 Пустое состояние */
+.dynamic-modal-empty {
+  text-align: center;
+  color: #9ca3af;
+  padding: 24px 0;
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+/* 🔥 Адаптив */
+@media (max-width: 768px) {
+  .dynamic-modal {
+    padding: 20px 24px;
+    max-width: 95%;
+  }
+
+  .dynamic-modal-title {
+    font-size: 1rem;
+  }
+
+  .dynamic-modal-range {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+
+  .dynamic-modal-subtitle {
+    font-size: 0.7rem;
+  }
+
+  .modal-item-value {
+    min-width: 50px;
+    font-size: 0.8rem;
+    padding: 3px 8px;
+  }
+
+  .modal-item-description {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dynamic-modal {
+    padding: 16px;
+    max-width: 98%;
+    max-height: 85vh;
+  }
+
+  .dynamic-modal-title {
+    font-size: 0.9rem;
+  }
+
+  .dynamic-modal-close {
+    font-size: 1.2rem;
+    padding: 2px 6px;
+  }
+
+  .dynamic-modal-range {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    margin: 8px 0 12px 0;
+  }
+
+  .dynamic-modal-subtitle {
+    font-size: 0.65rem;
+    gap: 4px;
+  }
+
+  .dynamic-modal-item {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .modal-item-value {
+    min-width: 45px;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+
+  .modal-item-description {
+    font-size: 0.75rem;
+  }
+
+  .dynamic-modal-empty {
+    font-size: 0.85rem;
+    padding: 16px 0;
+  }
+}

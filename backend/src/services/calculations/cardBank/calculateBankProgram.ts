@@ -286,6 +286,7 @@ export const calculateBankProgram = (
     bank: offer.bank?.name || "",
     program: offer.program,
     type: programType as any,
+    offerId: offer.id,
 
     rate: actualRateResult,
     twoRate: offer.twoRate ?? undefined,

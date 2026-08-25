@@ -14,6 +14,8 @@ import { NoResults } from "./NoResults/NoResults";
 import { BankGroup } from "./BankCard/BankGroup/BankGroup";
 import { FloatingSelectionBar } from "./FloatingSelectionBar/FloatingSelectionBar";
 import { BANK_ORDER } from "../../utils/constants";
+import { getDisplayRate, getDisplaySubsidy } from "../../utils/offerHelpers";
+import { useDynamicOffersData } from "../../hooks/api/useDynamicOffersData";
 
 export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   bankResults,
@@ -35,6 +37,81 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   filtersRef,
 }) => {
   const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set());
+
+  // 🔥 Загружаем динамические данные
+  const { offers, dynamicDataMap, loading } = useDynamicOffersData();
+
+  // 🔥 Создаем индекс для быстрого поиска по ID
+  const offerIndex = useMemo(() => {
+    const index = new Map<string, any>();
+    offers.forEach((offer) => {
+      index.set(offer.id, offer);
+    });
+    return index;
+  }, [offers]);
+
+  // 🔥 Функция получения динамических данных по offerId
+  const getDynamicDataForOffer = useMemo(() => {
+    return (bankResult: BankProgramResultWithIndex) => {
+      if (!offers.length || !dynamicDataMap) return null;
+
+      // 🔥 1. Ищем по offerId (основной способ)
+      if (bankResult.offerId) {
+        const offer = offerIndex.get(bankResult.offerId);
+        if (offer) {
+          const rateResult = getDisplayRate(offer, dynamicDataMap);
+          const subsidyResult = getDisplaySubsidy(offer, dynamicDataMap);
+
+          return {
+            dynamicRateData:
+              rateResult.type === "dynamic" && rateResult.details
+                ? {
+                    display: rateResult.display as string,
+                    details: rateResult.details,
+                  }
+                : undefined,
+            dynamicSubsidyData:
+              subsidyResult.type === "dynamic" && subsidyResult.details
+                ? {
+                    display: subsidyResult.display,
+                    details: subsidyResult.details,
+                  }
+                : undefined,
+          };
+        }
+      }
+
+      // 🔥 2. Fallback - поиск по банку и программе
+      const offer = offers.find(
+        (o) =>
+          o.bank?.name === bankResult.bank && o.program === bankResult.program,
+      );
+
+      if (offer) {
+        const rateResult = getDisplayRate(offer, dynamicDataMap);
+        const subsidyResult = getDisplaySubsidy(offer, dynamicDataMap);
+
+        return {
+          dynamicRateData:
+            rateResult.type === "dynamic" && rateResult.details
+              ? {
+                  display: rateResult.display as string,
+                  details: rateResult.details,
+                }
+              : undefined,
+          dynamicSubsidyData:
+            subsidyResult.type === "dynamic" && subsidyResult.details
+              ? {
+                  display: subsidyResult.display,
+                  details: subsidyResult.details,
+                }
+              : undefined,
+        };
+      }
+
+      return null;
+    };
+  }, [offers, dynamicDataMap, offerIndex]);
 
   // 🔥 Синхронизируем фильтры с ref
   useEffect(() => {
@@ -180,6 +257,14 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
     setSelectedCards(new Set());
   };
 
+  if (loading) {
+    return (
+      <div className="loading-dynamic-data">
+        Загрузка динамических данных...
+      </div>
+    );
+  }
+
   return (
     <div className="results-section">
       <div className="banks-header-wrapper">
@@ -219,6 +304,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
             formatMoney={formatMoney}
             onCardClick={handleCardClick}
             hasProgramsInCategory={hasProgramsInCategory}
+            getDynamicDataForOffer={getDynamicDataForOffer}
           />
         ))
       )}
