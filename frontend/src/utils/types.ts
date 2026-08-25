@@ -227,6 +227,7 @@ export interface BankProgramResult {
   bank: string;
   program: string;
   type: ProgramType;
+  offerId?: string;
   rate: number; // Ставка на период
   twoRate?: number;
   actualRate?: number;

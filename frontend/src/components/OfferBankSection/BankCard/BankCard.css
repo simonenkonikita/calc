@@ -175,3 +175,43 @@
     align-items: flex-start;
   }
 }
+
+/* 🔥 Контейнер для динамической информации */
+.bank-card-dynamic-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  margin: 4px 0 8px 0;
+  flex-wrap: wrap;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  min-height: 28px;
+  cursor: default;
+  user-select: none;
+}
+
+.bank-card-dynamic-info:empty {
+  display: none;
+}
+
+.bank-card-dynamic-info .dynamic-info-display {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.bank-card-dynamic-info .dynamic-info-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+}
+
+/* 🔥 Разделитель между бейджами */
+.dynamic-badge-divider {
+  color: #d1d5db;
+  font-weight: 300;
+  font-size: 0.7rem;
+  padding: 0 2px;
+}
