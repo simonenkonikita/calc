@@ -16,6 +16,8 @@ frontend/.env
 # SHELL ФАЙЛЫ
 # ============================================================
 .bashrc
+*deepseek_bash_20260825_981fba.sh
+deepseek_bash_20260825_981fba.sh
 *.bashrc
 *.pgpass
 
@@ -100,4 +102,3 @@ coverage/
 backend/src/services/calculations/сoefficients/_getDynamicValue.ts
 backend/src/services/calculations/сoefficients/_getThresholdSubsidy.ts
 backend/src/utils/programHelpers.ts
-
