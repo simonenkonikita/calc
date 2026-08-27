@@ -1,7 +1,7 @@
 // backend/src/services/calculations/bankProgram/steps/payment/calculateAllMonthlyPayment.ts
 
 import { Offer } from "../../../../entities/Offer";
-import { TranchePaymentsResult } from "../../../../types/types";
+import { TranchePaymentsResult, Variables } from "../../../../types/types";
 import { calculateMonthlyPayment } from "./calculateMonthlyPayment";
 import { calculateTwoContractsMonthlyPayment } from "./family/calculateTwoContractsMonthlyPayment";
 import { calculateSubsidyPayments } from "./subsidy/calculateSubsidyPayments";
@@ -11,6 +11,7 @@ type SubsidyCalculationMethod = "standard" | "onlyPercent";
 
 interface CalculateAllMonthlyPaymentParams {
   offer: Offer;
+  variables: Variables;
   mortgageAmount: number;
   actualRate: number;
   loanTermYears: number;
@@ -45,6 +46,7 @@ export const calculateAllMonthlyPayment = (
 ): CalculateAllMonthlyPaymentResult => {
   const {
     offer,
+    variables,
     mortgageAmount,
     actualRate,
     loanTermYears,
@@ -72,10 +74,14 @@ export const calculateAllMonthlyPayment = (
   };
 
   // 1. КОРОТКАЯ СУБСИДИЯ
-  if (isShortSubsidy && offer.shortRate !== null && offer.shortRate !== undefined) {
+  if (
+    isShortSubsidy &&
+    offer.shortRate !== null &&
+    offer.shortRate !== undefined
+  ) {
     const shortRate = offer.shortRate;
     const durationMonths = offer.durationMonths ?? 12;
-    
+
     const result = calculateSubsidyPayments(
       mortgageAmount,
       shortRate,
@@ -86,12 +92,18 @@ export const calculateAllMonthlyPayment = (
     );
     monthlyPayment = result.monthlyPaymentSubsidy;
     monthlyPaymentAfter = result.monthlyPaymentAfter;
-  } 
+  }
   // 2. ДВА ДОГОВОРА
-  else if (isTwoContracts && offer.twoRate !== null && offer.twoRate !== undefined) {
+  else if (
+    isTwoContracts &&
+    offer.twoRate !== null &&
+    offer.twoRate !== undefined
+  ) {
     const twoRate = offer.twoRate;
-    
+
     const result = calculateTwoContractsMonthlyPayment(
+      offer,
+      variables,
       mortgageAmount,
       twoRate,
       actualRate,
@@ -101,7 +113,7 @@ export const calculateAllMonthlyPayment = (
     secondContractPayment = result.secondContractPayment;
     totalMonthlyPayment = result.totalMonthlyPayment;
     monthlyPayment = totalMonthlyPayment;
-  } 
+  }
   // 3. ТРАНШЕВАЯ ИПОТЕКА
   else if (isTranche) {
     const trancheResult = calculateTranchePayments(
@@ -126,7 +138,7 @@ export const calculateAllMonthlyPayment = (
       monthsUntilSecondTranche: trancheResult.monthsUntilSecondTranche,
       trancheSecondDate: trancheResult.trancheSecondDate,
     };
-  } 
+  }
   // 4. СТАНДАРТНАЯ ИПОТЕКА
   else {
     monthlyPayment = calculateMonthlyPayment(

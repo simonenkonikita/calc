@@ -1,34 +1,40 @@
 // backend/src/services/calculations/bankProgram/steps/calculateContractAmount.ts
 
 import { Offer } from "../../../../entities/Offer";
-import { Variables, BankCoefficients, ContractAmountResult } from "../../../../types/types";
+import {
+  Variables,
+  BankCoefficients,
+  ContractAmountResult,
+} from "../../../../types/types";
 import { calculateFamilyContractAmount } from "./family/calculateFamilyContractAmount";
 import { calculateFamilyExcessLimitContractAmount } from "./family/calculateFamilyExcessLimitContractAmount";
 import { calculateFamilyTwoContractAmount } from "./family/calculateFamilyTwoContractAmount";
 import { calculateStandardContractAmount } from "./standard/calculateStandardContractAmount";
 
-
 export const calculateContractAmount = (
+  offer: Offer,
   objectCost: number,
   downPayment: number,
   remainingAmount: number,
   userDownPaymentPercent: number,
   manualDownPayment: number,
-  offer: Offer,
   variables: Variables,
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
 ): ContractAmountResult => {
-  const programType = offer.programEntity?.type || 'base';
+  const programType = offer.programEntity?.type || "base";
+  const isFamilyOrIt = programType === "family" || programType === "it";
+  const isTwoContracts = isFamilyOrIt && offer.isTwoContracts === true;
+  const isExcessLimit = isFamilyOrIt && offer.excessLimit === true;
 
-  if (programType === "family" && offer.isTwoContracts === true) {
+  if (isTwoContracts) {
     return calculateFamilyTwoContractAmount(
+      offer,
       objectCost,
       downPayment,
       remainingAmount,
       userDownPaymentPercent,
-      offer,
       variables,
       noSubsidyInflate,
       isSpecialMortgageMode,
@@ -36,7 +42,7 @@ export const calculateContractAmount = (
     );
   }
 
-  if (programType === "family" && offer.excessLimit === true) {
+  if (isExcessLimit) {
     return calculateFamilyExcessLimitContractAmount(
       objectCost,
       downPayment,
@@ -50,7 +56,7 @@ export const calculateContractAmount = (
     );
   }
 
-  if (programType === "family") {
+  if (isFamilyOrIt) {
     return calculateFamilyContractAmount(
       objectCost,
       downPayment,
