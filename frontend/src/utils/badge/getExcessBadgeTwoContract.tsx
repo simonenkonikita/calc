@@ -6,13 +6,14 @@ export const getExcessBadgeTwoContract = (
   offer: BankProgramResultWithIndex,
   isSpecialMortgageMode: boolean = false,
 ): { text: string; icon: string } | null => {
-  // Проверяем, что это сверхлимитная программа
-  const isExcessProgram =
-    offer.program?.toLowerCase().includes("2 договора") ||
-    offer.program === "Семейная ипотека (2 договора)" ||
-    offer.program === "ИТ ипотека сверхлимит (2 договора)";
+  const program = offer.program?.toLowerCase() || "";
 
-  if (!isExcessProgram) {
+  // 🔥 Проверяем, что это СВЕРХЛИМИТ с 2 договорами
+  const isTwoContractExcess =
+    program.includes("сверхлимит") &&
+    (program.includes("2 договора") || program.includes("два договора"));
+
+  if (!isTwoContractExcess) {
     return null;
   }
 
@@ -23,11 +24,15 @@ export const getExcessBadgeTwoContract = (
     };
   }
 
-  const minExcessAmount = getMinExcessAmount(offer.bank);
-  const maxExcessAmount = variables.maxFamilyMortgageSum || 15000000;
+  const isIt = program.includes("ит");
+
+  const maxExcessAmount = isIt
+    ? variables.maxItMortgageSum || 18000000
+    : variables.maxFamilyMortgageSum || 15000000;
+
+  const minExcessAmount = getMinExcessAmount(offer.bank, isIt);
   const mortgageAmount = offer.mortgageAmount || 0;
 
-  // 🔥 Разные сообщения в зависимости от суммы
   if (mortgageAmount < minExcessAmount) {
     return {
       icon: "⚠️",
@@ -42,9 +47,8 @@ export const getExcessBadgeTwoContract = (
     };
   }
 
-  // Сумма в допустимом диапазоне - показываем обычный шильдик
   return {
     icon: "⚡",
-    text: `Cерхлимит`,
+    text: `Сверхлимит (2 договора)`,
   };
 };

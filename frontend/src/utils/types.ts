@@ -12,7 +12,10 @@ export interface Variables {
   itMortgageLimit: number;
   maxItMortgageSum: number;
   deposit: number;
-  minExcessAmounts?: {
+  minExcessAmountsFamily?: {
+    [bankName: string]: number;
+  };
+  minExcessAmountsIt?: {
     [bankName: string]: number;
   };
 }

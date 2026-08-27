@@ -1,9 +1,19 @@
 import { variables } from "../../data/limitdDate";
 
-export const getMinExcessAmount = (bankName: string): number => {
+export const getMinExcessAmount = (
+  bankName: string,
+  isIt: boolean = false, // ← Добавляем параметр
+): number => {
+  // Выбираем правильный объект с минимальными суммами
+  const minAmounts = isIt
+    ? variables.minExcessAmountsIt
+    : variables.minExcessAmountsFamily;
+
   // Если для банка есть своя минимальная сумма - используем её
-  if (variables.minExcessAmounts && variables.minExcessAmounts[bankName]) {
-    return variables.minExcessAmounts[bankName];
+  if (minAmounts && minAmounts[bankName]) {
+    return minAmounts[bankName];
   }
-  return 6000000;
+
+  // Значение по умолчанию
+  return isIt ? 9000000 : 6000000;
 };

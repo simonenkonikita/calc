@@ -6,20 +6,25 @@ export const getExcessBadge = (
   offer: BankProgramResultWithIndex,
 ): { text: string; icon: string } | null => {
   // Проверяем, что это сверхлимитная программа
-  const isExcessProgram =
-    offer.program?.toLowerCase().includes("сверхлимит") ||
-    offer.program === "Семейная ипотека сверхлимит" ||
-    offer.program === "ИТ ипотека сверхлимит";
+  const program = offer.program?.toLowerCase() || "";
+
+  const isExcessProgram = program.includes("сверхлимит");
 
   if (!isExcessProgram) {
     return null;
   }
 
-  const minExcessAmount = getMinExcessAmount(offer.bank);
-  const maxExcessAmount = variables.maxFamilyMortgageSum || 15000000;
+  // 🔥 ИСПРАВЛЕНО: определяем ИТ-программу по наличию "ит" в названии
+  const isIt = program.includes("ит");
+
+  const maxExcessAmount = isIt
+    ? variables.maxItMortgageSum || 18000000
+    : variables.maxFamilyMortgageSum || 15000000;
+
+  const minExcessAmount = getMinExcessAmount(offer.bank, isIt);
   const mortgageAmount = offer.mortgageAmount || 0;
 
-  // 🔥 Разные сообщения в зависимости от суммы
+  // Сообщения в зависимости от суммы
   if (mortgageAmount < minExcessAmount) {
     return {
       icon: "⚠️",
@@ -34,9 +39,8 @@ export const getExcessBadge = (
     };
   }
 
-  // Сумма в допустимом диапазоне - показываем обычный шильдик
   return {
     icon: "⚡",
-    text: `Cерхлимит`,
+    text: `Сверхлимит`,
   };
 };

@@ -174,7 +174,31 @@ export const BankCard: React.FC<BankCardProps> = ({
         </div>
       )}
 
-      {/*   {offer.type === "family" && offer.isTwoContracts && (
+      {/*     {offer.type === "family" && offer.isTwoContracts && (
+        <div className="bank-excess-warning-overlay">
+          <div className="excess-overlay-icon">🚫</div>
+          <div className="excess-overlay-title">
+            Ипотека с выбранными параметрами невозможна
+          </div>
+          <div className="excess-overlay-hint">
+            Превышен лимит семейной ипотеки
+          </div>
+        </div>
+      )}
+ */}
+      {offer.type === "it" && offer.isLimitExceeded && (
+        <div className="bank-excess-warning-overlay">
+          <div className="excess-overlay-icon">🚫</div>
+          <div className="excess-overlay-title">
+            Ипотека с выбранными параметрами невозможна
+          </div>
+          {/*      <div className="excess-overlay-hint">
+            Превышен лимит семейной ипотеки
+          </div> */}
+        </div>
+      )}
+
+      {/*       {offer.type === "it" && offer.isTwoContracts && (
         <div className="bank-excess-warning-overlay">
           <div className="excess-overlay-icon">🚫</div>
           <div className="excess-overlay-title">
