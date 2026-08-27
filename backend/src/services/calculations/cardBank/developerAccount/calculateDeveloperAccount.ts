@@ -23,7 +23,6 @@ interface CalculateDeveloperAccountParams {
   downPaymentAmount: number;
   noSubsidyInflate: boolean;
   coefficients: BankCoefficients;
-  isFamilyOrIt: boolean;
 }
 
 export const calculateDeveloperAccount = (
@@ -44,8 +43,10 @@ export const calculateDeveloperAccount = (
     downPaymentAmount,
     noSubsidyInflate,
     coefficients,
-    isFamilyOrIt,
   } = params;
+
+  const programType = offer.programEntity?.type || "base";
+  const isFamilyOrIt = programType === "family" || programType === "it";
 
   // ============================================================
   // СЕМЕЙНАЯ/ИТ — сложная формула с лимитами

@@ -4,7 +4,6 @@ import { Offer } from "../../../entities/Offer";
 import { BankCoefficients, Variables } from "../../../types/types";
 import { calculateContractAmount } from "../cardBank/contractAmount/calculateContractAmount";
 
-
 const createUpdatedCoefficients = (
   coefficients: BankCoefficients,
   subsidyPercent: number,
@@ -32,26 +31,30 @@ const createUpdatedCoefficients = (
     ...coefficients,
     subsidyPercent: subsidyPercent,
     creditFromSubsidyPercent: Math.max(0, 100 - subsidyPercent),
-    kefSubsidy: subsidyPercent > 0 ? subsidyPercent / (100 - subsidyPercent) : 0,
+    kefSubsidy:
+      subsidyPercent > 0 ? subsidyPercent / (100 - subsidyPercent) : 0,
     mortgageCoefficient: (mortgagePercent * (100 - subsidyPercent)) / 100,
-    overstatementCoefficient: 100 - (mortgagePercent * (100 - subsidyPercent)) / 100,
-    requiredCoeffWithMinPV: 1 - (subsidyPercent / 100) * (mortgagePercent / 100),
+    overstatementCoefficient:
+      100 - (mortgagePercent * (100 - subsidyPercent)) / 100,
+    requiredCoeffWithMinPV:
+      1 - (subsidyPercent / 100) * (mortgagePercent / 100),
     requiredCoeffWithLargePV: 1 - subsidyPercent / 100,
-    requiredCoeffWithoutPV: (mortgagePercent * (100 - subsidyPercent)) / 100 > 0
-      ? (100 - (mortgagePercent * (100 - subsidyPercent)) / 100) /
-        ((mortgagePercent * (100 - subsidyPercent)) / 100)
-      : 0,
+    requiredCoeffWithoutPV:
+      (mortgagePercent * (100 - subsidyPercent)) / 100 > 0
+        ? (100 - (mortgagePercent * (100 - subsidyPercent)) / 100) /
+          ((mortgagePercent * (100 - subsidyPercent)) / 100)
+        : 0,
     requiredCoeffFamilyTwo: requiredCoeffFamilyTwo,
   };
 };
 
 export const calculateContractAmountWithSubsidy = (
+  offer: Offer,
   objectCost: number,
   downPayment: number,
   remainingAmount: number,
   userDownPaymentPercent: number,
   manualDownPayment: number,
-  offer: Offer,
   variables: Variables,
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,
@@ -67,12 +70,12 @@ export const calculateContractAmountWithSubsidy = (
   );
 
   const result = calculateContractAmount(
+    offer,
     objectCost,
     downPayment,
     remainingAmount,
     userDownPaymentPercent,
     manualDownPayment,
-    offer,
     variables,
     noSubsidyInflate,
     isSpecialMortgageMode,

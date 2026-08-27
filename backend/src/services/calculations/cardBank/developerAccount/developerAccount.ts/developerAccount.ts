@@ -38,9 +38,15 @@ export const developerAccount = (params: developerAccountParams): number => {
     coefficients,
   } = params;
 
+  const isIt = offer.programEntity?.type === "it";
+
   const limit = offer.excessLimit
-    ? variables.maxFamilyMortgageSum || 15000000
-    : variables.familyMortgageLimit || 6000000;
+    ? isIt
+      ? variables.maxItMortgageSum || 18000000
+      : variables.maxFamilyMortgageSum || 15000000
+    : isIt
+      ? variables.itMortgageLimit || 9000000
+      : variables.familyMortgageLimit || 6000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
   const summCreditMinPV = objectCost / coefficients.requiredCoeffWithMinPV;

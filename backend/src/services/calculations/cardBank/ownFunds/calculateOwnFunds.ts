@@ -17,7 +17,6 @@ interface CalculateOwnFundsParams {
   variables: Variables;
   isSpecialMortgageMode: boolean;
   coefficients: BankCoefficients;
-  isFamilyOrIt: boolean;
 }
 
 export const calculateOwnFunds = (params: CalculateOwnFundsParams): number => {
@@ -25,7 +24,6 @@ export const calculateOwnFunds = (params: CalculateOwnFundsParams): number => {
     downPayment,
     downPaymentAmount,
     isSpecialMortgageMode,
-    isFamilyOrIt,
     objectCost,
     remainingAmount,
     contractAmount,
@@ -34,6 +32,9 @@ export const calculateOwnFunds = (params: CalculateOwnFundsParams): number => {
     variables,
     coefficients,
   } = params;
+
+  const programType = offer.programEntity?.type || "base";
+  const isFamilyOrIt = programType === "family" || programType === "it";
 
   if (isFamilyOrIt) {
     return ownFunds({

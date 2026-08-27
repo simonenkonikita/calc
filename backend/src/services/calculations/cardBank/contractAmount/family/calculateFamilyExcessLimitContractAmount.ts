@@ -18,7 +18,15 @@ export const calculateFamilyExcessLimitContractAmount = (
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
 ): ContractAmountResult => {
-  const maxLimit = variables.maxFamilyMortgageSum || 15000000;
+  const isIt = offer.programEntity?.type === "it";
+
+  const limit = isIt
+    ? variables.itMortgageLimit || 9000000
+    : variables.familyMortgageLimit || 6000000;
+
+  const maxLimit = isIt
+    ? variables.maxItMortgageSum || 18000000
+    : variables.maxFamilyMortgageSum || 15000000;
 
   const subsidyPercent = offer.subsidyPercent;
 

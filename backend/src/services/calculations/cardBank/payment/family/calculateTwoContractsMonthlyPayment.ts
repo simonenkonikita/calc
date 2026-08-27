@@ -1,7 +1,11 @@
+import { Offer } from "../../../../../entities/Offer";
+import { Variables } from "../../../../../types/types";
 import { calculateMonthlyPayment } from "../calculateMonthlyPayment";
 
 // ========== РАСЧЕТ ЕЖЕМЕСЯЧНОГО ПЛАТЕЖА ПО 2 ДОГОВОРАМ ==========
 export const calculateTwoContractsMonthlyPayment = (
+  offer: Offer,
+  variables: Variables,
   mortgageAmount: number,
   twoRate: number, // Ставка по второму договору (обычно выше)
   firstRate: number, // Ставка по первому договору (льготная, 6%)
@@ -12,7 +16,11 @@ export const calculateTwoContractsMonthlyPayment = (
   totalMonthlyPayment: number;
 } => {
   // Лимит для первого договора (льготная ставка)
-  const FIRST_CONTRACT_LIMIT = 6000000;
+  const isIt = offer.programEntity?.type === "it";
+
+  const limit = isIt
+    ? variables.itMortgageLimit || 9000000
+    : variables.familyMortgageLimit || 6000000;
 
   // Проверка на корректность данных
   if (mortgageAmount <= 0 || loanTermMonths <= 0) {
@@ -24,11 +32,8 @@ export const calculateTwoContractsMonthlyPayment = (
   }
 
   // Разбиваем сумму на два договора
-  const firstContractAmount = Math.min(mortgageAmount, FIRST_CONTRACT_LIMIT);
-  const secondContractAmount = Math.max(
-    0,
-    mortgageAmount - FIRST_CONTRACT_LIMIT,
-  );
+  const firstContractAmount = Math.min(mortgageAmount, limit);
+  const secondContractAmount = Math.max(0, mortgageAmount - limit);
 
   // Если второго договора нет (сумма меньше лимита)
   if (secondContractAmount === 0) {

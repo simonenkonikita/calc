@@ -39,7 +39,6 @@ export const calculateBankProgram = (
   const programType = offer.programEntity?.type || "base";
   const isFamilyOrIt = programType === "family" || programType === "it";
   const isTwoContracts = isFamilyOrIt && offer.isTwoContracts === true;
-  const isExcessLimit = isFamilyOrIt && offer.excessLimit === true;
   const isTranche = programType === "tranche" && offer.isTranche === true;
   const isSpecialMortgageMode =
     mortgageWithoutDownPayment || mortgagePartialDownPayment;
@@ -47,17 +46,16 @@ export const calculateBankProgram = (
 
   // Коэффициенты
   const coefficients = calculateBankCoefficients({
-    offer,
     variables,
     objectCost,
     downPayment,
     remainingAmount,
     userDownPaymentPercent,
     manualDownPayment,
-    loanTermYears,
+    offer,
     noSubsidyInflate,
     isSpecialMortgageMode,
-    isTwoContracts,
+    loanTermYears,
   });
 
   const actualSubsidyPercent = coefficients.subsidyPercent;
@@ -80,12 +78,12 @@ export const calculateBankProgram = (
 
   // Первоначальный взнос
   let downPaymentAmount = calculateDownPaymentAmount({
-    offer,
     objectCost,
     downPayment,
     contractAmount,
     userDownPaymentPercent,
     manualDownPayment,
+    offer,
     variables,
     isSpecialMortgageMode,
     remainingAmount,
@@ -95,16 +93,17 @@ export const calculateBankProgram = (
 
   // Сумма ипотеки
   let mortgageAmountResult = calculateMortgageAmount({
-    offer,
     objectCost,
     contractAmount,
     downPayment,
     remainingAmount,
     downPaymentAmount,
     userDownPaymentPercent,
+    offer,
     variables,
-    coefficients,
+    isFamilyOrIt,
     isSpecialMortgageMode,
+    coefficients,
   });
 
   let { firstContractAmount, secondContractAmount, isLimitExceeded } =
@@ -140,6 +139,7 @@ export const calculateBankProgram = (
       variables,
       isSpecialMortgageMode,
       coefficients,
+      isFamilyOrIt,
     });
 
     const adjustmentResult = adjustTwoContracts({
@@ -184,6 +184,7 @@ export const calculateBankProgram = (
     variables,
     isSpecialMortgageMode,
     coefficients,
+    isFamilyOrIt,
   });
 
   // Внос клиента
@@ -198,6 +199,7 @@ export const calculateBankProgram = (
     variables,
     isSpecialMortgageMode,
     coefficients,
+    isFamilyOrIt,
   });
 
   // Актуальная ставка
@@ -244,6 +246,7 @@ export const calculateBankProgram = (
     downPaymentAmount,
     noSubsidyInflate,
     coefficients,
+    isFamilyOrIt,
   });
 
   // Цена за м²
@@ -255,7 +258,6 @@ export const calculateBankProgram = (
   // Ежемесячный платеж
   const paymentResult = calculateAllMonthlyPayment({
     offer,
-    variables,
     mortgageAmount: mortgageAmountResult.mortgageAmount,
     actualRate: actualRateResult,
     loanTermYears,

@@ -51,7 +51,16 @@ export const adjustTwoContracts = (
     minPVPercent,
   } = params;
 
-  const LIMIT = variables.familyMortgageLimit || 6000000;
+  const isIt = offer.programEntity?.type === "it";
+
+  const limit = isIt
+    ? variables.itMortgageLimit || 9000000
+    : variables.familyMortgageLimit || 6000000;
+
+  const maxLimit = isIt
+    ? variables.maxItMortgageSum || 18000000
+    : variables.maxFamilyMortgageSum || 15000000;
+
   let secondContract = secondContractAmount || 0;
 
   // ============================================================
@@ -91,10 +100,10 @@ export const adjustTwoContracts = (
 
   if (isSpecialMortgageMode) {
     // Специальный режим (без ПВ или с частичным ПВ)
-    calculatedDownPayment = newContractAmount - LIMIT - secondContract;
+    calculatedDownPayment = newContractAmount - limit - secondContract;
   } else {
     // Обычный режим
-    calculatedDownPayment = newContractAmount - LIMIT - secondContract;
+    calculatedDownPayment = newContractAmount - limit - secondContract;
   }
 
   let newDownPaymentAmount = Math.max(minPVAmount, calculatedDownPayment);
@@ -107,8 +116,8 @@ export const adjustTwoContracts = (
   // ============================================================
   // 5. РАЗБИВКА ПО ДОГОВОРАМ
   // ============================================================
-  let newFirstContractAmount = Math.min(newMortgageAmount, LIMIT);
-  let newSecondContractAmount = Math.max(0, newMortgageAmount - LIMIT);
+  let newFirstContractAmount = Math.min(newMortgageAmount, limit);
+  let newSecondContractAmount = Math.max(0, newMortgageAmount - limit);
 
   // ============================================================
   // 6. ИТЕРАТИВНЫЙ ПЕРЕСЧЕТ
@@ -151,15 +160,15 @@ export const adjustTwoContracts = (
       // Пересчитываем ПВ
       const newMinPVAmount = newContractAmount * (minPVPercent / 100);
       const newCalculatedDownPayment =
-        newContractAmount - LIMIT - secondContract;
+        newContractAmount - limit - secondContract;
       newDownPaymentAmount = Math.max(newMinPVAmount, newCalculatedDownPayment);
 
       // Пересчитываем ипотеку
       newMortgageAmount = newContractAmount - newDownPaymentAmount;
 
       // Пересчитываем разбивку
-      newFirstContractAmount = Math.min(newMortgageAmount, LIMIT);
-      newSecondContractAmount = Math.max(0, newMortgageAmount - LIMIT);
+      newFirstContractAmount = Math.min(newMortgageAmount, limit);
+      newSecondContractAmount = Math.max(0, newMortgageAmount - limit);
     }
   }
 
