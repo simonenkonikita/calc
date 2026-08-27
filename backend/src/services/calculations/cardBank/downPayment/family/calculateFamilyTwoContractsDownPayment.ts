@@ -37,8 +37,15 @@ export const calculateFamilyTwoContractsDownPayment = (
     remainingAmount,
   } = params;
 
-  // 🔥 ОПРЕДЕЛЯЕМ ЛИМИТ ПО ФЛАГУ excessLimit
-  const maxLimit = variables.maxFamilyMortgageSum || 15000000;
+  const isIt = offer.programEntity?.type === "it";
+
+  const limit = isIt
+    ? variables.itMortgageLimit || 9000000
+    : variables.familyMortgageLimit || 6000000;
+
+  const maxLimit = isIt
+    ? variables.maxItMortgageSum || 18000000
+    : variables.maxFamilyMortgageSum || 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
   const cafsummPV = userDownPaymentPercent / 100;

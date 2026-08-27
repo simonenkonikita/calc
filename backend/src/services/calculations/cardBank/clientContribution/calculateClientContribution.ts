@@ -19,7 +19,6 @@ interface CalculateClientContributionParams {
   variables: Variables;
   isSpecialMortgageMode: boolean;
   coefficients: BankCoefficients;
-  isFamilyOrIt: boolean;
 }
 
 export const calculateClientContribution = (
@@ -31,13 +30,15 @@ export const calculateClientContribution = (
     downPaymentAmount,
     ownFunds,
     isSpecialMortgageMode,
-    isFamilyOrIt,
     objectCost,
     userDownPaymentPercent,
     offer,
     variables,
     coefficients,
   } = params;
+
+  const programType = offer.programEntity?.type || "base";
+  const isFamilyOrIt = programType === "family" || programType === "it";
 
   if (isFamilyOrIt) {
     return clientContribution({

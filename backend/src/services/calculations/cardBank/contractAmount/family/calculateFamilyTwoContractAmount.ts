@@ -11,18 +11,25 @@ import { getDynamicSubsidy } from "../../../сoefficients/getDynamicSubsidy";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ ДЛЯ 2 ДОГОВОРОВ ==========
 export const calculateFamilyTwoContractAmount = (
+  offer: Offer,
   objectCost: number,
   downPayment: number,
   remainingAmount: number,
   userDownPaymentPercent: number,
-  offer: Offer,
   variables: Variables,
   noSubsidyInflate: boolean,
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
 ): ContractAmountResult => {
-  const limit = variables.familyMortgageLimit || 6000000;
-  const maxLimit = variables.maxFamilyMortgageSum || 15000000;
+  const isIt = offer.programEntity?.type === "it";
+
+  const limit = isIt
+    ? variables.itMortgageLimit || 9000000
+    : variables.familyMortgageLimit || 6000000;
+
+  const maxLimit = isIt
+    ? variables.maxItMortgageSum || 18000000
+    : variables.maxFamilyMortgageSum || 15000000;
 
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
   const cafsummCred = 1 - userDownPaymentPercent / 100;

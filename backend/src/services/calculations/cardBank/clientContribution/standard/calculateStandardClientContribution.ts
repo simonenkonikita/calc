@@ -32,8 +32,15 @@ export const clientContribution = (params: clientContribution): number => {
     coefficients,
   } = params;
 
-  const limit = variables.familyMortgageLimit || 6000000;
-  const maxLimit = variables.maxFamilyMortgageSum || 15000000;
+  const isIt = offer.programEntity?.type === "it";
+
+  const limit = isIt
+    ? variables.itMortgageLimit || 9000000
+    : variables.familyMortgageLimit || 6000000;
+
+  const maxLimit = isIt
+    ? variables.maxItMortgageSum || 18000000
+    : variables.maxFamilyMortgageSum || 15000000;
 
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
   const cafsummCred = 1 - userDownPaymentPercent / 100;

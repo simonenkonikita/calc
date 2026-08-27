@@ -11,12 +11,12 @@ import { calculateStandardDownPayment } from "./standard/calculateStandardDownPa
 
 // src/hooks/payment/downPayment/calculateDownPaymentAmount.ts
 interface DownPaymentAmountParams {
+  offer: Offer;
   objectCost: number;
   downPayment: number;
   contractAmount: number;
   userDownPaymentPercent: number;
   manualDownPayment: number;
-  offer: Offer;
   variables: Variables;
   isSpecialMortgageMode: boolean;
   remainingAmount: number;
@@ -28,12 +28,12 @@ export const calculateDownPaymentAmount = (
   params: DownPaymentAmountParams,
 ): number => {
   const {
+    offer,
     objectCost,
     downPayment,
     contractAmount,
     userDownPaymentPercent,
     manualDownPayment,
-    offer,
     variables,
     isSpecialMortgageMode,
     remainingAmount,
@@ -41,10 +41,12 @@ export const calculateDownPaymentAmount = (
     coefficients,
   } = params;
 
-  // 🔥 Получаем тип программы
   const programType = offer.programEntity?.type || "base";
+  const isFamilyOrIt = programType === "family" || programType === "it";
+  const isTwoContracts = isFamilyOrIt && offer.isTwoContracts === true;
+  const isExcessLimit = isFamilyOrIt && offer.excessLimit === true;
 
-  if (programType === "family" && offer.isTwoContracts === true) {
+  if (isTwoContracts) {
     return calculateFamilyTwoContractsDownPayment({
       objectCost,
       downPayment,
@@ -60,7 +62,7 @@ export const calculateDownPaymentAmount = (
     });
   }
 
-  if (programType === "family" && offer.excessLimit === true) {
+  if (isExcessLimit) {
     return calculateFamilyExcessLimitDownPayment({
       objectCost,
       downPayment,
@@ -76,7 +78,7 @@ export const calculateDownPaymentAmount = (
     });
   }
 
-  if (programType === "family") {
+  if (isFamilyOrIt) {
     return calculateFamilyDownPayment({
       objectCost,
       downPayment,

@@ -36,9 +36,16 @@ export const calculateFamilyExcessLimitMortgageAmount = (
   } = params;
 
   const bankName = offer.bank?.name || "";
-  const limit = variables.minExcessAmounts?.[bankName] || 7500000;
 
-  const maxLimit = variables.maxFamilyMortgageSum || 15000000;
+  const isIt = offer.programEntity?.type === "it";
+
+  const limit = isIt
+    ? variables.minExcessAmountsIt?.[bankName] || 9000000
+    : variables.minExcessAmountsFamily?.[bankName] || 6000000;
+
+  const maxLimit = isIt
+    ? variables.maxItMortgageSum || 18000000
+    : variables.maxFamilyMortgageSum || 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
 

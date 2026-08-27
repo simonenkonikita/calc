@@ -75,12 +75,12 @@ export const calculateDynamicSubsidy = (
     }
 
     contractAmount = calculateContractAmountWithSubsidy(
+      offer,
       objectCost,
       downPayment,
       remainingAmount,
       userDownPaymentPercent,
       manualDownPayment,
-      offer,
       variables,
       noSubsidyInflate,
       isSpecialMortgageMode,

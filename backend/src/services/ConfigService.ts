@@ -16,27 +16,35 @@ export class ConfigService {
    */
   async getVariables(): Promise<Variables> {
     const cacheKey = "variables";
-    
+
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
     }
 
     try {
       const config = await this.getConfig();
-      
+
       const variables: Variables = {
         familyMortgageLimit: config.familyMortgageLimit || 6000000,
         maxFamilyMortgageSum: config.maxFamilyMortgageSum || 15000000,
         itMortgageLimit: config.itMortgageLimit || 9000000,
         maxItMortgageSum: config.maxItMortgageSum || 18000000,
         deposit: config.depositAmount || 30000,
-        minExcessAmounts: config.minExcessAmounts || {
+        minExcessAmountsFamily: config.minExcessAmounts || {
           Сбербанк: 6300000,
           ВТБ: 6150000,
           "Альфа-Банк": 6000000,
           Совкомбанк: 7500000,
           Уралсиб: 6000000,
           "Дом.РФ Банк": 6000000,
+        },
+        minExcessAmountsIt: config.minExcessAmounts || {
+          Сбербанк: 9300000,
+          ВТБ: 9150000,
+          "Альфа-Банк": 9000000,
+          Совкомбанк: 10500000,
+          Уралсиб: 9000000,
+          "Дом.РФ Банк": 9000000,
         },
       };
 
@@ -60,7 +68,7 @@ export class ConfigService {
    */
   async getConfig(): Promise<any> {
     const cacheKey = "config";
-    
+
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
     }
@@ -143,7 +151,11 @@ export class ConfigService {
   /**
    * Обновить конкретное поле в конфигурации
    */
-  async updateConfigField(key: string, field: string, value: any): Promise<any> {
+  async updateConfigField(
+    key: string,
+    field: string,
+    value: any,
+  ): Promise<any> {
     try {
       console.log(`📝 Updating field "${field}" to:`, value);
 
@@ -168,7 +180,10 @@ export class ConfigService {
       console.log(`✅ Field "${field}" updated`);
       return config.value;
     } catch (error) {
-      console.error(`Error in updateConfigField for key ${key}, field ${field}:`, error);
+      console.error(
+        `Error in updateConfigField for key ${key}, field ${field}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -226,11 +241,11 @@ export class ConfigService {
     try {
       console.log("🗑️ Deleting config...");
       await this.configRepository.delete({ key: "app_config" });
-      
+
       // Инвалидируем кэш
       this.invalidateVariablesCache();
       this.cache.delete("config");
-      
+
       console.log("✅ Config deleted");
     } catch (error) {
       console.error("Error in deleteConfig:", error);
@@ -248,13 +263,21 @@ export class ConfigService {
       itMortgageLimit: 9000000,
       maxItMortgageSum: 18000000,
       deposit: 30000,
-      minExcessAmounts: {
+      minExcessAmountsFamily: {
         Сбербанк: 6300000,
         ВТБ: 6150000,
         "Альфа-Банк": 6000000,
         Совкомбанк: 7500000,
         Уралсиб: 6000000,
         "Дом.РФ Банк": 6000000,
+      },
+      minExcessAmountsIt: {
+        Сбербанк: 9300000,
+        ВТБ: 9150000,
+        "Альфа-Банк": 9000000,
+        Совкомбанк: 10500000,
+        Уралсиб: 9000000,
+        "Дом.РФ Банк": 9000000,
       },
     };
   }
@@ -280,13 +303,22 @@ export class ConfigService {
       maxItMortgageSum: 18000000,
 
       // Минимальные суммы для сверхлимита по банкам
-      minExcessAmounts: {
+      minExcessAmountsFamily: {
         Сбербанк: 6300000,
         ВТБ: 6150000,
         "Альфа-Банк": 6000000,
         Совкомбанк: 7500000,
         Уралсиб: 6000000,
         "Дом.РФ Банк": 6000000,
+      },
+
+      minExcessAmountsIt: {
+        Сбербанк: 9300000,
+        ВТБ: 9150000,
+        "Альфа-Банк": 9000000,
+        Совкомбанк: 10500000,
+        Уралсиб: 9000000,
+        "Дом.РФ Банк": 9000000,
       },
 
       // Дополнительные настройки
