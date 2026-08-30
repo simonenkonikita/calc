@@ -43,7 +43,7 @@ export const calculateMortgageAmount = (
   const programType = offer.programEntity?.type || "base";
   const isFamilyOrIt = programType === "family" || programType === "it";
   const isTwoContracts = isFamilyOrIt && offer.isTwoContracts === true;
-  const isExcessLimit = isFamilyOrIt && offer.excessLimit === true;
+  const isExcessLimit = isFamilyOrIt && offer.isExcessLimit === true;
   const isTranche = programType === "tranche" && offer.isTranche === true;
 
   if (isTranche) {

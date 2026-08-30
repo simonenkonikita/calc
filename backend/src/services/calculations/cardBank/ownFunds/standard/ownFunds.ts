@@ -33,13 +33,17 @@ export const ownFunds = (params: ownFundsParams): number => {
 
   const isIt = offer.programEntity?.type === "it";
 
-  const limit = isIt
-    ? variables.itMortgageLimit || 9000000
-    : variables.familyMortgageLimit || 6000000;
+  const limit = offer.minLoanAmount
+    ? offer.minLoanAmount
+    : isIt
+      ? 9000000
+      : 6000000;
 
-  const maxLimit = isIt
-    ? variables.maxItMortgageSum || 18000000
-    : variables.maxFamilyMortgageSum || 15000000;
+  const maxLimit = offer.maxLoanAmount
+    ? offer.maxLoanAmount
+    : isIt
+      ? 18000000
+      : 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
 

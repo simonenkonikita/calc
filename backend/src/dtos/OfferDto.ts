@@ -54,7 +54,7 @@ export interface CreateOfferDTO {
 
   // Флаги
   isTwoContracts?: boolean;
-  excessLimit?: boolean;
+  isExcessLimit?: boolean;
   isTranche?: boolean;
 
   // Траншевая ипотека
@@ -102,7 +102,7 @@ export interface OfferResponseDTO {
   minPVPercent: number;
   durationMonths: number | null;
   isTwoContracts: boolean;
-  excessLimit: boolean;
+  isExcessLimit: boolean;
   isTranche: boolean;
   trancheFirstPercent: number | null;
   trancheSecondDate: string | null;
@@ -196,7 +196,7 @@ export interface OfferListDTO {
   minPVPercent: number;
   durationMonths: number | null;
   isTwoContracts: boolean;
-  excessLimit: boolean;
+  isExcessLimit: boolean;
   isTranche: boolean;
   complexes: string[] | null;
   isActive: boolean;

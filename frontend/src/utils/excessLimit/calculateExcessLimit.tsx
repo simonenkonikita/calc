@@ -5,7 +5,7 @@ import { Variables } from "../types";
 interface CalculateExcessLimitParams {
   bankOffer: {
     type: string;
-    excessLimit?: boolean;
+    excessLimitAmount?: boolean;
   };
   variables: Variables;
   mortgageAmount: number;
@@ -15,7 +15,7 @@ interface CalculateExcessLimitParams {
 
 interface CalculateExcessLimitResult {
   subsidyAmount: number;
-  excessLimit?: number;
+  excessLimitAmount?: number;
 }
 
 export const calculateExcessLimit = (
@@ -30,30 +30,30 @@ export const calculateExcessLimit = (
   } = params;
 
   let subsidyAmount = initialSubsidyAmount;
-  let excessLimit: number | undefined;
+  let excessLimitAmount: number | undefined;
 
-  if (bankOffer.excessLimit) {
+  if (bankOffer.excessLimitAmount) {
     if (bankOffer.type === "family") {
       const maxSubsidy =
         variables.familyMortgageLimit * (actualSubsidyPercent / 100);
       if (subsidyAmount > maxSubsidy) {
         subsidyAmount = maxSubsidy;
-        excessLimit = mortgageAmount - variables.familyMortgageLimit;
-        if (excessLimit < 0) excessLimit = 0;
+        excessLimitAmount = mortgageAmount - variables.familyMortgageLimit;
+        if (excessLimitAmount < 0) excessLimitAmount = 0;
       }
     } else if (bankOffer.type === "it") {
       const maxSubsidy =
         variables.itMortgageLimit * (actualSubsidyPercent / 100);
       if (subsidyAmount > maxSubsidy) {
         subsidyAmount = maxSubsidy;
-        excessLimit = mortgageAmount - variables.itMortgageLimit;
-        if (excessLimit < 0) excessLimit = 0;
+        excessLimitAmount = mortgageAmount - variables.itMortgageLimit;
+        if (excessLimitAmount < 0) excessLimitAmount = 0;
       }
     }
   }
 
   return {
     subsidyAmount,
-    excessLimit,
+    excessLimitAmount,
   };
 };

@@ -28,8 +28,8 @@ export const calculateFamilyTwoContractAmount = (
     : variables.familyMortgageLimit || 6000000;
 
   const maxLimit = isIt
-    ? variables.maxItMortgageSum || 18000000
-    : variables.maxFamilyMortgageSum || 15000000;
+    ? variables.maxItMortgageLimit || 18000000
+    : variables.maxFamilyMortgageLimit || 15000000;
 
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
   const cafsummCred = 1 - userDownPaymentPercent / 100;

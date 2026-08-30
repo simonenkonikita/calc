@@ -1,6 +1,4 @@
 // src/hooks/payment/downPayment/calculateStandardDownPayment.ts
-
-import { MIN_DOWN_PAYMENT_PERCENT } from "../../../../../data/constants";
 import { Offer } from "../../../../../entities/Offer";
 
 interface StandardDownPaymentParams {
@@ -11,6 +9,7 @@ interface StandardDownPaymentParams {
   userDownPaymentPercent: number;
   objectCost: number;
   offer: Offer;
+  minDownPaymentPercent: number;
 }
 
 export const calculateStandardDownPayment = (
@@ -24,6 +23,7 @@ export const calculateStandardDownPayment = (
     userDownPaymentPercent,
     objectCost,
     offer,
+    minDownPaymentPercent,
   } = params;
 
   const downPaymentFromContract =
@@ -46,7 +46,7 @@ export const calculateStandardDownPayment = (
     } else {
       downPaymentAmount = manualDownPayment;
     }
-  } else if (userDownPaymentPercent > MIN_DOWN_PAYMENT_PERCENT) {
+  } else if (userDownPaymentPercent > minDownPaymentPercent) {
     downPaymentAmount = downPaymentFromContract;
   } else if (downPayment >= contractAmountMinPV) {
     downPaymentAmount = downPayment;

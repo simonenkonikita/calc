@@ -1,42 +1,54 @@
+// src/hooks/api/usePrograms.ts
+
 import { useState, useEffect } from "react";
-import { ProgramConfig } from "../../utils/types";
+import { ProgramCategory } from "../../utils/types";
 
 export const usePrograms = () => {
-  const [programs, setPrograms] = useState<ProgramConfig[]>([]);
+  const [categories, setCategories] = useState<ProgramCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadPrograms = async () => {
+    const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/programs/config");
+        const response = await fetch("/api/programs/categories");
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const result = await response.json();
 
         if (result.success && result.data) {
-          setPrograms(result.data.programs);
+          setCategories(result.data);
         } else {
-          setError(result.error || "Failed to load programs");
+          setError(result.error || "Failed to load program categories");
         }
       } catch (err) {
-        setError("Error loading programs");
-        console.error(err);
+        setError(err instanceof Error ? err.message : "Error loading programs");
+        console.error("Error loading programs:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadPrograms();
+    fetchCategories();
   }, []);
 
-  const getProgramByType = (type: string): ProgramConfig | undefined => {
-    return programs.find((p) => p.type === type);
+  const getCategoryByType = (type: string): ProgramCategory | undefined => {
+    return categories.find((c) => c.type === type);
+  };
+
+  const getCategoryByKey = (key: string): ProgramCategory | undefined => {
+    return categories.find((c) => c.key === key);
   };
 
   return {
-    programs,
+    categories,
     loading,
     error,
-    getProgramByType,
+    getCategoryByType,
+    getCategoryByKey,
   };
 };

@@ -1,12 +1,10 @@
 // backend/src/services/calculations/result/calculateDownPayment.ts
-
-import { DEFAULT_MIN_PV_PERCENT } from "../../../data/constants";
 import { CalculatorFormData } from "../../../types/types";
 
 export const calculateDownPayment = (
   objectCost: number,
   formData: CalculatorFormData,
-  minPVPercent: number = DEFAULT_MIN_PV_PERCENT,
+  minPVPercent: number,
 ): number => {
   const {
     mortgageWithoutDownPayment,
@@ -32,7 +30,10 @@ export const calculateDownPayment = (
     if (manualDownPayment >= objectCost) {
       return objectCost;
     }
-    if (manualDownPayment >= minDownPayment && manualDownPayment <= objectCost) {
+    if (
+      manualDownPayment >= minDownPayment &&
+      manualDownPayment <= objectCost
+    ) {
       return manualDownPayment;
     }
     if (manualDownPayment < minDownPayment) {

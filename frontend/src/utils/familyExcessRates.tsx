@@ -1,6 +1,4 @@
-import { variables } from "../data/limitdDate";
-import { getMinExcessAmount } from "./badge/getMinExcessAmount";
-
+/* import { getMinExcessAmount } from "./badge/getMinExcessAmount";
 
 export const getMaxExcessAmount = (): number => {
   return variables.maxFamilyMortgageSum || 15000000;
@@ -46,3 +44,4 @@ export const getExcessLimitInfo = (bankName: string) => {
       : `Сумма от ${minAmount.toLocaleString()} ₽`,
   };
 };
+ */

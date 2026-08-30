@@ -13,9 +13,10 @@ import { BankFilters } from "./BankFilters/BankFilters";
 import { NoResults } from "./NoResults/NoResults";
 import { BankGroup } from "./BankCard/BankGroup/BankGroup";
 import { FloatingSelectionBar } from "./FloatingSelectionBar/FloatingSelectionBar";
-import { BANK_ORDER } from "../../utils/constants";
 import { getDisplayRate, getDisplaySubsidy } from "../../utils/offerHelpers";
 import { useDynamicOffersData } from "../../hooks/api/useDynamicOffersData";
+import { useConfig } from "../../hooks/api/useConfig";
+import { usePrograms } from "../../hooks/api/usePrograms";
 
 export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   bankResults,
@@ -26,7 +27,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   loanTermYears,
   area,
   complexName,
-  // 🔥 Фильтры из пропсов
   selectedBankFilter,
   selectedProgramTypeFilter,
   showOverstatement,
@@ -37,6 +37,27 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   filtersRef,
 }) => {
   const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set());
+
+  // ✅ Получаем конфиг для порядка банков
+  const { config, loading: configLoading } = useConfig();
+  const bankOrder = useMemo(() => {
+    if (config?.bankOrder) {
+      return [...config.bankOrder]
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+        .map((item) => item.name);
+    }
+    return [
+      "Сбербанк",
+      "ВТБ",
+      "Альфа-Банк",
+      "Совкомбанк",
+      "Уралсиб",
+      "Дом.РФ Банк",
+    ];
+  }, [config]);
+
+  // ✅ Получаем категории программ
+  const { categories, loading: categoriesLoading } = usePrograms();
 
   // 🔥 Загружаем динамические данные
   const { offers, dynamicDataMap, loading } = useDynamicOffersData();
@@ -55,7 +76,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
     return (bankResult: BankProgramResultWithIndex) => {
       if (!offers.length || !dynamicDataMap) return null;
 
-      // 🔥 1. Ищем по offerId (основной способ)
       if (bankResult.offerId) {
         const offer = offerIndex.get(bankResult.offerId);
         if (offer) {
@@ -81,7 +101,6 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
         }
       }
 
-      // 🔥 2. Fallback - поиск по банку и программе
       const offer = offers.find(
         (o) =>
           o.bank?.name === bankResult.bank && o.program === bankResult.program,
@@ -203,14 +222,14 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
 
   const sortedBanks = useMemo(() => {
     return Object.keys(groupedData).sort((a, b) => {
-      const indexA = BANK_ORDER.indexOf(a);
-      const indexB = BANK_ORDER.indexOf(b);
+      const indexA = bankOrder.indexOf(a);
+      const indexB = bankOrder.indexOf(b);
       if (indexA === -1 && indexB === -1) return a.localeCompare(b);
       if (indexA === -1) return 1;
       if (indexB === -1) return -1;
       return indexA - indexB;
     });
-  }, [groupedData]);
+  }, [groupedData, bankOrder]);
 
   const hasProgramsInCategory = (
     bankData: Record<string, BankProgramResultWithIndex[]>,
@@ -257,12 +276,9 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
     setSelectedCards(new Set());
   };
 
-  if (loading) {
-    return (
-      <div className="loading-dynamic-data">
-        Загрузка динамических данных...
-      </div>
-    );
+  // ✅ Показываем загрузку
+  if (loading || configLoading || categoriesLoading) {
+    return <div className="loading-dynamic-data">Загрузка данных...</div>;
   }
 
   return (
@@ -305,6 +321,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
             onCardClick={handleCardClick}
             hasProgramsInCategory={hasProgramsInCategory}
             getDynamicDataForOffer={getDynamicDataForOffer}
+            categories={categories} // ✅ Передаём категории
           />
         ))
       )}

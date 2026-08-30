@@ -1,19 +1,73 @@
 // hooks/useMortgageCalculator.ts
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { CalculatorFormData } from "../../utils/types";
 import { formatMoney } from "../../utils/formatMoney";
-import { DEFAULT_MIN_PV_PERCENT } from "../../data/constants";
-import { defaultFormData } from "../../data/defaultFormData";
 import { useMortgageData } from "../api/useMortgageData";
+import { useConfig } from "../api/useConfig";
+
+// 🔥 Базовые дефолтные значения (минимальные, только для инициализации)
+const DEFAULT_FORM_DATA: CalculatorFormData = {
+  complex: "",
+  apartmentType: "",
+  area: 30,
+  manualObjectCost: null,
+  considerDepositInCost: false,
+  downPaymentPercent: 20.1,
+  manualDownPayment: 0,
+  loanTerm: 30,
+  projectFinancingBank: "Сбербанк",
+  noSubsidyInflate: false,
+  mortgageWithoutDownPayment: false,
+  mortgagePartialDownPayment: false,
+};
 
 export const useMortgageCalculator = () => {
   const { results, isCalculating, error, calculate, clearCache } =
     useMortgageData();
-  const [formData, setFormData] = useState<CalculatorFormData>(defaultFormData);
+
+  // 🔥 Получаем конфиг
+  const { config, loading: configLoading } = useConfig();
+
+  // 🔥 Инициализируем форму с дефолтными значениями
+  const [formData, setFormData] = useState<CalculatorFormData>(() => {
+    if (config) {
+      return {
+        complex: "",
+        apartmentType: "",
+        area: 30,
+        manualObjectCost: null,
+        considerDepositInCost: false,
+        downPaymentPercent: config.minDownPaymentPercent ?? 20.1,
+        manualDownPayment: 0,
+        loanTerm: config.maxLoanTerm ?? 30,
+        projectFinancingBank: "Сбербанк",
+        noSubsidyInflate: false,
+        mortgageWithoutDownPayment: false,
+        mortgagePartialDownPayment: false,
+      };
+    }
+    return DEFAULT_FORM_DATA;
+  });
+
+  // 🔥 Обновляем форму, когда конфиг загрузился
+  useEffect(() => {
+    if (config) {
+      setFormData((prev) => ({
+        ...prev,
+        area: 30,
+        downPaymentPercent:
+          config.minDownPaymentPercent ?? prev.downPaymentPercent,
+        loanTerm: config.maxLoanTerm ?? 30,
+      }));
+    }
+  }, [config]);
+
   const [selectedOfferIndex, setSelectedOfferIndex] = useState<number | null>(
     null,
   );
+
+  const minDownPaymentPercent = config?.minDownPaymentPercent ?? 20.1;
 
   // 🔥 Ref для восстановления выбранного оффера
   const selectedOfferRef = useRef<number | null>(null);
@@ -25,26 +79,6 @@ export const useMortgageCalculator = () => {
     selectedCards: new Set<number>(),
     showOverstatement: false,
   });
-
-  /*   // 🔥 Автоматический расчет при изменении формы
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    // Дебаунс для избегания частых запросов
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    debounceTimeoutRef.current = setTimeout(() => {
-      calculate(formData);
-    }, 300);
-
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, [formData, calculate]); */
 
   // ============================================================
   // ОБРАБОТЧИКИ
@@ -59,12 +93,12 @@ export const useMortgageCalculator = () => {
         let newData = { ...prev, [field]: value };
 
         if (field === "mortgageWithoutDownPayment" && value === true) {
-          newData.downPaymentPercent = DEFAULT_MIN_PV_PERCENT;
+          newData.downPaymentPercent = minDownPaymentPercent;
           newData.mortgagePartialDownPayment = false;
         }
 
         if (field === "mortgagePartialDownPayment" && value === true) {
-          newData.downPaymentPercent = DEFAULT_MIN_PV_PERCENT;
+          newData.downPaymentPercent = minDownPaymentPercent;
           newData.mortgageWithoutDownPayment = false;
         }
 
@@ -88,7 +122,7 @@ export const useMortgageCalculator = () => {
         ) {
           newData = {
             ...newData,
-            downPaymentPercent: DEFAULT_MIN_PV_PERCENT,
+            downPaymentPercent: minDownPaymentPercent,
           };
         }
 
@@ -116,7 +150,7 @@ export const useMortgageCalculator = () => {
         filtersRef.current.selectedCards = new Set();
       }
     },
-    [],
+    [minDownPaymentPercent],
   );
 
   const handleSelectOffer = useCallback((index: number) => {
@@ -138,10 +172,14 @@ export const useMortgageCalculator = () => {
   );
 
   // ============================================================
-  // РУЧНОЙ ПЕРЕСЧЕТ
+  // РУЧНОЙ ПЕРЕСЧЕТ (по кнопке)
   // ============================================================
 
   const calculateResults = useCallback(() => {
+    // ✅ Проверяем, что выбраны ЖК и тип квартиры
+    if (!formData.complex || !formData.apartmentType) {
+      return;
+    }
     calculate(formData);
   }, [formData, calculate]);
 
@@ -157,6 +195,7 @@ export const useMortgageCalculator = () => {
     offersCount,
     isCalculating,
     error,
+    configLoading,
 
     // Форма
     formData,

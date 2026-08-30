@@ -1,9 +1,25 @@
-import { variables } from "../../data/limitdDate";
+// src/utils/badge/getMinExcessAmount.ts
 
-export const getMinExcessAmount = (bankName: string): number => {
-  // Если для банка есть своя минимальная сумма - используем её
-  if (variables.minExcessAmounts && variables.minExcessAmounts[bankName]) {
-    return variables.minExcessAmounts[bankName];
+import { BankProgramResultWithIndex } from "../types";
+
+export const getMinExcessAmount = (
+  offer: BankProgramResultWithIndex,
+): number => {
+  if (offer.minLoanAmount) {
+    return offer.minLoanAmount;
   }
-  return 6000000;
+
+  const isIt = offer.type === "it";
+  return isIt ? 9000000 : 6000000;
+};
+
+export const getMaxExcessAmount = (
+  offer: BankProgramResultWithIndex,
+): number => {
+  if (offer.maxLoanAmount) {
+    return offer.maxLoanAmount;
+  }
+
+  const isIt = offer.type === "it";
+  return isIt ? 18000000 : 15000000;
 };

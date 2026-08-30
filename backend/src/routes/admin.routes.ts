@@ -158,6 +158,12 @@ router.post(
 // 🔥 КОНФИГУРАЦИЯ
 // ============================================================
 router.get("/config", configController.get.bind(configController));
+router.get("/config/check", configController.check.bind(configController));
+router.post("/config", configController.create.bind(configController));
 router.put("/config", configController.update.bind(configController));
+router.patch(
+  "/config/:field",
+  configController.updateField.bind(configController),
+);
 
 export default router;
