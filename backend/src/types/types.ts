@@ -3,19 +3,30 @@ export interface BankProgramResultWithIndex extends BankProgramResult {
   _originalIndex: number;
 }
 
+export interface BankOrderItem {
+  name: string;
+  displayOrder: number;
+}
+
 // ========== ПЕРЕМЕННЫЕ (ЛИМИТЫ) ==========
 export interface Variables {
+  // Государственные лимиты
   familyMortgageLimit: number;
-  maxFamilyMortgageSum: number;
+  maxFamilyMortgageLimit: number;
   itMortgageLimit: number;
-  maxItMortgageSum: number;
+  maxItMortgageLimit: number;
+
+  // Границы для калькулятора
+  minArea: number;
+  maxArea: number;
+  minDownPaymentPercent: number;
+  maxDownPaymentPercent: number;
+  minLoanTerm: number;
+  maxLoanTerm: number;
+
+  // Дополнительные настройки
   deposit: number;
-  minExcessAmountsFamily?: {
-    [bankName: string]: number;
-  };
-  minExcessAmountsIt?: {
-    [bankName: string]: number;
-  };
+  bankOrder: BankOrderItem[];
 }
 
 export interface ProgramInfo {
@@ -214,59 +225,74 @@ export interface TranchePaymentsResult {
 }
 
 // ========== РЕЗУЛЬТАТ РАСЧЕТА ПО ОДНОЙ ПРОГРАММЕ ==========
+// ========== РЕЗУЛЬТАТ РАСЧЕТА ПО ОДНОЙ ПРОГРАММЕ ==========
 export interface BankProgramResult {
   bank: string;
   program: string;
   type: ProgramType;
   offerId?: string;
-  rate: number; // Ставка на период
+  rate: number;
   twoRate?: number;
   actualRate?: number;
   shortRate?: number;
-  durationMonths?: number; // Длительность программы
+  durationMonths?: number;
+
+  // ✅ ЛИМИТЫ ОФЕРА (добавляем)
+  minLoanAmount?: number; // Минимальная сумма кредита
+  maxLoanAmount?: number; // Максимальная сумма кредита
+  minLoanTerm?: number; // Минимальный срок (в годах)
+  maxLoanTerm?: number; // Максимальный срок (в годах)
+
+  complexes?: string[];
+
   // Расчет ежемесячного платежа
-  monthlyPayment: number; // Ежемесячный платёж
+  monthlyPayment: number;
+
   // Основные параметры
-  overstatement: number; // Завышение (сумма в договоре - стоимость объекта)
-  contractAmount: number; // Сумма в договоре
-  downPaymentAmount: number; // Сумма ПВ
-  ownFunds: number; // Собственные средства
-  clientContribution: number; // Вносим за клиента
-  downPaymentPercent: number; // ПВ %
-  minPVPercent: number; // Минимальный ПВ (%)
-  excessLimit?: number; // Сверхлимит (если есть)
-  mortgageAmount: number; // Ипотека
-  subsidyAmount: number; // Сумма субсидии
-  developerAccount: number; // На счет застройщика
+  overstatement: number;
+  contractAmount: number;
+  downPaymentAmount: number;
+  ownFunds: number;
+  clientContribution: number;
+  downPaymentPercent: number;
+  minPVPercent: number;
+  excessLimit?: number;
+  mortgageAmount: number;
+  subsidyAmount: number;
+  developerAccount: number;
+
   // Дополнительно для short программ
-  monthlyPaymentAfter?: number; // Платёж после субсидирования
-  remainingDebt?: number; // Остаток долга после субсидирования
+  monthlyPaymentAfter?: number;
+  remainingDebt?: number;
   subsidyPercent: number;
   pricePerM2: number | null;
+
   // Флаги
   isLimitExceeded?: boolean;
   isTwoContracts?: boolean;
+
   // Для 2 договоров (Совкомбанк)
   firstContract?: number;
   secondContract?: number;
   totalMonthlyPayment?: number;
-  // Платёж 2 договора
   firstContractPayment: number;
   secondContractPayment: number;
-  firstContractAmount?: number; // Сумма по первому договору
-  secondContractAmount?: number; // Сумма по второму договору
-  secondContractSubsidyPercent?: number; // 🔥 НОВОЕ: субсидия по второму договору в %
-  secondContractSubsidyAmount?: number; // 🔥 НОВОЕ: сумма субсидии по второму договору
-  // ===== НОВЫЕ ПОЛЯ ДЛЯ ТРАНШЕВОЙ ИПОТЕКИ =====
+  firstContractAmount?: number;
+  secondContractAmount?: number;
+  secondContractSubsidyPercent?: number;
+  secondContractSubsidyAmount?: number;
+
+  // Для траншевой ипотеки
   isTranche?: boolean;
   firstTrancheAmount?: number;
   secondTrancheAmount?: number;
   firstTranchePayment?: number;
   secondTranchePayment?: number;
-  trancheSecondDate?: string; // ✅ ДОБАВИТЬ - дата выдачи второго транша
-  monthsUntilSecondTranche?: number; // ✅ ДОБАВИТЬ - количество месяцев до второго транша
+  trancheSecondDate?: string;
+  monthsUntilSecondTranche?: number;
   minLoanTermYears?: number;
 }
+
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========
 export interface CalculatorResult {
   objectResult: {

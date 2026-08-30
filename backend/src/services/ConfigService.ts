@@ -1,19 +1,13 @@
 // backend/src/services/ConfigService.ts
 
 import { AppDataSource } from "../data-source";
-import { Config } from "../entities/Config";
-import { Variables } from "../types/types";
-import { DEPOSIT_AMOUNT } from "../data/complexPrice/CONSTRUCTION";
-import { MIN_PV_PERCENT } from "../data/banks/constants";
-import { BANK_NAMES } from "../data/banks/constants";
+import { SystemConfig } from "../entities/SystemConfig";
+import { Variables, BankOrderItem } from "../types/types";
 
 export class ConfigService {
-  private configRepository = AppDataSource.getRepository(Config);
-  private cache: Map<string, any> = new Map(); // ← ДОБАВЛЯЕМ ЭТУ СТРОКУ
+  private configRepository = AppDataSource.getRepository(SystemConfig);
+  private cache: Map<string, any> = new Map();
 
-  /**
-   * Получить Variables для калькулятора
-   */
   async getVariables(): Promise<Variables> {
     const cacheKey = "variables";
 
@@ -21,315 +15,223 @@ export class ConfigService {
       return this.cache.get(cacheKey);
     }
 
-    try {
-      const config = await this.getConfig();
+    const config = await this.getConfig();
 
-      const variables: Variables = {
-        familyMortgageLimit: config.familyMortgageLimit || 6000000,
-        maxFamilyMortgageSum: config.maxFamilyMortgageSum || 15000000,
-        itMortgageLimit: config.itMortgageLimit || 9000000,
-        maxItMortgageSum: config.maxItMortgageSum || 18000000,
-        deposit: config.depositAmount || 30000,
-        minExcessAmountsFamily: config.minExcessAmounts || {
-          Сбербанк: 6300000,
-          ВТБ: 6150000,
-          "Альфа-Банк": 6000000,
-          Совкомбанк: 7500000,
-          Уралсиб: 6000000,
-          "Дом.РФ Банк": 6000000,
-        },
-        minExcessAmountsIt: config.minExcessAmounts || {
-          Сбербанк: 9300000,
-          ВТБ: 9150000,
-          "Альфа-Банк": 9000000,
-          Совкомбанк: 10500000,
-          Уралсиб: 9000000,
-          "Дом.РФ Банк": 9000000,
-        },
-      };
+    const variables: Variables = {
+      // Государственные лимиты
+      familyMortgageLimit: config.familyMortgageLimit,
+      maxFamilyMortgageLimit: config.maxFamilyMortgageLimit,
+      itMortgageLimit: config.itMortgageLimit,
+      maxItMortgageLimit: config.maxItMortgageLimit,
 
-      this.cache.set(cacheKey, variables);
-      return variables;
-    } catch (error) {
-      console.error("Error getting variables:", error);
-      return this.getDefaultVariables();
-    }
+      // Границы для калькулятора
+      minArea: config.minArea,
+      maxArea: config.maxArea,
+      minDownPaymentPercent: config.minDownPaymentPercent,
+      maxDownPaymentPercent: config.maxDownPaymentPercent,
+      minLoanTerm: config.minLoanTerm,
+      maxLoanTerm: config.maxLoanTerm,
+
+      // Дополнительные настройки
+      deposit: config.deposit,
+      bankOrder: config.bankOrder,
+    };
+
+    this.cache.set(cacheKey, variables);
+    return variables;
   }
 
-  /**
-   * Инвалидация кэша переменных
-   */
   invalidateVariablesCache(): void {
     this.cache.delete("variables");
+    this.cache.delete("config");
   }
 
-  /**
-   * Получить конфигурацию
-   */
-  async getConfig(): Promise<any> {
+  async getConfig(): Promise<SystemConfig> {
     const cacheKey = "config";
 
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
     }
 
-    try {
-      let config = await this.configRepository.findOne({
-        where: { key: "app_config" },
-      });
+    const config = await this.configRepository.findOne({
+      where: {},
+    });
 
-      if (!config) {
-        console.log("⚠️ Config not found, creating default config...");
-        config = new Config();
-        config.key = "app_config";
-        config.value = this.getDefaultConfig();
-        await this.configRepository.save(config);
-        console.log("✅ Default config created");
-      }
-
-      this.cache.set(cacheKey, config.value);
-      return config.value;
-    } catch (error) {
-      console.error("Error in getConfig:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Обновить конфигурацию
-   */
-  async updateConfig(data: Partial<any>): Promise<any> {
-    try {
-      console.log("📝 Updating config with data:", data);
-
-      let config = await this.configRepository.findOne({
-        where: { key: "app_config" },
-      });
-
-      if (!config) {
-        console.log("⚠️ Config not found, creating new...");
-        config = new Config();
-        config.key = "app_config";
-        config.value = this.getDefaultConfig();
-      }
-
-      const updatedValue = {
-        ...config.value,
-        ...data,
-      };
-
-      config.value = updatedValue;
-      await this.configRepository.save(config);
-
-      // Инвалидируем кэш
-      this.invalidateVariablesCache();
-      this.cache.delete("config");
-
-      console.log("✅ Config updated:", updatedValue);
-      return config.value;
-    } catch (error) {
-      console.error("Error in updateConfig:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Получить конфигурацию по ключу
-   */
-  async getConfigByKey(key: string): Promise<any> {
-    try {
-      const config = await this.configRepository.findOne({
-        where: { key },
-      });
-      return config?.value || null;
-    } catch (error) {
-      console.error(`Error in getConfigByKey for key ${key}:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Обновить конкретное поле в конфигурации
-   */
-  async updateConfigField(
-    key: string,
-    field: string,
-    value: any,
-  ): Promise<any> {
-    try {
-      console.log(`📝 Updating field "${field}" to:`, value);
-
-      let config = await this.configRepository.findOne({
-        where: { key },
-      });
-
-      if (!config) {
-        console.log("⚠️ Config not found, creating new...");
-        config = new Config();
-        config.key = key;
-        config.value = this.getDefaultConfig();
-      }
-
-      config.value[field] = value;
-      await this.configRepository.save(config);
-
-      // Инвалидируем кэш
-      this.invalidateVariablesCache();
-      this.cache.delete("config");
-
-      console.log(`✅ Field "${field}" updated`);
-      return config.value;
-    } catch (error) {
-      console.error(
-        `Error in updateConfigField for key ${key}, field ${field}:`,
-        error,
+    if (!config) {
+      throw new Error(
+        "System configuration not found. Please initialize the system configuration first.",
       );
-      throw error;
     }
+
+    this.cache.set(cacheKey, config);
+    return config;
   }
 
-  /**
-   * Сбросить конфигурацию до значений по умолчанию
-   */
-  async resetConfig(): Promise<any> {
-    try {
-      console.log("🔄 Resetting config to default values...");
+  async createConfig(data: Partial<SystemConfig>): Promise<SystemConfig> {
+    const existing = await this.configRepository.findOne({
+      where: {},
+    });
 
-      let config = await this.configRepository.findOne({
-        where: { key: "app_config" },
-      });
-
-      if (!config) {
-        config = new Config();
-        config.key = "app_config";
-      }
-
-      config.value = this.getDefaultConfig();
-      await this.configRepository.save(config);
-
-      // Инвалидируем кэш
-      this.invalidateVariablesCache();
-      this.cache.delete("config");
-
-      console.log("✅ Config reset to default");
-      return config.value;
-    } catch (error) {
-      console.error("Error in resetConfig:", error);
-      throw error;
+    if (existing) {
+      throw new Error(
+        "System configuration already exists. Use updateConfig() instead.",
+      );
     }
+
+    const config = this.configRepository.create({
+      // Государственные лимиты
+      familyMortgageLimit: data.familyMortgageLimit!,
+      maxFamilyMortgageLimit: data.maxFamilyMortgageLimit!,
+      itMortgageLimit: data.itMortgageLimit!,
+      maxItMortgageLimit: data.maxItMortgageLimit!,
+
+      // Границы для калькулятора
+      minArea: data.minArea!,
+      maxArea: data.maxArea!,
+      minDownPaymentPercent: data.minDownPaymentPercent!,
+      maxDownPaymentPercent: data.maxDownPaymentPercent!,
+      minLoanTerm: data.minLoanTerm!,
+      maxLoanTerm: data.maxLoanTerm!,
+
+      // Дополнительные настройки
+      deposit: data.deposit!,
+      bankOrder: data.bankOrder!,
+    });
+
+    await this.configRepository.save(config);
+    this.invalidateVariablesCache();
+
+    return config;
   }
 
-  /**
-   * Проверить наличие конфигурации
-   */
+  async updateConfig(data: Partial<SystemConfig>): Promise<SystemConfig> {
+    let config = await this.configRepository.findOne({
+      where: {},
+    });
+
+    if (!config) {
+      throw new Error(
+        "System configuration not found. Please create configuration first.",
+      );
+    }
+
+    // Государственные лимиты
+    if (data.familyMortgageLimit !== undefined) {
+      config.familyMortgageLimit = data.familyMortgageLimit;
+    }
+    if (data.maxFamilyMortgageLimit !== undefined) {
+      config.maxFamilyMortgageLimit = data.maxFamilyMortgageLimit;
+    }
+    if (data.itMortgageLimit !== undefined) {
+      config.itMortgageLimit = data.itMortgageLimit;
+    }
+    if (data.maxItMortgageLimit !== undefined) {
+      config.maxItMortgageLimit = data.maxItMortgageLimit;
+    }
+
+    // Границы для калькулятора
+    if (data.minArea !== undefined) {
+      config.minArea = data.minArea;
+    }
+    if (data.maxArea !== undefined) {
+      config.maxArea = data.maxArea;
+    }
+    if (data.minDownPaymentPercent !== undefined) {
+      config.minDownPaymentPercent = data.minDownPaymentPercent;
+    }
+    if (data.maxDownPaymentPercent !== undefined) {
+      config.maxDownPaymentPercent = data.maxDownPaymentPercent;
+    }
+    if (data.minLoanTerm !== undefined) {
+      config.minLoanTerm = data.minLoanTerm;
+    }
+    if (data.maxLoanTerm !== undefined) {
+      config.maxLoanTerm = data.maxLoanTerm;
+    }
+
+    // Дополнительные настройки
+    if (data.deposit !== undefined) {
+      config.deposit = data.deposit;
+    }
+    if (data.bankOrder !== undefined) {
+      config.bankOrder = data.bankOrder;
+    }
+
+    await this.configRepository.save(config);
+    this.invalidateVariablesCache();
+
+    return config;
+  }
+
+  async updateConfigField(
+    field: keyof SystemConfig,
+    value: any,
+  ): Promise<SystemConfig> {
+    let config = await this.configRepository.findOne({
+      where: {},
+    });
+
+    if (!config) {
+      throw new Error(
+        `System configuration not found. Cannot update field "${field}".`,
+      );
+    }
+
+    (config as any)[field] = value;
+    await this.configRepository.save(config);
+    this.invalidateVariablesCache();
+
+    return config;
+  }
+
+  async getDeposit(): Promise<number> {
+    const config = await this.getConfig();
+    return config.deposit;
+  }
+
+  async getBankOrder(): Promise<BankOrderItem[]> {
+    const config = await this.getConfig();
+    return config.bankOrder || [];
+  }
+
+  async getBankNamesOrdered(): Promise<string[]> {
+    const bankOrder = await this.getBankOrder();
+    const sorted = [...bankOrder].sort(
+      (a, b) => a.displayOrder - b.displayOrder,
+    );
+    return sorted.map((item) => item.name);
+  }
+
+  async getFamilyLimits(): Promise<{ limit: number; maxLimit: number }> {
+    const config = await this.getConfig();
+    return {
+      limit: config.familyMortgageLimit,
+      maxLimit: config.maxFamilyMortgageLimit,
+    };
+  }
+
+  async getItLimits(): Promise<{ limit: number; maxLimit: number }> {
+    const config = await this.getConfig();
+    return {
+      limit: config.itMortgageLimit,
+      maxLimit: config.maxItMortgageLimit,
+    };
+  }
+
   async hasConfig(): Promise<boolean> {
     try {
       const config = await this.configRepository.findOne({
-        where: { key: "app_config" },
+        where: {},
       });
       return !!config;
     } catch (error) {
-      console.error("Error in hasConfig:", error);
       return false;
     }
   }
 
-  /**
-   * Удалить конфигурацию
-   */
   async deleteConfig(): Promise<void> {
-    try {
-      console.log("🗑️ Deleting config...");
-      await this.configRepository.delete({ key: "app_config" });
-
-      // Инвалидируем кэш
-      this.invalidateVariablesCache();
-      this.cache.delete("config");
-
-      console.log("✅ Config deleted");
-    } catch (error) {
-      console.error("Error in deleteConfig:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Значения по умолчанию для Variables
-   */
-  private getDefaultVariables(): Variables {
-    return {
-      familyMortgageLimit: 6000000,
-      maxFamilyMortgageSum: 15000000,
-      itMortgageLimit: 9000000,
-      maxItMortgageSum: 18000000,
-      deposit: 30000,
-      minExcessAmountsFamily: {
-        Сбербанк: 6300000,
-        ВТБ: 6150000,
-        "Альфа-Банк": 6000000,
-        Совкомбанк: 7500000,
-        Уралсиб: 6000000,
-        "Дом.РФ Банк": 6000000,
-      },
-      minExcessAmountsIt: {
-        Сбербанк: 9300000,
-        ВТБ: 9150000,
-        "Альфа-Банк": 9000000,
-        Совкомбанк: 10500000,
-        Уралсиб: 9000000,
-        "Дом.РФ Банк": 9000000,
-      },
-    };
-  }
-
-  /**
-   * Значения конфигурации по умолчанию
-   */
-  private getDefaultConfig(): any {
-    return {
-      // Основные настройки
-      depositAmount: DEPOSIT_AMOUNT || 30000,
-      minDownPayment: MIN_PV_PERCENT || 20.1,
-      maxLoanTerm: 30,
-      defaultComplex: "ЖК Сады у моря 3",
-      bankOrder: Object.values(BANK_NAMES) || [],
-
-      // Льготные программы
-      enableFamilyMortgage: true,
-      enableITMortgage: true,
-      familyMortgageLimit: 6000000,
-      itMortgageLimit: 9000000,
-      maxFamilyMortgageSum: 15000000,
-      maxItMortgageSum: 18000000,
-
-      // Минимальные суммы для сверхлимита по банкам
-      minExcessAmountsFamily: {
-        Сбербанк: 6300000,
-        ВТБ: 6150000,
-        "Альфа-Банк": 6000000,
-        Совкомбанк: 7500000,
-        Уралсиб: 6000000,
-        "Дом.РФ Банк": 6000000,
-      },
-
-      minExcessAmountsIt: {
-        Сбербанк: 9300000,
-        ВТБ: 9150000,
-        "Альфа-Банк": 9000000,
-        Совкомбанк: 10500000,
-        Уралсиб: 9000000,
-        "Дом.РФ Банк": 9000000,
-      },
-
-      // Дополнительные настройки
-      showOverstatement: true,
-      enableSpecialMortgageMode: false,
-      defaultLoanTerm: 30,
-
-      // Настройки отображения
-      currency: "₽",
-      locale: "ru-RU",
-    };
+    await this.configRepository.delete({});
+    this.invalidateVariablesCache();
   }
 }
 

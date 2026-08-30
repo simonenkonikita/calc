@@ -1,14 +1,6 @@
 // FormSection.tsx - исправленная версия
 
 import { useMemo, ChangeEvent, useEffect } from "react";
-import {
-  MAX_DOWN_PAYMENT_PERCENT,
-  MIN_DOWN_PAYMENT_PERCENT,
-  MAX_AREA,
-  MIN_AREA,
-  MAX_LOAN_TERM,
-  MIN_LOAN_TERM,
-} from "../../data/constants";
 import { CalculatorFormData } from "../../utils/types";
 import "./FormSection.css";
 import { useConfig } from "../../hooks/api/useConfig";
@@ -32,7 +24,13 @@ export const FormSection: React.FC<FormSectionProps> = ({
   isCalculating = false,
 }) => {
   const { config, loading: configLoading } = useConfig();
-  const DEPOSIT_AMOUNT = config?.depositAmount ?? 30000;
+  const DEPOSIT_AMOUNT = config?.deposit ?? 0;
+  const MIN_DOWN_PAYMENT_PERCENT = config?.minDownPaymentPercent ?? 20.1;
+  const MAX_DOWN_PAYMENT_PERCENT = config?.maxDownPaymentPercent ?? 99.9;
+  const MIN_AREA = config?.minArea ?? 1;
+  const MAX_AREA = config?.maxArea ?? 150;
+  const MIN_LOAN_TERM = config?.minLoanTerm ?? 1;
+  const MAX_LOAN_TERM = config?.maxLoanTerm ?? 30;
 
   // Загружаем данные о ЖК и типах квартир из API
   const {

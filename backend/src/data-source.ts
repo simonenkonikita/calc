@@ -9,7 +9,7 @@ import { Program } from "./entities/Program";
 import { Offer } from "./entities/Offer";
 import { DynamicRate } from "./entities/DynamicRate";
 import { DynamicSubsidy } from "./entities/DynamicSubsidy";
-import { Config } from "./entities/Config";
+import { SystemConfig } from "./entities/SystemConfig";
 import * as path from "path";
 
 export const AppDataSource = new DataSource({
@@ -29,7 +29,7 @@ export const AppDataSource = new DataSource({
     Offer,
     DynamicRate,
     DynamicSubsidy,
-    Config,
+    SystemConfig,
   ],
   migrations: [path.join(__dirname, "..", "migrations", "*.ts")],
   subscribers: [],

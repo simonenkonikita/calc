@@ -1,4 +1,4 @@
-const MIN_PV_PERCENT = 20.1;
+/* const MIN_PV_PERCENT = 20.1;
 
 // ========== КОНСТАНТЫ ИПОТЕКИ ==========
 export const DEFAULT_MIN_PV_PERCENT = MIN_PV_PERCENT;
@@ -81,3 +81,4 @@ export const CATEGORY_ORDER = [
     types: [PROGRAM_TYPES.TRANCHE],
   },
 ];
+ */

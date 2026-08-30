@@ -21,7 +21,7 @@ export class Offer {
   id: string;
 
   @Column({ type: "varchar", length: 200 })
-  program: string; // ← Название программы
+  program: string;
 
   @Column({ type: "decimal", precision: 5, scale: 2 })
   rate: number;
@@ -38,6 +38,24 @@ export class Offer {
   @Column({ type: "decimal", precision: 5, scale: 2 })
   minPVPercent: number;
 
+  // ============================================================
+  // 🔥 ИНДИВИДУАЛЬНЫЕ ЛИМИТЫ ОФЕРА
+  // ============================================================
+  @Column({ type: "decimal", precision: 15, scale: 2, nullable: true })
+  minLoanAmount: number | null; // Минимальная сумма кредита для этого офера
+
+  @Column({ type: "decimal", precision: 15, scale: 2, nullable: true })
+  maxLoanAmount: number | null; // Максимальная сумма кредита для этого офера
+
+  @Column({ type: "int", nullable: true })
+  minLoanTerm: number | null; // Минимальный срок кредита в годах
+
+  @Column({ type: "int", nullable: true })
+  maxLoanTerm: number | null; // Максимальный срок кредита в годах
+
+  // ============================================================
+  // ОСТАЛЬНЫЕ ПОЛЯ
+  // ============================================================
   @Column({ type: "int", nullable: true })
   durationMonths: number | null;
 
@@ -66,13 +84,13 @@ export class Offer {
   thresholdTolerance: number | null;
 
   @Column({ type: "varchar", length: 10, nullable: true })
-  thresholdToleranceType: string | null; // 'fixed' | 'percent'
+  thresholdToleranceType: string | null;
 
   @Column({ type: "varchar", length: 10, nullable: true })
-  roundingStrategy: string | null; // 'up' | 'down'
+  roundingStrategy: string | null;
 
   @Column({ type: "int", nullable: true })
-  minLoanTermYears: number | null;
+  minLoanTermYears: number | null; // ⚠️ УДАЛИТЬ позже (дубликат)
 
   @Column({ type: "text", nullable: true })
   description: string | null;
@@ -94,14 +112,14 @@ export class Offer {
   @JoinColumn({ name: "bankId" })
   bank: Bank;
 
-  @Column({ type: "uuid" }) // 👈 UUID
+  @Column({ type: "uuid" })
   bankId: string;
 
   @ManyToOne(() => Program, (program) => program.offers)
-  @JoinColumn({ name: "programId" }) // 👈 используем programId
+  @JoinColumn({ name: "programId" })
   programEntity: Program;
 
-  @Column({ type: "uuid" }) // 👈 UUID
+  @Column({ type: "uuid" })
   programId: string;
 
   @OneToMany(() => DynamicRate, (rate) => rate.offer)

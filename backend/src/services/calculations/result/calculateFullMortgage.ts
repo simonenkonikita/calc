@@ -1,6 +1,5 @@
 // backend/src/services/calculations/result/calculateFullMortgage.ts
 
-import { DEFAULT_MIN_PV_PERCENT } from "../../../data/constants";
 import {
   CalculatorFormData,
   Variables,
@@ -16,6 +15,7 @@ export const calculateFullMortgage = (
   offers: Offer[],
   variables: Variables,
   pricePerSquareMeter: number,
+  minDownPaymentPercent: number,
 ): {
   objectResult: ObjectCalculationResult;
   bankResults: BankProgramResult[];
@@ -41,7 +41,7 @@ export const calculateFullMortgage = (
   const downPayment = calculateDownPayment(
     objectCost,
     formData,
-    DEFAULT_MIN_PV_PERCENT,
+    minDownPaymentPercent, // ✅ Передаём из контроллера
   );
 
   const remainingAmount = objectCost - downPayment;
@@ -65,6 +65,7 @@ export const calculateFullMortgage = (
         formData.mortgagePartialDownPayment,
         formData.area,
         formData.complex,
+        minDownPaymentPercent,
       );
       bankResults.push(result);
     } catch (error) {

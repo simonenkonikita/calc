@@ -1,4 +1,3 @@
-import { variables } from "../../data/limitdDate";
 import { BankProgramResultWithIndex } from "../types";
 
 export const getLimitBadge = (
@@ -13,7 +12,7 @@ export const getLimitBadge = (
     return null;
   }
 
-  const familyMortgageLimit = variables.familyMortgageLimit || 6000000;
+  const familyMortgageLimit = offer.minLoanTerm || 6000000;
   const mortgageAmount = offer.mortgageAmount || 0;
 
   if (mortgageAmount > familyMortgageLimit) {

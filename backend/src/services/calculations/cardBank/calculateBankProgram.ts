@@ -1,7 +1,7 @@
 // backend/src/services/calculations/bankProgram/calculateBankProgram.ts
 
 import { Offer } from "../../../entities/Offer";
-import { Variables, BankProgramResult } from "../../../types/types";
+
 import { calculateActualRate } from "../cardBank/actualRate/calculateActualRate";
 import { calculateClientContribution } from "../cardBank/clientContribution/calculateClientContribution";
 import { calculateContractAmount } from "../cardBank/contractAmount/calculateContractAmount";
@@ -20,6 +20,7 @@ import { calculateOwnFunds } from "./ownFunds/calculateOwnFunds";
 import { calculateAllMonthlyPayment } from "./payment/calculateAllMonthlyPayment";
 import { calculateSubsidyAmount } from "./subsidyAmount/calculateSubsidyAmount";
 import { calculateDownPaymentAmount } from "./downPayment/сalculateDownPaymentAmount";
+import { BankProgramResult, Variables } from "../../../types/types";
 
 export const calculateBankProgram = (
   objectCost: number,
@@ -35,6 +36,7 @@ export const calculateBankProgram = (
   mortgagePartialDownPayment: boolean,
   area: number,
   complexName: string,
+  minDownPaymentPercent: number,
 ): BankProgramResult => {
   const programType = offer.programEntity?.type || "base";
   const isFamilyOrIt = programType === "family" || programType === "it";
@@ -91,6 +93,7 @@ export const calculateBankProgram = (
     remainingAmount,
     noSubsidyInflate,
     coefficients,
+    minDownPaymentPercent,
   });
 
   // Сумма ипотеки
@@ -284,6 +287,14 @@ export const calculateBankProgram = (
     program: offer.program,
     type: programType as any,
     offerId: offer.id,
+
+    // ✅ Добавляем лимиты из офера
+    minLoanAmount: offer.minLoanAmount ?? undefined,
+    maxLoanAmount: offer.maxLoanAmount ?? undefined,
+    minLoanTerm: offer.minLoanTerm ?? undefined,
+    maxLoanTerm: offer.maxLoanTerm ?? undefined,
+
+    complexes: offer.complexes ?? undefined,
 
     rate: actualRateResult,
     twoRate: offer.twoRate ?? undefined,

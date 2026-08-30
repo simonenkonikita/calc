@@ -3,35 +3,34 @@
 import { AppDataSource } from "../data-source";
 import { ApartmentType } from "../entities/ApartmentType";
 import { Complex } from "../entities/Complex";
-import { PRICE_PER_SQUARE_METER_DEFAULT } from "../data/constants";
 
 /**
  * Найти цену за квадратный метр для ЖК и типа квартиры из БД
+ * @throws Error если данные не найдены
  */
 export const findPricePerSquareMeter = async (
   complexName: string,
   apartmentType: string,
 ): Promise<number> => {
-  try {
-    const complexRepository = AppDataSource.getRepository(Complex);
-    const complex = await complexRepository.findOne({
-      where: { name: complexName },
-      relations: ["apartmentTypes"],
-    });
+  const complexRepository = AppDataSource.getRepository(Complex);
+  const complex = await complexRepository.findOne({
+    where: { name: complexName },
+    relations: ["apartmentTypes"],
+  });
 
-    if (!complex || !complex.apartmentTypes) {
-      return PRICE_PER_SQUARE_METER_DEFAULT;
-    }
-
-    const found = complex.apartmentTypes.find(
-      (at) => at.type === apartmentType,
-    );
-
-    return found?.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT;
-  } catch (error) {
-    console.error("Error finding price per square meter:", error);
-    return PRICE_PER_SQUARE_METER_DEFAULT;
+  if (!complex || !complex.apartmentTypes) {
+    throw new Error(`Complex "${complexName}" not found`);
   }
+
+  const found = complex.apartmentTypes.find((at) => at.type === apartmentType);
+
+  if (!found || !found.pricePerSquareMeter) {
+    throw new Error(
+      `Apartment type "${apartmentType}" not found for complex "${complexName}"`,
+    );
+  }
+
+  return found.pricePerSquareMeter;
 };
 
 /**
@@ -41,26 +40,19 @@ export const getSurchargeWithoutDownPayment = async (
   complexName: string,
   apartmentType: string,
 ): Promise<number> => {
-  try {
-    const complexRepository = AppDataSource.getRepository(Complex);
-    const complex = await complexRepository.findOne({
-      where: { name: complexName },
-      relations: ["apartmentTypes"],
-    });
+  const complexRepository = AppDataSource.getRepository(Complex);
+  const complex = await complexRepository.findOne({
+    where: { name: complexName },
+    relations: ["apartmentTypes"],
+  });
 
-    if (!complex || !complex.apartmentTypes) {
-      return 0;
-    }
-
-    const found = complex.apartmentTypes.find(
-      (at) => at.type === apartmentType,
-    );
-
-    return found?.surcharges?.withoutDownPayment ?? 0;
-  } catch (error) {
-    console.error("Error getting surcharge without down payment:", error);
+  if (!complex || !complex.apartmentTypes) {
     return 0;
   }
+
+  const found = complex.apartmentTypes.find((at) => at.type === apartmentType);
+
+  return found?.surcharges?.withoutDownPayment ?? 0;
 };
 
 /**
@@ -70,26 +62,19 @@ export const getSurchargePartialDownPayment = async (
   complexName: string,
   apartmentType: string,
 ): Promise<number> => {
-  try {
-    const complexRepository = AppDataSource.getRepository(Complex);
-    const complex = await complexRepository.findOne({
-      where: { name: complexName },
-      relations: ["apartmentTypes"],
-    });
+  const complexRepository = AppDataSource.getRepository(Complex);
+  const complex = await complexRepository.findOne({
+    where: { name: complexName },
+    relations: ["apartmentTypes"],
+  });
 
-    if (!complex || !complex.apartmentTypes) {
-      return 0;
-    }
-
-    const found = complex.apartmentTypes.find(
-      (at) => at.type === apartmentType,
-    );
-
-    return found?.surcharges?.partialDownPayment ?? 0;
-  } catch (error) {
-    console.error("Error getting surcharge partial down payment:", error);
+  if (!complex || !complex.apartmentTypes) {
     return 0;
   }
+
+  const found = complex.apartmentTypes.find((at) => at.type === apartmentType);
+
+  return found?.surcharges?.partialDownPayment ?? 0;
 };
 
 /**
@@ -116,6 +101,7 @@ export const getMortgageSurcharge = async (
 
 /**
  * Получить полную информацию о цене для ЖК и типа квартиры из БД
+ * @throws Error если данные не найдены
  */
 export const getPriceInfo = async (
   complexName: string,
@@ -126,36 +112,30 @@ export const getPriceInfo = async (
     withoutDownPayment: number;
     partialDownPayment: number;
   };
-} | null> => {
-  try {
-    const complexRepository = AppDataSource.getRepository(Complex);
-    const complex = await complexRepository.findOne({
-      where: { name: complexName },
-      relations: ["apartmentTypes"],
-    });
+}> => {
+  const complexRepository = AppDataSource.getRepository(Complex);
+  const complex = await complexRepository.findOne({
+    where: { name: complexName },
+    relations: ["apartmentTypes"],
+  });
 
-    if (!complex || !complex.apartmentTypes) {
-      return null;
-    }
-
-    const found = complex.apartmentTypes.find(
-      (at) => at.type === apartmentType,
-    );
-
-    if (!found) {
-      return null;
-    }
-
-    return {
-      pricePerSquareMeter:
-        found.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT,
-      surcharges: {
-        withoutDownPayment: found.surcharges?.withoutDownPayment ?? 0,
-        partialDownPayment: found.surcharges?.partialDownPayment ?? 0,
-      },
-    };
-  } catch (error) {
-    console.error("Error getting price info:", error);
-    return null;
+  if (!complex || !complex.apartmentTypes) {
+    throw new Error(`Complex "${complexName}" not found`);
   }
+
+  const found = complex.apartmentTypes.find((at) => at.type === apartmentType);
+
+  if (!found || !found.pricePerSquareMeter) {
+    throw new Error(
+      `Apartment type "${apartmentType}" not found for complex "${complexName}"`,
+    );
+  }
+
+  return {
+    pricePerSquareMeter: found.pricePerSquareMeter,
+    surcharges: {
+      withoutDownPayment: found.surcharges?.withoutDownPayment ?? 0,
+      partialDownPayment: found.surcharges?.partialDownPayment ?? 0,
+    },
+  };
 };

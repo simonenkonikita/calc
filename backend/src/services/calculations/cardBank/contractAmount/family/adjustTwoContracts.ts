@@ -58,8 +58,8 @@ export const adjustTwoContracts = (
     : variables.familyMortgageLimit || 6000000;
 
   const maxLimit = isIt
-    ? variables.maxItMortgageSum || 18000000
-    : variables.maxFamilyMortgageSum || 15000000;
+    ? variables.maxItMortgageLimit || 18000000
+    : variables.maxFamilyMortgageLimit || 15000000;
 
   let secondContract = secondContractAmount || 0;
 

@@ -1,5 +1,6 @@
+// src/hooks/api/useConfig.ts
+
 import { useState, useEffect } from "react";
-import { api } from "../../services/api";
 import { ConfigData } from "../../utils/types";
 
 export const useConfig = () => {
@@ -8,26 +9,31 @@ export const useConfig = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadConfig = async () => {
+    const fetchConfig = async () => {
       try {
         setLoading(true);
-        const response = await api.getConfig();
-        if (response.success && response.data) {
-          setConfig({
-            depositAmount: response.data.depositAmount,
-          });
+        const response = await fetch("/api/config");
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          setConfig(result.data);
         } else {
-          setError(response.error || "Failed to load config");
+          setError(result.error || "Failed to load config");
         }
       } catch (err) {
-        setError("Error loading config");
-        console.error(err);
+        setError(err instanceof Error ? err.message : "Error loading config");
+        console.error("Error loading config:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadConfig();
+    fetchConfig();
   }, []);
 
   return { config, loading, error };

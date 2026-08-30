@@ -22,6 +22,7 @@ interface DownPaymentAmountParams {
   remainingAmount: number;
   noSubsidyInflate: boolean;
   coefficients: BankCoefficients;
+  minDownPaymentPercent: number;
 }
 
 export const calculateDownPaymentAmount = (
@@ -39,6 +40,7 @@ export const calculateDownPaymentAmount = (
     remainingAmount,
     noSubsidyInflate,
     coefficients,
+    minDownPaymentPercent,
   } = params;
 
   const programType = offer.programEntity?.type || "base";
@@ -102,5 +104,6 @@ export const calculateDownPaymentAmount = (
     userDownPaymentPercent,
     objectCost,
     offer,
+    minDownPaymentPercent,
   });
 };

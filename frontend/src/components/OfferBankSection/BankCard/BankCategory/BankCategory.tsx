@@ -1,14 +1,13 @@
 // src/components/BankCategory/BankCategory.tsx
+
 import React from "react";
-
 import "./BankCategory.css";
-
 import { BankCard } from "../BankCard";
 import { BankProgramResultWithIndex } from "../../../../utils/types";
-import { isTrancheAvailable } from "../../../../utils/tranche/trancheDates";
 
 interface BankCategoryProps {
   categoryLabel: string;
+  categoryColor?: string;
   programs: BankProgramResultWithIndex[];
   selectedCards: Set<number>;
   showOverstatement: boolean;
@@ -25,6 +24,7 @@ interface BankCategoryProps {
 
 export const BankCategory: React.FC<BankCategoryProps> = ({
   categoryLabel,
+  categoryColor = "#6b7280",
   programs,
   selectedCards,
   showOverstatement,
@@ -50,8 +50,13 @@ export const BankCategory: React.FC<BankCategoryProps> = ({
             offer.monthlyPaymentAfter !== null;
 
           const isTwoContracts = offer.isTwoContracts === true;
-          const isTrancheUnavailable =
-            offer.type === "tranche" && !isTrancheAvailable(complexName);
+
+          // ✅ Проверяем траншевую ипотеку через данные из офера
+          const isTrancheUnavailable = !!(
+            offer.type === "tranche" &&
+            (!offer.trancheSecondDate ||
+              (offer.complexes && !offer.complexes.includes(complexName)))
+          );
 
           const dynamicData = getDynamicDataForOffer?.(offer);
 

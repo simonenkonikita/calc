@@ -3,6 +3,7 @@
 import { Request, Response } from "express";
 import ConfigService from "../../services/ConfigService";
 import { BaseController } from "./base.controller";
+import { SystemConfig } from "../../entities/SystemConfig";
 
 const configService = new ConfigService();
 
@@ -23,6 +24,64 @@ export class ConfigController extends BaseController {
   }
 
   /**
+   * Создать конфигурацию (если её нет)
+   */
+  async create(req: Request, res: Response) {
+    try {
+      const data = req.body;
+      console.log("📝 Creating config with data:", data);
+
+      // Валидация обязательных полей
+      const requiredFields = [
+        // Государственные лимиты
+        "familyMortgageLimit",
+        "maxFamilyMortgageLimit",
+        "itMortgageLimit",
+        "maxItMortgageLimit",
+
+        // Границы для калькулятора
+        "minArea",
+        "maxArea",
+        "minDownPaymentPercent",
+        "maxDownPaymentPercent",
+        "minLoanTerm",
+        "maxLoanTerm",
+
+        // Дополнительные настройки
+        "deposit",
+        "bankOrder",
+      ];
+
+      const missingFields = requiredFields.filter(
+        (field) => data[field] === undefined,
+      );
+
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          error: `Missing required fields: ${missingFields.join(", ")}`,
+        });
+      }
+
+      const config = await configService.createConfig({
+        familyMortgageLimit: data.familyMortgageLimit,
+        maxFamilyMortgageLimit: data.maxFamilyMortgageLimit,
+        itMortgageLimit: data.itMortgageLimit,
+        maxItMortgageLimit: data.maxItMortgageLimit,
+        deposit: data.deposit,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: config,
+        message: "System configuration created successfully",
+      });
+    } catch (error) {
+      this.handleError(res, error, "Failed to create config");
+    }
+  }
+
+  /**
    * Обновить конфигурацию
    */
   async update(req: Request, res: Response) {
@@ -37,13 +96,112 @@ export class ConfigController extends BaseController {
         });
       }
 
-      const config = await configService.updateConfig(data);
+      // Разрешаем обновлять только определённые поля
+      const allowedFields = [
+        "familyMortgageLimit",
+        "maxFamilyMortgageLimit",
+        "itMortgageLimit",
+        "maxItMortgageLimit",
+        "deposit",
+        "bankOrder",
+      ];
+
+      const updateData: any = {};
+      for (const field of allowedFields) {
+        if (data[field] !== undefined) {
+          updateData[field] = data[field];
+        }
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: `No valid fields to update. Allowed: ${allowedFields.join(", ")}`,
+        });
+      }
+
+      const config = await configService.updateConfig(updateData);
       res.json({
         success: true,
         data: config,
+        message: "Configuration updated successfully",
       });
     } catch (error) {
       this.handleError(res, error, "Failed to update config");
+    }
+  }
+
+  /**
+   * Обновить конкретное поле
+   */
+  async updateField(req: Request, res: Response) {
+    try {
+      const { field } = req.params;
+      const { value } = req.body;
+
+      const allowedFields = [
+        // Государственные лимиты
+        "familyMortgageLimit",
+        "maxFamilyMortgageLimit",
+        "itMortgageLimit",
+        "maxItMortgageLimit",
+
+        // Границы для калькулятора
+        "minArea",
+        "maxArea",
+        "minDownPaymentPercent",
+        "maxDownPaymentPercent",
+        "minLoanTerm",
+        "maxLoanTerm",
+
+        // Дополнительные настройки
+        "deposit",
+        "bankOrder",
+      ];
+
+      if (!allowedFields.includes(field)) {
+        return res.status(400).json({
+          success: false,
+          error: `Field "${field}" is not allowed. Allowed: ${allowedFields.join(", ")}`,
+        });
+      }
+
+      if (value === undefined) {
+        return res.status(400).json({
+          success: false,
+          error: "Value is required",
+        });
+      }
+
+      const config = await configService.updateConfigField(
+        field as keyof SystemConfig,
+        value,
+      );
+
+      res.json({
+        success: true,
+        data: config,
+        message: `Field "${field}" updated successfully`,
+      });
+    } catch (error) {
+      this.handleError(res, error, "Failed to update config field");
+    }
+  }
+
+  /**
+   * Проверить наличие конфигурации
+   */
+  async check(req: Request, res: Response) {
+    try {
+      const hasConfig = await configService.hasConfig();
+      res.json({
+        success: true,
+        data: {
+          exists: hasConfig,
+        },
+      });
+    } catch (error) {
+      this.handleError(res, error, "Failed to check config");
     }
   }
 }

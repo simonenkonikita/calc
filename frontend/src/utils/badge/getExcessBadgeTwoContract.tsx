@@ -1,6 +1,5 @@
 import { BankProgramResultWithIndex } from "../types";
 import { getMinExcessAmount } from "./getMinExcessAmount";
-import { variables } from "../../data/limitdDate";
 
 export const getExcessBadgeTwoContract = (
   offer: BankProgramResultWithIndex,
@@ -23,8 +22,8 @@ export const getExcessBadgeTwoContract = (
     };
   }
 
-  const minExcessAmount = getMinExcessAmount(offer.bank);
-  const maxExcessAmount = variables.maxFamilyMortgageSum || 15000000;
+  const minExcessAmount = getMinExcessAmount(offer);
+  const maxExcessAmount = offer.maxLoanAmount || 15000000;
   const mortgageAmount = offer.mortgageAmount || 0;
 
   // 🔥 Разные сообщения в зависимости от суммы
