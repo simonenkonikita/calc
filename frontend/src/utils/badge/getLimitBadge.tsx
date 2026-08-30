@@ -1,30 +1,40 @@
-import { BankProgramResultWithIndex } from "../types";
+import { BankProgramResultWithIndex, ConfigData } from "../types";
 
 export const getLimitBadge = (
   offer: BankProgramResultWithIndex,
+  config: ConfigData | null,
 ): { text: string; icon: string } | null => {
-  // Проверяем, что это сверхлимитная программа
-  const isExcessProgram =
-    offer.program === "Семейная базовая" ||
-    offer.program === "Семейная ипотека 3,5%";
-
-  if (!isExcessProgram) {
+  if (!config) {
     return null;
   }
 
-  const familyMortgageLimit = offer.minLoanTerm || 6000000;
+  // ✅ Базовая программа: без сверхлимита, без 2-х договоров
+  const isBaseProgram =
+    (offer.type === "family" || offer.type === "it") &&
+    offer.isTwoContracts !== true &&
+    offer.isExcessLimit !== true;
+
+  if (!isBaseProgram) {
+    return null;
+  }
+
+  const limit =
+    offer.type === "family"
+      ? config.familyMortgageLimit || 6000000
+      : config.itMortgageLimit || 9000000;
+
   const mortgageAmount = offer.mortgageAmount || 0;
 
-  if (mortgageAmount > familyMortgageLimit) {
+  if (mortgageAmount > limit) {
     return {
       icon: "⚠️",
-      text: `Максимальная сумма ипотеки ${familyMortgageLimit.toLocaleString()} ₽`,
+      text: `Максимальная сумма ${limit.toLocaleString()} ₽`,
     };
   }
 
-  // Сумма в допустимом диапазоне - показываем обычный шильдик
+  // ✅ В пределах лимита - НЕ показываем бейдж (возвращаем null)
   return {
     icon: "⚡",
-    text: `Максимальная сумма ипотеки ${familyMortgageLimit.toLocaleString()} ₽`,
+    text: `Максимальная сумма ${limit.toLocaleString()} ₽`,
   };
 };

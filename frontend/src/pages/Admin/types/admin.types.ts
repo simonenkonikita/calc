@@ -122,7 +122,7 @@ export interface AdminOffer {
   minPVPercent: number;
   durationMonths: number | null;
   isTwoContracts: boolean;
-  excessLimit: boolean;
+  isExcessLimit: boolean;
   isTranche: boolean;
   trancheFirstPercent: number | null;
   trancheSecondDate: string | null;

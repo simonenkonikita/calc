@@ -41,7 +41,7 @@ export const calculateBankProgram = (
   const programType = offer.programEntity?.type || "base";
   const isFamilyOrIt = programType === "family" || programType === "it";
   const isTwoContracts = isFamilyOrIt && offer.isTwoContracts === true;
-  const isExcessLimit = isFamilyOrIt && offer.excessLimit === true;
+  const isExcessLimit = isFamilyOrIt && offer.isExcessLimit === true;
   const isTranche = programType === "tranche" && offer.isTranche === true;
   const isSpecialMortgageMode =
     mortgageWithoutDownPayment || mortgagePartialDownPayment;
@@ -229,7 +229,7 @@ export const calculateBankProgram = (
   });
 
   const finalSubsidyAmount = excessResult.subsidyAmount;
-  const excessLimit = excessResult.excessLimit;
+  const excessLimitAmount = excessResult.excessLimitAmount;
 
   // На счет застройщика
   const developerAccount = calculateDeveloperAccount({
@@ -300,6 +300,7 @@ export const calculateBankProgram = (
     twoRate: offer.twoRate ?? undefined,
     shortRate: offer.shortRate ?? undefined,
 
+    isExcessLimit,
     isTwoContracts,
     isTranche,
 
@@ -330,16 +331,17 @@ export const calculateBankProgram = (
     downPaymentPercent: Number(downPaymentPercentCalc.toFixed(1)),
     minPVPercent: offer.minPVPercent,
 
-    excessLimit: excessLimit ? Math.ceil(excessLimit) : undefined,
+    isLimitExceeded,
+    excessLimitAmount: excessLimitAmount
+      ? Math.ceil(excessLimitAmount)
+      : undefined,
     mortgageAmount: Math.ceil(mortgageAmountResult.mortgageAmount),
     subsidyAmount: Math.ceil(finalSubsidyAmount),
     developerAccount: Math.ceil(developerAccount),
     pricePerM2: pricePerM2 !== null ? Math.ceil(pricePerM2) : null,
 
-    isLimitExceeded,
     firstContractAmount,
     secondContractAmount,
-
     secondContractSubsidyPercent,
     secondContractSubsidyAmount: secondContractSubsidyAmount
       ? Math.ceil(secondContractSubsidyAmount)

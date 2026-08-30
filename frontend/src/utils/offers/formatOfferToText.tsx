@@ -149,8 +149,8 @@ export const formatOfferToText = (
     lines.push(`Завышение: ${formatMoney(offer.overstatement)}`);
   }
 
-  if (offer.excessLimit && offer.excessLimit > 0) {
-    lines.push(`Сверхлимит: ${formatMoney(offer.excessLimit)}`);
+  if (offer.excessLimitAmount && offer.excessLimitAmount > 0) {
+    lines.push(`Сверхлимит: ${formatMoney(offer.excessLimitAmount)}`);
   }
 
   if (offer.isLimitExceeded) {

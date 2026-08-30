@@ -1,21 +1,24 @@
 import { BankProgramResultWithIndex } from "../types";
-import { getMinExcessAmount } from "./getMinExcessAmount";
+import { getMaxExcessAmount, getMinExcessAmount } from "./getMinExcessAmount";
 
 export const getExcessBadge = (
   offer: BankProgramResultWithIndex,
 ): { text: string; icon: string } | null => {
-  // Проверяем, что это сверхлимитная программа
+  // ✅ Проверяем, что это сверхлимитная программа
   const isExcessProgram =
-    offer.program?.toLowerCase().includes("сверхлимит") ||
-    offer.program === "Семейная ипотека сверхлимит" ||
-    offer.program === "ИТ ипотека сверхлимит";
+    (offer.type === "family" || offer.type === "it") &&
+    offer.isExcessLimit === true &&
+    offer.isTwoContracts !== true;
 
+  // ✅ Если НЕ сверхлимитная - вообще не показываем бейдж
   if (!isExcessProgram) {
     return null;
   }
 
+  // ✅ Теперь мы уверены, что это сверхлимитная программа
+  // Можно показывать предупреждения
   const minExcessAmount = getMinExcessAmount(offer);
-  const maxExcessAmount = offer.maxLoanAmount || 15000000;
+  const maxExcessAmount = getMaxExcessAmount(offer);
   const mortgageAmount = offer.mortgageAmount || 0;
 
   // 🔥 Разные сообщения в зависимости от суммы
@@ -28,7 +31,7 @@ export const getExcessBadge = (
 
   if (mortgageAmount > maxExcessAmount) {
     return {
-      icon: "⚠️",
+      icon: "🚫",
       text: `Максимальная сумма ${maxExcessAmount.toLocaleString()} ₽`,
     };
   }
@@ -36,6 +39,6 @@ export const getExcessBadge = (
   // Сумма в допустимом диапазоне - показываем обычный шильдик
   return {
     icon: "⚡",
-    text: `Cерхлимит`,
+    text: `Сверхлимит`,
   };
 };

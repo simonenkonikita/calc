@@ -63,7 +63,7 @@ export class Offer {
   isTwoContracts: boolean;
 
   @Column({ type: "boolean", default: false })
-  excessLimit: boolean;
+  isExcessLimit: boolean;
 
   @Column({ type: "boolean", default: false })
   isTranche: boolean;

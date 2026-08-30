@@ -204,7 +204,7 @@ export interface BankOffer {
   minPVPercent: number; // Минимальный ПВ (%)
   durationMonths?: number; // Для short программ
   isTwoContracts?: boolean; // Для Совкомбанка (2 договора)
-  excessLimit?: boolean; // Сверхлимит
+  isExcessLimit?: boolean; // Сверхлимит
   rate: number; // Процентная ставка (%)
   twoRate?: number;
   shortRate?: number; //
@@ -263,7 +263,7 @@ export interface BankProgramResult {
   clientContribution: number;
   downPaymentPercent: number;
   minPVPercent: number;
-  excessLimit?: number;
+  excessLimitAmount?: number;
   mortgageAmount: number;
   subsidyAmount: number;
   developerAccount: number;
@@ -275,8 +275,9 @@ export interface BankProgramResult {
   pricePerM2: number | null;
 
   // Флаги
-  isLimitExceeded?: boolean;
   isTwoContracts?: boolean;
+  isExcessLimit?: boolean;
+  isLimitExceeded?: boolean;
 
   // Для 2 договоров (Совкомбанк)
   firstContract?: number;

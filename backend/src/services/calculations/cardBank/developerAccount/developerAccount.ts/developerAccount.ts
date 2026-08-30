@@ -40,7 +40,7 @@ export const developerAccount = (params: developerAccountParams): number => {
 
   const isIt = offer.programEntity?.type === "it";
 
-  const limit = offer.excessLimit
+  const limit = offer.isExcessLimit
     ? isIt
       ? variables.maxItMortgageLimit || 18000000
       : variables.maxFamilyMortgageLimit || 15000000

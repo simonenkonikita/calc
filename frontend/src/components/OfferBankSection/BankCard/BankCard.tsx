@@ -16,6 +16,7 @@ import { getLimitBadge } from "../../../utils/badge/getLimitBadge";
 import { getExcessBadgeTwoContract } from "../../../utils/badge/getExcessBadgeTwoContract";
 import { getLoanTermBadge } from "../../../utils/badge/getLoanTermBadge";
 import { DynamicInfoPopup } from "../../DynamicInfo/DynamicInfoPopup";
+import { useConfig } from "../../../hooks/api/useConfig";
 
 interface BankCardProps {
   offer: BankProgramResultWithIndex;
@@ -68,10 +69,10 @@ export const BankCard: React.FC<BankCardProps> = ({
   dynamicRateData,
   dynamicSubsidyData,
 }) => {
-  // Получаем все бейджи
+  const { config: configData } = useConfig();
   const badge = getBadge(offer);
   const excessBadge = getExcessBadge(offer);
-  const limitBadge = getLimitBadge(offer);
+  const limitBadge = getLimitBadge(offer, configData);
   const termBadge = getTermYearsBadge(offer);
   const trancheBadge = getTrancheBadge(offer, complexName);
   const badgeTwoContract = getExcessBadgeTwoContract(
@@ -144,9 +145,9 @@ export const BankCard: React.FC<BankCardProps> = ({
         formatMoney={formatMoney}
       />
 
-      {offer.excessLimit && offer.excessLimit > 0 && (
+      {offer.excessLimitAmount && offer.excessLimitAmount > 0 && (
         <div className="bank-excess">
-          Сверхлимит: {formatMoney(offer.excessLimit)}
+          Сверхлимит: {formatMoney(offer.excessLimitAmount)}
         </div>
       )}
 
@@ -162,17 +163,18 @@ export const BankCard: React.FC<BankCardProps> = ({
         </div>
       )}
 
-      {offer.type === "family" && offer.isLimitExceeded && (
-        <div className="bank-excess-warning-overlay">
-          <div className="excess-overlay-icon">🚫</div>
-          <div className="excess-overlay-title">
-            Ипотека с выбранными параметрами невозможна
-          </div>
-          {/*      <div className="excess-overlay-hint">
+      {(offer.type === "family" || offer.type === "it") &&
+        offer.isLimitExceeded && (
+          <div className="bank-excess-warning-overlay">
+            <div className="excess-overlay-icon">🚫</div>
+            <div className="excess-overlay-title">
+              Ипотека с выбранными параметрами невозможна
+            </div>
+            {/*      <div className="excess-overlay-hint">
             Превышен лимит семейной ипотеки
           </div> */}
-        </div>
-      )}
+          </div>
+        )}
 
       {/*   {offer.type === "family" && offer.isTwoContracts && (
         <div className="bank-excess-warning-overlay">

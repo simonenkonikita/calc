@@ -17,7 +17,7 @@ export const calculateFamilyContractAmount = (
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
 ): ContractAmountResult => {
-  const limit = bankOffer.excessLimit
+  const limit = bankOffer.isExcessLimit
     ? variables.maxFamilyMortgageSum || 15000000
     : variables.familyMortgageLimit || 6000000;
 

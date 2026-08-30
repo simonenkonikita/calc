@@ -5,12 +5,21 @@ import { BankProgramResultWithIndex } from "../types";
 export const getMinExcessAmount = (
   offer: BankProgramResultWithIndex,
 ): number => {
-  // ✅ Используем лимиты из офера
   if (offer.minLoanAmount) {
     return offer.minLoanAmount;
   }
 
-  // 🔥 Если в офере нет лимита — используем дефолтные
   const isIt = offer.type === "it";
   return isIt ? 9000000 : 6000000;
+};
+
+export const getMaxExcessAmount = (
+  offer: BankProgramResultWithIndex,
+): number => {
+  if (offer.maxLoanAmount) {
+    return offer.maxLoanAmount;
+  }
+
+  const isIt = offer.type === "it";
+  return isIt ? 18000000 : 15000000;
 };

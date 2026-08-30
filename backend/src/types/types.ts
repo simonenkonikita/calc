@@ -198,14 +198,14 @@ export interface BankOffer {
   subsidyPercent: number; // Субсидия (%)
   minPVPercent: number; // Минимальный ПВ (%)
   durationMonths?: number; // Для short программ
-  isTwoContracts?: boolean; // Для Совкомбанка (2 договора)
-  excessLimit?: boolean; // Сверхлимит
   rate: number; // Процентная ставка (%)
   twoRate?: number;
   shortRate?: number; //
   subsidyCalculationMethod?: "onlyPercent" | "standard";
   dynamicRates?: DynamicRateRule[];
   dynamicSubsidies?: DynamicRateRule[];
+  isTwoContracts?: boolean; // Для Совкомбанка (2 договора)
+  isExcessLimit?: boolean; // Сверхлимит
   isTranche?: boolean;
   trancheFirstPercent?: number; // % от стоимости объекта для первого транша (например, 19.9%)
   trancheSecondDate?: string; // дата выдачи второго транша (например, "2027-02-01")
@@ -256,7 +256,7 @@ export interface BankProgramResult {
   clientContribution: number;
   downPaymentPercent: number;
   minPVPercent: number;
-  excessLimit?: number;
+  excessLimitAmount?: number;
   mortgageAmount: number;
   subsidyAmount: number;
   developerAccount: number;
@@ -268,8 +268,9 @@ export interface BankProgramResult {
   pricePerM2: number | null;
 
   // Флаги
-  isLimitExceeded?: boolean;
   isTwoContracts?: boolean;
+  isExcessLimit?: boolean;
+  isLimitExceeded?: boolean;
 
   // Для 2 договоров (Совкомбанк)
   firstContract?: number;
