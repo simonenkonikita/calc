@@ -33,21 +33,16 @@ export class ConfigController extends BaseController {
 
       // Валидация обязательных полей
       const requiredFields = [
-        // Государственные лимиты
         "familyMortgageLimit",
         "maxFamilyMortgageLimit",
         "itMortgageLimit",
         "maxItMortgageLimit",
-
-        // Границы для калькулятора
         "minArea",
         "maxArea",
         "minDownPaymentPercent",
         "maxDownPaymentPercent",
         "minLoanTerm",
         "maxLoanTerm",
-
-        // Дополнительные настройки
         "deposit",
         "bankOrder",
       ];
@@ -68,7 +63,14 @@ export class ConfigController extends BaseController {
         maxFamilyMortgageLimit: data.maxFamilyMortgageLimit,
         itMortgageLimit: data.itMortgageLimit,
         maxItMortgageLimit: data.maxItMortgageLimit,
+        minArea: data.minArea,
+        maxArea: data.maxArea,
+        minDownPaymentPercent: data.minDownPaymentPercent,
+        maxDownPaymentPercent: data.maxDownPaymentPercent,
+        minLoanTerm: data.minLoanTerm,
+        maxLoanTerm: data.maxLoanTerm,
         deposit: data.deposit,
+        bankOrder: data.bankOrder,
       });
 
       res.status(201).json({
@@ -96,12 +98,18 @@ export class ConfigController extends BaseController {
         });
       }
 
-      // Разрешаем обновлять только определённые поля
+      // ✅ Разрешаем обновлять ВСЕ поля
       const allowedFields = [
         "familyMortgageLimit",
         "maxFamilyMortgageLimit",
         "itMortgageLimit",
         "maxItMortgageLimit",
+        "minArea",
+        "maxArea",
+        "minDownPaymentPercent",
+        "maxDownPaymentPercent",
+        "minLoanTerm",
+        "maxLoanTerm",
         "deposit",
         "bankOrder",
       ];
@@ -140,21 +148,16 @@ export class ConfigController extends BaseController {
       const { value } = req.body;
 
       const allowedFields = [
-        // Государственные лимиты
         "familyMortgageLimit",
         "maxFamilyMortgageLimit",
         "itMortgageLimit",
         "maxItMortgageLimit",
-
-        // Границы для калькулятора
         "minArea",
         "maxArea",
         "minDownPaymentPercent",
         "maxDownPaymentPercent",
         "minLoanTerm",
         "maxLoanTerm",
-
-        // Дополнительные настройки
         "deposit",
         "bankOrder",
       ];
