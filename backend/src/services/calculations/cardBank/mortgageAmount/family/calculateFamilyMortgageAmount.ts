@@ -35,17 +35,19 @@ export const calculateFamilyMortgageAmount = (
     coefficients,
   } = params;
 
-  const bankName = offer.bank?.name || "";
-
   const isIt = offer.programEntity?.type === "it";
 
-  const limit = isIt
-    ? variables.minExcessAmountsIt?.[bankName] || 9000000
-    : variables.minExcessAmountsFamily?.[bankName] || 6000000;
+  const limit = offer.minLoanAmount
+    ? offer.minLoanAmount
+    : isIt
+      ? 9000000
+      : 6000000;
 
-  const maxLimit = isIt
-    ? variables.maxItMortgageSum || 18000000
-    : variables.maxFamilyMortgageSum || 15000000;
+  const maxLimit = offer.maxLoanAmount
+    ? offer.maxLoanAmount
+    : isIt
+      ? 18000000
+      : 15000000;
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
 

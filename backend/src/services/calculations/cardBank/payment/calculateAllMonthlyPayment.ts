@@ -123,7 +123,6 @@ export const calculateAllMonthlyPayment = (
       secondTrancheAmount,
       mortgageAmount,
       loanTermMonths,
-      complexName,
     );
 
     firstContractPayment = trancheResult.firstTranchePayment;

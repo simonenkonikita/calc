@@ -1,17 +1,11 @@
-// backend/src/routes/config.ts
+// backend/src/routes/config.routes.ts
 
 import { Router } from "express";
-import { DEPOSIT_AMOUNT } from "../data/complexPrice/CONSTRUCTION";
+import { getConfig } from "../controllers/config.controller";
 
 const router = Router();
 
-router.get("/", (req, res) => {
-  res.json({
-    success: true,
-    data: {
-      depositAmount: DEPOSIT_AMOUNT,
-    },
-  });
-});
+// 🔥 Публичные (для фронтенда и калькулятора)
+router.get("/", getConfig);
 
 export default router;

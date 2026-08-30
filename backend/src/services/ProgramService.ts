@@ -119,7 +119,7 @@ export class ProgramService {
           minPVPercent: Number(offer.minPVPercent),
           durationMonths: offer.durationMonths,
           isTwoContracts: offer.isTwoContracts || false,
-          excessLimit: offer.excessLimit || false,
+          isExcessLimit: offer.isExcessLimit || false,
           isTranche: offer.isTranche || false,
           trancheFirstPercent: offer.trancheFirstPercent
             ? Number(offer.trancheFirstPercent)

@@ -1,10 +1,13 @@
 // src/components/BankGroup/BankGroup.tsx
+
 import React from "react";
 import { BankCategory } from "../BankCategory/BankCategory";
 import "./BankGroup.css";
 
-import { BankProgramResultWithIndex } from "../../../../utils/types";
-import { CATEGORY_ORDER } from "../../../../data/banks/constants";
+import {
+  BankProgramResultWithIndex,
+  ProgramCategory,
+} from "../../../../utils/types";
 
 interface BankGroupProps {
   bankName: string;
@@ -25,6 +28,8 @@ interface BankGroupProps {
     dynamicRateData?: any;
     dynamicSubsidyData?: any;
   } | null;
+  // ✅ Добавляем пропс для категорий из API
+  categories: ProgramCategory[];
 }
 
 export const BankGroup: React.FC<BankGroupProps> = ({
@@ -40,10 +45,16 @@ export const BankGroup: React.FC<BankGroupProps> = ({
   onCardClick,
   hasProgramsInCategory,
   getDynamicDataForOffer,
+  categories, // ✅ Получаем из пропсов
 }) => {
   const hasAnyPrograms = Object.values(bankData).some((arr) => arr.length > 0);
 
   if (!hasAnyPrograms) return null;
+
+  // ✅ Сортируем категории по displayOrder
+  const sortedCategories = [...categories].sort(
+    (a, b) => a.displayOrder - b.displayOrder,
+  );
 
   return (
     <div className="bank-group">
@@ -55,7 +66,7 @@ export const BankGroup: React.FC<BankGroupProps> = ({
       </div>
 
       <div className="bank-categories">
-        {CATEGORY_ORDER.map((category) => {
+        {sortedCategories.map((category) => {
           if (!hasProgramsInCategory(bankData, category.key)) {
             return null;
           }
@@ -66,6 +77,7 @@ export const BankGroup: React.FC<BankGroupProps> = ({
             <BankCategory
               key={category.key}
               categoryLabel={category.label}
+              categoryColor={category.color}
               programs={programs}
               selectedCards={selectedCards}
               showOverstatement={showOverstatement}

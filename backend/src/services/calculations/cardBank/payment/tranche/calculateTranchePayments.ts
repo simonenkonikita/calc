@@ -2,7 +2,10 @@
 
 import { Offer } from "../../../../../entities/Offer";
 import { TranchePaymentsResult } from "../../../../../types/types";
-import { getTrancheSecondDate, getMonthsUntilTranche } from "../../../../../utils/tranche/trancheDates";
+import {
+  getTrancheSecondDate,
+  getMonthsUntilTranche,
+} from "../../../../../utils/tranche/trancheDates";
 import { calculateMonthlyPayment } from "../calculateMonthlyPayment";
 
 export const calculateTranchePayments = (
@@ -12,14 +15,14 @@ export const calculateTranchePayments = (
   secondTrancheAmount: number,
   mortgageAmount: number,
   loanTermMonths: number,
-  complexName: string,
 ): TranchePaymentsResult => {
   const monthlyRate = annualRate / 100 / 12;
 
-  const secondDate = getTrancheSecondDate(complexName);
-  const monthsFromComplex = getMonthsUntilTranche(complexName);
+  const secondDate = getTrancheSecondDate(offer); // ✅ Передаём offer
+  const monthsFromOffer = getMonthsUntilTranche(offer); // ✅ Передаём offer
 
-  const monthsUntilSecondTranche = monthsFromComplex !== null ? monthsFromComplex : 12;
+  const monthsUntilSecondTranche =
+    monthsFromOffer !== null ? monthsFromOffer : 12;
 
   const annuityPayment = calculateMonthlyPayment(
     firstTrancheAmount,
@@ -43,11 +46,17 @@ export const calculateTranchePayments = (
   for (let i = 0; i < monthsUntilSecondTranche && i < loanTermMonths; i++) {
     const interest = remainingFirstTranche * monthlyRate;
     const principalPayment = firstTranchePayment - interest;
-    remainingFirstTranche = Math.max(0, remainingFirstTranche - principalPayment);
+    remainingFirstTranche = Math.max(
+      0,
+      remainingFirstTranche - principalPayment,
+    );
   }
 
   const totalRemaining = remainingFirstTranche + secondTrancheAmount;
-  const remainingMonths = Math.max(1, loanTermMonths - monthsUntilSecondTranche);
+  const remainingMonths = Math.max(
+    1,
+    loanTermMonths - monthsUntilSecondTranche,
+  );
 
   const paymentAfterSecondTranche = calculateMonthlyPayment(
     totalRemaining,

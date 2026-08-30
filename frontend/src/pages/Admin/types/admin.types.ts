@@ -122,7 +122,7 @@ export interface AdminOffer {
   minPVPercent: number;
   durationMonths: number | null;
   isTwoContracts: boolean;
-  excessLimit: boolean;
+  isExcessLimit: boolean;
   isTranche: boolean;
   trancheFirstPercent: number | null;
   trancheSecondDate: string | null;
@@ -149,14 +149,27 @@ export interface AdminOffer {
   updatedAt?: string;
 }
 
+export interface BankOrderItem {
+  name: string;
+  displayOrder: number;
+}
+
 export interface AdminConfig {
-  depositAmount: number;
-  minDownPayment: number;
+  id: string;
+  familyMortgageLimit: number;
+  maxFamilyMortgageLimit: number;
+  itMortgageLimit: number;
+  maxItMortgageLimit: number;
+  minArea: number;
+  maxArea: number;
+  minDownPaymentPercent: number;
+  maxDownPaymentPercent: number;
+  minLoanTerm: number;
   maxLoanTerm: number;
-  defaultComplex: string;
-  bankOrder: string[];
-  createdAt?: string;
-  updatedAt?: string;
+  deposit: number;
+  bankOrder: BankOrderItem[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ============================================================
@@ -192,4 +205,19 @@ export interface CreateAdminSubsidyDTO {
   priority?: number;
   description?: string | null;
   isActive?: boolean;
+}
+
+export interface AdminConfigUpdate {
+  familyMortgageLimit?: number;
+  maxFamilyMortgageLimit?: number;
+  itMortgageLimit?: number;
+  maxItMortgageLimit?: number;
+  minArea?: number;
+  maxArea?: number;
+  minDownPaymentPercent?: number;
+  maxDownPaymentPercent?: number;
+  minLoanTerm?: number;
+  maxLoanTerm?: number;
+  deposit?: number;
+  bankOrder?: BankOrderItem[];
 }

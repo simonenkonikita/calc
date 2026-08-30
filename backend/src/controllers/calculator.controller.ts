@@ -9,7 +9,6 @@ import {
   getMortgageSurcharge,
   getPriceInfo,
 } from "../utils/mortgageSurcharges"; // ✅ Используем утилиту
-import { PRICE_PER_SQUARE_METER_DEFAULT } from "../data/constants";
 import { ApartmentType } from "../entities/ApartmentType";
 import { Offer } from "../entities/Offer";
 import { Complex } from "../entities/Complex";
@@ -44,11 +43,13 @@ export const calculate = async (req: Request, res: Response) => {
     }
 
     // 3. Базовая цена из БД
-    const basePrice =
-      Number(apartmentType.pricePerSquareMeter) ||
-      PRICE_PER_SQUARE_METER_DEFAULT;
+    const basePrice = Number(apartmentType.pricePerSquareMeter);
 
-    // 4. 🔥 Используем утилиту для расчета наценки
+    // 4. Получаем конфиг из БД (ОДИН РАЗ)
+    const config = await configService.getConfig();
+    const variables = await configService.getVariables();
+
+    // 5. Используем утилиту для расчета наценки
     const surcharge = await getMortgageSurcharge(
       formData.complex,
       formData.apartmentType,
@@ -56,13 +57,13 @@ export const calculate = async (req: Request, res: Response) => {
       formData.mortgagePartialDownPayment,
     );
 
-    // 5. Финальная цена
+    // 6. Финальная цена
     const finalPricePerM2 =
       formData.mortgageWithoutDownPayment || formData.mortgagePartialDownPayment
         ? basePrice + surcharge
         : basePrice;
 
-    // 6. Получаем surcharges для ответа
+    // 7. Получаем surcharges для ответа
     const priceInfo = await getPriceInfo(
       formData.complex,
       formData.apartmentType,
@@ -72,23 +73,21 @@ export const calculate = async (req: Request, res: Response) => {
       partialDownPayment: 0,
     };
 
-    // 7. Получаем офферы
+    // 8. Получаем офферы
     const offers: Offer[] = await offerService.getOffersByComplex(
       formData.complex,
     );
 
-    // 8. Получаем Variables
-    const variables = await configService.getVariables();
-
-    // 9. Вызываем калькулятор
+    // 10. 🔥 Вызываем калькулятор, передаём minDownPaymentPercent из конфига
     const result = calculateFullMortgage(
       formData,
       offers,
       variables,
-      finalPricePerM2 || PRICE_PER_SQUARE_METER_DEFAULT,
+      finalPricePerM2,
+      config.minDownPaymentPercent, // ✅ Передаём из конфига
     );
 
-    // 10. Возвращаем результат
+    // 11. Возвращаем результат
     res.json({
       success: true,
       data: {
@@ -218,8 +217,7 @@ export const getPricePerSquareMeter = async (req: Request, res: Response) => {
     res.json({
       success: true,
       data: {
-        pricePerSquareMeter:
-          apartmentType.pricePerSquareMeter || PRICE_PER_SQUARE_METER_DEFAULT,
+        pricePerSquareMeter: apartmentType.pricePerSquareMeter,
         surcharges: apartmentType.surcharges || {
           withoutDownPayment: 0,
           partialDownPayment: 0,

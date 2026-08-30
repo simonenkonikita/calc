@@ -1,64 +1,175 @@
 /* frontend/src/pages/Admin/sections/ConfigSection.css */
 
-/* ============================================================
-   CONFIG SECTION
-   ============================================================ */
-.config-section .config-form {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.25rem;
+.config-form {
+  background: #1e1e2f;
+  padding: 24px;
+  border-radius: 12px;
+  color: #e0e0e0;
 }
 
-.config-section .config-form .full-width {
+.config-form h3 {
+  color: #ffffff;
+  margin: 24px 0 16px 0;
+  font-size: 18px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 8px;
+}
+
+.config-form h3:first-of-type {
+  margin-top: 0;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #b0b0b0;
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 14px;
+  background: #2a2a3e;
+  border: 1px solid #3a3a52;
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #6c5ce7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+}
+
+.form-group input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-group.full-width {
   grid-column: 1 / -1;
 }
 
-.config-section .config-form .form-group {
+.form-group small {
+  display: block;
+  margin-top: 4px;
+  color: #888;
+  font-size: 12px;
+}
+
+.config-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #333;
+}
+
+.admin-btn-primary {
+  padding: 12px 24px;
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.admin-btn-primary:hover:not(:disabled) {
+  background: #5a4bd1;
+}
+
+.admin-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-btn-secondary {
+  padding: 12px 24px;
+  background: transparent;
+  color: #b0b0b0;
+  border: 1px solid #3a3a52;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-btn-secondary:hover:not(:disabled) {
+  background: #2a2a3e;
+  border-color: #5a4bd1;
+  color: white;
+}
+
+.admin-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-error {
+  padding: 12px 16px;
+  background: #3d1a1a;
+  border: 1px solid #cc4444;
+  border-radius: 8px;
+  color: #ff6b6b;
+  margin: 12px 0;
+}
+
+.form-success {
+  padding: 12px 16px;
+  background: #1a3d1a;
+  border: 1px solid #44cc44;
+  border-radius: 8px;
+  color: #6bff6b;
+  margin: 12px 0;
+}
+
+.admin-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #b0b0b0;
+  font-size: 16px;
+}
+
+.admin-error {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-}
-
-.config-section .config-form .form-group label {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #555;
-  display: flex;
   align-items: center;
-  gap: 0.3rem;
+  justify-content: center;
+  height: 200px;
+  color: #ff6b6b;
+  gap: 16px;
 }
 
-.config-section .config-form .form-group input,
-.config-section .config-form .form-group select,
-.config-section .config-form .form-group textarea {
-  padding: 0.4rem 0.75rem;
-  border: 1px solid #eaeaea;
-  border-radius: 0.375rem;
-  font-size: 0.9rem;
-  transition: border-color 0.15s;
-  background: #ffffff;
-  width: 100%;
-}
-
-.config-section .config-form .form-group input:focus,
-.config-section .config-form .form-group select:focus,
-.config-section .config-form .form-group textarea:focus {
-  outline: none;
-  border-color: #3b82f6;
-}
-
-.config-section .config-actions {
-  grid-column: 1 / -1;
+.admin-empty {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-  padding-top: 1rem;
-  border-top: 1px solid #eaeaea;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #b0b0b0;
+  font-size: 16px;
 }
 
 @media (max-width: 768px) {
-  .config-section .config-form {
+  .form-row {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
   }
 }

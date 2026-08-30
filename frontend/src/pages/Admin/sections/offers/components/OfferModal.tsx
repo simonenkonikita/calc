@@ -75,7 +75,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         minPVPercent: 20.1,
         durationMonths: null,
         isTwoContracts: false,
-        excessLimit: false,
+        isExcessLimit: false,
         isTranche: false,
         trancheFirstPercent: null,
         trancheSecondDate: null,
@@ -145,7 +145,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         minPVPercent: editingOffer.minPVPercent,
         durationMonths: editingOffer.durationMonths,
         isTwoContracts: editingOffer.isTwoContracts,
-        excessLimit: editingOffer.excessLimit,
+        isExcessLimit: editingOffer.isExcessLimit,
         isTranche: editingOffer.isTranche,
         trancheFirstPercent: editingOffer.trancheFirstPercent,
         trancheSecondDate: editingOffer.trancheSecondDate,
@@ -177,7 +177,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       setFormData((prev) => ({
         ...prev,
         isTwoContracts: false,
-        excessLimit: false,
+        isExcessLimit: false,
         twoRate: null,
       }));
     }
@@ -489,7 +489,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         minPVPercent: formData.minPVPercent || 20.1,
         durationMonths: formData.durationMonths || null,
         isTwoContracts: formData.isTwoContracts || false,
-        excessLimit: formData.excessLimit || false,
+        isExcessLimit: formData.isExcessLimit || false,
         isTranche: formData.isTranche || false,
         trancheFirstPercent: formData.trancheFirstPercent || null,
         trancheSecondDate: formData.trancheSecondDate || null,
@@ -835,7 +835,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                       onChange={(e) => {
                         const checked = e.target.checked;
                         if (checked) {
-                          handleChange("excessLimit", false);
+                          handleChange("isExcessLimit", false);
                         }
                         handleChange("isTwoContracts", checked);
                       }}
@@ -845,13 +845,13 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                   <label className="checkbox-label">
                     <input
                       type="checkbox"
-                      checked={formData.excessLimit || false}
+                      checked={formData.isExcessLimit || false}
                       onChange={(e) => {
                         const checked = e.target.checked;
                         if (checked) {
                           handleChange("isTwoContracts", false);
                         }
-                        handleChange("excessLimit", checked);
+                        handleChange("isExcessLimit", checked);
                       }}
                     />
                     Сверхлимит

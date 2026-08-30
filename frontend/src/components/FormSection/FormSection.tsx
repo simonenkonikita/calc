@@ -1,14 +1,6 @@
-// FormSection.tsx - исправленная версия
+// FormSection.tsx
 
 import { useMemo, ChangeEvent, useEffect } from "react";
-import {
-  MAX_DOWN_PAYMENT_PERCENT,
-  MIN_DOWN_PAYMENT_PERCENT,
-  MAX_AREA,
-  MIN_AREA,
-  MAX_LOAN_TERM,
-  MIN_LOAN_TERM,
-} from "../../data/constants";
 import { CalculatorFormData } from "../../utils/types";
 import "./FormSection.css";
 import { useConfig } from "../../hooks/api/useConfig";
@@ -31,10 +23,9 @@ export const FormSection: React.FC<FormSectionProps> = ({
   onCalculate,
   isCalculating = false,
 }) => {
+  // ✅ ВСЕ ХУКИ ВЫЗЫВАЮТСЯ НАВЕРХУ (ДО ЛЮБЫХ УСЛОВИЙ И РАННИХ ВОЗВРАТОВ)
   const { config, loading: configLoading } = useConfig();
-  const DEPOSIT_AMOUNT = config?.depositAmount ?? 30000;
 
-  // Загружаем данные о ЖК и типах квартир из API
   const {
     complexes,
     apartmentTypes,
@@ -43,32 +34,39 @@ export const FormSection: React.FC<FormSectionProps> = ({
     loadApartmentTypes,
   } = useComplexData();
 
-  // Загружаем цену для выбранного ЖК и типа квартиры
   const { priceData, loading: priceLoading, fetchPrice } = usePriceData();
 
-  // Загружаем типы квартир при изменении ЖК
+  // ✅ Значения с дефолтами (используются, пока config загружается)
+  const DEPOSIT_AMOUNT = config?.deposit ?? 30000;
+  const MIN_DOWN_PAYMENT_PERCENT = config?.minDownPaymentPercent ?? 20.1;
+  const MAX_DOWN_PAYMENT_PERCENT = config?.maxDownPaymentPercent ?? 99.9;
+  const MIN_AREA = config?.minArea ?? 1;
+  const MAX_AREA = config?.maxArea ?? 999;
+  const MIN_LOAN_TERM = config?.minLoanTerm ?? 1;
+  const MAX_LOAN_TERM = config?.maxLoanTerm ?? 30;
+
+  // ✅ Загружаем типы квартир при изменении ЖК (ВСЕГДА ВЫЗЫВАЕТСЯ)
   useEffect(() => {
     if (formData.complex) {
       loadApartmentTypes(formData.complex);
     }
   }, [formData.complex, loadApartmentTypes]);
 
-  // Загружаем цену при изменении ЖК и типа квартиры
+  // ✅ Загружаем цену при изменении ЖК и типа квартиры (ВСЕГДА ВЫЗЫВАЕТСЯ)
   useEffect(() => {
     if (formData.complex && formData.apartmentType) {
       fetchPrice(formData.complex, formData.apartmentType);
     }
   }, [formData.complex, formData.apartmentType, fetchPrice]);
 
-  // Получаем доступные типы квартир из API данных
+  // ✅ Получаем доступные типы квартир из API данных (ВСЕГДА ВЫЗЫВАЕТСЯ)
   const availableTypes = useMemo(() => {
     return apartmentTypes.map((item) => item.type);
   }, [apartmentTypes]);
 
-  // Получаем цену за м² из API
+  // ✅ Получаем цену за м² из API (ВСЕГДА ВЫЗЫВАЕТСЯ)
   const pricePerSquareMeter = useMemo(() => {
     if (priceData) {
-      // Если включена ипотека без ПВ или с частичным ПВ, добавляем наценку
       if (formData.mortgageWithoutDownPayment) {
         return (
           priceData.pricePerSquareMeter +
@@ -83,7 +81,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
       }
       return priceData.pricePerSquareMeter;
     }
-    return 0; // Возвращаем 0, если данных нет
+    return 0;
   }, [
     priceData,
     formData.mortgageWithoutDownPayment,
@@ -97,7 +95,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
     if (formData.manualObjectCost && formData.manualObjectCost > 0) {
       return formData.manualObjectCost;
     }
-
     return formData.area * pricePerSquareMeter;
   }, [formData.manualObjectCost, formData.area, pricePerSquareMeter]);
 
@@ -332,11 +329,10 @@ export const FormSection: React.FC<FormSectionProps> = ({
   const handleComplexChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const newComplex = e.target.value;
     onInputChange("complex", newComplex);
-    // Сбрасываем тип квартиры при смене ЖК
     onInputChange("apartmentType", "");
   };
 
-  // Если конфиг загружается или данные комплексов загружаются, показываем индикатор
+  // ✅ РАННИЙ ВОЗВРАТ ТОЛЬКО ПОСЛЕ ВСЕХ ХУКОВ
   if (configLoading || complexesLoading) {
     return (
       <div className="form-section">
