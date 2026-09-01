@@ -41,9 +41,9 @@ export const LandingPage: React.FC = () => {
               Интеллектуальный расчёт ипотеки
             </div> */}
             <h1 className="hero-title">
-              Рассчитайте ипотеку
+              Найдите идеальное ипотечное решение
               <br />
-              <span className="hero-gradient">за считанные минуты</span>
+              <span className="hero-gradient">для вашего клиента</span>
             </h1>
             <p className="hero-description">
               Сравните предложения банков, узнайте оптимальную ставку и получите
@@ -57,7 +57,7 @@ export const LandingPage: React.FC = () => {
             </div>
             <div className="hero-stats">
               <div className="stat-item">
-                <span className="stat-number">15+</span>
+                <span className="stat-number">9+</span>
                 <span className="stat-label">Банков</span>
               </div>
               <div className="stat-divider"></div>
@@ -112,7 +112,7 @@ export const LandingPage: React.FC = () => {
           <div className="section-header">
             <h2 className="section-title">Что вы можете</h2>
             <p className="section-subtitle">
-              Все инструменты для принятия правильного решения
+              Все инструменты что вы могли найти верное решение
             </p>
           </div>
           <div className="features-grid">
@@ -168,7 +168,10 @@ export const LandingPage: React.FC = () => {
       <section id="cta" className="cta">
         <div className="container">
           <div className="cta-content">
-            <h2 className="cta-title">Готовы узнать свой идеальный вариант?</h2>
+            <h2 className="cta-title">
+              Готовы узнать идеальный вариант ипоетки <br />
+              для вашего клента?
+            </h2>
             <p className="cta-description">
               Введите параметры и получите полный расчёт за 30 секунд
             </p>
@@ -184,16 +187,16 @@ export const LandingPage: React.FC = () => {
         <div className="container">
           <div className="footer-content">
             <div className="footer-brand">
-              <span className="logo-icon">🏠</span>
+              {/*    <span className="logo-icon">🏠</span> */}
               <span className="logo-text">
                 {/*  Mortgage<span className="logo-highlight">Calc</span> */}
-                Ipoteka.<span className="logo-highlight">Partner</span>
+                Ipoteka<span className="logo-highlight">Partner</span>
               </span>
-              <p className="footer-desc">
+              {/*      <p className="footer-desc">
                 Умный ипотечный калькулятор для принятия правильных решений
-              </p>
+              </p> */}
             </div>
-            <div className="footer-links">
+            {/* <div className="footer-links">
               <div className="footer-column">
                 <h4>Продукт</h4>
                 <a href="#features">Возможности</a>
@@ -206,7 +209,7 @@ export const LandingPage: React.FC = () => {
                 <a href="#">Контакты</a>
                 <a href="#">Блог</a>
               </div>
-            </div>
+            </div> */}
           </div>
           {/*      <div className="footer-bottom">
             <span>© 2026 MortgageCalc. Все права защищены.</span>
