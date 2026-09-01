@@ -89,6 +89,7 @@ export const MortgageCalculator: React.FC = () => {
     totalPayment: 0,
     overpayment: 0,
     pricePerSquareMeter: 0,
+    area: 0,
   };
 
   return (
@@ -126,14 +127,12 @@ export const MortgageCalculator: React.FC = () => {
                 <ResultsCalcSection
                   objectResult={results.objectResult}
                   formatMoney={formatMoney}
-                  area={formData.area}
                 />
               ) : (
                 // 🔥 Показываем те же поля, но с прочерками
                 <ResultsCalcSection
                   objectResult={emptyObjectResult}
                   formatMoney={formatMoney}
-                  area={formData.area || 0}
                 />
               )}
             </div>

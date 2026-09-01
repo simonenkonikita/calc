@@ -9,14 +9,14 @@ interface ResultsCalcSectionProps {
   objectResult: ObjectCalculationResult;
   formatMoney: (amount: number) => string;
   isManualCost?: boolean;
-  area: number;
 }
 
 export const ResultsCalcSection: React.FC<ResultsCalcSectionProps> = ({
   objectResult,
   formatMoney,
-  area = 0,
 }) => {
+  const area = objectResult.area;
+
   const calculatedPricePerM2 = calculatePricePerM2(
     objectResult.objectCost,
     area,

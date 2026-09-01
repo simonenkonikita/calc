@@ -128,6 +128,7 @@ export interface ObjectCalculationResult {
   downPayment: number; // ПВ (рассчитанный)
   remainingAmount: number; // Сумма для расчета (objectCost - downPayment)
   pricePerSquareMeter: number; // Цена за м2 (из справочника)
+  area: number;
 }
 
 export interface OfferBankSectionProps {
@@ -251,6 +252,7 @@ export interface BankProgramResult {
 
   // ✅ ДОБАВЛЯЕМ complexes
   complexes?: string[];
+  area?: number;
 
   // Расчет ежемесячного платежа
   monthlyPayment: number;

@@ -17,6 +17,8 @@ export const BankCardDetails: React.FC<BankCardDetailsProps> = ({
   isTwoContracts,
   formatMoney,
 }) => {
+  const area = offer.area ?? 0;
+
   // Вспомогательная функция для форматирования значений
   const formatValue = (value: any): string => {
     if (value === undefined || value === null) return "—";
@@ -113,6 +115,10 @@ export const BankCardDetails: React.FC<BankCardDetailsProps> = ({
         ]
       : []),
     { label: "На счет застройщика:", value: offer.developerAccount || 0 },
+    {
+      label: "Площадь объекта:",
+      value: area > 0 ? `${area} м²` : "—",
+    },
     {
       label: "Получено за м²:",
       value:
