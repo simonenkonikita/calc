@@ -84,7 +84,8 @@ export const calculate = async (req: Request, res: Response) => {
       offers,
       variables,
       finalPricePerM2,
-      config.minDownPaymentPercent, // ✅ Передаём из конфига
+      config.minDownPaymentPercent,
+      formData.area, // ✅ Передаём из конфига
     );
 
     // 11. Возвращаем результат

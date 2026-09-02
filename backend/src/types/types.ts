@@ -129,6 +129,7 @@ export interface ObjectCalculationResult {
   downPayment: number; // ПВ (рассчитанный)
   remainingAmount: number; // Сумма для расчета (objectCost - downPayment)
   pricePerSquareMeter: number; // Цена за м2 (из справочника)
+  area: number;
 }
 
 // ========== БАНКОВСКИЕ ПРОГРАММЫ (из JSON) ==========
@@ -244,7 +245,7 @@ export interface BankProgramResult {
   maxLoanTerm?: number; // Максимальный срок (в годах)
 
   complexes?: string[];
-
+  area?: number;
   // Расчет ежемесячного платежа
   monthlyPayment: number;
 

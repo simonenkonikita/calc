@@ -16,11 +16,11 @@ export const calculateFullMortgage = (
   variables: Variables,
   pricePerSquareMeter: number,
   minDownPaymentPercent: number,
+  area: number,
 ): {
   objectResult: ObjectCalculationResult;
   bankResults: BankProgramResult[];
 } => {
-  const area = formData.area;
   const manualObjectCost = formData.manualObjectCost;
   const considerDeposit = formData.considerDepositInCost;
   const deposit = variables.deposit;
@@ -63,7 +63,7 @@ export const calculateFullMortgage = (
         formData.noSubsidyInflate,
         formData.mortgageWithoutDownPayment,
         formData.mortgagePartialDownPayment,
-        formData.area,
+        area,
         formData.complex,
         minDownPaymentPercent,
       );
@@ -82,7 +82,11 @@ export const calculateFullMortgage = (
       downPayment,
       remainingAmount,
       pricePerSquareMeter,
+      area: area,
     },
-    bankResults,
+    bankResults: bankResults.map((result) => ({
+      ...result,
+      area: area,
+    })),
   };
 };

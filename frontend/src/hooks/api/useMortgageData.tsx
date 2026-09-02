@@ -43,12 +43,17 @@ export const useMortgageData = () => {
     abortControllerRef.current = controller;
 
     try {
+      // 🔥 Логируем отправляемые данные
+      console.log("📤 Отправка данных на сервер:", formData);
+
       const response = await api.calculate(formData);
+
+      // 🔥 Логируем ответ от сервера
+      console.log("📥 Ответ от сервера:", response);
 
       if (controller.signal.aborted) return;
 
       if (response.success) {
-        // 🔥 Сохраняем в кеш (через сервис)
         mortgageCache.set(formData, response.data);
         setResults(response.data);
       } else {
