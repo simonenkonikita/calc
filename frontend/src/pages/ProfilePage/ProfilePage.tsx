@@ -17,6 +17,7 @@ export const ProfilePage: React.FC = () => {
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
     phone: user?.phone || "",
+    position: user?.position || "",
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -75,23 +76,78 @@ export const ProfilePage: React.FC = () => {
     await logout();
   };
 
-  if (!user)
+  const getInitials = (): string => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName[0]}${user.lastName[0]}`;
+    }
+    if (user?.firstName) {
+      return user.firstName[0];
+    }
+    return user?.email?.[0] || "U";
+  };
+
+  const getRoleLabel = (role: string): string => {
+    const roles: Record<string, string> = {
+      admin: "Администратор проекта",
+      developer_admin: "Администратор застройщика",
+      developer_manager: "Менеджер застройщика",
+      agent: "Агент",
+    };
+    return roles[role] || role;
+  };
+
+  const getRoleColor = (role: string): string => {
+    const colors: Record<string, string> = {
+      admin: "var(--role-admin)",
+      developer_admin: "var(--role-developer-admin)",
+      developer_manager: "var(--role-developer-manager)",
+      agent: "var(--role-agent)",
+    };
+    return colors[role] || "var(--role-default)";
+  };
+
+  if (!user) {
     return (
       <div className="profile-page">
-        <div className="profile-container">
-          <p>Загрузка...</p>
+        <div className="profile-loading">
+          <div className="loading-spinner"></div>
+          <p>Загрузка профиля...</p>
         </div>
       </div>
     );
+  }
 
   return (
     <div className="profile-page">
       <div className="profile-container">
-        <div className="profile-header">
-          <h1>👤 Профиль</h1>
-          <button onClick={handleLogout} className="logout-btn-profile">
-            🚪 Выйти
-          </button>
+        {/* Hero секция профиля */}
+        <div className="profile-hero">
+          <div className="profile-hero-content">
+            <div className="profile-avatar-large">
+              <span className="profile-avatar-text">{getInitials()}</span>
+            </div>
+            <div className="profile-hero-info">
+              <h1 className="profile-hero-name">
+                {user.firstName || user.lastName
+                  ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+                  : user.email}
+              </h1>
+              <p className="profile-hero-email">{user.email}</p>
+              <div className="profile-hero-badge">
+                <span
+                  className="profile-role-badge"
+                  style={{ backgroundColor: getRoleColor(user.role) }}
+                >
+                  {getRoleLabel(user.role)}
+                </span>
+                {user.company && (
+                  <span className="profile-company-badge">
+                    🏢 {user.company}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {message && (
@@ -100,14 +156,26 @@ export const ProfilePage: React.FC = () => {
           </div>
         )}
 
+        {/* Основная информация */}
         <div className="profile-card">
           <div className="profile-card-header">
-            <h2>Основная информация</h2>
+            <div className="profile-card-title">
+              <span className="card-icon">👤</span>
+              <h2>Основная информация</h2>
+            </div>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="edit-btn"
+              className="profile-edit-btn"
             >
-              {isEditing ? "✕ Отмена" : "✏️ Редактировать"}
+              {isEditing ? (
+                <>
+                  <span>✕</span> Отмена
+                </>
+              ) : (
+                <>
+                  <span>✏️</span> Редактировать
+                </>
+              )}
             </button>
           </div>
 
@@ -115,7 +183,7 @@ export const ProfilePage: React.FC = () => {
             <form onSubmit={handleProfileUpdate} className="profile-form">
               <div className="form-group">
                 <label>Email</label>
-                <input type="email" value={user.email} disabled />
+                <div className="form-input-disabled">{user.email}</div>
               </div>
               <div className="form-row">
                 <div className="form-group">
@@ -127,6 +195,7 @@ export const ProfilePage: React.FC = () => {
                       setFormData({ ...formData, firstName: e.target.value })
                     }
                     placeholder="Введите имя"
+                    className="form-input"
                   />
                 </div>
                 <div className="form-group">
@@ -138,6 +207,7 @@ export const ProfilePage: React.FC = () => {
                       setFormData({ ...formData, lastName: e.target.value })
                     }
                     placeholder="Введите фамилию"
+                    className="form-input"
                   />
                 </div>
               </div>
@@ -150,43 +220,85 @@ export const ProfilePage: React.FC = () => {
                     setFormData({ ...formData, phone: e.target.value })
                   }
                   placeholder="+7 (999) 123-45-67"
+                  className="form-input"
                 />
               </div>
-              <button type="submit" className="save-btn">
-                💾 Сохранить
+              {user.position !== undefined && (
+                <div className="form-group">
+                  <label>Должность</label>
+                  <input
+                    type="text"
+                    value={formData.position}
+                    onChange={(e) =>
+                      setFormData({ ...formData, position: e.target.value })
+                    }
+                    placeholder="Введите должность"
+                    className="form-input"
+                  />
+                </div>
+              )}
+              <button type="submit" className="profile-save-btn">
+                💾 Сохранить изменения
               </button>
             </form>
           ) : (
-            <div className="profile-info">
-              <div className="info-item">
-                <span className="info-label">Email</span>
-                <span className="info-value">{user.email}</span>
+            <div className="profile-info-grid">
+              <div className="profile-info-item">
+                <span className="profile-info-label">📧 Email</span>
+                <span className="profile-info-value">{user.email}</span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Имя</span>
-                <span className="info-value">{user.firstName || "—"}</span>
+              <div className="profile-info-item">
+                <span className="profile-info-label">👤 Имя</span>
+                <span className="profile-info-value">
+                  {user.firstName || "—"}
+                </span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Фамилия</span>
-                <span className="info-value">{user.lastName || "—"}</span>
+              <div className="profile-info-item">
+                <span className="profile-info-label">👤 Фамилия</span>
+                <span className="profile-info-value">
+                  {user.lastName || "—"}
+                </span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Телефон</span>
-                <span className="info-value">{user.phone || "—"}</span>
+              <div className="profile-info-item">
+                <span className="profile-info-label">📱 Телефон</span>
+                <span className="profile-info-value">{user.phone || "—"}</span>
               </div>
+              {user.position && (
+                <div className="profile-info-item">
+                  <span className="profile-info-label">💼 Должность</span>
+                  <span className="profile-info-value">{user.position}</span>
+                </div>
+              )}
+              {user.company && (
+                <div className="profile-info-item">
+                  <span className="profile-info-label">🏢 Компания</span>
+                  <span className="profile-info-value">{user.company}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
 
+        {/* Безопасность */}
         <div className="profile-card">
-          <h2>🔐 Безопасность</h2>
           <div className="profile-card-header">
-            <div></div>
+            <div className="profile-card-title">
+              <span className="card-icon">🔐</span>
+              <h2>Безопасность</h2>
+            </div>
             <button
               onClick={() => setIsChangingPassword(!isChangingPassword)}
-              className="edit-btn"
+              className="profile-edit-btn"
             >
-              {isChangingPassword ? "✕ Отмена" : "🔄 Сменить пароль"}
+              {isChangingPassword ? (
+                <>
+                  <span>✕</span> Отмена
+                </>
+              ) : (
+                <>
+                  <span>🔄</span> Сменить пароль
+                </>
+              )}
             </button>
           </div>
 
@@ -205,6 +317,7 @@ export const ProfilePage: React.FC = () => {
                   }
                   placeholder="Введите старый пароль"
                   required
+                  className="form-input"
                 />
               </div>
               <div className="form-group">
@@ -221,6 +334,7 @@ export const ProfilePage: React.FC = () => {
                   placeholder="Минимум 6 символов"
                   required
                   minLength={6}
+                  className="form-input"
                 />
               </div>
               <div className="form-group">
@@ -236,17 +350,64 @@ export const ProfilePage: React.FC = () => {
                   }
                   placeholder="Подтвердите пароль"
                   required
+                  className="form-input"
                 />
               </div>
-              <button type="submit" className="save-btn">
+              <button type="submit" className="profile-save-btn">
                 🔑 Сменить пароль
               </button>
             </form>
           ) : (
-            <p className="password-hint">
-              Для смены пароля нажмите кнопку "Сменить пароль"
-            </p>
+            <div className="profile-security-info">
+              <div className="security-item">
+                <span className="security-icon">🔒</span>
+                <div className="security-content">
+                  <div className="security-title">Пароль защищен</div>
+                  <div className="security-description">
+                    Ваш пароль хранится в зашифрованном виде. Рекомендуем менять
+                    пароль каждые 3 месяца.
+                  </div>
+                </div>
+              </div>
+              <div className="security-item">
+                <span className="security-icon">🛡️</span>
+                <div className="security-content">
+                  <div className="security-title">
+                    Двухфакторная аутентификация
+                  </div>
+                  <div className="security-description">
+                    Подключите дополнительную защиту для вашего аккаунта.
+                  </div>
+                </div>
+                <button className="security-btn">Настроить</button>
+              </div>
+            </div>
           )}
+        </div>
+
+        {/* Статистика */}
+        <div className="profile-stats">
+          <div className="stat-card">
+            <span className="stat-emoji">📅</span>
+            <div className="stat-info">
+              <span className="stat-number">В разработке</span>
+              <span className="stat-label">Дата регистрации</span>
+            </div>
+          </div>
+          <div className="stat-card">
+            <span className="stat-emoji">🏠</span>
+            <div className="stat-info">
+              <span className="stat-number">0</span>
+              <span className="stat-label">Расчетов выполнено</span>
+            </div>
+          </div>
+          <div className="stat-card">
+            <span className="stat-emoji">⭐</span>
+            <div className="stat-info">
+              <span className="stat-number">0</span>
+              <span className="stat-label">Избранных программ</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

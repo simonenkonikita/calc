@@ -1,23 +1,61 @@
-// frontend/src/components/Navigation/Navigation.tsx
-import { useState } from "react";
+// frontend/src/components/Navigation/AppNavigation.tsx
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthPanel } from "../Auth/AuthPanel";
+
 import "./AppNavigation.css";
 import { useAuth } from "../../hooks/ui/useAuth";
+import { ProfileDropdown } from "../Auth/ProfileDropdown/ProfileDropdown";
 
-const Navigation = () => {
+const AppNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const [isAuthPanelOpen, setIsAuthPanelOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     await logout();
     navigate("/");
+    setIsDropdownOpen(false);
   };
 
   const openAuthPanel = () => setIsAuthPanelOpen(true);
   const closeAuthPanel = () => setIsAuthPanelOpen(false);
+
+  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+  const closeDropdown = () => setIsDropdownOpen(false);
+
+  // Закрытие dropdown при клике вне
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Закрытие dropdown по ESC
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, []);
 
   return (
     <>
@@ -30,7 +68,6 @@ const Navigation = () => {
           </div>
 
           <ul className="nav-menu">
-            {/* Защищенные ссылки (только для авторизованных) */}
             {isAuthenticated && (
               <>
                 <li
@@ -45,40 +82,44 @@ const Navigation = () => {
                 >
                   <Link to="/projects">Проекты</Link>
                 </li>
-
-                {/* Админка (только для админов) */}
                 {isAdmin && (
                   <li
                     className={location.pathname === "/admin" ? "active" : ""}
                   >
-                    <Link to="/admin">
-                      <span className="admin-icon">⚙️</span> Админка
-                    </Link>
+                    <Link to="/admin">Админка</Link>
                   </li>
                 )}
               </>
             )}
           </ul>
 
-          {/* Правая часть навигации */}
           <div className="nav-actions">
             {isAuthenticated ? (
               <div className="nav-user">
-                <Link to="/profile" className="profile-link">
-                  <span className="user-avatar">👤</span>
-                  <span className="user-name">
-                    {user?.firstName ||
-                      user?.email?.split("@")[0] ||
-                      "Пользователь"}
-                  </span>
-                </Link>
                 <button
-                  onClick={handleLogout}
-                  className="logout-btn"
-                  title="Выйти"
+                  ref={buttonRef}
+                  onClick={toggleDropdown}
+                  className="avatar-btn"
+                  title="Профиль"
                 >
-                  <span className="logout-icon">🚪</span>
+                  <span className="avatar-circle">
+                    {user?.firstName?.[0] || user?.email?.[0] || "👤"}
+                  </span>
                 </button>
+
+                {/* Dropdown меню */}
+                {isDropdownOpen && (
+                  <div ref={dropdownRef} className="dropdown-container">
+                    <ProfileDropdown
+                      user={user}
+                      onProfile={() => {
+                        navigate("/profile");
+                        setIsDropdownOpen(false);
+                      }}
+                      onLogout={handleLogout}
+                    />
+                  </div>
+                )}
               </div>
             ) : (
               <button onClick={openAuthPanel} className="login-btn-nav">
@@ -89,10 +130,9 @@ const Navigation = () => {
         </div>
       </nav>
 
-      {/* Панель авторизации */}
       <AuthPanel isOpen={isAuthPanelOpen} onClose={closeAuthPanel} />
     </>
   );
 };
 
-export default Navigation;
+export default AppNavigation;

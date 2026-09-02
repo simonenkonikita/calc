@@ -1,4 +1,4 @@
-/* frontend/src/components/Navigation/Navigation.css */
+/* frontend/src/components/Navigation/AppNavigation.css */
 .navigation {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -21,6 +21,7 @@
 .nav-brand {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .brand-logo {
@@ -30,6 +31,9 @@
   flex-shrink: 0;
 }
 
+/* ============================================================
+   МЕНЮ (СДВИНУТО ВПРАВО)
+   ============================================================ */
 .nav-menu {
   display: flex;
   gap: 32px;
@@ -37,6 +41,9 @@
   margin: 0;
   padding: 0;
   align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+  padding-right: 32px;
 }
 
 .nav-menu li a {
@@ -68,71 +75,66 @@
 }
 
 /* ============================================================
-   ПРАВАЯ ЧАСТЬ
+   ПРАВАЯ ЧАСТЬ (КНОПКИ)
    ============================================================ */
 .nav-actions {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
+/* ============================================================
+   АВАТАР
+   ============================================================ */
 .nav-user {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
 }
 
-.profile-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: white;
-  text-decoration: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  transition: background 0.2s;
-}
-
-.profile-link:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.user-avatar {
-  font-size: 18px;
-}
-
-.user-name {
-  color: white;
-  font-weight: 500;
-  font-size: 14px;
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.logout-btn {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 6px 10px;
-  border-radius: 8px;
+.avatar-btn {
+  background: none;
+  border: none;
   cursor: pointer;
-  font-size: 16px;
-  transition: all 0.2s;
+  padding: 0;
+  transition: transform 0.2s;
+  outline: none;
+}
+
+.avatar-btn:hover {
+  transform: scale(1.05);
+}
+
+.avatar-btn:active {
+  transform: scale(0.95);
+}
+
+.avatar-circle {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.logout-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.logout-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6c5ce7, #a855f7);
+  color: #ffffff;
   font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s;
+  user-select: none;
 }
 
+.avatar-circle:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 20px rgba(108, 92, 231, 0.3);
+}
+
+/* ============================================================
+   КНОПКА ВХОДА
+   ============================================================ */
 .login-btn-nav {
   background: rgba(255, 255, 255, 0.15);
   color: white;
@@ -148,6 +150,161 @@
 .login-btn-nav:hover {
   background: rgba(255, 255, 255, 0.25);
   border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================================
+   DROPDOWN КОНТЕЙНЕР
+   ============================================================ */
+.dropdown-container {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 1000;
+  min-width: 280px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   КАРТОЧКА DROPDOWN
+   ============================================================ */
+.profile-dropdown {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  border: 1px solid #f1f5f9;
+}
+
+/* ============================================================
+   ШАПКА С АВАТАРОМ
+   ============================================================ */
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: #f8fafc;
+}
+
+.dropdown-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6c5ce7, #a855f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dropdown-avatar-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dropdown-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.dropdown-user-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-user-email {
+  font-size: 13px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-user-role {
+  font-size: 11px;
+  font-weight: 500;
+  color: #ffffff;
+  padding: 2px 10px;
+  border-radius: 12px;
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+/* ============================================================
+   РАЗДЕЛИТЕЛЬ
+   ============================================================ */
+.dropdown-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 0 8px;
+}
+
+/* ============================================================
+   ПУНКТЫ МЕНЮ
+   ============================================================ */
+.dropdown-menu {
+  padding: 6px 8px;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.2s;
+  width: 100%;
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.dropdown-item:hover {
+  background: #f1f5f9;
+}
+
+.dropdown-item.logout:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.dropdown-item.logout .dropdown-item-icon {
+  color: #dc2626;
+}
+
+.dropdown-item-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.dropdown-item-text {
+  font-weight: 500;
 }
 
 /* ============================================================
@@ -171,6 +328,7 @@
     width: 100%;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 8px;
+    padding-right: 0;
   }
 
   .nav-menu li a {
@@ -186,22 +344,40 @@
     gap: 6px;
   }
 
-  .user-name {
-    font-size: 12px;
-    max-width: 80px;
-  }
-
-  .profile-link {
-    padding: 4px 8px;
-  }
-
-  .logout-btn {
-    padding: 4px 8px;
+  .avatar-circle {
+    width: 34px;
+    height: 34px;
     font-size: 14px;
   }
 
   .login-btn-nav {
     padding: 6px 16px;
+    font-size: 12px;
+  }
+
+  .dropdown-container {
+    min-width: 240px;
+    right: -10px;
+  }
+
+  .dropdown-header {
+    padding: 12px 16px;
+  }
+
+  .dropdown-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dropdown-avatar-text {
+    font-size: 15px;
+  }
+
+  .dropdown-user-name {
+    font-size: 14px;
+  }
+
+  .dropdown-user-email {
     font-size: 12px;
   }
 }
@@ -220,21 +396,37 @@
     padding: 4px 6px;
   }
 
-  .user-name {
-    display: none;
-  }
-
-  .profile-link {
-    padding: 4px 6px;
-  }
-
-  .logout-btn {
-    padding: 4px 6px;
+  .avatar-circle {
+    width: 30px;
+    height: 30px;
     font-size: 12px;
   }
 
   .login-btn-nav {
     padding: 4px 12px;
     font-size: 11px;
+  }
+
+  .dropdown-container {
+    min-width: 200px;
+    right: -6px;
+  }
+
+  .dropdown-user-name {
+    font-size: 13px;
+  }
+
+  .dropdown-user-email {
+    font-size: 11px;
+  }
+
+  .dropdown-item {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .dropdown-item-icon {
+    font-size: 16px;
+    width: 20px;
   }
 }

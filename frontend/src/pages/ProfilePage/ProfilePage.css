@@ -1,50 +1,211 @@
 /* frontend/src/pages/ProfilePage/ProfilePage.css */
+
+/* ============================================================
+   ПЕРЕМЕННЫЕ
+   ============================================================ */
+:root {
+  --role-admin: #ef4444;
+  --role-developer-admin: #8b5cf6;
+  --role-developer-manager: #3b82f6;
+  --role-agent: #10b981;
+  --role-default: #6b7280;
+}
+
+/* ============================================================
+   ОСНОВНОЙ КОНТЕЙНЕР
+   ============================================================ */
 .profile-page {
   min-height: 100vh;
   background: #f8fafc;
-  padding: 40px 20px;
+  padding: 0;
 }
 
 .profile-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
+  padding: 30px 20px;
 }
 
-.profile-header {
+/* ============================================================
+   ЗАГРУЗКА
+   ============================================================ */
+.profile-loading {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 32px;
+  justify-content: center;
+  min-height: 60vh;
 }
 
-.profile-header h1 {
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top: 3px solid #6c5ce7;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.profile-loading p {
+  margin-top: 16px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* ============================================================
+   HERO СЕКЦИЯ
+   ============================================================ */
+.profile-hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 40px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-hero::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+}
+
+.profile-hero::after {
+  content: "";
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 50%;
+}
+
+.profile-hero-content {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-avatar-text {
   font-size: 32px;
   font-weight: 700;
-  color: #0f172a;
-  margin: 0;
+  color: #ffffff;
+  text-transform: uppercase;
 }
 
-.logout-btn-profile {
-  background: #ef4444;
+.profile-hero-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-hero-name {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.profile-hero-email {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 12px 0;
+}
+
+.profile-hero-badge {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-role-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
   color: white;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.profile-company-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.profile-logout-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.logout-btn-profile:hover {
-  background: #dc2626;
+.profile-logout-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
+/* ============================================================
+   СООБЩЕНИЯ
+   ============================================================ */
 .profile-message {
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  margin-bottom: 24px;
   font-weight: 500;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .profile-message.success {
@@ -59,81 +220,108 @@
   border: 1px solid #fca5a5;
 }
 
+/* ============================================================
+   КАРТОЧКИ
+   ============================================================ */
 .profile-card {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px 32px;
   margin-bottom: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   border: 1px solid #e2e8f0;
+  transition: box-shadow 0.2s;
+}
+
+.profile-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .profile-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
-.profile-card h2 {
+.profile-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-icon {
+  font-size: 22px;
+}
+
+.profile-card-title h2 {
   font-size: 18px;
   font-weight: 600;
   color: #0f172a;
   margin: 0;
 }
 
-.edit-btn {
+.profile-edit-btn {
   background: #f1f5f9;
   border: none;
-  padding: 6px 16px;
-  border-radius: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
   color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.edit-btn:hover {
+.profile-edit-btn:hover {
   background: #e2e8f0;
 }
 
-.profile-info {
+/* ============================================================
+   ИНФОРМАЦИЯ
+   ============================================================ */
+.profile-info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px 24px;
 }
 
-.info-item {
+.profile-info-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 8px 0;
 }
 
-.info-label {
+.profile-info-label {
   font-size: 13px;
   font-weight: 500;
   color: #94a3b8;
 }
 
-.info-value {
+.profile-info-value {
   font-size: 15px;
   font-weight: 500;
   color: #0f172a;
 }
 
+/* ============================================================
+   ФОРМЫ
+   ============================================================ */
 .profile-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .profile-form .form-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .profile-form .form-group label {
@@ -142,21 +330,27 @@
   color: #475569;
 }
 
-.profile-form .form-group input {
+.form-input {
   padding: 10px 14px;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 14px;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
+  background: #f8fafc;
 }
 
-.profile-form .form-group input:focus {
+.form-input:focus {
   outline: none;
   border-color: #6c5ce7;
+  background: #ffffff;
   box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
 }
 
-.profile-form .form-group input:disabled {
+.form-input-disabled {
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
   background: #f1f5f9;
   color: #94a3b8;
   cursor: not-allowed;
@@ -168,12 +362,12 @@
   gap: 16px;
 }
 
-.save-btn {
+.profile-save-btn {
   background: linear-gradient(135deg, #6c5ce7, #a855f7);
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -181,61 +375,222 @@
   margin-top: 4px;
 }
 
-.save-btn:hover {
+.profile-save-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+  box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3);
 }
 
-.password-hint {
-  color: #94a3b8;
+/* ============================================================
+   БЕЗОПАСНОСТЬ
+   ============================================================ */
+.profile-security-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.security-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.security-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.security-content {
+  flex: 1;
+}
+
+.security-title {
   font-size: 14px;
-  margin: 0;
+  font-weight: 600;
+  color: #0f172a;
 }
 
+.security-description {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.security-btn {
+  background: #e2e8f0;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.security-btn:hover {
+  background: #cbd5e1;
+}
+
+/* ============================================================
+   СТАТИСТИКА
+   ============================================================ */
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.stat-emoji {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-number {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* ============================================================
+   АДАПТИВ
+   ============================================================ */
 @media (max-width: 768px) {
-  .profile-page {
-    padding: 20px 16px;
+  .profile-container {
+    padding: 16px;
   }
 
-  .profile-header {
+  .profile-hero {
+    padding: 24px;
+    border-radius: 16px;
+  }
+
+  .profile-hero-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-avatar-large {
+    width: 64px;
+    height: 64px;
+  }
+
+  .profile-avatar-text {
+    font-size: 26px;
+  }
+
+  .profile-hero-name {
+    font-size: 22px;
+  }
+
+  .profile-hero-badge {
+    justify-content: center;
+  }
+
+  .profile-logout-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .profile-card {
+    padding: 20px;
+  }
+
+  .profile-card-header {
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
   }
 
-  .profile-header h1 {
-    font-size: 24px;
-  }
-
-  .logout-btn-profile {
+  .profile-edit-btn {
     width: 100%;
-    text-align: center;
+    justify-content: center;
   }
 
-  .profile-info {
+  .profile-info-grid {
     grid-template-columns: 1fr;
-  }
-
-  .profile-card {
-    padding: 16px;
-  }
-
-  .profile-card-header {
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-start;
   }
 
   .profile-form .form-row {
     grid-template-columns: 1fr;
   }
 
-  .save-btn {
+  .profile-save-btn {
     width: 100%;
   }
 
-  .edit-btn {
-    width: 100%;
+  .profile-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    padding: 16px 20px;
+  }
+
+  .security-item {
+    flex-direction: column;
     text-align: center;
+    padding: 16px;
+  }
+
+  .security-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-hero {
+    padding: 20px;
+  }
+
+  .profile-hero-name {
+    font-size: 20px;
+  }
+
+  .profile-card {
+    padding: 16px;
+  }
+
+  .profile-card-title h2 {
+    font-size: 16px;
+  }
+
+  .profile-info-value {
+    font-size: 14px;
+  }
+
+  .stat-number {
+    font-size: 18px;
   }
 }
