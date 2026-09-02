@@ -14,6 +14,9 @@ import configRoutes from "./routes/config.routes";
 import adminRoutes from "./routes/admin.routes";
 import programsRoutes from "./routes/programs.routes";
 
+import "./strategies/jwt.strategy";
+import passport from "./strategies/jwt.strategy";
+
 dotenv.config();
 
 const app = express();
@@ -34,6 +37,8 @@ app.use(
 app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
+
+app.use(passport.initialize());
 
 // Health check
 app.get("/api/health", (req: Request, res: Response) => {
