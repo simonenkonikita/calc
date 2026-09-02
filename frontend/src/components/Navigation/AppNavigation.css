@@ -1,0 +1,240 @@
+/* frontend/src/components/Navigation/Navigation.css */
+.navigation {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+.nav-container {
+  margin: 0 auto;
+  padding: 0 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70px;
+  width: 100%;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+}
+
+.brand-logo {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.nav-menu li a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 0;
+  transition: opacity 0.2s;
+  position: relative;
+}
+
+.nav-menu li a:hover {
+  opacity: 0.8;
+}
+
+.nav-menu li.active a::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: white;
+  border-radius: 2px;
+}
+
+.admin-icon {
+  margin-right: 4px;
+}
+
+/* ============================================================
+   ПРАВАЯ ЧАСТЬ
+   ============================================================ */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.profile-link:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.user-avatar {
+  font-size: 18px;
+}
+
+.user-name {
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.logout-icon {
+  font-size: 16px;
+}
+
+.login-btn-nav {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.login-btn-nav:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================================
+   АДАПТИВ
+   ============================================================ */
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 0 16px;
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 60px;
+    gap: 8px;
+  }
+
+  .nav-menu {
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 4px 0;
+    order: 3;
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 8px;
+  }
+
+  .nav-menu li a {
+    font-size: 13px;
+    padding: 4px 8px;
+  }
+
+  .brand-logo {
+    height: 28px;
+  }
+
+  .nav-actions {
+    gap: 6px;
+  }
+
+  .user-name {
+    font-size: 12px;
+    max-width: 80px;
+  }
+
+  .profile-link {
+    padding: 4px 8px;
+  }
+
+  .logout-btn {
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+
+  .login-btn-nav {
+    padding: 6px 16px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-logo {
+    height: 24px;
+  }
+
+  .nav-menu {
+    gap: 8px;
+  }
+
+  .nav-menu li a {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+
+  .user-name {
+    display: none;
+  }
+
+  .profile-link {
+    padding: 4px 6px;
+  }
+
+  .logout-btn {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+
+  .login-btn-nav {
+    padding: 4px 12px;
+    font-size: 11px;
+  }
+}

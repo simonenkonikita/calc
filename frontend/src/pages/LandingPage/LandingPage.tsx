@@ -13,25 +13,6 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="landing-page">
-      {/* Навигация */}
-      <nav className="landing-nav">
-        <div className="nav-container">
-          <div className="logo">
-            <span className="logo-icon">🏠</span>
-            <span className="logo-text">
-              Mortgage<span className="logo-highlight">Calc</span>
-            </span>
-          </div>
-          <div className="nav-links">
-            <a href="#features">Возможности</a>
-            <a href="#benefits">Преимущества</a>
-            <Link to="/calculator" className="nav-cta">
-              Начать расчёт
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero секция */}
       <section className="hero">
         <div className="hero-container">
