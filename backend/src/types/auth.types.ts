@@ -9,14 +9,15 @@ export interface AuthUser {
   id: string;
   email: string;
   role: UserRole;
-  company?: string;
+  company?: string; // Для обратной совместимости (название компании)
+  companyId?: string; // 🔥 НОВОЕ ПОЛЕ - ID компании
+  companyName?: string;
   firstName?: string;
   lastName?: string;
   phone?: string;
   position?: string;
   isActive?: boolean;
 }
-
 /**
  * Расширенный Request с пользователем
  */
@@ -31,7 +32,7 @@ export interface JwtPayload {
   id: string;
   email: string;
   role: UserRole;
-  company?: string;
+  companyId?: string;
 }
 
 /**

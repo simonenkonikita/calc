@@ -1,4 +1,5 @@
 // frontend/src/pages/Admin/AdminPage.tsx
+
 import React, { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { AdminSidebar } from "./AdminSidebar";
@@ -7,14 +8,18 @@ import { ComplexesSection } from "./sections/ComplexesSection";
 import { RatesSection } from "./sections/RatesSection";
 import { SubsidiesSection } from "./sections/SubsidiesSection";
 import { ConfigSection } from "./sections/ConfigSection";
-import "./AdminPage.css";
 import { DashboardSection } from "./DashboardSection";
 import { ProgramsSection } from "./sections/ProgramsSection";
 import { OffersSection } from "./sections/offers";
-import { useAuth } from "../../hooks/ui/useAuth";
+import { UsersSection } from "./sections/UsersSection";
+import "./AdminPage.css";
+import { useAuthExtended } from "../../hooks/ui/useAuth";
+import { CompaniesSection } from "./sections/CompaniesSection";
 
 type AdminSection =
   | "dashboard"
+  | "companies" // 🔥 НОВАЯ
+  | "users" // 🔥 ОБНОВЛЕНА
   | "banks"
   | "complexes"
   | "offers"
@@ -25,21 +30,57 @@ type AdminSection =
 
 export const AdminPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, isDeveloperAdmin } =
+    useAuthExtended();
 
-  // 🔥 Проверяем, что пользователь авторизован и имеет роль admin
+  // Проверка авторизации
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 
-  if (user?.role !== "admin") {
+  // Проверка роли - только admin и developer_admin имеют доступ к админке
+  if (!isAdmin && !isDeveloperAdmin) {
     return <Navigate to="/calculator" replace />;
   }
+
+  // 🔥 Получаем видимые секции в зависимости от роли
+  const getVisibleSections = (): AdminSection[] => {
+    const sections: AdminSection[] = ["dashboard"];
+
+    // Только admin видит разделы компаний и пользователей
+    if (isAdmin) {
+      sections.push("companies");
+      sections.push("users");
+    }
+
+    // Все разработчики видят остальные разделы
+    sections.push(
+      "complexes",
+      "banks",
+      "programs",
+      "offers",
+      "rates",
+      "subsidies",
+    );
+
+    // Только admin видит конфигурацию
+    if (isAdmin) {
+      sections.push("config");
+    }
+
+    return sections;
+  };
 
   const renderSection = () => {
     switch (activeSection) {
       case "dashboard":
         return <DashboardSection />;
+      case "companies":
+        if (!isAdmin) return <div>Доступ запрещен</div>;
+        return <CompaniesSection />;
+      case "users":
+        if (!isAdmin) return <div>Доступ запрещен</div>;
+        return <UsersSection />;
       case "banks":
         return <BanksSection />;
       case "complexes":
@@ -53,15 +94,28 @@ export const AdminPage: React.FC = () => {
       case "programs":
         return <ProgramsSection />;
       case "config":
+        if (!isAdmin) return <div>Доступ запрещен</div>;
         return <ConfigSection />;
       default:
         return <DashboardSection />;
     }
   };
 
+  const visibleSections = getVisibleSections();
+
+  // Если текущая секция недоступна для пользователя, переключаем на dashboard
+  if (!visibleSections.includes(activeSection)) {
+    setActiveSection("dashboard");
+  }
+
   return (
     <div className="admin-page">
-      <AdminSidebar active={activeSection} onSelect={setActiveSection} />
+      <AdminSidebar
+        active={activeSection}
+        onSelect={setActiveSection}
+        visibleSections={visibleSections}
+        userRole={user?.role}
+      />
       <div className="admin-content">
         <div className="admin-body">{renderSection()}</div>
       </div>

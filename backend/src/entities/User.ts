@@ -1,11 +1,16 @@
 // backend/src/entities/User.ts
+
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
 } from "typeorm";
+import { Company } from "./Company";
 
 export type UserRole =
   | "admin"
@@ -44,9 +49,6 @@ export class User {
   phone: string;
 
   @Column({ nullable: true })
-  company: string;
-
-  @Column({ nullable: true })
   position: string;
 
   @Column({ default: true })
@@ -54,6 +56,29 @@ export class User {
 
   @Column({ nullable: true })
   lastLoginAt: Date;
+
+  // ============================================================
+  // 🔥 СВЯЗИ
+  // ============================================================
+
+  // 🔥 ИСПРАВЛЯЕМ: добавляем nullable: true
+  @Column({ nullable: true })
+  companyId: string | null;
+
+  @ManyToOne(() => Company, (company) => company.users, { nullable: true })
+  @JoinColumn({ name: "companyId" })
+  company: Company | null;
+
+  // 🔥 ИСПРАВЛЯЕМ: добавляем nullable: true
+  @Column({ nullable: true })
+  createdById: string | null;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: "createdById" })
+  createdBy: User | null;
+
+  @OneToMany(() => User, (user) => user.createdBy)
+  createdUsers: User[];
 
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;

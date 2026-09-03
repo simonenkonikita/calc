@@ -1,8 +1,16 @@
 // frontend/src/providers/AuthProvider.tsx
-import React, { useState, useEffect, ReactNode } from "react";
+
+import React, { useState, useEffect, ReactNode, useCallback } from "react";
 import { AuthContext } from "../contexts/AuthContext";
-import { AuthUser, RegisterData } from "../types/auth.types";
+import {
+  AuthUser,
+  RegisterData,
+  Company,
+  UserRole,
+  AuthContextType,
+} from "../types/auth.types";
 import { authApi } from "../services/auth";
+import { adminApi } from "../services/adminApi";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -12,6 +20,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userCompany, setUserCompany] = useState<Company | null>(null);
+
+  // ============================================================
+  // ЗАГРУЗКА ПОЛЬЗОВАТЕЛЯ
+  // ============================================================
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -20,19 +33,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const response = await authApi.me();
         console.log("📥 Auth response:", response);
 
-        // 🔥 response.data — это сам пользователь
         if (response.success && response.data) {
           setUser(response.data);
           console.log("✅ User set:", response.data);
+
+          // 🔥 Если у пользователя есть компания, загружаем её данные
+          if (response.data.companyId) {
+            try {
+              const company = await adminApi.getCompany(
+                response.data.companyId,
+              );
+              setUserCompany(company);
+              console.log("🏢 Company loaded:", company);
+            } catch (companyError) {
+              console.warn("⚠️ Could not load company:", companyError);
+            }
+          }
         } else {
           console.log("❌ No user");
           setUser(null);
-          localStorage.removeItem('token');
+          setUserCompany(null);
+          localStorage.removeItem("token");
         }
       } catch (error) {
         console.error("❌ Auth check error:", error);
         setUser(null);
-        localStorage.removeItem('token');
+        setUserCompany(null);
+        localStorage.removeItem("token");
       } finally {
         setLoading(false);
       }
@@ -41,6 +68,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuth();
   }, []);
 
+  // ============================================================
+  // ОБНОВЛЕНИЕ ПОЛЬЗОВАТЕЛЯ
+  // ============================================================
+
+  const refreshUser = useCallback(async (): Promise<void> => {
+    try {
+      const response = await authApi.me();
+      if (response.success && response.data) {
+        setUser(response.data);
+        console.log("🔄 User refreshed:", response.data);
+
+        // Обновляем компанию
+        if (response.data.companyId) {
+          try {
+            const company = await adminApi.getCompany(response.data.companyId);
+            setUserCompany(company);
+          } catch (companyError) {
+            console.warn("⚠️ Could not load company:", companyError);
+          }
+        } else {
+          setUserCompany(null);
+        }
+      }
+    } catch (error) {
+      console.error("❌ Error refreshing user:", error);
+    }
+  }, []);
+
+  // ============================================================
+  // ВХОД
+  // ============================================================
+
   const login = async (email: string, password: string): Promise<boolean> => {
     setError(null);
     try {
@@ -48,8 +107,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.success && response.data) {
         setUser(response.data);
         if (response.token) {
-          localStorage.setItem('token', response.token);
+          localStorage.setItem("token", response.token);
         }
+
+        // Загружаем компанию
+        if (response.data.companyId) {
+          try {
+            const company = await adminApi.getCompany(response.data.companyId);
+            setUserCompany(company);
+          } catch (companyError) {
+            console.warn("⚠️ Could not load company:", companyError);
+          }
+        }
+
         return true;
       }
       setError(response.message || "Ошибка входа");
@@ -60,6 +130,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // ============================================================
+  // РЕГИСТРАЦИЯ (ТОЛЬКО ДЛЯ АГЕНТОВ)
+  // ============================================================
+
   const register = async (data: RegisterData): Promise<boolean> => {
     setError(null);
     try {
@@ -67,7 +141,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.success && response.data) {
         setUser(response.data);
         if (response.token) {
-          localStorage.setItem('token', response.token);
+          localStorage.setItem("token", response.token);
         }
         return true;
       }
@@ -79,16 +153,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // ============================================================
+  // ВЫХОД
+  // ============================================================
+
   const logout = async (): Promise<void> => {
     try {
       await authApi.logout();
     } finally {
       setUser(null);
-      localStorage.removeItem('token');
+      setUserCompany(null);
+      localStorage.removeItem("token");
     }
   };
 
-  const updateProfile = async (data: Partial<RegisterData>): Promise<boolean> => {
+  // ============================================================
+  // ОБНОВЛЕНИЕ ПРОФИЛЯ
+  // ============================================================
+
+  const updateProfile = async (
+    data: Partial<RegisterData>,
+  ): Promise<boolean> => {
     setError(null);
     try {
       const response = await authApi.updateProfile(data);
@@ -104,7 +189,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const changePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
+  // ============================================================
+  // СМЕНА ПАРОЛЯ
+  // ============================================================
+
+  const changePassword = async (
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<boolean> => {
     setError(null);
     try {
       await authApi.changePassword({ oldPassword, newPassword });
@@ -115,25 +207,82 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // ============================================================
+  // 🔥 ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ
+  // ============================================================
+
+  /**
+   * Получить компанию пользователя
+   */
+  const getUserCompany = useCallback((): Company | null => {
+    return userCompany;
+  }, [userCompany]);
+
+  /**
+   * Проверка наличия роли
+   */
+  const hasRole = useCallback(
+    (roles: UserRole | UserRole[]): boolean => {
+      if (!user) return false;
+      const roleList = Array.isArray(roles) ? roles : [roles];
+      return roleList.includes(user.role);
+    },
+    [user],
+  );
+
+  /**
+   * Проверка доступа к сущности по companyId
+   */
+  const hasAccessToEntity = useCallback(
+    (entityCompanyId: string | null | undefined): boolean => {
+      if (!user) return false;
+      // Admin имеет доступ ко всему
+      if (user.role === "admin") return true;
+      // Если у сущности нет компании, доступ запрещен для не-админов
+      if (!entityCompanyId) return false;
+      // Проверяем, что компания пользователя совпадает с компанией сущности
+      return user.companyId === entityCompanyId;
+    },
+    [user],
+  );
+
+  // ============================================================
+  // ВСПОМОГАТЕЛЬНЫЕ ПРОВЕРКИ
+  // ============================================================
+
   const isAuthenticated = !!user;
   const isAdmin = user?.role === "admin";
   const isDeveloper =
     user?.role === "developer_admin" || user?.role === "developer_manager";
   const isAgent = user?.role === "agent";
 
-  const value = {
+  // ============================================================
+  // ЗНАЧЕНИЕ КОНТЕКСТА
+  // ============================================================
+
+  const value: AuthContextType = {
+    // Основные данные
     user,
     loading,
     error,
+
+    // Основные методы
     login,
     logout,
     register,
     updateProfile,
     changePassword,
+    refreshUser,
+
+    // Проверки
     isAuthenticated,
     isAdmin,
     isDeveloper,
     isAgent,
+
+    // Вспомогательные методы
+    getUserCompany,
+    hasRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

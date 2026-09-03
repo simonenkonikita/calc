@@ -1,28 +1,47 @@
 // frontend/src/pages/Admin/AdminSidebar.tsx
+
 import React, { useState } from "react";
+import { UserRole } from "../../types/auth.types";
 import "./AdminSidebar.css";
 
 interface AdminSidebarProps {
   active: string;
   onSelect: (section: any) => void;
+  visibleSections?: string[]; // 🔥 ДОБАВЛЯЕМ
+  userRole?: UserRole; // 🔥 ДОБАВЛЯЕМ
 }
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   active,
   onSelect,
+  visibleSections = [],
+  userRole,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const menuItems = [
+  // 🔥 ВСЕ пункты меню
+  const allMenuItems = [
     { id: "dashboard", label: "Главная", icon: "📊" },
+    { id: "companies", label: "Компании", icon: "🏢", adminOnly: true },
+    { id: "users", label: "Пользователи", icon: "👥", adminOnly: true },
     { id: "complexes", label: "Жилые комплексы", icon: "🏗️" },
     { id: "banks", label: "Банки", icon: "🏦" },
     { id: "programs", label: "Программы", icon: "📋" },
     { id: "offers", label: "Офферы", icon: "📄" },
     { id: "rates", label: "Ставки", icon: "📈" },
     { id: "subsidies", label: "Субсидии", icon: "💰" },
-    { id: "config", label: "Конфигурация", icon: "⚙️" },
+    { id: "config", label: "Конфигурация", icon: "⚙️", adminOnly: true },
   ];
+
+  // 🔥 Фильтруем пункты меню
+  const menuItems = allMenuItems.filter((item) => {
+    // Если переданы visibleSections, используем их
+    if (visibleSections.length > 0) {
+      return visibleSections.includes(item.id);
+    }
+    // Иначе показываем все (для обратной совместимости)
+    return true;
+  });
 
   const handleSelect = (id: string) => {
     onSelect(id);
@@ -68,7 +87,9 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       <div className="admin-sidebar-footer">
         <div className="sidebar-status">
           <span className="status-dot"></span>
-          <span className="status-text">Система работает</span>
+          <span className="status-text">
+            {userRole === "admin" ? "👑 Администратор" : "🏢 Застройщик"}
+          </span>
         </div>
         <div className="sidebar-version">v2.0.0</div>
       </div>

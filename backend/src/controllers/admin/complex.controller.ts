@@ -4,60 +4,103 @@ import { Request, Response } from "express";
 import { AppDataSource } from "../../data-source";
 import { Complex } from "../../entities/Complex";
 import { BaseController } from "./base.controller";
+import { AuthRequest } from "../../types/auth.types";
 
 const complexRepository = AppDataSource.getRepository(Complex);
 
 export class ComplexController extends BaseController {
   /**
-   * Получить все ЖК
+   * Получить все ЖК (с учетом прав пользователя)
    */
-  async getAll(req: Request, res: Response) {
+  async getAll(req: AuthRequest, res: Response) {
     try {
+      const user = req.user;
+
+      let where: any = {};
+
+      // Если пользователь не админ, показываем только его компанию
+      if (user && user.role !== "admin") {
+        where.companyId = user.companyId;
+      }
+
       const complexes = await complexRepository.find({
-        relations: ["apartmentTypes"],
+        where,
+        relations: ["apartmentTypes", "company"],
         order: { name: "ASC" },
       });
-      res.json(complexes);
+
+      res.json({ success: true, data: complexes });
     } catch (error) {
       this.handleError(res, error, "Failed to get complexes");
     }
   }
 
   /**
-   * Получить ЖК по ID
+   * 🔥 ПОЛУЧИТЬ ЖК ПО ID (НОВЫЙ МЕТОД)
    */
-  async getOne(req: Request, res: Response) {
+  async getOne(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
+      const user = req.user;
+
       const complex = await complexRepository.findOne({
         where: { id },
-        relations: ["apartmentTypes"],
+        relations: ["apartmentTypes", "company"],
       });
 
       if (!complex) {
         return this.handleNotFound(res, "Complex");
       }
 
-      res.json(complex);
+      // Проверяем права доступа
+      if (user?.role !== "admin") {
+        if (complex.companyId !== user?.companyId) {
+          return res.status(403).json({
+            success: false,
+            error: "Доступ запрещен. Вы не можете просматривать этот ЖК",
+          });
+        }
+      }
+
+      res.json({ success: true, data: complex });
     } catch (error) {
       this.handleError(res, error, "Failed to get complex");
     }
   }
 
   /**
-   * Создать ЖК
+   * Создать ЖК (только admin или developer_admin)
    */
-  async create(req: Request, res: Response) {
+  async create(req: AuthRequest, res: Response) {
     try {
       const data = req.body;
-      console.log(
-        "📝 Creating complex with data:",
-        JSON.stringify(data, null, 2),
-      );
+      const currentUser = req.user;
 
-      // Валидация обязательных полей
+      // Проверяем права
+      if (
+        !currentUser ||
+        (currentUser.role !== "admin" && currentUser.role !== "developer_admin")
+      ) {
+        return res.status(403).json({
+          success: false,
+          error:
+            "Доступ запрещен. Только администратор проекта или компании может создавать ЖК",
+        });
+      }
+
+      // Если developer_admin, привязываем к его компании
+      if (currentUser.role === "developer_admin") {
+        if (!currentUser.companyId) {
+          return res.status(400).json({
+            success: false,
+            error: "У вас нет компании",
+          });
+        }
+        data.companyId = currentUser.companyId;
+      }
+
+      // Валидация
       if (!data.name) {
-        console.log("❌ Validation failed: name is required");
         return res.status(400).json({
           success: false,
           error: "Name is required",
@@ -65,32 +108,15 @@ export class ComplexController extends BaseController {
       }
 
       if (!data.status) {
-        console.log("❌ Validation failed: status is required");
         return res.status(400).json({
           success: false,
           error: "Status is required",
         });
       }
 
-      // Генерируем slug из названия
       const { generateSlug } = await import("../../utils/slugify");
       const slug = generateSlug(data.name);
-      console.log(`🔗 Generated slug: ${slug}`);
 
-      // Проверяем, существует ли ЖК с таким именем
-      const existing = await complexRepository.findOne({
-        where: { name: data.name },
-      });
-
-      if (existing) {
-        console.log(`❌ Complex with name "${data.name}" already exists`);
-        return res.status(409).json({
-          success: false,
-          error: `Complex with name "${data.name}" already exists`,
-        });
-      }
-
-      // Создаем комплекс
       const complex = complexRepository.create({
         name: data.name,
         slug: slug,
@@ -102,56 +128,54 @@ export class ComplexController extends BaseController {
         specialOffers: data.specialOffers || [],
         materialsLink: data.materialsLink || "",
         isActive: data.isActive !== undefined ? data.isActive : true,
+        companyId: data.companyId,
+        createdById: currentUser.id,
       });
 
-      console.log("🏗️ Saving complex to database...");
       await complexRepository.save(complex);
-      console.log("✅ Complex saved successfully:", complex.id);
 
-      // Возвращаем созданный комплекс с отношениями
       const created = await complexRepository.findOne({
         where: { id: complex.id },
-        relations: ["apartmentTypes"],
+        relations: ["apartmentTypes", "company"],
       });
 
-      res.status(201).json(created);
+      res.status(201).json({ success: true, data: created });
     } catch (error) {
-      console.error("❌ Error creating complex - FULL ERROR:", error);
-      // Исправляем: проверяем тип error перед использованием stack
-      if (error instanceof Error) {
-        console.error("❌ Error stack:", error.stack);
-      }
-
-      // Отправляем детальную ошибку
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to create complex";
-      const errorStack = error instanceof Error ? error.stack : undefined;
-
-      res.status(500).json({
-        success: false,
-        error: errorMessage,
-        ...(process.env.NODE_ENV === "development" && { stack: errorStack }),
-      });
+      this.handleError(res, error, "Failed to create complex");
     }
   }
 
   /**
-   * Обновить ЖК
+   * Обновить ЖК (с проверкой прав)
    */
-  async update(req: Request, res: Response) {
+  async update(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
       const data = req.body;
-
-      console.log(`📝 Updating complex ${id} with data:`, data);
+      const currentUser = req.user;
 
       const existingComplex = await complexRepository.findOne({
         where: { id },
-        relations: ["apartmentTypes"],
+        relations: ["company"],
       });
 
       if (!existingComplex) {
         return this.handleNotFound(res, "Complex");
+      }
+
+      // Проверяем права
+      if (currentUser?.role === "developer_admin") {
+        if (existingComplex.companyId !== currentUser.companyId) {
+          return res.status(403).json({
+            success: false,
+            error: "Доступ запрещен. Вы можете редактировать только свои ЖК",
+          });
+        }
+      } else if (currentUser?.role !== "admin") {
+        return res.status(403).json({
+          success: false,
+          error: "Доступ запрещен. Недостаточно прав",
+        });
       }
 
       // Обновляем поля
@@ -170,57 +194,66 @@ export class ComplexController extends BaseController {
         existingComplex.materialsLink = data.materialsLink;
       if (data.isActive !== undefined) existingComplex.isActive = data.isActive;
 
-      // Если изменилось имя, обновляем slug
+      // Только admin может менять компанию
+      if (currentUser?.role === "admin" && data.companyId !== undefined) {
+        existingComplex.companyId = data.companyId;
+      }
+
       if (data.name && data.name !== existingComplex.name) {
         const { generateSlug } = await import("../../utils/slugify");
         existingComplex.slug = generateSlug(data.name);
       }
 
-      await complexRepository.save(existingComplex);
-      console.log("✅ Complex updated:", existingComplex);
+      existingComplex.updatedById = currentUser?.id;
 
-      // Возвращаем обновленный комплекс с отношениями
+      await complexRepository.save(existingComplex);
+
       const updated = await complexRepository.findOne({
         where: { id },
-        relations: ["apartmentTypes"],
+        relations: ["apartmentTypes", "company"],
       });
 
-      res.json(updated);
+      res.json({ success: true, data: updated });
     } catch (error) {
-      console.error("❌ Error updating complex:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to update complex";
-      res.status(500).json({
-        success: false,
-        error: errorMessage,
-      });
+      this.handleError(res, error, "Failed to update complex");
     }
   }
 
   /**
-   * Удалить ЖК
+   * Удалить ЖК (с проверкой прав)
    */
-  async delete(req: Request, res: Response) {
+  async delete(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
-      console.log(`🗑️ Deleting complex ${id}`);
+      const currentUser = req.user;
 
-      const result = await complexRepository.delete(id);
+      const existingComplex = await complexRepository.findOne({
+        where: { id },
+      });
 
-      if (result.affected === 0) {
+      if (!existingComplex) {
         return this.handleNotFound(res, "Complex");
       }
 
-      console.log("✅ Complex deleted");
+      // Проверяем права
+      if (currentUser?.role === "developer_admin") {
+        if (existingComplex.companyId !== currentUser.companyId) {
+          return res.status(403).json({
+            success: false,
+            error: "Доступ запрещен. Вы можете удалять только свои ЖК",
+          });
+        }
+      } else if (currentUser?.role !== "admin") {
+        return res.status(403).json({
+          success: false,
+          error: "Доступ запрещен. Недостаточно прав",
+        });
+      }
+
+      await complexRepository.delete(id);
       res.json({ success: true, message: "Complex deleted successfully" });
     } catch (error) {
-      console.error("❌ Error deleting complex:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete complex";
-      res.status(500).json({
-        success: false,
-        error: errorMessage,
-      });
+      this.handleError(res, error, "Failed to delete complex");
     }
   }
 }

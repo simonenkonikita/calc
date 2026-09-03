@@ -12,6 +12,7 @@ import { DynamicSubsidy } from "./entities/DynamicSubsidy";
 import { SystemConfig } from "./entities/SystemConfig";
 import * as path from "path";
 import { User } from "./entities/User";
+import { Company } from "./entities/Company";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -24,6 +25,8 @@ export const AppDataSource = new DataSource({
   logging: process.env.NODE_ENV === "development",
   entities: [
     Bank,
+    User,
+    Company,
     Complex,
     ApartmentType,
     Program,
@@ -31,7 +34,6 @@ export const AppDataSource = new DataSource({
     DynamicRate,
     DynamicSubsidy,
     SystemConfig,
-    User,
   ],
   migrations: [path.join(__dirname, "..", "migrations", "*.ts")],
   subscribers: [],

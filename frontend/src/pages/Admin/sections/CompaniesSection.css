@@ -1,0 +1,228 @@
+/* frontend/src/pages/Admin/sections/CompaniesSection.css */
+
+.companies-section .admin-table .company-name {
+  font-weight: 600;
+}
+
+.companies-section .admin-table .admin-email {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+/* Модальное окно */
+.companies-section .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.companies-section .modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+.companies-section .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.companies-section .modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.companies-section .modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.companies-section .modal-close:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.companies-section .modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.companies-section .modal-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.companies-section .modal-form-grid .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.companies-section .modal-form-grid .form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.companies-section .form-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.companies-section .form-label.required::after {
+  content: " *";
+  color: #ef4444;
+}
+
+.companies-section .form-input,
+.companies-section .form-select,
+.companies-section .form-textarea {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.companies-section .form-input:focus,
+.companies-section .form-select:focus,
+.companies-section .form-textarea:focus {
+  outline: none;
+  border-color: #818cf8;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
+}
+
+.companies-section .form-row {
+  display: grid;
+  gap: 16px;
+}
+
+.companies-section .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.companies-section hr {
+  margin: 16px 0;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .companies-section .modal-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .companies-section .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.companies-section .admin-table .company-complexes-list {
+  padding: 0.5rem 0;
+  background: #fafafa;
+  border-radius: 0.375rem;
+}
+
+.companies-section .admin-table .company-complexes-list .complex-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.companies-section
+  .admin-table
+  .company-complexes-list
+  .complex-row:last-child {
+  border-bottom: none;
+}
+
+.companies-section
+  .admin-table
+  .company-complexes-list
+  .complex-row
+  .complex-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.companies-section .admin-btn-xs {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.65rem;
+  border-radius: 0.25rem;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+.companies-section .admin-btn-sm {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+  .companies-section .admin-table .company-complexes-list .complex-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+  }
+}

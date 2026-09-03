@@ -1,5 +1,19 @@
 // frontend/src/pages/Admin/types/admin.types.ts
 
+import { User, Company } from "../../../types/auth.types";
+
+export interface AdminUser extends Omit<User, "company"> {
+  company?: Company | null;
+  createdBy?: AdminUser;
+  createdUsers?: AdminUser[];
+}
+
+export interface AdminCompany extends Company {
+  admin?: AdminUser;
+  users?: AdminUser[];
+  createdBy?: AdminUser;
+}
+
 export interface AdminBank {
   id: string;
   name: string;
@@ -39,6 +53,12 @@ export interface AdminComplex {
   materialsLink: string;
   isActive: boolean;
   apartmentTypes: AdminApartmentType[];
+  companyId?: string;
+  company?: AdminCompany;
+  createdById?: string;
+  createdBy?: AdminUser;
+  updatedById?: string;
+  updatedBy?: AdminUser;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -138,13 +158,14 @@ export interface AdminOffer {
   programId: string;
   bank?: AdminBank;
   programEntity?: AdminProgram;
-
-  // 🔥 Динамические ставки (новая структура)
+  companyId?: string;
+  company?: AdminCompany;
+  createdById?: string;
+  createdBy?: AdminUser;
+  updatedById?: string;
+  updatedBy?: AdminUser;
   dynamicRates?: AdminRate[];
-
-  // 🔥 Динамические субсидии (новая структура)
   dynamicSubsidies?: AdminSubsidy[];
-
   createdAt?: string;
   updatedAt?: string;
 }

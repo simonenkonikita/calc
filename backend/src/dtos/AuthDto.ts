@@ -7,9 +7,7 @@ export interface RegisterDto {
   firstName?: string;
   lastName?: string;
   phone?: string;
-  company?: string;
-  position?: string;
-  role?: UserRole;
+  role?: UserRole; // Игнорируется, всегда agent
 }
 
 export interface LoginDto {
@@ -33,8 +31,40 @@ export interface UpdateUserDto {
   firstName?: string;
   lastName?: string;
   phone?: string;
-  company?: string;
+  company?: string; // Для обратной совместимости (строка)
+  companyId?: string; // 🔥 НОВОЕ ПОЛЕ - ID компании
   position?: string;
   role?: UserRole;
   isActive?: boolean;
+}
+
+export interface CreateUserByAdminDto {
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  company?: string;
+  companyId?: string; // 🔥 НОВОЕ ПОЛЕ
+  position?: string;
+  role: UserRole;
+}
+
+export interface CreateCompanyAdminDto {
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  company: string;
+  companyId?: string; // 🔥 НОВОЕ ПОЛЕ
+}
+
+export interface CreateCompanyManagerDto {
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  company?: string;
+  companyId?: string; // 🔥 НОВОЕ ПОЛЕ
+  position?: string;
 }

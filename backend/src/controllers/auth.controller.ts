@@ -1,4 +1,5 @@
 // backend/src/controllers/auth.controller.ts
+
 import { Request, Response } from "express";
 import { AuthService } from "../services/AuthService";
 import { AuthRequest } from "../types/auth.types";
@@ -7,7 +8,7 @@ const authService = new AuthService();
 
 export class AuthController {
   // ============================================================
-  // РЕГИСТРАЦИЯ
+  // РЕГИСТРАЦИЯ (ТОЛЬКО ДЛЯ АГЕНТОВ)
   // ============================================================
   async register(req: Request, res: Response) {
     try {
@@ -115,7 +116,8 @@ export class AuthController {
           lastName: user.lastName,
           phone: user.phone,
           role: user.role,
-          company: user.company,
+          companyId: user.companyId,
+          companyName: user.company?.name,
           position: user.position,
         },
       });
@@ -155,22 +157,140 @@ export class AuthController {
   }
 
   // ============================================================
-  // ВСЕ ПОЛЬЗОВАТЕЛИ (ТОЛЬКО АДМИН)
+  // СОЗДАНИЕ КОМПАНИИ С АДМИНИСТРАТОРОМ (ТОЛЬКО АДМИН)
+  // ============================================================
+  async createCompanyWithAdmin(req: AuthRequest, res: Response) {
+    try {
+      const currentUser = req.user;
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({
+          success: false,
+          error:
+            "Доступ запрещен. Только администратор проекта может создавать компании",
+        });
+      }
+
+      const fullUser = await authService.getUserById(currentUser.id);
+      if (!fullUser) {
+        return res.status(404).json({
+          success: false,
+          error: "Пользователь не найден",
+        });
+      }
+
+      const result = await authService.createCompanyWithAdmin(
+        req.body,
+        fullUser,
+      );
+
+      res.status(201).json({
+        success: true,
+        message: "Компания и администратор созданы",
+        data: {
+          company: {
+            id: result.company.id,
+            name: result.company.name,
+            slug: result.company.slug,
+          },
+          admin: {
+            id: result.admin.id,
+            email: result.admin.email,
+            firstName: result.admin.firstName,
+            lastName: result.admin.lastName,
+            role: result.admin.role,
+          },
+        },
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message || "Ошибка создания компании",
+      });
+    }
+  }
+
+  // ============================================================
+  // СОЗДАНИЕ МЕНЕДЖЕРА КОМПАНИИ
+  // ============================================================
+  async createCompanyManager(req: AuthRequest, res: Response) {
+    try {
+      const currentUser = req.user;
+      if (!currentUser) {
+        return res.status(401).json({
+          success: false,
+          error: "Не авторизован",
+        });
+      }
+
+      const fullUser = await authService.getUserById(currentUser.id);
+      if (!fullUser) {
+        return res.status(404).json({
+          success: false,
+          error: "Пользователь не найден",
+        });
+      }
+
+      const user = await authService.createCompanyManager(req.body, fullUser);
+
+      res.status(201).json({
+        success: true,
+        message: "Менеджер компании создан",
+        data: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          companyId: user.companyId,
+          companyName: user.company?.name,
+          position: user.position,
+        },
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message || "Ошибка создания менеджера",
+      });
+    }
+  }
+
+  // ============================================================
+  // ПОЛУЧЕНИЕ ПОЛЬЗОВАТЕЛЕЙ
   // ============================================================
   async getAllUsers(req: AuthRequest, res: Response) {
     try {
       const user = req.user;
-      if (!user || user.role !== "admin") {
-        return res.status(403).json({
+      if (!user) {
+        return res.status(401).json({
           success: false,
-          error: "Доступ запрещен. Требуются права администратора",
+          error: "Не авторизован",
         });
       }
 
-      const users = await authService.getAllUsers();
+      const fullUser = await authService.getUserById(user.id);
+      if (!fullUser) {
+        return res.status(404).json({
+          success: false,
+          error: "Пользователь не найден",
+        });
+      }
+
+      const users = await authService.getAllUsers(fullUser);
+
       res.json({
         success: true,
-        data: users,
+        data: users.map((u) => ({
+          id: u.id,
+          email: u.email,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          role: u.role,
+          companyId: u.companyId,
+          companyName: u.company?.name,
+          position: u.position,
+          isActive: u.isActive,
+          createdAt: u.createdAt,
+        })),
       });
     } catch (error: any) {
       res.status(500).json({
@@ -181,20 +301,66 @@ export class AuthController {
   }
 
   // ============================================================
-  // ОБНОВЛЕНИЕ ПОЛЬЗОВАТЕЛЯ (ТОЛЬКО АДМИН)
+  // ПОЛУЧЕНИЕ ПОЛЬЗОВАТЕЛЕЙ КОМПАНИИ
   // ============================================================
-  async updateUser(req: AuthRequest, res: Response) {
+  async getUsersByCompany(req: AuthRequest, res: Response) {
     try {
+      const { companyId } = req.params;
       const user = req.user;
-      if (!user || user.role !== "admin") {
-        return res.status(403).json({
+
+      if (!user) {
+        return res.status(401).json({
           success: false,
-          error: "Доступ запрещен. Требуются права администратора",
+          error: "Не авторизован",
         });
       }
 
+      const fullUser = await authService.getUserById(user.id);
+      if (!fullUser) {
+        return res.status(404).json({
+          success: false,
+          error: "Пользователь не найден",
+        });
+      }
+
+      const users = await authService.getUsersByCompany(companyId, fullUser);
+
+      res.json({
+        success: true,
+        data: users,
+      });
+    } catch (error: any) {
+      res.status(403).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+
+  // ============================================================
+  // ОБНОВЛЕНИЕ ПОЛЬЗОВАТЕЛЯ
+  // ============================================================
+  async updateUser(req: AuthRequest, res: Response) {
+    try {
       const { id } = req.params;
-      const updatedUser = await authService.updateUser(id, req.body);
+      const user = req.user;
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          error: "Не авторизован",
+        });
+      }
+
+      const fullUser = await authService.getUserById(user.id);
+      if (!fullUser) {
+        return res.status(404).json({
+          success: false,
+          error: "Пользователь не найден",
+        });
+      }
+
+      const updatedUser = await authService.updateUser(id, req.body, fullUser);
 
       res.json({
         success: true,
@@ -210,20 +376,29 @@ export class AuthController {
   }
 
   // ============================================================
-  // УДАЛЕНИЕ ПОЛЬЗОВАТЕЛЯ (ТОЛЬКО АДМИН)
+  // УДАЛЕНИЕ ПОЛЬЗОВАТЕЛЯ
   // ============================================================
   async deleteUser(req: AuthRequest, res: Response) {
     try {
+      const { id } = req.params;
       const user = req.user;
-      if (!user || user.role !== "admin") {
-        return res.status(403).json({
+
+      if (!user) {
+        return res.status(401).json({
           success: false,
-          error: "Доступ запрещен. Требуются права администратора",
+          error: "Не авторизован",
         });
       }
 
-      const { id } = req.params;
-      await authService.deleteUser(id);
+      const fullUser = await authService.getUserById(user.id);
+      if (!fullUser) {
+        return res.status(404).json({
+          success: false,
+          error: "Пользователь не найден",
+        });
+      }
+
+      await authService.deleteUser(id, fullUser);
 
       res.json({
         success: true,

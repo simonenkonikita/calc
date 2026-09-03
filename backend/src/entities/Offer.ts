@@ -1,5 +1,4 @@
 // backend/src/entities/Offer.ts
-
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -14,6 +13,8 @@ import { Bank } from "./Bank";
 import { Program } from "./Program";
 import { DynamicRate } from "./DynamicRate";
 import { DynamicSubsidy } from "./DynamicSubsidy";
+import { User } from "./User";
+import { Company } from "./Company";
 
 @Entity("offers")
 export class Offer {
@@ -38,24 +39,18 @@ export class Offer {
   @Column({ type: "decimal", precision: 5, scale: 2 })
   minPVPercent: number;
 
-  // ============================================================
-  // 🔥 ИНДИВИДУАЛЬНЫЕ ЛИМИТЫ ОФЕРА
-  // ============================================================
   @Column({ type: "decimal", precision: 15, scale: 2, nullable: true })
-  minLoanAmount: number | null; // Минимальная сумма кредита для этого офера
+  minLoanAmount: number | null;
 
   @Column({ type: "decimal", precision: 15, scale: 2, nullable: true })
-  maxLoanAmount: number | null; // Максимальная сумма кредита для этого офера
+  maxLoanAmount: number | null;
 
   @Column({ type: "int", nullable: true })
-  minLoanTerm: number | null; // Минимальный срок кредита в годах
+  minLoanTerm: number | null;
 
   @Column({ type: "int", nullable: true })
-  maxLoanTerm: number | null; // Максимальный срок кредита в годах
+  maxLoanTerm: number | null;
 
-  // ============================================================
-  // ОСТАЛЬНЫЕ ПОЛЯ
-  // ============================================================
   @Column({ type: "int", nullable: true })
   durationMonths: number | null;
 
@@ -90,19 +85,13 @@ export class Offer {
   roundingStrategy: string | null;
 
   @Column({ type: "int", nullable: true })
-  minLoanTermYears: number | null; // ⚠️ УДАЛИТЬ позже (дубликат)
+  minLoanTermYears: number | null;
 
   @Column({ type: "text", nullable: true })
   description: string | null;
 
   @Column({ type: "boolean", default: true })
   isActive: boolean;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   // ============================================================
   // 🔥 СВЯЗИ
@@ -127,4 +116,35 @@ export class Offer {
 
   @OneToMany(() => DynamicSubsidy, (subsidy) => subsidy.offer)
   dynamicSubsidies: DynamicSubsidy[];
+
+  // ============================================================
+  // 🔥 ДОПОЛНИТЕЛЬНЫЕ ПОЛЯ ДЛЯ ИЕРАРХИИ
+  // ============================================================
+
+  @Column({ nullable: true })
+  companyId: string;
+
+  @ManyToOne(() => Company, { nullable: true })
+  @JoinColumn({ name: "companyId" })
+  company: Company;
+
+  @Column({ nullable: true })
+  createdById: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: "createdById" })
+  createdBy: User;
+
+  @Column({ nullable: true })
+  updatedById: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: "updatedById" })
+  updatedBy: User;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

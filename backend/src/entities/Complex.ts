@@ -1,4 +1,5 @@
 // backend/src/entities/Complex.ts
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,8 +7,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from "typeorm";
 import { ApartmentType } from "./ApartmentType";
+import { Company } from "./Company";
+import { User } from "./User";
 
 @Entity("complexes")
 export class Complex {
@@ -43,6 +48,32 @@ export class Complex {
 
   @Column({ type: "boolean", default: true })
   isActive: boolean;
+
+  // ============================================================
+  // 🔥 СВЯЗИ
+  // ============================================================
+
+  @Column({ nullable: true })
+  companyId: string | null;
+
+  // 🔥 ИСПРАВЛЯЕМ: company -> Company
+  @ManyToOne(() => Company, (company) => company.complexes, { nullable: true })
+  @JoinColumn({ name: "companyId" })
+  company: Company | null;
+
+  @Column({ nullable: true })
+  createdById: string | null;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: "createdById" })
+  createdBy: User | null;
+
+  @Column({ nullable: true })
+  updatedById: string | null;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: "updatedById" })
+  updatedBy: User | null;
 
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
