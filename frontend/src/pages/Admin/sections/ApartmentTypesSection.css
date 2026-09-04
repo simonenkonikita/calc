@@ -1,11 +1,13 @@
 /* frontend/src/pages/Admin/components/ApartmentTypesSection.css */
 
+@import "../admin-variables.css";
+
 .apartment-types-section {
   margin-top: 1rem;
   padding: 1rem;
-  background: #fafafa;
-  border-radius: 0.5rem;
-  border: 1px solid #eaeaea;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-200);
 }
 
 .apartment-types-section .section-header {
@@ -18,7 +20,7 @@
 .apartment-types-section .section-header h4 {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--gray-800);
   margin: 0;
 }
 
@@ -26,7 +28,7 @@
   display: flex;
   gap: 0.5rem;
   padding: 0.5rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--gray-100);
 }
 
 .apartment-types-section .type-row:last-child {
@@ -43,16 +45,17 @@
 .apartment-types-section .type-cell select {
   width: 100%;
   padding: 0.2rem 0.4rem;
-  border: 1px solid #eaeaea;
-  border-radius: 0.25rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
   font-size: 0.8rem;
-  background: #ffffff;
+  background: var(--bg-white);
 }
 
 .apartment-types-section .type-cell input:focus,
 .apartment-types-section .type-cell select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
 }
 
 .apartment-types-section .type-actions {
@@ -62,7 +65,7 @@
 
 .apartment-types-section .empty-state {
   text-align: center;
-  color: #888;
+  color: var(--gray-500);
   padding: 1.5rem;
   font-size: 0.85rem;
 }

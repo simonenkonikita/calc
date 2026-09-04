@@ -195,7 +195,7 @@ export const ProfilePage: React.FC = () => {
                       setFormData({ ...formData, firstName: e.target.value })
                     }
                     placeholder="Введите имя"
-                    className="form-input"
+                    className="admin-input"
                   />
                 </div>
                 <div className="form-group">
@@ -207,7 +207,7 @@ export const ProfilePage: React.FC = () => {
                       setFormData({ ...formData, lastName: e.target.value })
                     }
                     placeholder="Введите фамилию"
-                    className="form-input"
+                    className="admin-input"
                   />
                 </div>
               </div>
@@ -220,7 +220,7 @@ export const ProfilePage: React.FC = () => {
                     setFormData({ ...formData, phone: e.target.value })
                   }
                   placeholder="+7 (999) 123-45-67"
-                  className="form-input"
+                  className="admin-input"
                 />
               </div>
               {user.position !== undefined && (
@@ -233,7 +233,7 @@ export const ProfilePage: React.FC = () => {
                       setFormData({ ...formData, position: e.target.value })
                     }
                     placeholder="Введите должность"
-                    className="form-input"
+                    className="admin-input"
                   />
                 </div>
               )}
@@ -317,7 +317,7 @@ export const ProfilePage: React.FC = () => {
                   }
                   placeholder="Введите старый пароль"
                   required
-                  className="form-input"
+                  className="admin-input"
                 />
               </div>
               <div className="form-group">
@@ -334,7 +334,7 @@ export const ProfilePage: React.FC = () => {
                   placeholder="Минимум 6 символов"
                   required
                   minLength={6}
-                  className="form-input"
+                  className="admin-input"
                 />
               </div>
               <div className="form-group">
@@ -350,7 +350,7 @@ export const ProfilePage: React.FC = () => {
                   }
                   placeholder="Подтвердите пароль"
                   required
-                  className="form-input"
+                  className="admin-input"
                 />
               </div>
               <button type="submit" className="profile-save-btn">

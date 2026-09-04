@@ -1,5 +1,7 @@
 /* frontend/src/pages/Admin/sections/offers/components/BankTabs.css */
 
+@import "../../../../admin-variables.css";
+
 .bank-tabs {
   display: flex;
   gap: 0.5rem;
@@ -7,7 +9,7 @@
   margin-bottom: 1.5rem;
   overflow-x: auto;
   flex-wrap: nowrap;
-  border-bottom: 2px solid #f3f4f6;
+  border-bottom: 2px solid var(--gray-100);
 }
 
 .bank-tab {
@@ -16,26 +18,26 @@
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 0.5rem 0.5rem 0 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   cursor: pointer;
   background: transparent;
-  color: #6b7280;
+  color: var(--gray-500);
   font-size: 0.85rem;
   font-weight: 500;
-  transition: all 0.2s;
+  transition: var(--transition);
   white-space: nowrap;
   position: relative;
 }
 
 .bank-tab:hover {
-  background: #f3f4f6;
-  color: #1f2937;
+  background: var(--gray-100);
+  color: var(--gray-800);
 }
 
 .bank-tab.active {
-  background: #f8fafc;
-  color: #1f2937;
-  border-bottom: 3px solid #818cf8;
+  background: var(--bg-white);
+  color: var(--gray-900);
+  border-bottom: 3px solid var(--primary);
 }
 
 .bank-tab .bank-tab-icon {
@@ -53,15 +55,15 @@
   min-width: 20px;
   height: 20px;
   padding: 0 0.4rem;
-  background: #e5e7eb;
+  background: var(--gray-100);
   border-radius: 9999px;
   font-size: 0.65rem;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--gray-500);
 }
 
 .bank-tab.active .bank-tab-count {
-  background: #818cf8;
+  background: var(--primary);
   color: white;
 }
 
@@ -73,13 +75,13 @@
 
 .bank-tab.inactive:hover {
   background: transparent;
-  color: #6b7280;
+  color: var(--gray-500);
 }
 
 /* 🔥 Разделитель между активными и неактивными банками */
 .bank-tabs-divider {
   width: 2px;
-  background: #e5e7eb;
+  background: var(--gray-200);
   margin: 4px 0;
   border-radius: 2px;
   flex-shrink: 0;
@@ -92,9 +94,9 @@
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  background: #f9fafb;
-  border-radius: 12px;
-  border: 2px dashed #d1d5db;
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--gray-300);
   margin: 16px 0;
   width: 100%;
 }
@@ -102,12 +104,12 @@
 .bank-tabs-empty .empty-message {
   font-size: 18px;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--gray-500);
 }
 
 .bank-tabs-empty .empty-hint {
   font-size: 14px;
-  color: #9ca3af;
+  color: var(--gray-400);
   margin-top: 8px;
 }
 
@@ -118,12 +120,16 @@
 }
 
 .bank-tab .bank-tab-status.active {
-  color: #10b981;
+  color: var(--success);
 }
 
 .bank-tab .bank-tab-status.inactive {
-  color: #ef4444;
+  color: var(--danger);
 }
+
+/* ============================================================
+   АДАПТИВ
+   ============================================================ */
 
 @media (max-width: 768px) {
   .bank-tabs {

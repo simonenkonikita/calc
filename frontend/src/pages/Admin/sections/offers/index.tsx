@@ -1,6 +1,6 @@
 // frontend/src/pages/Admin/sections/offers/index.ts
 
-export { OffersSection } from "./OffersSection";
+export { OffersSection } from "../OffersSection";
 export { BankTabs } from "./components/BankTabs/BankTabs";
 export { ProgramGroup } from "./components/ProgramGroup/ProgramGroup";
 export { OfferCard } from "./components/OfferCard";

@@ -1,4 +1,5 @@
 /* frontend/src/pages/Admin/sections/offers/components/ProgramGroup.css */
+@import "../../../../admin-variables.css";
 
 .program-group {
   margin-bottom: 1.5rem;

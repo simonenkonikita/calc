@@ -736,7 +736,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                 onChange={(e) =>
                   handleChange("isActive", e.target.value === "active")
                 }
-                className="form-select"
+                className="admin-select"
               >
                 <option value="active">✅ Активен</option>
                 <option value="inactive">❌ Неактивен</option>
@@ -878,7 +878,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                         parseFloat(e.target.value) || null,
                       )
                     }
-                    className="form-input"
+                    className="admin-input"
                     placeholder="0.00"
                   />
                 </div>
@@ -893,7 +893,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                     onChange={(e) =>
                       handleChange("trancheSecondDate", e.target.value || null)
                     }
-                    className="form-input"
+                    className="admin-input"
                   />
                 </div>
               </>
@@ -953,7 +953,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                           parseFloat(e.target.value) || null,
                         )
                       }
-                      className="form-input"
+                      className="admin-input"
                       placeholder="0.00"
                     />
                   </div>
@@ -980,7 +980,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                         parseFloat(e.target.value) || 0,
                       )
                     }
-                    className="form-input"
+                    className="admin-input"
                     placeholder="0.00"
                   />
                 </div>
@@ -1037,7 +1037,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                       parseInt(e.target.value) || null,
                     )
                   }
-                  className="form-input"
+                  className="admin-input"
                   placeholder="Например: 36"
                 />
                 <span className="form-hint">
@@ -1063,7 +1063,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                       parseFloat(e.target.value) || null,
                     )
                   }
-                  className="form-input"
+                  className="admin-input"
                   placeholder="0.00"
                 />
               </div>
@@ -1184,14 +1184,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         <div className="modal-footer">
           <button
             onClick={onClose}
-            className="admin-btn-secondary"
+            className="admin-btn admin-btn-secondary"
             disabled={loading}
           >
             Отмена
           </button>
           <button
             onClick={handleSubmit}
-            className="admin-btn-success"
+            className="admin-btn admin-btn-success"
             disabled={loading}
           >
             {loading

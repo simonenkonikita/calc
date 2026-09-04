@@ -20,10 +20,10 @@ export const OffersToolbar: React.FC<OffersToolbarProps> = ({
 }) => {
   return (
     <div className="offers-toolbar">
-      <button onClick={onAdd} className="admin-btn-primary">
+      <button onClick={onAdd} className="admin-btn admin-btn-primary">
         + Добавить оффер
       </button>
-      <button onClick={onRefresh} className="admin-btn-secondary">
+      <button onClick={onRefresh} className="admin-btn admin-btn-secondary">
         🔄 Обновить
       </button>
       <div className="spacer" />

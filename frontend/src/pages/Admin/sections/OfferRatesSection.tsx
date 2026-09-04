@@ -37,7 +37,7 @@ export const OfferRatesSection: React.FC<OfferRatesSectionProps> = ({
       <div className="admin-section">
         <div className="admin-section-header">
           <h4>Динамические ставки</h4>
-          <button className="admin-btn-primary">+ Добавить</button>
+          <button className="admin-btn admin-btn-primary">+ Добавить</button>
         </div>
         <div className="admin-table-wrapper">
           <table className="admin-table">
@@ -68,8 +68,10 @@ export const OfferRatesSection: React.FC<OfferRatesSectionProps> = ({
                     <td>{rate.rate}%</td>
                     <td>{rate.priority}</td>
                     <td>
-                      <button className="admin-btn-primary">✏️</button>
-                      <button className="admin-btn-danger">🗑️</button>
+                      <button className="admin-btn admin-btn-primary">
+                        ✏️
+                      </button>
+                      <button className="admin-btn admin-btn-danger">🗑️</button>
                     </td>
                   </tr>
                 ))

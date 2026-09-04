@@ -5,6 +5,7 @@ import { ProgramGroupProps } from "../../types";
 
 import "./ProgramGroup.css";
 import { OfferCard } from "../OfferCard";
+import StatusBadge from "../../../StatusBadge";
 
 export const ProgramGroup: React.FC<ProgramGroupProps> = ({
   programLabel,
@@ -47,13 +48,7 @@ export const ProgramGroup: React.FC<ProgramGroupProps> = ({
           <span className="program-offers-count">
             {offers.length} {offers.length === 1 ? "оффер" : "офферов"}
           </span>
-          {programIsActive ? (
-            <span className="status-badge active">✅ Активен</span>
-          ) : (
-            <span className="status-badge inactive">
-              ❌ Программа не активна
-            </span>
-          )}
+          <StatusBadge isActive={programIsActive} activeText="Активна" />
         </div>
       </div>
       <div className="program-offers-list">

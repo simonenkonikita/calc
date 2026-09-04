@@ -4,8 +4,11 @@ import React, { useState, useEffect } from "react";
 import { adminApi } from "../../../services/adminApi";
 import { AdminBank } from "../types/admin.types";
 import { AdminLayout } from "../AdminLayout";
-import { useMortgageData } from "../../../hooks/api/useMortgageData";
+import AdminToolbar from "../AdminToolbar";
+
 import "./BanksSection.css";
+import StatusBadge from "./StatusBadge";
+import ActionButtons from "./ActionButtons";
 
 export const BanksSection: React.FC = () => {
   const [banks, setBanks] = useState<AdminBank[]>([]);
@@ -14,13 +17,8 @@ export const BanksSection: React.FC = () => {
   const [formData, setFormData] = useState<Partial<AdminBank>>({});
   const [isCreating, setIsCreating] = useState(false);
 
-  // 🔥 Получаем функции очистки кэша
-  const { clearCache, getCacheSize } = useMortgageData();
-  const [cacheSize, setCacheSize] = useState(0);
-
   useEffect(() => {
     loadBanks();
-    setCacheSize(getCacheSize());
   }, []);
 
   const loadBanks = async () => {
@@ -48,12 +46,7 @@ export const BanksSection: React.FC = () => {
       setBanks([...banks, newBank]);
       setIsCreating(false);
       setFormData({});
-
-      // 🔥 Очищаем кэш после создания
-      clearCache();
-      setCacheSize(0);
-
-      alert("✅ Банк успешно создан! Кэш очищен.");
+      alert("✅ Банк успешно создан!");
     } catch (error) {
       console.error("Error creating bank:", error);
       alert("❌ Ошибка при создании банка");
@@ -69,17 +62,11 @@ export const BanksSection: React.FC = () => {
         displayOrder: formData.displayOrder,
         isActive: formData.isActive,
       };
-
       const updated = await adminApi.updateBank(id, updateData);
       setBanks(banks.map((b) => (b.id === id ? updated : b)));
       setEditingId(null);
       setFormData({});
-
-      // 🔥 Очищаем кэш после обновления
-      clearCache();
-      setCacheSize(0);
-
-      alert("✅ Банк успешно обновлен! Кэш очищен.");
+      alert("✅ Банк успешно обновлен!");
     } catch (error) {
       console.error("Error updating bank:", error);
       alert("❌ Ошибка при обновлении банка");
@@ -91,22 +78,11 @@ export const BanksSection: React.FC = () => {
     try {
       await adminApi.deleteBank(id);
       setBanks(banks.filter((b) => b.id !== id));
-
-      // 🔥 Очищаем кэш после удаления
-      clearCache();
-      setCacheSize(0);
-
-      alert("✅ Банк удален! Кэш очищен.");
+      alert("✅ Банк удален!");
     } catch (error) {
       console.error("Error deleting bank:", error);
       alert("❌ Ошибка при удалении банка");
     }
-  };
-
-  const handleClearCache = () => {
-    clearCache();
-    setCacheSize(0);
-    alert("🗑️ Кэш успешно очищен!");
   };
 
   const startEdit = (bank: AdminBank) => {
@@ -141,26 +117,17 @@ export const BanksSection: React.FC = () => {
   return (
     <div className="banks-section">
       <AdminLayout title="🏦 Банки-партнеры">
-        <div className="admin-toolbar">
-          <button onClick={startCreate} className="admin-btn-primary">
-            + Добавить банк
-          </button>
-          <button onClick={loadBanks} className="admin-btn-secondary">
-            🔄 Обновить
-          </button>
-          <button
-            onClick={handleClearCache}
-            className="admin-btn-warning"
-            title="Очистить кэш расчетов"
-          >
-            🗑️ Очистить кэш {cacheSize > 0 && `(${cacheSize})`}
-          </button>
-          <span
-            style={{ fontSize: "0.8rem", color: "#6b7280", marginLeft: "auto" }}
-          >
-            Всего: {banks.length}
-          </span>
-        </div>
+        <AdminToolbar
+          buttons={[
+            {
+              label: "+ Добавить банк",
+              onClick: startCreate,
+              variant: "primary",
+            },
+            { label: "🔄 Обновить", onClick: loadBanks, variant: "secondary" },
+          ]}
+          totalCount={banks.length}
+        />
 
         <div className="admin-table-wrapper">
           <table className="admin-table">
@@ -185,6 +152,7 @@ export const BanksSection: React.FC = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, name: e.target.value })
                         }
+                        className="admin-input admin-input-sm"
                       />
                     ) : (
                       bank.name
@@ -203,6 +171,7 @@ export const BanksSection: React.FC = () => {
                             baseRate: parseFloat(e.target.value) || 0,
                           })
                         }
+                        className="admin-input admin-input-sm admin-input-number"
                       />
                     ) : (
                       `${bank.baseRate}%`
@@ -220,6 +189,7 @@ export const BanksSection: React.FC = () => {
                             displayOrder: parseInt(e.target.value) || 0,
                           })
                         }
+                        className="admin-input admin-input-sm admin-input-number"
                       />
                     ) : (
                       bank.displayOrder
@@ -235,47 +205,52 @@ export const BanksSection: React.FC = () => {
                             isActive: e.target.value === "active",
                           })
                         }
+                        className="admin-select admin-select-sm"
                       >
                         <option value="active">✅ Активен</option>
                         <option value="inactive">❌ Неактивен</option>
                       </select>
-                    ) : bank.isActive ? (
-                      "✅ Активен"
                     ) : (
-                      "❌ Неактивен"
+                      <StatusBadge isActive={bank.isActive} />
                     )}
                   </td>
                   <td>
                     {editingId === bank.id ? (
-                      <div className="admin-actions">
-                        <button
-                          onClick={() => handleUpdate(bank.id)}
-                          className="admin-btn-success"
-                        >
-                          💾
-                        </button>
-                        <button
-                          onClick={cancelEdit}
-                          className="admin-btn-danger"
-                        >
-                          ✕
-                        </button>
-                      </div>
+                      <ActionButtons
+                        buttons={[
+                          {
+                            icon: "💾",
+                            onClick: () => handleUpdate(bank.id),
+                            variant: "success",
+                            title: "Сохранить",
+                          },
+                          {
+                            icon: "✕",
+                            onClick: cancelEdit,
+                            variant: "danger",
+                            title: "Отмена",
+                          },
+                        ]}
+                        size="sm"
+                      />
                     ) : (
-                      <div className="admin-actions">
-                        <button
-                          onClick={() => startEdit(bank)}
-                          className="admin-btn-primary"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => handleDelete(bank.id)}
-                          className="admin-btn-danger"
-                        >
-                          🗑️
-                        </button>
-                      </div>
+                      <ActionButtons
+                        buttons={[
+                          {
+                            icon: "✏️",
+                            onClick: () => startEdit(bank),
+                            variant: "primary",
+                            title: "Редактировать",
+                          },
+                          {
+                            icon: "🗑️",
+                            onClick: () => handleDelete(bank.id),
+                            variant: "danger",
+                            title: "Удалить",
+                          },
+                        ]}
+                        size="sm"
+                      />
                     )}
                   </td>
                 </tr>
@@ -289,6 +264,7 @@ export const BanksSection: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
+                      className="admin-input admin-input-sm"
                     />
                   </td>
                   <td>-</td>
@@ -304,6 +280,7 @@ export const BanksSection: React.FC = () => {
                           baseRate: parseFloat(e.target.value) || 0,
                         })
                       }
+                      className="admin-input admin-input-sm admin-input-number"
                     />
                   </td>
                   <td>
@@ -318,6 +295,7 @@ export const BanksSection: React.FC = () => {
                           minPVPercent: parseFloat(e.target.value) || 20.1,
                         })
                       }
+                      className="admin-input admin-input-sm admin-input-number"
                     />
                   </td>
                   <td>
@@ -331,6 +309,7 @@ export const BanksSection: React.FC = () => {
                           displayOrder: parseInt(e.target.value) || 0,
                         })
                       }
+                      className="admin-input admin-input-sm admin-input-number"
                     />
                   </td>
                   <td>
@@ -342,23 +321,30 @@ export const BanksSection: React.FC = () => {
                           isActive: e.target.value === "active",
                         })
                       }
+                      className="admin-select admin-select-sm"
                     >
                       <option value="active">✅ Активен</option>
                       <option value="inactive">❌ Неактивен</option>
                     </select>
                   </td>
                   <td>
-                    <div className="admin-actions">
-                      <button
-                        onClick={handleCreate}
-                        className="admin-btn-success"
-                      >
-                        💾 Сохранить
-                      </button>
-                      <button onClick={cancelEdit} className="admin-btn-danger">
-                        ✕
-                      </button>
-                    </div>
+                    <ActionButtons
+                      buttons={[
+                        {
+                          icon: "💾 Сохранить",
+                          onClick: handleCreate,
+                          variant: "success",
+                          title: "Сохранить",
+                        },
+                        {
+                          icon: "✕",
+                          onClick: cancelEdit,
+                          variant: "danger",
+                          title: "Отмена",
+                        },
+                      ]}
+                      size="sm"
+                    />
                   </td>
                 </tr>
               )}

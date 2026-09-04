@@ -6,6 +6,9 @@ import { AdminCompany, AdminComplex } from "../types/admin.types";
 import "./CompaniesSection.css";
 import { useAuthExtended } from "../../../hooks/ui/useAuth";
 import adminApi from "../../../services/adminApi";
+import AdminToolbar from "../AdminToolbar";
+import StatusBadge from "./StatusBadge";
+import ActionButtons from "./ActionButtons";
 
 export const CompaniesSection: React.FC = () => {
   const [companies, setCompanies] = useState<AdminCompany[]>([]);
@@ -15,9 +18,11 @@ export const CompaniesSection: React.FC = () => {
   const [formData, setFormData] = useState<Partial<AdminCompany>>({});
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // 🔥 Состояния для управления комплексами
-  const [expandedCompanyId, setExpandedCompanyId] = useState<string | null>(null);
+  const [expandedCompanyId, setExpandedCompanyId] = useState<string | null>(
+    null,
+  );
   const [showComplexModal, setShowComplexModal] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [complexForm, setComplexForm] = useState({
@@ -32,8 +37,10 @@ export const CompaniesSection: React.FC = () => {
     isActive: true,
   });
   const [editingComplexId, setEditingComplexId] = useState<string | null>(null);
-  const [complexFormData, setComplexFormData] = useState<Partial<AdminComplex>>({});
-  
+  const [complexFormData, setComplexFormData] = useState<Partial<AdminComplex>>(
+    {},
+  );
+
   const [companyForm, setCompanyForm] = useState({
     name: "",
     description: "",
@@ -96,7 +103,10 @@ export const CompaniesSection: React.FC = () => {
       alert("⚠️ Введите email администратора");
       return;
     }
-    if (!companyForm.adminPassword.trim() || companyForm.adminPassword.length < 6) {
+    if (
+      !companyForm.adminPassword.trim() ||
+      companyForm.adminPassword.length < 6
+    ) {
       alert("⚠️ Пароль должен быть не менее 6 символов");
       return;
     }
@@ -156,7 +166,8 @@ export const CompaniesSection: React.FC = () => {
   };
 
   const handleDeleteCompany = async (id: string, name: string) => {
-    if (!confirm(`Удалить компанию "${name}" со всеми пользователями и ЖК?`)) return;
+    if (!confirm(`Удалить компанию "${name}" со всеми пользователями и ЖК?`))
+      return;
     try {
       await adminApi.deleteCompany(id);
       await loadData();
@@ -249,7 +260,9 @@ export const CompaniesSection: React.FC = () => {
 
   const getAdminName = (admin?: any) => {
     if (!admin) return "-";
-    return `${admin.firstName || ""} ${admin.lastName || ""}`.trim() || admin.email;
+    return (
+      `${admin.firstName || ""} ${admin.lastName || ""}`.trim() || admin.email
+    );
   };
 
   const getUsersCount = (users?: any[]) => {
@@ -258,9 +271,9 @@ export const CompaniesSection: React.FC = () => {
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      "строится": "🏗️ Строится",
-      "сдан": "🏢 Сдан",
-      "проект": "🏠 Проект",
+      строится: "🏗️ Строится",
+      сдан: "🏢 Сдан",
+      проект: "🏠 Проект",
     };
     return labels[status] || status;
   };
@@ -274,22 +287,21 @@ export const CompaniesSection: React.FC = () => {
   return (
     <div className="companies-section">
       <AdminLayout title="🏢 Компании">
-        <div className="admin-toolbar">
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="admin-btn-primary"
-          >
-            + Создать компанию
-          </button>
-          <button onClick={loadCompanies} className="admin-btn-secondary">
-            🔄 Обновить
-          </button>
-          <span
-            style={{ fontSize: "0.8rem", color: "#6b7280", marginLeft: "auto" }}
-          >
-            Всего: {companies.length}
-          </span>
-        </div>
+        <AdminToolbar
+          buttons={[
+            {
+              label: "+ Создать компанию",
+              onClick: () => setShowCreateModal(true),
+              variant: "primary",
+            },
+            {
+              label: "🔄 Обновить",
+              onClick: loadCompanies,
+              variant: "secondary",
+            },
+          ]}
+          totalCount={companies.length}
+        />
 
         <div className="admin-table-wrapper">
           <table className="admin-table">
@@ -320,6 +332,7 @@ export const CompaniesSection: React.FC = () => {
                             onChange={(e) =>
                               setFormData({ ...formData, name: e.target.value })
                             }
+                            className="admin-input admin-input-sm"
                           />
                         ) : (
                           <strong>{company.name}</strong>
@@ -330,8 +343,12 @@ export const CompaniesSection: React.FC = () => {
                           <input
                             value={formData.adminId || ""}
                             onChange={(e) =>
-                              setFormData({ ...formData, adminId: e.target.value })
+                              setFormData({
+                                ...formData,
+                                adminId: e.target.value,
+                              })
                             }
+                            className="admin-input admin-input-sm"
                           />
                         ) : (
                           getAdminName(company.admin)
@@ -339,22 +356,32 @@ export const CompaniesSection: React.FC = () => {
                       </td>
                       <td>{getUsersCount(company.users)}</td>
                       <td>
-                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "0.5rem",
+                            alignItems: "center",
+                          }}
+                        >
                           <span>{companyComplexes.length}</span>
                           <button
                             onClick={() => {
                               setSelectedCompanyId(company.id);
                               setShowComplexModal(true);
                             }}
-                            className="admin-btn-success admin-btn-sm"
+                            className="admin-btn admin-btn-success admin-btn-sm"
                             title="Добавить ЖК"
                           >
                             + ЖК
                           </button>
                           {companyComplexes.length > 0 && (
                             <button
-                              onClick={() => setExpandedCompanyId(isExpanded ? null : company.id)}
-                              className="admin-btn-secondary admin-btn-sm"
+                              onClick={() =>
+                                setExpandedCompanyId(
+                                  isExpanded ? null : company.id,
+                                )
+                              }
+                              className="admin-btn admin-btn-secondary admin-btn-sm"
                             >
                               {isExpanded ? "🔼" : "🔽"}
                             </button>
@@ -366,8 +393,12 @@ export const CompaniesSection: React.FC = () => {
                           <input
                             value={formData.phone || ""}
                             onChange={(e) =>
-                              setFormData({ ...formData, phone: e.target.value })
+                              setFormData({
+                                ...formData,
+                                phone: e.target.value,
+                              })
                             }
+                            className="admin-input admin-input-sm"
                           />
                         ) : (
                           company.phone || "-"
@@ -378,11 +409,19 @@ export const CompaniesSection: React.FC = () => {
                           <input
                             value={formData.website || ""}
                             onChange={(e) =>
-                              setFormData({ ...formData, website: e.target.value })
+                              setFormData({
+                                ...formData,
+                                website: e.target.value,
+                              })
                             }
+                            className="admin-input admin-input-sm"
                           />
                         ) : company.website ? (
-                          <a href={company.website} target="_blank" rel="noopener noreferrer">
+                          <a
+                            href={company.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             {company.website}
                           </a>
                         ) : (
@@ -399,55 +438,62 @@ export const CompaniesSection: React.FC = () => {
                                 isActive: e.target.value === "active",
                               })
                             }
+                            className="admin-select admin-select-sm"
                           >
                             <option value="active">✅ Активна</option>
                             <option value="inactive">❌ Неактивна</option>
                           </select>
-                        ) : company.isActive ? (
-                          "✅"
                         ) : (
-                          "❌"
+                          <StatusBadge
+                            isActive={company.isActive}
+                            activeText="Активна"
+                          />
                         )}
                       </td>
                       <td>
                         {editingId === company.id ? (
-                          <div className="admin-actions">
-                            <button
-                              onClick={() => handleUpdateCompany(company.id)}
-                              className="admin-btn-success"
-                            >
-                              💾
-                            </button>
-                            <button
-                              onClick={() => {
-                                setEditingId(null);
-                                setFormData({});
-                              }}
-                              className="admin-btn-danger"
-                            >
-                              ✕
-                            </button>
-                          </div>
+                          <ActionButtons
+                            buttons={[
+                              {
+                                icon: "💾",
+                                onClick: () => handleUpdateCompany(company.id),
+                                variant: "success",
+                                title: "Сохранить",
+                              },
+                              {
+                                icon: "✕",
+                                onClick: () => {
+                                  setEditingId(null);
+                                  setFormData({});
+                                },
+                                variant: "danger",
+                                title: "Отмена",
+                              },
+                            ]}
+                            size="sm"
+                          />
                         ) : (
-                          <div className="admin-actions">
-                            <button
-                              onClick={() => {
-                                setEditingId(company.id);
-                                setFormData(company);
-                              }}
-                              className="admin-btn-primary"
-                              title="Редактировать"
-                            >
-                              ✏️
-                            </button>
-                            <button
-                              onClick={() => handleDeleteCompany(company.id, company.name)}
-                              className="admin-btn-danger"
-                              title="Удалить"
-                            >
-                              🗑️
-                            </button>
-                          </div>
+                          <ActionButtons
+                            buttons={[
+                              {
+                                icon: "✏️",
+                                onClick: () => {
+                                  setEditingId(company.id);
+                                  setFormData(company);
+                                },
+                                variant: "primary",
+                                title: "Редактировать",
+                              },
+                              {
+                                icon: "🗑️",
+                                onClick: () =>
+                                  handleDeleteCompany(company.id, company.name),
+                                variant: "danger",
+                                title: "Удалить",
+                              },
+                            ]}
+                            size="sm"
+                          />
                         )}
                       </td>
                     </tr>
@@ -457,16 +503,18 @@ export const CompaniesSection: React.FC = () => {
                       <tr>
                         <td colSpan={8} style={{ padding: "0.5rem 1rem" }}>
                           <div className="company-complexes-list">
-                            <div style={{ 
-                              display: "grid", 
-                              gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr auto",
-                              gap: "0.5rem",
-                              fontSize: "0.8rem",
-                              fontWeight: 600,
-                              color: "#6b7280",
-                              padding: "0.5rem 0",
-                              borderBottom: "1px solid #e5e7eb"
-                            }}>
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr auto",
+                                gap: "0.5rem",
+                                fontSize: "0.8rem",
+                                fontWeight: 600,
+                                color: "#6b7280",
+                                padding: "0.5rem 0",
+                                borderBottom: "1px solid #e5e7eb",
+                              }}
+                            >
                               <span>Название</span>
                               <span>Статус</span>
                               <span>Банки</span>
@@ -475,34 +523,45 @@ export const CompaniesSection: React.FC = () => {
                               <span>Действия</span>
                             </div>
                             {companyComplexes.map((complex) => (
-                              <div key={complex.id} style={{
-                                display: "grid",
-                                gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr auto",
-                                gap: "0.5rem",
-                                padding: "0.4rem 0",
-                                borderBottom: "1px solid #f3f4f6",
-                                alignItems: "center",
-                                fontSize: "0.85rem"
-                              }}>
+                              <div
+                                key={complex.id}
+                                style={{
+                                  display: "grid",
+                                  gridTemplateColumns:
+                                    "1fr 1fr 1fr 1fr 1fr auto",
+                                  gap: "0.5rem",
+                                  padding: "0.4rem 0",
+                                  borderBottom: "1px solid #f3f4f6",
+                                  alignItems: "center",
+                                  fontSize: "0.85rem",
+                                }}
+                              >
                                 <span>{complex.name}</span>
                                 <span>{getStatusLabel(complex.status)}</span>
                                 <span>{complex.banks?.join(", ") || "-"}</span>
                                 <span>{complex.isActive ? "✅" : "❌"}</span>
-                                <span>{complex.apartmentTypes?.length || 0}</span>
+                                <span>
+                                  {complex.apartmentTypes?.length || 0}
+                                </span>
                                 <div className="admin-actions">
                                   <button
                                     onClick={() => {
                                       setEditingComplexId(complex.id);
                                       setComplexFormData(complex);
                                     }}
-                                    className="admin-btn-primary admin-btn-xs"
+                                    className="admin-btn admin-btn-primary admin-btn-xs"
                                     title="Редактировать"
                                   >
                                     ✏️
                                   </button>
                                   <button
-                                    onClick={() => handleDeleteComplex(complex.id, complex.name)}
-                                    className="admin-btn-danger admin-btn-xs"
+                                    onClick={() =>
+                                      handleDeleteComplex(
+                                        complex.id,
+                                        complex.name,
+                                      )
+                                    }
+                                    className="admin-btn admin-btn-danger admin-btn-xs"
                                     title="Удалить"
                                   >
                                     🗑️
@@ -520,7 +579,14 @@ export const CompaniesSection: React.FC = () => {
 
               {companies.length === 0 && (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: "center", padding: "2rem", color: "#6b7280" }}>
+                  <td
+                    colSpan={8}
+                    style={{
+                      textAlign: "center",
+                      padding: "2rem",
+                      color: "#6b7280",
+                    }}
+                  >
                     Нет компаний. Нажмите "Создать компанию".
                   </td>
                 </tr>
@@ -554,16 +620,27 @@ export const CompaniesSection: React.FC = () => {
               </div>
 
               <div className="modal-body">
-                <div className="modal-form-grid" style={{ gridTemplateColumns: "1fr" }}>
+                <div
+                  className="modal-form-grid"
+                  style={{ gridTemplateColumns: "1fr" }}
+                >
                   {/* Информация о компании */}
-                  <h3 style={{ margin: "0 0 8px 0", fontSize: "1rem", color: "#374151" }}>
+                  <h3
+                    style={{
+                      margin: "0 0 8px 0",
+                      fontSize: "1rem",
+                      color: "#374151",
+                    }}
+                  >
                     📋 Информация о компании
                   </h3>
 
                   <div className="form-group">
-                    <label className="form-label required">Название компании</label>
+                    <label className="form-label required">
+                      Название компании
+                    </label>
                     <input
-                      className="form-input"
+                      className="admin-input"
                       placeholder="Например: Строй-Групп"
                       value={companyForm.name}
                       onChange={(e) =>
@@ -581,21 +658,30 @@ export const CompaniesSection: React.FC = () => {
                       placeholder="Краткое описание компании..."
                       value={companyForm.description}
                       onChange={(e) =>
-                        setCompanyForm({ ...companyForm, description: e.target.value })
+                        setCompanyForm({
+                          ...companyForm,
+                          description: e.target.value,
+                        })
                       }
                       disabled={isSubmitting}
                     />
                   </div>
 
-                  <div className="form-row" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                  <div
+                    className="form-row"
+                    style={{ gridTemplateColumns: "1fr 1fr" }}
+                  >
                     <div className="form-group">
                       <label className="form-label">Телефон компании</label>
                       <input
-                        className="form-input"
+                        className="admin-input"
                         placeholder="+7 (999) 123-45-67"
                         value={companyForm.phone}
                         onChange={(e) =>
-                          setCompanyForm({ ...companyForm, phone: e.target.value })
+                          setCompanyForm({
+                            ...companyForm,
+                            phone: e.target.value,
+                          })
                         }
                         disabled={isSubmitting}
                       />
@@ -603,11 +689,14 @@ export const CompaniesSection: React.FC = () => {
                     <div className="form-group">
                       <label className="form-label">Сайт компании</label>
                       <input
-                        className="form-input"
+                        className="admin-input"
                         placeholder="https://company.ru"
                         value={companyForm.website}
                         onChange={(e) =>
-                          setCompanyForm({ ...companyForm, website: e.target.value })
+                          setCompanyForm({
+                            ...companyForm,
+                            website: e.target.value,
+                          })
                         }
                         disabled={isSubmitting}
                       />
@@ -617,32 +706,52 @@ export const CompaniesSection: React.FC = () => {
                   <div className="form-group">
                     <label className="form-label">Адрес</label>
                     <input
-                      className="form-input"
+                      className="admin-input"
                       placeholder="г. Москва, ул. Примерная, д. 1"
                       value={companyForm.address}
                       onChange={(e) =>
-                        setCompanyForm({ ...companyForm, address: e.target.value })
+                        setCompanyForm({
+                          ...companyForm,
+                          address: e.target.value,
+                        })
                       }
                       disabled={isSubmitting}
                     />
                   </div>
 
                   {/* Информация об администраторе */}
-                  <hr style={{ margin: "16px 0", border: "none", borderTop: "1px solid #e5e7eb" }} />
+                  <hr
+                    style={{
+                      margin: "16px 0",
+                      border: "none",
+                      borderTop: "1px solid #e5e7eb",
+                    }}
+                  />
 
-                  <h3 style={{ margin: "0 0 8px 0", fontSize: "1rem", color: "#374151" }}>
+                  <h3
+                    style={{
+                      margin: "0 0 8px 0",
+                      fontSize: "1rem",
+                      color: "#374151",
+                    }}
+                  >
                     👤 Администратор компании
                   </h3>
 
                   <div className="form-group">
-                    <label className="form-label required">Email администратора</label>
+                    <label className="form-label required">
+                      Email администратора
+                    </label>
                     <input
-                      className="form-input"
+                      className="admin-input"
                       type="email"
                       placeholder="admin@company.ru"
                       value={companyForm.adminEmail}
                       onChange={(e) =>
-                        setCompanyForm({ ...companyForm, adminEmail: e.target.value })
+                        setCompanyForm({
+                          ...companyForm,
+                          adminEmail: e.target.value,
+                        })
                       }
                       disabled={isSubmitting}
                     />
@@ -651,26 +760,35 @@ export const CompaniesSection: React.FC = () => {
                   <div className="form-group">
                     <label className="form-label required">Пароль</label>
                     <input
-                      className="form-input"
+                      className="admin-input"
                       type="password"
                       placeholder="Минимум 6 символов"
                       value={companyForm.adminPassword}
                       onChange={(e) =>
-                        setCompanyForm({ ...companyForm, adminPassword: e.target.value })
+                        setCompanyForm({
+                          ...companyForm,
+                          adminPassword: e.target.value,
+                        })
                       }
                       disabled={isSubmitting}
                     />
                   </div>
 
-                  <div className="form-row" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                  <div
+                    className="form-row"
+                    style={{ gridTemplateColumns: "1fr 1fr" }}
+                  >
                     <div className="form-group">
                       <label className="form-label">Имя</label>
                       <input
-                        className="form-input"
+                        className="admin-input"
                         placeholder="Иван"
                         value={companyForm.adminFirstName}
                         onChange={(e) =>
-                          setCompanyForm({ ...companyForm, adminFirstName: e.target.value })
+                          setCompanyForm({
+                            ...companyForm,
+                            adminFirstName: e.target.value,
+                          })
                         }
                         disabled={isSubmitting}
                       />
@@ -678,11 +796,14 @@ export const CompaniesSection: React.FC = () => {
                     <div className="form-group">
                       <label className="form-label">Фамилия</label>
                       <input
-                        className="form-input"
+                        className="admin-input"
                         placeholder="Петров"
                         value={companyForm.adminLastName}
                         onChange={(e) =>
-                          setCompanyForm({ ...companyForm, adminLastName: e.target.value })
+                          setCompanyForm({
+                            ...companyForm,
+                            adminLastName: e.target.value,
+                          })
                         }
                         disabled={isSubmitting}
                       />
@@ -692,11 +813,14 @@ export const CompaniesSection: React.FC = () => {
                   <div className="form-group">
                     <label className="form-label">Телефон администратора</label>
                     <input
-                      className="form-input"
+                      className="admin-input"
                       placeholder="+7 (999) 123-45-67"
                       value={companyForm.adminPhone}
                       onChange={(e) =>
-                        setCompanyForm({ ...companyForm, adminPhone: e.target.value })
+                        setCompanyForm({
+                          ...companyForm,
+                          adminPhone: e.target.value,
+                        })
                       }
                       disabled={isSubmitting}
                     />
@@ -707,14 +831,14 @@ export const CompaniesSection: React.FC = () => {
               <div className="modal-footer">
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="admin-btn-secondary"
+                  className="admin-btn admin-btn-secondary"
                   disabled={isSubmitting}
                 >
                   Отмена
                 </button>
                 <button
                   onClick={handleCreateCompany}
-                  className="admin-btn-success"
+                  className="admin-btn admin-btn-success"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "⏳ Создание..." : "🏢 Создать компанию"}
@@ -749,11 +873,14 @@ export const CompaniesSection: React.FC = () => {
               </div>
 
               <div className="modal-body">
-                <div className="modal-form-grid" style={{ gridTemplateColumns: "1fr" }}>
+                <div
+                  className="modal-form-grid"
+                  style={{ gridTemplateColumns: "1fr" }}
+                >
                   <div className="form-group">
                     <label className="form-label required">Название ЖК</label>
                     <input
-                      className="form-input"
+                      className="admin-input"
                       placeholder="Например: ЖК Новая Москва"
                       value={complexForm.name}
                       onChange={(e) =>
@@ -766,10 +893,13 @@ export const CompaniesSection: React.FC = () => {
                   <div className="form-group">
                     <label className="form-label required">Статус</label>
                     <select
-                      className="form-select"
+                      className="admin-select"
                       value={complexForm.status}
                       onChange={(e) =>
-                        setComplexForm({ ...complexForm, status: e.target.value as any })
+                        setComplexForm({
+                          ...complexForm,
+                          status: e.target.value as any,
+                        })
                       }
                       disabled={isSubmitting}
                     >
@@ -787,7 +917,10 @@ export const CompaniesSection: React.FC = () => {
                       placeholder="Краткое описание ЖК..."
                       value={complexForm.description}
                       onChange={(e) =>
-                        setComplexForm({ ...complexForm, description: e.target.value })
+                        setComplexForm({
+                          ...complexForm,
+                          description: e.target.value,
+                        })
                       }
                       disabled={isSubmitting}
                     />
@@ -796,10 +929,13 @@ export const CompaniesSection: React.FC = () => {
                   <div className="form-group">
                     <label className="form-label">Активен</label>
                     <select
-                      className="form-select"
+                      className="admin-select"
                       value={complexForm.isActive ? "active" : "inactive"}
                       onChange={(e) =>
-                        setComplexForm({ ...complexForm, isActive: e.target.value === "active" })
+                        setComplexForm({
+                          ...complexForm,
+                          isActive: e.target.value === "active",
+                        })
                       }
                       disabled={isSubmitting}
                     >
@@ -813,14 +949,14 @@ export const CompaniesSection: React.FC = () => {
               <div className="modal-footer">
                 <button
                   onClick={() => setShowComplexModal(false)}
-                  className="admin-btn-secondary"
+                  className="admin-btn admin-btn-secondary"
                   disabled={isSubmitting}
                 >
                   Отмена
                 </button>
                 <button
                   onClick={handleCreateComplex}
-                  className="admin-btn-success"
+                  className="admin-btn admin-btn-success"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "⏳ Создание..." : "🏗️ Создать ЖК"}

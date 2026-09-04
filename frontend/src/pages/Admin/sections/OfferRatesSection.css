@@ -1,12 +1,14 @@
 /* frontend/src/pages/Admin/sections/OfferRatesSection.css */
 
+@import "../admin-variables.css";
+
 /* ============================================================
    ОБЩИЙ КОНТЕЙНЕР
    ============================================================ */
 .offer-rates-section {
-  background: #fafafa;
-  border-radius: 0.5rem;
-  border: 1px solid #eaeaea;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-200);
   padding: 1rem;
   margin-top: 0.5rem;
 }
@@ -32,13 +34,13 @@
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid var(--gray-200);
 }
 
 .offer-rates-section .admin-section-header h4 {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--gray-800);
   margin: 0;
   display: flex;
   align-items: center;
@@ -46,7 +48,7 @@
 }
 
 .offer-rates-section .admin-section-header h4::before {
-  content: '📊';
+  content: "📊";
   font-size: 1.1rem;
 }
 
@@ -56,28 +58,29 @@
 .offer-rates-section .admin-btn-primary {
   padding: 0.25rem 0.75rem;
   font-size: 0.8rem;
-  background: #1a1a1a;
+  background: var(--primary-gradient);
   color: #ffffff;
   border: none;
-  border-radius: 0.375rem;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: var(--transition);
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
 }
 
 .offer-rates-section .admin-btn-primary:hover {
-  background: #333;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-primary);
 }
 
 /* ============================================================
    ТАБЛИЦА
    ============================================================ */
 .offer-rates-section .admin-table-wrapper {
-  border: 1px solid #eaeaea;
-  border-radius: 0.5rem;
-  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--bg-white);
   overflow: hidden;
 }
 
@@ -88,7 +91,7 @@
 }
 
 .offer-rates-section .admin-table thead {
-  background: #f5f5f5;
+  background: var(--gray-50);
 }
 
 .offer-rates-section .admin-table th {
@@ -98,25 +101,25 @@
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #888;
-  border-bottom: 1px solid #eaeaea;
+  color: var(--gray-500);
+  border-bottom: 1px solid var(--gray-200);
   white-space: nowrap;
 }
 
 .offer-rates-section .admin-table td {
   padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--gray-100);
   vertical-align: middle;
-  color: #1a1a1a;
+  color: var(--gray-800);
   font-size: 0.85rem;
 }
 
 .offer-rates-section .admin-table tbody tr {
-  transition: background 0.1s ease;
+  transition: var(--transition);
 }
 
 .offer-rates-section .admin-table tbody tr:hover {
-  background: #fafafa;
+  background: var(--gray-50);
 }
 
 .offer-rates-section .admin-table tbody tr:last-child td {
@@ -128,33 +131,33 @@
    ============================================================ */
 .offer-rates-section .rate-condition {
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--gray-800);
 }
 
 .offer-rates-section .rate-condition-type {
   display: inline-block;
   padding: 0.1rem 0.5rem;
-  background: #f0f0f0;
-  border-radius: 0.25rem;
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
   font-size: 0.7rem;
-  color: #555;
+  color: var(--gray-600);
   font-weight: 500;
 }
 
 .offer-rates-section .rate-value {
   font-weight: 600;
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 .offer-rates-section .rate-percent {
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--gray-800);
 }
 
 .offer-rates-section .rate-priority {
   text-align: center;
   font-weight: 500;
-  color: #555;
+  color: var(--gray-600);
 }
 
 /* ============================================================
@@ -170,27 +173,27 @@
   padding: 0.2rem 0.4rem;
   font-size: 0.8rem;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: var(--transition);
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
 .offer-rates-section .admin-btn-primary {
-  background: #f5f5f5;
-  color: #1a1a1a;
-  border: 1px solid #eaeaea;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
 }
 
 .offer-rates-section .admin-btn-primary:hover {
-  background: #e5e5e5;
+  background: var(--gray-200);
 }
 
 .offer-rates-section .admin-btn-danger {
-  background: #fef2f2;
-  color: #ef4444;
+  background: var(--danger-bg);
+  color: var(--danger);
   border: 1px solid #fecaca;
 }
 
@@ -203,7 +206,7 @@
    ============================================================ */
 .offer-rates-section .empty-state {
   text-align: center;
-  color: #888;
+  color: var(--gray-500);
   padding: 2rem 1.5rem;
   font-size: 0.85rem;
 }
@@ -216,7 +219,7 @@
 
 .offer-rates-section .empty-state .empty-title {
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--gray-800);
   margin-bottom: 0.25rem;
 }
 

@@ -3,6 +3,10 @@
 import React, { useState, useEffect } from "react";
 import { adminApi } from "../../../services/adminApi";
 import { AdminLayout } from "../AdminLayout";
+import AdminToolbar from "../AdminToolbar";
+import "./SubsidiesSection.css";
+import ActionButtons from "./ActionButtons";
+import StatusBadge from "./StatusBadge";
 
 interface DynamicSubsidy {
   id: string;
@@ -256,488 +260,471 @@ export const SubsidiesSection: React.FC = () => {
   if (loading) return <div className="admin-loading">Загрузка...</div>;
 
   return (
-    <AdminLayout title="💰 Динамические субсидии">
-      <div className="admin-toolbar">
-        <button
-          onClick={() => setIsCreating(true)}
-          className="admin-btn-primary"
-        >
-          + Добавить субсидии
-        </button>
-        <button onClick={loadData} className="admin-btn-secondary">
-          🔄 Обновить
-        </button>
-        <span
-          style={{ fontSize: "0.8rem", color: "#6b7280", marginLeft: "auto" }}
-        >
-          Всего: {subsidies.length}
-        </span>
-      </div>
+    <div className="subsidies-section">
+      <AdminLayout title="💰 Динамические субсидии">
+        <AdminToolbar
+          buttons={[
+            {
+              label: "+ Добавить субсидии",
+              onClick: () => setIsCreating(true),
+              variant: "primary",
+            },
+            { label: "🔄 Обновить", onClick: loadData, variant: "secondary" },
+          ]}
+          totalCount={subsidies.length}
+        />
 
-      {isCreating && (
-        <div
-          className="admin-section"
-          style={{
-            marginBottom: "1.5rem",
-            padding: "1rem",
-            background: "#f9fafb",
-            borderRadius: "0.5rem",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "1rem",
-              flexWrap: "wrap",
-              gap: "0.5rem",
-            }}
-          >
-            <h3 style={{ fontSize: "1rem", fontWeight: 600, margin: 0 }}>
-              📝 Создание субсидий
-            </h3>
-            <div>
-              <select
-                value={selectedOfferId}
-                onChange={(e) => setSelectedOfferId(e.target.value)}
-                style={{
-                  padding: "0.3rem 0.6rem",
-                  borderRadius: "0.375rem",
-                  border: "1px solid #e5e7eb",
-                  marginRight: "0.5rem",
-                  background: "white",
-                }}
-              >
-                <option value="">Выберите оффер</option>
-                {offers.map((offer) => (
-                  <option key={offer.id} value={offer.id}>
-                    {getOfferLabel(offer)}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={addRow}
-                className="admin-btn-secondary"
-                style={{ marginRight: "0.5rem" }}
-              >
-                + Добавить строку
-              </button>
-              <button
-                onClick={handleCreateMultiple}
-                className="admin-btn-success"
-              >
-                💾 Сохранить все
-              </button>
-              <button
-                onClick={cancelCreate}
-                className="admin-btn-danger"
-                style={{ marginLeft: "0.5rem" }}
-              >
-                ✕ Отмена
-              </button>
+        {isCreating && (
+          <div className="admin-section create-form-section">
+            <div className="admin-section-header">
+              <h3>📝 Создание субсидий</h3>
+              <div className="form-actions">
+                <select
+                  value={selectedOfferId}
+                  onChange={(e) => setSelectedOfferId(e.target.value)}
+                  className="admin-select admin-select-sm"
+                >
+                  <option value="">Выберите оффер</option>
+                  {offers.map((offer) => (
+                    <option key={offer.id} value={offer.id}>
+                      {getOfferLabel(offer)}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={addRow}
+                  className="admin-btn admin-btn-secondary"
+                >
+                  + Добавить строку
+                </button>
+                <button
+                  onClick={handleCreateMultiple}
+                  className="admin-btn admin-btn-success"
+                >
+                  💾 Сохранить все
+                </button>
+                <button
+                  onClick={cancelCreate}
+                  className="admin-btn admin-btn-danger"
+                >
+                  ✕ Отмена
+                </button>
+              </div>
+            </div>
+
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th className="col-number">#</th>
+                    <th>ПВ от</th>
+                    <th>ПВ до</th>
+                    <th>Сумма от</th>
+                    <th>Сумма до</th>
+                    <th>Срок от</th>
+                    <th>Срок до</th>
+                    <th>Субсидия %</th>
+                    <th>Приоритет</th>
+                    <th>Описание</th>
+                    <th className="col-actions">Действия</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row, index) => (
+                    <tr key={row.id}>
+                      <td className="text-center">{index + 1}</td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          placeholder="от"
+                          value={row.minPVPercent ?? ""}
+                          onChange={(e) =>
+                            updateRow(
+                              row.id,
+                              "minPVPercent",
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            )
+                          }
+                          className="admin-input admin-input-sm admin-input-pv"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          placeholder="до"
+                          value={row.maxPVPercent ?? ""}
+                          onChange={(e) =>
+                            updateRow(
+                              row.id,
+                              "maxPVPercent",
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            )
+                          }
+                          className="admin-input admin-input-sm admin-input-pv"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          placeholder="от"
+                          value={row.minAmount ?? ""}
+                          onChange={(e) =>
+                            updateRow(
+                              row.id,
+                              "minAmount",
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            )
+                          }
+                          className="admin-input admin-input-sm admin-input-amount"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          placeholder="до"
+                          value={row.maxAmount ?? ""}
+                          onChange={(e) =>
+                            updateRow(
+                              row.id,
+                              "maxAmount",
+                              e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            )
+                          }
+                          className="admin-input admin-input-sm admin-input-amount"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          placeholder="от"
+                          value={row.minTerm ?? ""}
+                          onChange={(e) =>
+                            updateRow(
+                              row.id,
+                              "minTerm",
+                              e.target.value ? parseInt(e.target.value) : null,
+                            )
+                          }
+                          className="admin-input admin-input-sm admin-input-term"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          placeholder="до"
+                          value={row.maxTerm ?? ""}
+                          onChange={(e) =>
+                            updateRow(
+                              row.id,
+                              "maxTerm",
+                              e.target.value ? parseInt(e.target.value) : null,
+                            )
+                          }
+                          className="admin-input admin-input-sm admin-input-term"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          placeholder="%"
+                          value={row.subsidyPercent ?? ""}
+                          onChange={(e) =>
+                            updateRow(
+                              row.id,
+                              "subsidyPercent",
+                              parseFloat(e.target.value) || 0,
+                            )
+                          }
+                          className="admin-input admin-input-sm admin-input-subsidy"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          placeholder="Приор"
+                          value={row.priority ?? ""}
+                          onChange={(e) =>
+                            updateRow(
+                              row.id,
+                              "priority",
+                              parseInt(e.target.value) || 0,
+                            )
+                          }
+                          className="admin-input admin-input-sm admin-input-priority"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          placeholder="Описание"
+                          value={row.description || ""}
+                          onChange={(e) =>
+                            updateRow(row.id, "description", e.target.value)
+                          }
+                          className="admin-input admin-input-sm admin-input-description"
+                        />
+                      </td>
+                      <td>
+                        <ActionButtons
+                          buttons={[
+                            {
+                              icon: "✕",
+                              onClick: () => removeRow(row.id),
+                              variant: "danger",
+                              title: "Удалить строку",
+                            },
+                          ]}
+                          size="sm"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
+        )}
 
-          <div className="admin-table-wrapper">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th style={{ width: "40px" }}>#</th>
-                  <th>ПВ от</th>
-                  <th>ПВ до</th>
-                  <th>Сумма от</th>
-                  <th>Сумма до</th>
-                  <th>Срок от</th>
-                  <th>Срок до</th>
-                  <th>Субсидия %</th>
-                  <th>Приоритет</th>
-                  <th>Описание</th>
-                  <th style={{ width: "60px" }}>Действия</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row, index) => (
-                  <tr key={row.id}>
-                    <td style={{ textAlign: "center" }}>{index + 1}</td>
-                    <td>
-                      <input
-                        type="number"
-                        step="0.1"
-                        placeholder="от"
-                        value={row.minPVPercent ?? ""}
-                        onChange={(e) =>
-                          updateRow(
-                            row.id,
-                            "minPVPercent",
-                            e.target.value ? parseFloat(e.target.value) : null,
-                          )
-                        }
-                        style={{ width: "60px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        step="0.1"
-                        placeholder="до"
-                        value={row.maxPVPercent ?? ""}
-                        onChange={(e) =>
-                          updateRow(
-                            row.id,
-                            "maxPVPercent",
-                            e.target.value ? parseFloat(e.target.value) : null,
-                          )
-                        }
-                        style={{ width: "60px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        placeholder="от"
-                        value={row.minAmount ?? ""}
-                        onChange={(e) =>
-                          updateRow(
-                            row.id,
-                            "minAmount",
-                            e.target.value ? parseFloat(e.target.value) : null,
-                          )
-                        }
-                        style={{ width: "80px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        placeholder="до"
-                        value={row.maxAmount ?? ""}
-                        onChange={(e) =>
-                          updateRow(
-                            row.id,
-                            "maxAmount",
-                            e.target.value ? parseFloat(e.target.value) : null,
-                          )
-                        }
-                        style={{ width: "80px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        placeholder="от"
-                        value={row.minTerm ?? ""}
-                        onChange={(e) =>
-                          updateRow(
-                            row.id,
-                            "minTerm",
-                            e.target.value ? parseInt(e.target.value) : null,
-                          )
-                        }
-                        style={{ width: "50px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        placeholder="до"
-                        value={row.maxTerm ?? ""}
-                        onChange={(e) =>
-                          updateRow(
-                            row.id,
-                            "maxTerm",
-                            e.target.value ? parseInt(e.target.value) : null,
-                          )
-                        }
-                        style={{ width: "50px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        step="0.1"
-                        placeholder="%"
-                        value={row.subsidyPercent ?? ""}
-                        onChange={(e) =>
-                          updateRow(
-                            row.id,
-                            "subsidyPercent",
-                            parseFloat(e.target.value) || 0,
-                          )
-                        }
-                        style={{ width: "60px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        placeholder="Приор"
-                        value={row.priority ?? ""}
-                        onChange={(e) =>
-                          updateRow(
-                            row.id,
-                            "priority",
-                            parseInt(e.target.value) || 0,
-                          )
-                        }
-                        style={{ width: "50px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        placeholder="Описание"
-                        value={row.description || ""}
-                        onChange={(e) =>
-                          updateRow(row.id, "description", e.target.value)
-                        }
-                        style={{ minWidth: "120px" }}
-                      />
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => removeRow(row.id)}
-                        className="admin-btn-danger"
-                        style={{ padding: "0.2rem 0.4rem", fontSize: "0.7rem" }}
-                        title="Удалить строку"
-                      >
-                        ✕
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      <div className="admin-table-wrapper">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Оффер</th>
-              <th>ПВ от</th>
-              <th>ПВ до</th>
-              <th>Сумма от</th>
-              <th>Сумма до</th>
-              <th>Срок от</th>
-              <th>Срок до</th>
-              <th>Субсидия</th>
-              <th>Приоритет</th>
-              <th>Активен</th>
-              <th>Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {subsidies.map((subsidy) => (
-              <tr key={subsidy.id}>
-                {editingId === subsidy.id ? (
-                  <>
-                    <td>{getOfferLabel(subsidy.offer)}</td>
-                    <td>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={formData.minPVPercent ?? ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            minPVPercent: e.target.value
-                              ? parseFloat(e.target.value)
-                              : null,
-                          })
-                        }
-                        style={{ width: "60px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={formData.maxPVPercent ?? ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            maxPVPercent: e.target.value
-                              ? parseFloat(e.target.value)
-                              : null,
-                          })
-                        }
-                        style={{ width: "60px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={formData.minAmount ?? ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            minAmount: e.target.value
-                              ? parseFloat(e.target.value)
-                              : null,
-                          })
-                        }
-                        style={{ width: "80px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={formData.maxAmount ?? ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            maxAmount: e.target.value
-                              ? parseFloat(e.target.value)
-                              : null,
-                          })
-                        }
-                        style={{ width: "80px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={formData.minTerm ?? ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            minTerm: e.target.value
-                              ? parseInt(e.target.value)
-                              : null,
-                          })
-                        }
-                        style={{ width: "50px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={formData.maxTerm ?? ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            maxTerm: e.target.value
-                              ? parseInt(e.target.value)
-                              : null,
-                          })
-                        }
-                        style={{ width: "50px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={formData.subsidyPercent ?? ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            subsidyPercent: parseFloat(e.target.value) || 0,
-                          })
-                        }
-                        style={{ width: "60px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={formData.priority ?? ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            priority: parseInt(e.target.value) || 0,
-                          })
-                        }
-                        style={{ width: "50px" }}
-                      />
-                    </td>
-                    <td>
-                      <select
-                        value={formData.isActive ? "active" : "inactive"}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            isActive: e.target.value === "active",
-                          })
-                        }
-                      >
-                        <option value="active">✅</option>
-                        <option value="inactive">❌</option>
-                      </select>
-                    </td>
-                    <td>
-                      <div className="admin-actions">
-                        <button
-                          onClick={() => handleUpdate(subsidy.id)}
-                          className="admin-btn-success"
-                        >
-                          💾
-                        </button>
-                        <button
-                          onClick={cancelEdit}
-                          className="admin-btn-danger"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td>{getOfferLabel(subsidy.offer)}</td>
-                    <td>{subsidy.minPVPercent ?? "—"}</td>
-                    <td>{subsidy.maxPVPercent ?? "∞"}</td>
-                    <td>{formatNumber(subsidy.minAmount)}</td>
-                    <td>{formatNumber(subsidy.maxAmount)}</td>
-                    <td>{subsidy.minTerm ?? "—"}</td>
-                    <td>{subsidy.maxTerm ?? "∞"}</td>
-                    <td>{subsidy.subsidyPercent}%</td>
-                    <td>{subsidy.priority}</td>
-                    <td>{subsidy.isActive ? "✅" : "❌"}</td>
-                    <td>
-                      <div className="admin-actions">
-                        <button
-                          onClick={() => startEdit(subsidy)}
-                          className="admin-btn-primary"
-                          title="Редактировать"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => handleDelete(subsidy.id)}
-                          className="admin-btn-danger"
-                          title="Удалить"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
-                  </>
-                )}
-              </tr>
-            ))}
-
-            {subsidies.length === 0 && !isCreating && (
+        <div className="admin-table-wrapper">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td
-                  colSpan={11}
-                  style={{
-                    textAlign: "center",
-                    color: "#6b7280",
-                    padding: "2rem",
-                  }}
-                >
-                  Нет динамических субсидий. Нажмите "Добавить субсидии" чтобы
-                  создать.
-                </td>
+                <th>Оффер</th>
+                <th>ПВ от</th>
+                <th>ПВ до</th>
+                <th>Сумма от</th>
+                <th>Сумма до</th>
+                <th>Срок от</th>
+                <th>Срок до</th>
+                <th>Субсидия</th>
+                <th>Приоритет</th>
+                <th>Активен</th>
+                <th>Действия</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </AdminLayout>
+            </thead>
+            <tbody>
+              {subsidies.map((subsidy) => (
+                <tr key={subsidy.id}>
+                  {editingId === subsidy.id ? (
+                    <>
+                      <td>{getOfferLabel(subsidy.offer)}</td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={formData.minPVPercent ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              minPVPercent: e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            })
+                          }
+                          className="admin-input admin-input-sm admin-input-pv"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={formData.maxPVPercent ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              maxPVPercent: e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            })
+                          }
+                          className="admin-input admin-input-sm admin-input-pv"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          value={formData.minAmount ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              minAmount: e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            })
+                          }
+                          className="admin-input admin-input-sm admin-input-amount"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          value={formData.maxAmount ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              maxAmount: e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            })
+                          }
+                          className="admin-input admin-input-sm admin-input-amount"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          value={formData.minTerm ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              minTerm: e.target.value
+                                ? parseInt(e.target.value)
+                                : null,
+                            })
+                          }
+                          className="admin-input admin-input-sm admin-input-term"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          value={formData.maxTerm ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              maxTerm: e.target.value
+                                ? parseInt(e.target.value)
+                                : null,
+                            })
+                          }
+                          className="admin-input admin-input-sm admin-input-term"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={formData.subsidyPercent ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              subsidyPercent: parseFloat(e.target.value) || 0,
+                            })
+                          }
+                          className="admin-input admin-input-sm admin-input-subsidy"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          value={formData.priority ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              priority: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          className="admin-input admin-input-sm admin-input-priority"
+                        />
+                      </td>
+                      <td>
+                        <select
+                          value={formData.isActive ? "active" : "inactive"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isActive: e.target.value === "active",
+                            })
+                          }
+                          className="admin-select admin-select-sm"
+                        >
+                          <option value="active">✅ Активен</option>
+                          <option value="inactive">❌ Неактивен</option>
+                        </select>
+                      </td>
+                      <td>
+                        <ActionButtons
+                          buttons={[
+                            {
+                              icon: "💾",
+                              onClick: () => handleUpdate(subsidy.id),
+                              variant: "success",
+                              title: "Сохранить",
+                            },
+                            {
+                              icon: "✕",
+                              onClick: cancelEdit,
+                              variant: "danger",
+                              title: "Отмена",
+                            },
+                          ]}
+                          size="sm"
+                        />
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td>{getOfferLabel(subsidy.offer)}</td>
+                      <td>{subsidy.minPVPercent ?? "—"}</td>
+                      <td>{subsidy.maxPVPercent ?? "∞"}</td>
+                      <td>{formatNumber(subsidy.minAmount)}</td>
+                      <td>{formatNumber(subsidy.maxAmount)}</td>
+                      <td>{subsidy.minTerm ?? "—"}</td>
+                      <td>{subsidy.maxTerm ?? "∞"}</td>
+                      <td className="subsidy-percent">
+                        {subsidy.subsidyPercent}%
+                      </td>
+                      <td>{subsidy.priority}</td>
+                      <td>
+                        <StatusBadge isActive={subsidy.isActive} />
+                      </td>
+                      <td>
+                        <ActionButtons
+                          buttons={[
+                            {
+                              icon: "✏️",
+                              onClick: () => startEdit(subsidy),
+                              variant: "primary",
+                              title: "Редактировать",
+                            },
+                            {
+                              icon: "🗑️",
+                              onClick: () => handleDelete(subsidy.id),
+                              variant: "danger",
+                              title: "Удалить",
+                            },
+                          ]}
+                          size="sm"
+                        />
+                      </td>
+                    </>
+                  )}
+                </tr>
+              ))}
+
+              {subsidies.length === 0 && !isCreating && (
+                <tr>
+                  <td colSpan={11} className="empty-state">
+                    Нет динамических субсидий. Нажмите "Добавить субсидии" чтобы
+                    создать.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminLayout>
+    </div>
   );
 };
 

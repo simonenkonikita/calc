@@ -2,9 +2,10 @@
 
 import React from "react";
 import { OfferCardProps } from "../types";
-
 import "./OfferCard.css";
 import { DynamicInfoPopup } from "../../../../../components/DynamicInfo/DynamicInfoPopup";
+import ActionButtons from "../../ActionButtons";
+import StatusBadge from "../../StatusBadge";
 
 export const OfferCard: React.FC<OfferCardProps> = ({
   offer,
@@ -62,13 +63,54 @@ export const OfferCard: React.FC<OfferCardProps> = ({
       );
     }
 
-    // Фиксированная или отсутствующая субсидия
     const typeClass = subsidyResult.type === "fixed" ? "fixed" : "none";
     return (
       <span className={`subsidy-badge subsidy-${typeClass}`}>
         {subsidyResult.display}
       </span>
     );
+  };
+
+  // 🔥 Определяем кнопки для ActionButtons
+  const getActionButtons = () => {
+    const buttons = [
+      {
+        icon: "✏️",
+        onClick: () => onEdit(offer),
+        variant: "primary" as const,
+        title: "Редактировать",
+      },
+      {
+        icon: "📋",
+        onClick: () => onCopy(offer.id),
+        variant: "warning" as const,
+        title: "Копировать",
+      },
+    ];
+
+    if (isOfferEffectiveActive) {
+      buttons.push({
+        icon: "🗑️",
+        onClick: () => onDelete(offer.id),
+        variant: "danger" as const,
+        title: "Удалить",
+      });
+    } else {
+      buttons.push({
+        icon: "↩️",
+        onClick: () => onRestore(offer.id),
+        variant: "success" as const,
+        title: "Восстановить",
+      });
+      buttons.push({
+        icon: "💀",
+        onClick: () => onHardDelete(offer.id),
+        variant: "danger" as const,
+        title: "Полностью удалить",
+      });
+    }
+
+    return buttons;
   };
 
   return (
@@ -78,59 +120,15 @@ export const OfferCard: React.FC<OfferCardProps> = ({
           <span className="offer-program-name">{offer.program}</span>
         </div>
         <div className="offer-card-actions">
-          {isOfferEffectiveActive ? (
-            <span className="status-badge active">✅ Активен</span>
-          ) : (
-            <span className="status-badge inactive" title={getInactiveReason()}>
-              ❌ Неактивен
-              <span className="status-reason"> ({getInactiveReason()})</span>
-            </span>
-          )}
-          <button
-            onClick={() => onEdit(offer)}
-            className="admin-btn-primary admin-btn-sm"
-            title="Редактировать"
-          >
-            ✏️
-          </button>
-          <button
-            onClick={() => onCopy(offer.id)}
-            className="admin-btn-warning admin-btn-sm"
-            title="Копировать"
-          >
-            📋
-          </button>
-          {!isOfferEffectiveActive ? (
-            <button
-              onClick={() => onRestore(offer.id)}
-              className="admin-btn-success admin-btn-sm"
-              title="Восстановить"
-            >
-              ↩️
-            </button>
-          ) : (
-            <button
-              onClick={() => onDelete(offer.id)}
-              className="admin-btn-danger admin-btn-sm"
-              title="Удалить"
-            >
-              🗑️
-            </button>
-          )}
-          {!isOfferEffectiveActive && (
-            <button
-              onClick={() => onHardDelete(offer.id)}
-              className="admin-btn-danger admin-btn-sm"
-              title="Полностью удалить"
-            >
-              💀
-            </button>
-          )}
+          <StatusBadge
+            isActive={isOfferEffectiveActive}
+            inactiveText={getInactiveReason()}
+          />
+          <ActionButtons buttons={getActionButtons()} size="sm" />
         </div>
       </div>
 
       <div className="offer-card-body">
-        {/* Верхняя часть - детали оффера */}
         <div className="offer-details-top">
           <div className="offer-detail-item">
             <span className="detail-label">Ставка:</span>
@@ -150,7 +148,6 @@ export const OfferCard: React.FC<OfferCardProps> = ({
           </div>
         </div>
 
-        {/* Нижняя часть - ЖК в строку */}
         <div className="offer-complexes-row">
           <span className="detail-label">ЖК:</span>
           <div className="complexes-list">
@@ -158,7 +155,6 @@ export const OfferCard: React.FC<OfferCardProps> = ({
           </div>
         </div>
 
-        {/* Описание (если есть) */}
         {offer.description && (
           <div className="offer-description">
             <span className="detail-label">Описание:</span>

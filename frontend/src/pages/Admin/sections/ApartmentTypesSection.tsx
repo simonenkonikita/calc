@@ -105,7 +105,7 @@ export const ApartmentTypesSection: React.FC<ApartmentTypesSectionProps> = ({
           <h4>🏠 Типы квартир в {complexName}</h4>
           <button
             onClick={() => setIsCreating(true)}
-            className="admin-btn-primary"
+            className="admin-btn admin-btn-primary"
             disabled={isCreating}
           >
             + Добавить тип
@@ -252,13 +252,13 @@ export const ApartmentTypesSection: React.FC<ApartmentTypesSectionProps> = ({
                           <div className="admin-actions">
                             <button
                               onClick={() => handleUpdate(type.id)}
-                              className="admin-btn-success"
+                              className="admin-btn admin-btn-success"
                             >
                               💾
                             </button>
                             <button
                               onClick={cancelEdit}
-                              className="admin-btn-danger"
+                              className="admin-btn admin-btn-danger"
                             >
                               ✕
                             </button>
@@ -267,13 +267,13 @@ export const ApartmentTypesSection: React.FC<ApartmentTypesSectionProps> = ({
                           <div className="admin-actions">
                             <button
                               onClick={() => startEdit(type)}
-                              className="admin-btn-primary"
+                              className="admin-btn admin-btn-primary"
                             >
                               ✏️
                             </button>
                             <button
                               onClick={() => handleDelete(type.id)}
-                              className="admin-btn-danger"
+                              className="admin-btn admin-btn-danger"
                             >
                               🗑️
                             </button>
@@ -363,13 +363,13 @@ export const ApartmentTypesSection: React.FC<ApartmentTypesSectionProps> = ({
                         <div className="admin-actions">
                           <button
                             onClick={handleCreate}
-                            className="admin-btn-success"
+                            className="admin-btn admin-btn-success"
                           >
                             💾 Сохранить
                           </button>
                           <button
                             onClick={cancelEdit}
-                            className="admin-btn-danger"
+                            className="admin-btn admin-btn-danger"
                           >
                             ✕
                           </button>

@@ -1,21 +1,23 @@
 // frontend/src/pages/Admin/sections/offers/OffersSection.tsx
 
 import React, { useState } from "react";
-import { AdminLayout } from "../../AdminLayout";
-import { AdminOffer } from "../../types/admin.types";
-import { useOffersData } from "./hooks/useOffersData";
-import { BankTabs } from "./components/BankTabs/BankTabs";
-import { ProgramGroup } from "./components/ProgramGroup/ProgramGroup";
-import { OfferModal } from "./components/OfferModal";
-import { OffersToolbar } from "./components/OffersToolbar";
-import { OffersEmptyState } from "./components/OffersEmptyState";
+import { AdminLayout } from "../AdminLayout";
+import { AdminOffer } from "../types/admin.types";
+
+import AdminToolbar from "../AdminToolbar";
 import "./OffersSection.css";
+
+import adminApi from "../../../services/adminApi";
+import { BankTabs } from "./offers/components/BankTabs/BankTabs";
+import { OfferModal } from "./offers/components/OfferModal";
+import { OffersEmptyState } from "./offers/components/OffersEmptyState";
+import { ProgramGroup } from "./offers/components/ProgramGroup/ProgramGroup";
+import { useOffersData } from "./offers/hooks/useOffersData";
 import {
   getDisplayRate,
   getDisplaySubsidy,
   renderComplexesList,
-} from "./utils/offerHelpers";
-import adminApi from "../../../../services/adminApi";
+} from "./offers/utils/offerHelpers";
 
 export const OffersSection: React.FC = () => {
   const {
@@ -40,7 +42,6 @@ export const OffersSection: React.FC = () => {
     const result: Record<string, Record<string, AdminOffer[]>> = {};
     const offersByBank: Record<string, AdminOffer[]> = {};
 
-    // 🔥 Показываем только офферы активных банков
     const activeOffers = offers.filter((offer) => {
       const bank = banks.find((b) => b.id === offer.bankId);
       return bank?.isActive === true;
@@ -99,7 +100,6 @@ export const OffersSection: React.FC = () => {
   const handleCopy = async (id: string) => {
     try {
       const copy = await adminApi.copyOffer(id);
-      // После копирования обновляем список
       refresh();
       alert("✅ Оффер скопирован");
     } catch (error) {
@@ -144,10 +144,8 @@ export const OffersSection: React.FC = () => {
     }
   };
 
-  // 🔥 Фильтруем офферы для поиска с учетом статуса банка
   const filteredOffers = offers.filter((offer) => {
     const bank = banks.find((b) => b.id === offer.bankId);
-    // 🔥 Показываем только офферы активных банков
     if (!bank?.isActive) return false;
 
     const matchesBank = !selectedBankId || offer.bankId === selectedBankId;
@@ -164,7 +162,6 @@ export const OffersSection: React.FC = () => {
     return bank?.name || bankId;
   };
 
-  // 🔥 Проверяем, есть ли активные банки
   const hasActiveBanks = banks.some((b) => b.isActive === true);
   const groupedOffers = getOffersByBankAndProgram();
 
@@ -173,15 +170,23 @@ export const OffersSection: React.FC = () => {
   return (
     <div className="offers-section">
       <AdminLayout title="📄 Офферы (предложения банков)">
-        <OffersToolbar
-          onAdd={openCreateModal}
-          onRefresh={refresh}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
+        <AdminToolbar
+          buttons={[
+            {
+              label: "+ Добавить оффер",
+              onClick: openCreateModal,
+              variant: "primary",
+            },
+            { label: "🔄 Обновить", onClick: refresh, variant: "secondary" },
+          ]}
+          search={{
+            value: searchTerm,
+            onChange: setSearchTerm,
+            placeholder: "Поиск...",
+          }}
           totalCount={filteredOffers.length}
         />
 
-        {/* 🔥 Передаем все банки, но BankTabs сам отфильтрует активные */}
         <BankTabs
           banks={banks}
           offers={offers}
@@ -208,7 +213,6 @@ export const OffersSection: React.FC = () => {
                 const program = programs.find((p) => p.id === programId);
                 const programIsActive = program?.isActive ?? true;
 
-                // 🔥 Проверяем статус банка для отображения
                 const bank = banks.find((b) => b.id === selectedBankId);
                 const bankIsActive = bank?.isActive ?? true;
 

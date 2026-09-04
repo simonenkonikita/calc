@@ -1,20 +1,159 @@
 /* frontend/src/pages/Admin/sections/SubsidiesSection.css */
 
+@import "../admin-variables.css";
+
+/* ============================================================
+   💰 СУБСИДИИ - СТИЛЬ ЛЕНДИНГА
+   ============================================================ */
+
+.subsidies-section .total-count {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  margin-left: auto;
+}
+
+/* ============================================================
+   📝 ФОРМА СОЗДАНИЯ
+   ============================================================ */
+
+.subsidies-section .create-form-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+}
+
+.subsidies-section .form-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ============================================================
+   📊 ИНПУТЫ В ТАБЛИЦЕ
+   ============================================================ */
+
+.subsidies-section .admin-input-pv {
+  width: 60px;
+}
+
+.subsidies-section .admin-input-amount {
+  width: 80px;
+}
+
+.subsidies-section .admin-input-term {
+  width: 50px;
+}
+
+.subsidies-section .admin-input-subsidy {
+  width: 60px;
+}
+
+.subsidies-section .admin-input-priority {
+  width: 50px;
+}
+
+.subsidies-section .admin-input-description {
+  min-width: 120px;
+}
+
+/* ============================================================
+   📐 КОЛОНКИ ТАБЛИЦЫ
+   ============================================================ */
+
+.subsidies-section .col-number {
+  width: 40px;
+}
+
+.subsidies-section .col-actions {
+  width: 60px;
+}
+
+.subsidies-section .text-center {
+  text-align: center;
+}
+
+/* ============================================================
+   💰 ПРОЦЕНТ СУБСИДИИ
+   ============================================================ */
+
 .subsidies-section .subsidy-percent {
   font-weight: 600;
-  color: #10b981;
+  color: var(--success);
 }
 
-.subsidies-section .subsidy-range {
-  color: #555;
-  font-size: 0.8rem;
+/* ============================================================
+   📭 ПУСТОЕ СОСТОЯНИЕ
+   ============================================================ */
+
+.subsidies-section .empty-state {
+  text-align: center;
+  color: var(--gray-500);
+  padding: 2rem;
 }
 
-.subsidies-section .subsidy-description {
-  font-size: 0.75rem;
-  color: #888;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* ============================================================
+   📱 АДАПТИВ
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .subsidies-section .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .subsidies-section .admin-select-sm {
+    width: 100%;
+  }
+
+  .subsidies-section .admin-input-pv {
+    width: 50px;
+  }
+
+  .subsidies-section .admin-input-amount {
+    width: 60px;
+  }
+
+  .subsidies-section .admin-input-term {
+    width: 40px;
+  }
+
+  .subsidies-section .admin-input-subsidy {
+    width: 50px;
+  }
+
+  .subsidies-section .admin-input-priority {
+    width: 40px;
+  }
+
+  .subsidies-section .admin-input-description {
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .subsidies-section .admin-input-pv {
+    width: 40px;
+  }
+
+  .subsidies-section .admin-input-amount {
+    width: 50px;
+  }
+
+  .subsidies-section .admin-input-term {
+    width: 35px;
+  }
+
+  .subsidies-section .admin-input-subsidy {
+    width: 40px;
+  }
+
+  .subsidies-section .admin-input-priority {
+    width: 35px;
+  }
+
+  .subsidies-section .admin-input-description {
+    min-width: 60px;
+  }
 }

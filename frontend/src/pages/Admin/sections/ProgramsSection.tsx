@@ -4,7 +4,10 @@ import React, { useState, useEffect } from "react";
 import { adminApi } from "../../../services/adminApi";
 import { AdminProgram } from "../types/admin.types";
 import { AdminLayout } from "../AdminLayout";
+import AdminToolbar from "../AdminToolbar";
 import "./ProgramsSection.css";
+import ActionButtons from "./ActionButtons";
+import StatusBadge from "./StatusBadge";
 
 export const ProgramsSection: React.FC = () => {
   const [programs, setPrograms] = useState<AdminProgram[]>([]);
@@ -74,20 +77,17 @@ export const ProgramsSection: React.FC = () => {
     }
   };
 
-  // 🔥 Обновленная функция удаления с поддержкой каскадного удаления
   const handleDelete = async (id: string) => {
     const program = programs.find((p) => p.id === id);
     const programName = program?.label || program?.type || "Программа";
 
     try {
-      // Пробуем удалить без каскада
       await adminApi.deleteProgram(id);
       setPrograms(programs.filter((p) => p.id !== id));
       alert(`✅ Программа "${programName}" удалена!`);
     } catch (error: any) {
       console.error("Error deleting program:", error);
 
-      // Если это 409 Conflict - предлагаем каскадное удаление
       if (error.status === 409 && error.canCascade) {
         const confirmMessage =
           `⚠️ Программа "${programName}" имеет ${error.offersCount} связанных офферов!\n\n` +
@@ -99,7 +99,6 @@ export const ProgramsSection: React.FC = () => {
 
         if (confirm(confirmMessage)) {
           try {
-            // Удаляем с каскадом
             const result = await adminApi.deleteProgram(id, true);
             setPrograms(programs.filter((p) => p.id !== id));
             alert(
@@ -115,7 +114,6 @@ export const ProgramsSection: React.FC = () => {
         return;
       }
 
-      // Другие ошибки
       alert(`❌ ${error.message || "Ошибка при удалении программы"}`);
     }
   };
@@ -157,19 +155,21 @@ export const ProgramsSection: React.FC = () => {
   return (
     <div className="programs-section">
       <AdminLayout title="📋 Программы ипотеки">
-        <div className="admin-toolbar">
-          <button onClick={startCreate} className="admin-btn-primary">
-            + Добавить программу
-          </button>
-          <button onClick={loadPrograms} className="admin-btn-secondary">
-            🔄 Обновить
-          </button>
-          <span
-            style={{ fontSize: "0.8rem", color: "#6b7280", marginLeft: "auto" }}
-          >
-            Всего: {programs.length}
-          </span>
-        </div>
+        <AdminToolbar
+          buttons={[
+            {
+              label: "+ Добавить программу",
+              onClick: startCreate,
+              variant: "primary",
+            },
+            {
+              label: "🔄 Обновить",
+              onClick: loadPrograms,
+              variant: "secondary",
+            },
+          ]}
+          totalCount={programs.length}
+        />
 
         <div className="admin-table-wrapper">
           <table className="admin-table">
@@ -195,6 +195,7 @@ export const ProgramsSection: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, type: e.target.value })
                       }
+                      className="admin-input admin-input-sm"
                     />
                   </td>
                   <td>
@@ -204,6 +205,7 @@ export const ProgramsSection: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, label: e.target.value })
                       }
+                      className="admin-input admin-input-sm"
                     />
                   </td>
                   <td>
@@ -213,11 +215,7 @@ export const ProgramsSection: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, icon: e.target.value })
                       }
-                      style={{
-                        textAlign: "center",
-                        fontSize: "1.2rem",
-                        width: "60px",
-                      }}
+                      className="admin-input admin-input-sm admin-input-icon"
                     />
                   </td>
                   <td>
@@ -227,12 +225,7 @@ export const ProgramsSection: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, color: e.target.value })
                       }
-                      style={{
-                        padding: "2px",
-                        width: "40px",
-                        height: "30px",
-                        cursor: "pointer",
-                      }}
+                      className="admin-input admin-input-sm admin-input-color"
                     />
                   </td>
                   <td>
@@ -245,6 +238,7 @@ export const ProgramsSection: React.FC = () => {
                           description: e.target.value,
                         })
                       }
+                      className="admin-input admin-input-sm"
                     />
                   </td>
                   <td>
@@ -258,7 +252,7 @@ export const ProgramsSection: React.FC = () => {
                           displayOrder: parseInt(e.target.value) || 0,
                         })
                       }
-                      style={{ width: "60px" }}
+                      className="admin-input admin-input-sm admin-input-number admin-input-order"
                     />
                   </td>
                   <td>
@@ -270,26 +264,30 @@ export const ProgramsSection: React.FC = () => {
                           isActive: e.target.value === "active",
                         })
                       }
+                      className="admin-select admin-select-sm"
                     >
                       <option value="active">✅ Активен</option>
                       <option value="inactive">❌ Неактивен</option>
                     </select>
                   </td>
                   <td>
-                    <div className="admin-actions">
-                      <button
-                        onClick={handleCreate}
-                        className="admin-btn-success admin-btn-sm"
-                      >
-                        💾 Создать
-                      </button>
-                      <button
-                        onClick={cancelEdit}
-                        className="admin-btn-danger admin-btn-sm"
-                      >
-                        ✕
-                      </button>
-                    </div>
+                    <ActionButtons
+                      buttons={[
+                        {
+                          icon: "💾",
+                          onClick: handleCreate,
+                          variant: "success",
+                          title: "Создать",
+                        },
+                        {
+                          icon: "✕",
+                          onClick: cancelEdit,
+                          variant: "danger",
+                          title: "Отмена",
+                        },
+                      ]}
+                      size="sm"
+                    />
                   </td>
                 </tr>
               )}
@@ -304,6 +302,7 @@ export const ProgramsSection: React.FC = () => {
                           onChange={(e) =>
                             setFormData({ ...formData, type: e.target.value })
                           }
+                          className="admin-input admin-input-sm"
                         />
                       </td>
                       <td>
@@ -312,6 +311,7 @@ export const ProgramsSection: React.FC = () => {
                           onChange={(e) =>
                             setFormData({ ...formData, label: e.target.value })
                           }
+                          className="admin-input admin-input-sm"
                         />
                       </td>
                       <td>
@@ -320,11 +320,7 @@ export const ProgramsSection: React.FC = () => {
                           onChange={(e) =>
                             setFormData({ ...formData, icon: e.target.value })
                           }
-                          style={{
-                            textAlign: "center",
-                            fontSize: "1.2rem",
-                            width: "60px",
-                          }}
+                          className="admin-input admin-input-sm admin-input-icon"
                         />
                       </td>
                       <td>
@@ -334,12 +330,7 @@ export const ProgramsSection: React.FC = () => {
                           onChange={(e) =>
                             setFormData({ ...formData, color: e.target.value })
                           }
-                          style={{
-                            padding: "2px",
-                            width: "40px",
-                            height: "30px",
-                            cursor: "pointer",
-                          }}
+                          className="admin-input admin-input-sm admin-input-color"
                         />
                       </td>
                       <td>
@@ -351,6 +342,7 @@ export const ProgramsSection: React.FC = () => {
                               description: e.target.value,
                             })
                           }
+                          className="admin-input admin-input-sm"
                         />
                       </td>
                       <td>
@@ -363,7 +355,7 @@ export const ProgramsSection: React.FC = () => {
                               displayOrder: parseInt(e.target.value) || 0,
                             })
                           }
-                          style={{ width: "60px" }}
+                          className="admin-input admin-input-sm admin-input-number admin-input-order"
                         />
                       </td>
                       <td>
@@ -375,100 +367,81 @@ export const ProgramsSection: React.FC = () => {
                               isActive: e.target.value === "active",
                             })
                           }
+                          className="admin-select admin-select-sm"
                         >
                           <option value="active">✅ Активен</option>
                           <option value="inactive">❌ Неактивен</option>
                         </select>
                       </td>
                       <td>
-                        <div className="admin-actions">
-                          <button
-                            onClick={() => handleUpdate(program.id)}
-                            className="admin-btn-success admin-btn-sm"
-                          >
-                            💾
-                          </button>
-                          <button
-                            onClick={cancelEdit}
-                            className="admin-btn-danger admin-btn-sm"
-                          >
-                            ✕
-                          </button>
-                        </div>
+                        <ActionButtons
+                          buttons={[
+                            {
+                              icon: "💾",
+                              onClick: () => handleUpdate(program.id),
+                              variant: "success",
+                              title: "Сохранить",
+                            },
+                            {
+                              icon: "✕",
+                              onClick: cancelEdit,
+                              variant: "danger",
+                              title: "Отмена",
+                            },
+                          ]}
+                          size="sm"
+                        />
                       </td>
                     </>
                   ) : (
                     <>
                       <td>
-                        <code
-                          style={{
-                            fontSize: "0.8rem",
-                            background: "#f3f4f6",
-                            padding: "0.15rem 0.5rem",
-                            borderRadius: "0.25rem",
-                            color: "#374151",
-                          }}
-                        >
+                        <code className="program-type-code">
                           {program.type}
                         </code>
                       </td>
                       <td>
                         <strong>{program.label}</strong>
                       </td>
-                      <td style={{ fontSize: "1.5rem", textAlign: "center" }}>
-                        {program.icon}
-                      </td>
+                      <td className="program-icon">{program.icon}</td>
                       <td>
                         <span
-                          style={{
-                            display: "inline-block",
-                            width: "24px",
-                            height: "24px",
-                            background: program.color,
-                            borderRadius: "4px",
-                            border: "1px solid #e5e7eb",
-                            verticalAlign: "middle",
-                          }}
+                          className="program-color-preview"
+                          style={{ background: program.color }}
                         />
                       </td>
                       <td>
-                        <span title={program.description}>
+                        <span
+                          className="program-description"
+                          title={program.description}
+                        >
                           {program.description?.length > 30
                             ? program.description.substring(0, 30) + "..."
                             : program.description || "-"}
                         </span>
                       </td>
-                      <td style={{ textAlign: "center" }}>
-                        {program.displayOrder}
+                      <td className="program-order">{program.displayOrder}</td>
+                      <td>
+                        <StatusBadge isActive={program.isActive} />
                       </td>
                       <td>
-                        {program.isActive ? (
-                          <span className="status-badge active">
-                            ✅ Активен
-                          </span>
-                        ) : (
-                          <span className="status-badge inactive">
-                            ❌ Неактивен
-                          </span>
-                        )}
-                      </td>
-                      <td>
-                        <div className="admin-actions">
-                          <button
-                            onClick={() => startEdit(program)}
-                            className="admin-btn-primary admin-btn-sm"
-                            title="Редактировать"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            onClick={() => handleDelete(program.id)}
-                            className="admin-btn-danger admin-btn-sm"
-                            title="Удалить"
-                          >
-                            🗑️
-                          </button>
-                        </div>
+                        <ActionButtons
+                          buttons={[
+                            {
+                              icon: "✏️",
+                              onClick: () => startEdit(program),
+                              variant: "primary",
+                              title: "Редактировать",
+                            },
+                            {
+                              icon: "🗑️",
+                              onClick: () => handleDelete(program.id),
+                              variant: "danger",
+                              title: "Удалить",
+                            },
+                          ]}
+                          size="sm"
+                        />
                       </td>
                     </>
                   )}
@@ -477,14 +450,7 @@ export const ProgramsSection: React.FC = () => {
 
               {programs.length === 0 && !isCreating && (
                 <tr>
-                  <td
-                    colSpan={8}
-                    style={{
-                      textAlign: "center",
-                      color: "#6b7280",
-                      padding: "2rem",
-                    }}
-                  >
+                  <td colSpan={8} className="empty-state">
                     Нет программ. Нажмите <strong>"Добавить программу"</strong>{" "}
                     чтобы создать первую.
                   </td>

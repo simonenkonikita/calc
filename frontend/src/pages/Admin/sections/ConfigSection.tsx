@@ -114,7 +114,7 @@ export const ConfigSection: React.FC = () => {
     return (
       <div className="admin-error">
         <p>{error}</p>
-        <button onClick={loadData} className="admin-btn-primary">
+        <button onClick={loadData} className="admin-btn admin-btn-primary">
           Попробовать снова
         </button>
       </div>
@@ -326,14 +326,14 @@ export const ConfigSection: React.FC = () => {
             <button
               onClick={handleSaveConfig}
               disabled={saving}
-              className="admin-btn-primary"
+              className="admin-btn admin-btn-primary"
             >
               {saving ? "💾 Сохранение..." : "💾 Сохранить конфигурацию"}
             </button>
             <button
               onClick={handleReset}
               disabled={saving}
-              className="admin-btn-secondary"
+              className="admin-btn admin-btn-secondary"
             >
               🔄 Отменить изменения
             </button>

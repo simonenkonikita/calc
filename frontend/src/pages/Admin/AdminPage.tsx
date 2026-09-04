@@ -10,7 +10,7 @@ import { SubsidiesSection } from "./sections/SubsidiesSection";
 import { ConfigSection } from "./sections/ConfigSection";
 import { DashboardSection } from "./DashboardSection";
 import { ProgramsSection } from "./sections/ProgramsSection";
-import { OffersSection } from "./sections/offers";
+import { OffersSection } from "./sections/OffersSection";
 import { UsersSection } from "./sections/UsersSection";
 import "./AdminPage.css";
 import { useAuthExtended } from "../../hooks/ui/useAuth";

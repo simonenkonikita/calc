@@ -1,18 +1,59 @@
 /* frontend/src/pages/Admin/sections/BanksSection.css */
 
+@import "../admin-variables.css";
+
 /* ============================================================
-   BANKS SECTION
+   🏦 BANKS SECTION - СТИЛЬ ЛЕНДИНГА
    ============================================================ */
-.banks-section .admin-section .admin-table .bank-name {
+
+.banks-section .bank-name {
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.banks-section .bank-slug {
+  color: var(--gray-400);
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+.banks-section .bank-rate-highlight {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* ============================================================
+   📊 СЧЕТЧИК В ТУЛБАРЕ
+   ============================================================ */
+
+.banks-section .total-count {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  margin-left: auto;
+}
+
+/* ============================================================
+   🏷️ СТАТУС БАНКА В ТАБЛИЦЕ
+   ============================================================ */
+
+.banks-section .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
   font-weight: 500;
 }
 
-.banks-section .admin-section .admin-table .bank-slug {
-  color: #888;
-  font-size: 0.75rem;
+.banks-section .status-badge.active {
+  background: var(--success-bg);
+  color: #065f46;
+  border: 1px solid #a7f3d0;
 }
 
-.banks-section .admin-section .admin-table .bank-rate-highlight {
-  font-weight: 600;
-  color: #3b82f6;
+.banks-section .status-badge.inactive {
+  background: var(--danger-bg);
+  color: #991b1b;
+  border: 1px solid #fecaca;
 }

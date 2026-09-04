@@ -3,6 +3,10 @@
 import React, { useState, useEffect } from "react";
 import { adminApi } from "../../../services/adminApi";
 import { AdminLayout } from "../AdminLayout";
+import AdminToolbar from "../AdminToolbar";
+import "./RatesSection.css";
+import StatusBadge from "./StatusBadge";
+import ActionButtons from "./ActionButtons";
 
 interface DynamicRate {
   id: string;
@@ -40,7 +44,7 @@ export const RatesSection: React.FC = () => {
     try {
       setLoading(true);
       const [ratesData, offersData] = await Promise.all([
-        adminApi.getDynamicRates(), // 🔥 Используем getDynamicRates вместо getRates
+        adminApi.getDynamicRates(),
         adminApi.getOffers(),
       ]);
       setRates(Array.isArray(ratesData) ? ratesData : []);
@@ -158,328 +162,352 @@ export const RatesSection: React.FC = () => {
   if (loading) return <div className="admin-loading">Загрузка...</div>;
 
   return (
-    <AdminLayout title="📊 Динамические ставки">
-      <div className="admin-toolbar">
-        <button onClick={startCreate} className="admin-btn-primary">
-          + Добавить ставку
-        </button>
-        <button onClick={loadData} className="admin-btn-secondary">
-          🔄 Обновить
-        </button>
-        <span
-          style={{ fontSize: "0.8rem", color: "#6b7280", marginLeft: "auto" }}
-        >
-          Всего: {rates.length}
-        </span>
-      </div>
+    <div className="rates-section">
+      <AdminLayout title="📊 Динамические ставки">
+        <AdminToolbar
+          buttons={[
+            {
+              label: "+ Добавить ставку",
+              onClick: startCreate,
+              variant: "primary",
+            },
+            { label: "🔄 Обновить", onClick: loadData, variant: "secondary" },
+          ]}
+          totalCount={rates.length}
+        />
 
-      <div className="admin-table-wrapper">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Оффер</th>
-              <th>Тип</th>
-              <th>Условие</th>
-              <th>Значение</th>
-              <th>Ставка</th>
-              <th>Приоритет</th>
-              <th>Описание</th>
-              <th>Активен</th>
-              <th>Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isCreating && (
+        <div className="admin-table-wrapper">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td>
-                  <select
-                    value={selectedOfferId}
-                    onChange={(e) => setSelectedOfferId(e.target.value)}
-                  >
-                    <option value="">Выберите оффер</option>
-                    {offers.map((offer) => (
-                      <option key={offer.id} value={offer.id}>
-                        {getOfferLabel(offer)}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td>
-                  <select
-                    value={formData.conditionType || "pv"}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        conditionType: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="pv">ПВ</option>
-                    <option value="amount">Сумма</option>
-                    <option value="term">Срок</option>
-                  </select>
-                </td>
-                <td>
-                  <select
-                    value={formData.condition || "gte"}
-                    onChange={(e) =>
-                      setFormData({ ...formData, condition: e.target.value })
-                    }
-                  >
-                    <option value="gte">≥</option>
-                    <option value="lte">≤</option>
-                    <option value="lt">&lt;</option>
-                    <option value="gt">&gt;</option>
-                    <option value="eq">=</option>
-                  </select>
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="Значение"
-                    value={formData.value ?? ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        value: e.target.value
-                          ? parseFloat(e.target.value)
-                          : null,
-                      })
-                    }
-                    style={{ width: "100px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="Ставка"
-                    value={formData.rate ?? ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        rate: parseFloat(e.target.value) || 0,
-                      })
-                    }
-                    style={{ width: "80px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    placeholder="Приоритет"
-                    value={formData.priority ?? ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        priority: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    style={{ width: "60px" }}
-                  />
-                </td>
-                <td>
-                  <input
-                    placeholder="Описание"
-                    value={formData.description || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                  />
-                </td>
-                <td>✅</td>
-                <td>
-                  <div className="admin-actions">
-                    <button
-                      onClick={handleCreate}
-                      className="admin-btn-success"
+                <th>Оффер</th>
+                <th>Тип</th>
+                <th>Условие</th>
+                <th>Значение</th>
+                <th>Ставка</th>
+                <th>Приоритет</th>
+                <th>Описание</th>
+                <th>Активен</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isCreating && (
+                <tr>
+                  <td>
+                    <select
+                      value={selectedOfferId}
+                      onChange={(e) => setSelectedOfferId(e.target.value)}
+                      className="admin-select admin-select-sm"
                     >
-                      💾
-                    </button>
-                    <button onClick={cancelEdit} className="admin-btn-danger">
-                      ✕
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            )}
+                      <option value="">Выберите оффер</option>
+                      {offers.map((offer) => (
+                        <option key={offer.id} value={offer.id}>
+                          {getOfferLabel(offer)}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    <select
+                      value={formData.conditionType || "pv"}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          conditionType: e.target.value,
+                        })
+                      }
+                      className="admin-select admin-select-sm"
+                    >
+                      <option value="pv">ПВ</option>
+                      <option value="amount">Сумма</option>
+                      <option value="term">Срок</option>
+                    </select>
+                  </td>
+                  <td>
+                    <select
+                      value={formData.condition || "gte"}
+                      onChange={(e) =>
+                        setFormData({ ...formData, condition: e.target.value })
+                      }
+                      className="admin-select admin-select-sm"
+                    >
+                      <option value="gte">≥</option>
+                      <option value="lte">≤</option>
+                      <option value="lt">&lt;</option>
+                      <option value="gt">&gt;</option>
+                      <option value="eq">=</option>
+                    </select>
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="Значение"
+                      value={formData.value ?? ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          value: e.target.value
+                            ? parseFloat(e.target.value)
+                            : null,
+                        })
+                      }
+                      className="admin-input admin-input-sm admin-input-value"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="Ставка"
+                      value={formData.rate ?? ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          rate: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="admin-input admin-input-sm admin-input-rate"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      placeholder="Приоритет"
+                      value={formData.priority ?? ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          priority: parseInt(e.target.value) || 0,
+                        })
+                      }
+                      className="admin-input admin-input-sm admin-input-priority"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      placeholder="Описание"
+                      value={formData.description || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
+                      className="admin-input admin-input-sm"
+                    />
+                  </td>
+                  <td>
+                    <StatusBadge isActive={true} />
+                  </td>
+                  <td>
+                    <ActionButtons
+                      buttons={[
+                        {
+                          icon: "💾",
+                          onClick: handleCreate,
+                          variant: "success",
+                          title: "Сохранить",
+                        },
+                        {
+                          icon: "✕",
+                          onClick: cancelEdit,
+                          variant: "danger",
+                          title: "Отмена",
+                        },
+                      ]}
+                      size="sm"
+                    />
+                  </td>
+                </tr>
+              )}
 
-            {rates.map((rate) => (
-              <tr key={rate.id}>
-                {editingId === rate.id ? (
-                  <>
-                    <td>{getOfferLabel(rate.offer)}</td>
-                    <td>
-                      <select
-                        value={formData.conditionType || "pv"}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            conditionType: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="pv">ПВ</option>
-                        <option value="amount">Сумма</option>
-                        <option value="term">Срок</option>
-                      </select>
-                    </td>
-                    <td>
-                      <select
-                        value={formData.condition || "gte"}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            condition: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="gte">≥</option>
-                        <option value="lte">≤</option>
-                        <option value="lt">&lt;</option>
-                        <option value="gt">&gt;</option>
-                        <option value="eq">=</option>
-                      </select>
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={formData.value ?? ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            value: e.target.value
-                              ? parseFloat(e.target.value)
-                              : null,
-                          })
-                        }
-                        style={{ width: "100px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={formData.rate ?? ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            rate: parseFloat(e.target.value) || 0,
-                          })
-                        }
-                        style={{ width: "80px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={formData.priority ?? ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            priority: parseInt(e.target.value) || 0,
-                          })
-                        }
-                        style={{ width: "60px" }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        value={formData.description || ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            description: e.target.value,
-                          })
-                        }
-                      />
-                    </td>
-                    <td>
-                      <select
-                        value={formData.isActive ? "active" : "inactive"}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            isActive: e.target.value === "active",
-                          })
-                        }
-                      >
-                        <option value="active">✅</option>
-                        <option value="inactive">❌</option>
-                      </select>
-                    </td>
-                    <td>
-                      <div className="admin-actions">
-                        <button
-                          onClick={() => handleUpdate(rate.id)}
-                          className="admin-btn-success"
+              {rates.map((rate) => (
+                <tr key={rate.id}>
+                  {editingId === rate.id ? (
+                    <>
+                      <td>{getOfferLabel(rate.offer)}</td>
+                      <td>
+                        <select
+                          value={formData.conditionType || "pv"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              conditionType: e.target.value,
+                            })
+                          }
+                          className="admin-select admin-select-sm"
                         >
-                          💾
-                        </button>
-                        <button
-                          onClick={cancelEdit}
-                          className="admin-btn-danger"
+                          <option value="pv">ПВ</option>
+                          <option value="amount">Сумма</option>
+                          <option value="term">Срок</option>
+                        </select>
+                      </td>
+                      <td>
+                        <select
+                          value={formData.condition || "gte"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              condition: e.target.value,
+                            })
+                          }
+                          className="admin-select admin-select-sm"
                         >
-                          ✕
-                        </button>
-                      </div>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td>{getOfferLabel(rate.offer)}</td>
-                    <td>{rate.conditionType}</td>
-                    <td>{rate.condition}</td>
-                    <td>{rate.value ?? "—"}</td>
-                    <td>{rate.rate}%</td>
-                    <td>{rate.priority}</td>
-                    <td title={rate.description}>
-                      {rate.description?.substring(0, 30) || "-"}
-                    </td>
-                    <td>{rate.isActive ? "✅" : "❌"}</td>
-                    <td>
-                      <div className="admin-actions">
-                        <button
-                          onClick={() => startEdit(rate)}
-                          className="admin-btn-primary"
-                          title="Редактировать"
+                          <option value="gte">≥</option>
+                          <option value="lte">≤</option>
+                          <option value="lt">&lt;</option>
+                          <option value="gt">&gt;</option>
+                          <option value="eq">=</option>
+                        </select>
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={formData.value ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              value: e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            })
+                          }
+                          className="admin-input admin-input-sm admin-input-value"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={formData.rate ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              rate: parseFloat(e.target.value) || 0,
+                            })
+                          }
+                          className="admin-input admin-input-sm admin-input-rate"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          value={formData.priority ?? ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              priority: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          className="admin-input admin-input-sm admin-input-priority"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          value={formData.description || ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              description: e.target.value,
+                            })
+                          }
+                          className="admin-input admin-input-sm"
+                        />
+                      </td>
+                      <td>
+                        <select
+                          value={formData.isActive ? "active" : "inactive"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isActive: e.target.value === "active",
+                            })
+                          }
+                          className="admin-select admin-select-sm"
                         >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => handleDelete(rate.id)}
-                          className="admin-btn-danger"
-                          title="Удалить"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
-                  </>
-                )}
-              </tr>
-            ))}
+                          <option value="active">✅ Активен</option>
+                          <option value="inactive">❌ Неактивен</option>
+                        </select>
+                      </td>
+                      <td>
+                        <ActionButtons
+                          buttons={[
+                            {
+                              icon: "💾",
+                              onClick: () => handleUpdate(rate.id),
+                              variant: "success",
+                              title: "Сохранить",
+                            },
+                            {
+                              icon: "✕",
+                              onClick: cancelEdit,
+                              variant: "danger",
+                              title: "Отмена",
+                            },
+                          ]}
+                          size="sm"
+                        />
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td>{getOfferLabel(rate.offer)}</td>
+                      <td>
+                        <span className="rate-condition-type">
+                          {rate.conditionType}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="rate-condition">{rate.condition}</span>
+                      </td>
+                      <td>{rate.value ?? "—"}</td>
+                      <td className="rate-value">{rate.rate}%</td>
+                      <td className="rate-priority">{rate.priority}</td>
+                      <td title={rate.description}>
+                        {rate.description?.substring(0, 30) || "-"}
+                      </td>
+                      <td>
+                        <StatusBadge isActive={rate.isActive} />
+                      </td>
+                      <td>
+                        <ActionButtons
+                          buttons={[
+                            {
+                              icon: "✏️",
+                              onClick: () => startEdit(rate),
+                              variant: "primary",
+                              title: "Редактировать",
+                            },
+                            {
+                              icon: "🗑️",
+                              onClick: () => handleDelete(rate.id),
+                              variant: "danger",
+                              title: "Удалить",
+                            },
+                          ]}
+                          size="sm"
+                        />
+                      </td>
+                    </>
+                  )}
+                </tr>
+              ))}
 
-            {rates.length === 0 && !isCreating && (
-              <tr>
-                <td
-                  colSpan={9}
-                  style={{
-                    textAlign: "center",
-                    color: "#6b7280",
-                    padding: "2rem",
-                  }}
-                >
-                  Нет динамических ставок. Нажмите "Добавить ставку" чтобы
-                  создать первую.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </AdminLayout>
+              {rates.length === 0 && !isCreating && (
+                <tr>
+                  <td colSpan={9} className="empty-state">
+                    Нет динамических ставок. Нажмите "Добавить ставку" чтобы
+                    создать первую.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminLayout>
+    </div>
   );
 };

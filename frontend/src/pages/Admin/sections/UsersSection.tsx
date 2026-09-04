@@ -3,17 +3,20 @@
 import React, { useState, useEffect } from "react";
 import { AdminLayout } from "../AdminLayout";
 import { UserRole, Company } from "../../../types/auth.types";
-import { AdminUser } from "../types/admin.types"; // 🔥 ИСПРАВЛЕН ИМПОРТ
+import { AdminUser } from "../types/admin.types";
+import AdminToolbar from "../AdminToolbar";
 import "./UsersSection.css";
 import { useAuthExtended } from "../../../hooks/ui/useAuth";
 import adminApi from "../../../services/adminApi";
+import ActionButtons from "./ActionButtons";
+import StatusBadge from "./StatusBadge";
 
 export const UsersSection: React.FC = () => {
-  const [users, setUsers] = useState<AdminUser[]>([]); // 🔥 ИСПРАВЛЕН ТИП
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<AdminUser>>({}); // 🔥 ИСПРАВЛЕН ТИП
+  const [formData, setFormData] = useState<Partial<AdminUser>>({});
   const [isCreating, setIsCreating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -140,25 +143,20 @@ export const UsersSection: React.FC = () => {
   return (
     <div className="users-section">
       <AdminLayout title="👥 Пользователи">
-        <div className="admin-toolbar">
-          <button
-            onClick={() => {
-              setIsCreating(true);
-              setFormData({ role: "developer_manager" });
-            }}
-            className="admin-btn-success"
-          >
-            + Добавить пользователя
-          </button>
-          <button onClick={loadData} className="admin-btn-secondary">
-            🔄 Обновить
-          </button>
-          <span
-            style={{ fontSize: "0.8rem", color: "#6b7280", marginLeft: "auto" }}
-          >
-            Всего: {users.length}
-          </span>
-        </div>
+        <AdminToolbar
+          buttons={[
+            {
+              label: "+ Добавить пользователя",
+              onClick: () => {
+                setIsCreating(true);
+                setFormData({ role: "developer_manager" });
+              },
+              variant: "primary",
+            },
+            { label: "🔄 Обновить", onClick: loadData, variant: "secondary" },
+          ]}
+          totalCount={users.length}
+        />
 
         <div className="admin-table-wrapper">
           <table className="admin-table">
@@ -185,6 +183,7 @@ export const UsersSection: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
+                      className="admin-input admin-input-sm"
                     />
                   </td>
                   <td>
@@ -194,6 +193,7 @@ export const UsersSection: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, firstName: e.target.value })
                       }
+                      className="admin-input admin-input-sm"
                     />
                   </td>
                   <td>
@@ -205,6 +205,7 @@ export const UsersSection: React.FC = () => {
                           role: e.target.value as UserRole,
                         })
                       }
+                      className="admin-select admin-select-sm"
                     >
                       <option value="developer_manager">
                         Менеджер компании
@@ -222,6 +223,7 @@ export const UsersSection: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, companyId: e.target.value })
                       }
+                      className="admin-select admin-select-sm"
                     >
                       <option value="">Без компании</option>
                       {companies.map((c) => (
@@ -238,6 +240,7 @@ export const UsersSection: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
                       }
+                      className="admin-input admin-input-sm"
                     />
                   </td>
                   <td>
@@ -247,28 +250,34 @@ export const UsersSection: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, position: e.target.value })
                       }
+                      className="admin-input admin-input-sm"
                     />
                   </td>
-                  <td>✅</td>
                   <td>
-                    <div className="admin-actions">
-                      <button
-                        onClick={handleCreateUser}
-                        className="admin-btn-success"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? "⏳" : "💾"}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsCreating(false);
-                          setFormData({});
-                        }}
-                        className="admin-btn-danger"
-                      >
-                        ✕
-                      </button>
-                    </div>
+                    <StatusBadge isActive={true} />
+                  </td>
+                  <td>
+                    <ActionButtons
+                      buttons={[
+                        {
+                          icon: "💾",
+                          onClick: handleCreateUser,
+                          variant: "success",
+                          title: "Сохранить",
+                          disabled: isSubmitting,
+                        },
+                        {
+                          icon: "✕",
+                          onClick: () => {
+                            setIsCreating(false);
+                            setFormData({});
+                          },
+                          variant: "danger",
+                          title: "Отмена",
+                        },
+                      ]}
+                      size="sm"
+                    />
                   </td>
                 </tr>
               )}
@@ -283,6 +292,7 @@ export const UsersSection: React.FC = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
                         }
+                        className="admin-input admin-input-sm"
                       />
                     ) : (
                       user.email
@@ -298,6 +308,7 @@ export const UsersSection: React.FC = () => {
                             firstName: e.target.value,
                           })
                         }
+                        className="admin-input admin-input-sm"
                       />
                     ) : (
                       `${user.firstName || ""} ${user.lastName || ""}`
@@ -313,6 +324,7 @@ export const UsersSection: React.FC = () => {
                             role: e.target.value as UserRole,
                           })
                         }
+                        className="admin-select admin-select-sm"
                       >
                         <option value="admin">Администратор проекта</option>
                         <option value="developer_admin">
@@ -324,7 +336,9 @@ export const UsersSection: React.FC = () => {
                         <option value="agent">Агент</option>
                       </select>
                     ) : (
-                      getRoleLabel(user.role)
+                      <span className="role-badge">
+                        {getRoleLabel(user.role)}
+                      </span>
                     )}
                   </td>
                   <td>
@@ -337,6 +351,7 @@ export const UsersSection: React.FC = () => {
                             companyId: e.target.value,
                           })
                         }
+                        className="admin-select admin-select-sm"
                       >
                         <option value="">Без компании</option>
                         {companies.map((c) => (
@@ -356,6 +371,7 @@ export const UsersSection: React.FC = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, phone: e.target.value })
                         }
+                        className="admin-input admin-input-sm"
                       />
                     ) : (
                       user.phone || "-"
@@ -368,6 +384,7 @@ export const UsersSection: React.FC = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, position: e.target.value })
                         }
+                        className="admin-input admin-input-sm"
                       />
                     ) : (
                       user.position || "-"
@@ -383,53 +400,58 @@ export const UsersSection: React.FC = () => {
                             isActive: e.target.value === "active",
                           })
                         }
+                        className="admin-select admin-select-sm"
                       >
                         <option value="active">✅ Активен</option>
                         <option value="inactive">❌ Неактивен</option>
                       </select>
-                    ) : user.isActive ? (
-                      "✅"
                     ) : (
-                      "❌"
+                      <StatusBadge isActive={user.isActive} />
                     )}
                   </td>
                   <td>
                     {editingId === user.id ? (
-                      <div className="admin-actions">
-                        <button
-                          onClick={() => handleUpdateUser(user.id)}
-                          className="admin-btn-success"
-                        >
-                          💾
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingId(null);
-                            setFormData({});
-                          }}
-                          className="admin-btn-danger"
-                        >
-                          ✕
-                        </button>
-                      </div>
+                      <ActionButtons
+                        buttons={[
+                          {
+                            icon: "💾",
+                            onClick: () => handleUpdateUser(user.id),
+                            variant: "success",
+                            title: "Сохранить",
+                          },
+                          {
+                            icon: "✕",
+                            onClick: () => {
+                              setEditingId(null);
+                              setFormData({});
+                            },
+                            variant: "danger",
+                            title: "Отмена",
+                          },
+                        ]}
+                        size="sm"
+                      />
                     ) : (
-                      <div className="admin-actions">
-                        <button
-                          onClick={() => {
-                            setEditingId(user.id);
-                            setFormData(user);
-                          }}
-                          className="admin-btn-primary"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => handleDeleteUser(user.id)}
-                          className="admin-btn-danger"
-                        >
-                          🗑️
-                        </button>
-                      </div>
+                      <ActionButtons
+                        buttons={[
+                          {
+                            icon: "✏️",
+                            onClick: () => {
+                              setEditingId(user.id);
+                              setFormData(user);
+                            },
+                            variant: "primary",
+                            title: "Редактировать",
+                          },
+                          {
+                            icon: "🗑️",
+                            onClick: () => handleDeleteUser(user.id),
+                            variant: "danger",
+                            title: "Удалить",
+                          },
+                        ]}
+                        size="sm"
+                      />
                     )}
                   </td>
                 </tr>

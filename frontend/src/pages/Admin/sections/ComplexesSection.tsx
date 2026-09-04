@@ -5,9 +5,11 @@ import { adminApi } from "../../../services/adminApi";
 import { AdminComplex, AdminBank } from "../types/admin.types";
 import { AdminLayout } from "../AdminLayout";
 import { ApartmentTypesSection } from "./ApartmentTypesSection";
-
+import AdminToolbar from "../AdminToolbar";
 import "./ComplexesSection.css";
 import BankSelector from "./BankSelector";
+import ActionButtons from "./ActionButtons";
+import StatusBadge from "./StatusBadge";
 
 export const ComplexesSection: React.FC = () => {
   const [complexes, setComplexes] = useState<AdminComplex[]>([]);
@@ -155,19 +157,21 @@ export const ComplexesSection: React.FC = () => {
   return (
     <div className="complexes-section">
       <AdminLayout title="🏗️ Жилые комплексы">
-        <div className="admin-toolbar">
-          <button onClick={startCreate} className="admin-btn-primary">
-            + Добавить ЖК
-          </button>
-          <button onClick={loadComplexes} className="admin-btn-secondary">
-            🔄 Обновить
-          </button>
-          <span
-            style={{ fontSize: "0.8rem", color: "#6b7280", marginLeft: "auto" }}
-          >
-            Всего: {complexes.length}
-          </span>
-        </div>
+        <AdminToolbar
+          buttons={[
+            {
+              label: "+ Добавить ЖК",
+              onClick: startCreate,
+              variant: "primary",
+            },
+            {
+              label: "🔄 Обновить",
+              onClick: loadComplexes,
+              variant: "secondary",
+            },
+          ]}
+          totalCount={complexes.length}
+        />
 
         <div className="admin-table-wrapper">
           <table className="admin-table">
@@ -192,6 +196,7 @@ export const ComplexesSection: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
+                      className="admin-input admin-input-sm"
                     />
                   </td>
                   <td>
@@ -203,6 +208,7 @@ export const ComplexesSection: React.FC = () => {
                           status: e.target.value as any,
                         })
                       }
+                      className="admin-select admin-select-sm"
                     >
                       <option value="строится">🏗️ Строится</option>
                       <option value="сдан">🏢 Сдан</option>
@@ -227,23 +233,30 @@ export const ComplexesSection: React.FC = () => {
                           isActive: e.target.value === "active",
                         })
                       }
+                      className="admin-select admin-select-sm"
                     >
                       <option value="active">✅ Активен</option>
                       <option value="inactive">❌ Неактивен</option>
                     </select>
                   </td>
                   <td>
-                    <div className="admin-actions">
-                      <button
-                        onClick={handleCreate}
-                        className="admin-btn-success"
-                      >
-                        💾 Создать
-                      </button>
-                      <button onClick={cancelEdit} className="admin-btn-danger">
-                        ✕
-                      </button>
-                    </div>
+                    <ActionButtons
+                      buttons={[
+                        {
+                          icon: "💾",
+                          onClick: handleCreate,
+                          variant: "success",
+                          title: "Создать",
+                        },
+                        {
+                          icon: "✕",
+                          onClick: cancelEdit,
+                          variant: "danger",
+                          title: "Отмена",
+                        },
+                      ]}
+                      size="sm"
+                    />
                   </td>
                 </tr>
               )}
@@ -259,6 +272,7 @@ export const ComplexesSection: React.FC = () => {
                           onChange={(e) =>
                             setFormData({ ...formData, name: e.target.value })
                           }
+                          className="admin-input admin-input-sm"
                         />
                       ) : (
                         complex.name
@@ -274,13 +288,14 @@ export const ComplexesSection: React.FC = () => {
                               status: e.target.value as any,
                             })
                           }
+                          className="admin-select admin-select-sm"
                         >
                           <option value="строится">🏗️ Строится</option>
                           <option value="сдан">🏢 Сдан</option>
                           <option value="проект">🏠 Проект</option>
                         </select>
                       ) : (
-                        <span>
+                        <span className="complex-status">
                           {complex.status === "строится" && "🏗️ Строится"}
                           {complex.status === "сдан" && "🏢 Сдан"}
                           {complex.status === "проект" && "🏠 Проект"}
@@ -289,9 +304,8 @@ export const ComplexesSection: React.FC = () => {
                     </td>
                     <td>
                       <button
-                        className="admin-btn-secondary"
+                        className="admin-btn admin-btn-secondary admin-btn-sm"
                         onClick={() => toggleExpand(complex.id)}
-                        style={{ fontSize: "0.75rem" }}
                       >
                         {expandedComplex === complex.id
                           ? "📄 Скрыть"
@@ -323,47 +337,52 @@ export const ComplexesSection: React.FC = () => {
                               isActive: e.target.value === "active",
                             })
                           }
+                          className="admin-select admin-select-sm"
                         >
                           <option value="active">✅ Активен</option>
                           <option value="inactive">❌ Неактивен</option>
                         </select>
-                      ) : complex.isActive ? (
-                        "✅ Активен"
                       ) : (
-                        "❌ Неактивен"
+                        <StatusBadge isActive={complex.isActive} />
                       )}
                     </td>
                     <td>
                       {editingId === complex.id ? (
-                        <div className="admin-actions">
-                          <button
-                            onClick={() => handleUpdate(complex.id)}
-                            className="admin-btn-success"
-                          >
-                            💾
-                          </button>
-                          <button
-                            onClick={cancelEdit}
-                            className="admin-btn-danger"
-                          >
-                            ✕
-                          </button>
-                        </div>
+                        <ActionButtons
+                          buttons={[
+                            {
+                              icon: "💾",
+                              onClick: () => handleUpdate(complex.id),
+                              variant: "success",
+                              title: "Сохранить",
+                            },
+                            {
+                              icon: "✕",
+                              onClick: cancelEdit,
+                              variant: "danger",
+                              title: "Отмена",
+                            },
+                          ]}
+                          size="sm"
+                        />
                       ) : (
-                        <div className="admin-actions">
-                          <button
-                            onClick={() => startEdit(complex)}
-                            className="admin-btn-primary"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            onClick={() => handleDelete(complex.id)}
-                            className="admin-btn-danger"
-                          >
-                            🗑️
-                          </button>
-                        </div>
+                        <ActionButtons
+                          buttons={[
+                            {
+                              icon: "✏️",
+                              onClick: () => startEdit(complex),
+                              variant: "primary",
+                              title: "Редактировать",
+                            },
+                            {
+                              icon: "🗑️",
+                              onClick: () => handleDelete(complex.id),
+                              variant: "danger",
+                              title: "Удалить",
+                            },
+                          ]}
+                          size="sm"
+                        />
                       )}
                     </td>
                   </tr>

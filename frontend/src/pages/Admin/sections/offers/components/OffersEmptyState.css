@@ -1,5 +1,7 @@
 /* frontend/src/pages/Admin/sections/offers/components/OffersEmptyState.css */
 
+@import "../../../admin-variables.css";
+
 .offers-empty-state {
   display: flex;
   flex-direction: column;

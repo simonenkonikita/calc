@@ -23,8 +23,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const allMenuItems = [
     { id: "dashboard", label: "Главная", icon: "📊" },
     { id: "companies", label: "Компании", icon: "🏢", adminOnly: true },
-    { id: "users", label: "Пользователи", icon: "👥", adminOnly: true },
     { id: "complexes", label: "Жилые комплексы", icon: "🏗️" },
+    { id: "users", label: "Пользователи", icon: "👥", adminOnly: true },
     { id: "banks", label: "Банки", icon: "🏦" },
     { id: "programs", label: "Программы", icon: "📋" },
     { id: "offers", label: "Офферы", icon: "📄" },
