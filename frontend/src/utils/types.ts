@@ -1,5 +1,37 @@
 // Типы данных
 
+// ========== КОМПАНИИ ==========
+export interface CompanyData {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  phone?: string;
+  address?: string;
+  website?: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// ========== ЖК С КОМПАНИЕЙ ==========
+export interface ComplexData {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
+  description: string;
+  banks: string[];
+  paymentTerms: string[];
+  promotions: string[];
+  specialOffers: string[];
+  materialsLink: string;
+  isActive: boolean;
+  companyId?: string; // 🔥 ID компании, к которой привязан ЖК
+  company?: CompanyData;
+  apartmentTypes: ApartmentType[];
+}
+
 // Расширенный тип для хранения оригинального индекса
 export interface BankProgramResultWithIndex extends BankProgramResult {
   _originalIndex: number;
@@ -105,6 +137,8 @@ export interface RawProjectData {
 
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========
 export interface CalculatorFormData {
+  companyId?: string; // ID строительной компании
+  companyName?: string;
   // Параметры объекта
   complex: string; // ЖК/ГК
   apartmentType: string; // Тип квартиры

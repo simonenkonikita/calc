@@ -6,6 +6,8 @@ import "./FormSection.css";
 import { useConfig } from "../../hooks/api/useConfig";
 import { useComplexData } from "../../hooks/api/useComplexData";
 import { usePriceData } from "../../hooks/api/usePriceData";
+import { useAuthExtended } from "../../hooks/ui/useAuth";
+import { useCompanies } from "../../hooks/api/useCompanies";
 
 interface FormSectionProps {
   formData: CalculatorFormData;
@@ -24,7 +26,9 @@ export const FormSection: React.FC<FormSectionProps> = ({
   isCalculating = false,
 }) => {
   // ✅ ВСЕ ХУКИ ВЫЗЫВАЮТСЯ НАВЕРХУ (ДО ЛЮБЫХ УСЛОВИЙ И РАННИХ ВОЗВРАТОВ)
+  const { user, isAdmin } = useAuthExtended();
   const { config, loading: configLoading } = useConfig();
+  const { companies, loading: companiesLoading } = useCompanies();
 
   const {
     complexes,
@@ -32,6 +36,8 @@ export const FormSection: React.FC<FormSectionProps> = ({
     loading: complexesLoading,
     error: complexesError,
     loadApartmentTypes,
+    setCompanyId,
+    selectedCompanyId,
   } = useComplexData();
 
   const { priceData, loading: priceLoading, fetchPrice } = usePriceData();
@@ -44,6 +50,25 @@ export const FormSection: React.FC<FormSectionProps> = ({
   const MAX_AREA = config?.maxArea ?? 999;
   const MIN_LOAN_TERM = config?.minLoanTerm ?? 1;
   const MAX_LOAN_TERM = config?.maxLoanTerm ?? 30;
+
+  // 🔥 ДЛЯ НЕ-АДМИНА - УСТАНАВЛИВАЕМ КОМПАНИЮ АВТОМАТИЧЕСКИ
+  useEffect(() => {
+    if (!isAdmin && user?.companyId) {
+      setCompanyId(user.companyId);
+      if (!formData.companyId) {
+        onInputChange("companyId", user.companyId);
+        onInputChange("companyName", user.companyName || user.company || "");
+      }
+    }
+  }, [
+    isAdmin,
+    user?.companyId,
+    user?.companyName,
+    user?.company,
+    setCompanyId,
+    formData.companyId,
+    onInputChange,
+  ]);
 
   // ✅ Загружаем типы квартир при изменении ЖК (ВСЕГДА ВЫЗЫВАЕТСЯ)
   useEffect(() => {
@@ -95,7 +120,9 @@ export const FormSection: React.FC<FormSectionProps> = ({
     if (formData.manualObjectCost && formData.manualObjectCost > 0) {
       return formData.manualObjectCost;
     }
-    return formData.area * pricePerSquareMeter;
+    // 🔥 ПРОВЕРЯЕМ, ЧТО ЦЕНА НЕ ОТРИЦАТЕЛЬНАЯ
+    const price = formData.area * pricePerSquareMeter;
+    return Math.max(0, price);
   }, [formData.manualObjectCost, formData.area, pricePerSquareMeter]);
 
   // ============================================================
@@ -103,6 +130,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
   // ============================================================
   const calculateObjectCost = useMemo(() => {
     if (formData.considerDepositInCost) {
+      // 🔥 НЕ ДОПУСКАЕМ ОТРИЦАТЕЛЬНУЮ СТОИМОСТЬ
       return Math.max(0, baseObjectCost - DEPOSIT_AMOUNT);
     }
     return baseObjectCost;
@@ -234,17 +262,21 @@ export const FormSection: React.FC<FormSectionProps> = ({
   // ============================================================
   const handleConsiderDepositChange = (e: ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
-    const objectCost = checked
-      ? baseObjectCost - DEPOSIT_AMOUNT
+
+    // 🔥 ПРОСТО ПЕРЕКЛЮЧАЕМ ФЛАГ
+    onInputChange("considerDepositInCost", checked);
+
+    const newObjectCost = checked
+      ? Math.max(0, baseObjectCost - DEPOSIT_AMOUNT)
       : baseObjectCost;
 
-    if (formData.manualDownPayment > objectCost) {
-      onInputChange("manualDownPayment", objectCost);
+    const currentManualDownPayment = Math.max(0, formData.manualDownPayment);
+
+    if (currentManualDownPayment > newObjectCost) {
+      onInputChange("manualDownPayment", newObjectCost);
       onInputChange("mortgageWithoutDownPayment", false);
       onInputChange("mortgagePartialDownPayment", false);
     }
-
-    onInputChange("considerDepositInCost", checked);
   };
 
   // ============================================================
@@ -324,6 +356,23 @@ export const FormSection: React.FC<FormSectionProps> = ({
   };
 
   // ============================================================
+  // 🔥 ОБРАБОТЧИК ДЛЯ ВЫБОРА КОМПАНИИ
+  // ============================================================
+  const handleCompanyChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const companyId = e.target.value;
+    setCompanyId(companyId);
+    onInputChange("companyId", companyId);
+
+    // Находим название компании
+    const company = companies.find((c) => c.id === companyId);
+    onInputChange("companyName", company?.name || "");
+
+    // Сбрасываем ЖК и тип квартиры
+    onInputChange("complex", "");
+    onInputChange("apartmentType", "");
+  };
+
+  // ============================================================
   // ОБРАБОТЧИК ДЛЯ ИЗМЕНЕНИЯ ЖК (сброс типа квартиры)
   // ============================================================
   const handleComplexChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -332,11 +381,17 @@ export const FormSection: React.FC<FormSectionProps> = ({
     onInputChange("apartmentType", "");
   };
 
+  // 🔥 ОПРЕДЕЛЯЕМ ДОСТУПНЫЕ ЖК
+  const effectiveCompanyId = isAdmin ? formData.companyId : user?.companyId;
+  const hasCompany = !!effectiveCompanyId;
+  const hasComplexes = complexes.length > 0;
+  const isComplexDisabled = !hasCompany || !hasComplexes;
+
   // ✅ РАННИЙ ВОЗВРАТ ТОЛЬКО ПОСЛЕ ВСЕХ ХУКОВ
-  if (configLoading || complexesLoading) {
+  if (configLoading || complexesLoading || companiesLoading) {
     return (
       <div className="form-section">
-        <div className="loading-config">Загрузка конфигурации...</div>
+        <div className="loading-config">Загрузка данных...</div>
       </div>
     );
   }
@@ -358,18 +413,62 @@ export const FormSection: React.FC<FormSectionProps> = ({
         <div className="form-block">
           <h2>Параметры объекта</h2>
           <div className="form-fields">
+            {/* 🔥 ПОЛЕ "Строительная компания" - ТОЛЬКО ДЛЯ АДМИНА */}
+            {isAdmin && (
+              <div className="field">
+                <label>Строительная компания</label>
+                <select
+                  value={formData.companyId || ""}
+                  onChange={handleCompanyChange}
+                >
+                  <option value="">Все компании</option>
+                  {companies.map((company) => (
+                    <option key={company.id} value={company.id}>
+                      {company.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* 🔥 ДЛЯ НЕ-АДМИНА - НАЗВАНИЕ КОМПАНИИ ТОЛЬКО ДЛЯ ЧТЕНИЯ */}
+            {!isAdmin && user?.companyName && (
+              <div className="field field-readonly">
+                <label>Строительная компания</label>
+                <div className="readonly-value">{user.companyName}</div>
+              </div>
+            )}
+
+            {/* Жилой комплекс */}
             <div className="field">
               <label>Жилой комплекс</label>
-              <select value={formData.complex} onChange={handleComplexChange}>
-                <option value="">Выберите ЖК</option>
+              <select
+                value={formData.complex}
+                onChange={handleComplexChange}
+                disabled={isComplexDisabled}
+              >
+                <option value="">
+                  {!hasCompany
+                    ? "Сначала выберите компанию"
+                    : !hasComplexes
+                      ? "Нет доступных ЖК"
+                      : "Выберите ЖК"}
+                </option>
                 {complexes.map((complex) => (
                   <option key={complex} value={complex}>
                     {complex}
                   </option>
                 ))}
               </select>
+              {!isAdmin && !effectiveCompanyId && (
+                <div className="field-hint">
+                  ⚠️ У вас нет привязанной компании. Обратитесь к
+                  администратору.
+                </div>
+              )}
             </div>
 
+            {/* Тип квартиры */}
             <div className="field">
               <label>Тип квартиры</label>
               <select
@@ -379,7 +478,13 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 }
                 disabled={!formData.complex || availableTypes.length === 0}
               >
-                <option value="">Выберите тип</option>
+                <option value="">
+                  {!formData.complex
+                    ? "Сначала выберите ЖК"
+                    : availableTypes.length === 0
+                      ? "Нет доступных типов"
+                      : "Выберите тип"}
+                </option>
                 {availableTypes.map((type) => (
                   <option key={type} value={type}>
                     {type}
@@ -391,6 +496,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
               )}
             </div>
 
+            {/* Площадь */}
             <div className="field">
               <label>Площадь (м²)</label>
               <input
@@ -405,6 +511,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
               />
             </div>
 
+            {/* Ручной ввод стоимости объекта */}
             <div className="field">
               <label>Ручной ввод стоимости объекта (₽)</label>
               <input
@@ -572,7 +679,10 @@ export const FormSection: React.FC<FormSectionProps> = ({
             className="calculate-btn"
             onClick={onCalculate}
             disabled={
-              isCalculating || !formData.complex || !formData.apartmentType
+              isCalculating ||
+              !effectiveCompanyId ||
+              !formData.complex ||
+              !formData.apartmentType
             }
           >
             {isCalculating ? "Расчёт..." : "🔄 Рассчитать"}
