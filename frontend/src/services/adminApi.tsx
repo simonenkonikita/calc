@@ -179,26 +179,21 @@ export const adminApi = {
   /**
    * Создать компанию с администратором (только для admin)
    */
-  async createCompanyWithAdmin(data: {
-    companyName: string;
-    adminEmail: string;
-    adminPassword: string;
-    adminFirstName?: string;
-    adminLastName?: string;
-    adminPhone?: string;
-    companyDescription?: string;
-    companyPhone?: string;
-    companyAddress?: string;
-    companyWebsite?: string;
-  }): Promise<{ company: AdminCompany; admin: AdminUser }> {
-    // 🔥 ИСПРАВЛЯЕМ URL: /auth/admin/companies -> /admin/companies
-    return fetchWithAuth<{ company: AdminCompany; admin: AdminUser }>(
-      `${API_URL}/admin/companies`,
-      {
-        method: "POST",
-        body: JSON.stringify(data),
-      },
-    );
+  // frontend/src/services/adminApi.ts
+
+  /**
+   * Создать компанию с администратором (только для admin)
+   */
+  async createCompany(data: {
+    name: string;
+    phone?: string;
+    address?: string;
+    website?: string;
+  }): Promise<AdminCompany> {
+    return fetchWithAuth<AdminCompany>(`${API_URL}/admin/companies`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   },
 
   /**

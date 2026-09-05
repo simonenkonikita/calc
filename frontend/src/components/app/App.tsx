@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AdminPage } from "../../pages/Admin/AdminPage";
+import { AdminPage } from "../../pages/Admin/AdminPage/AdminPage";
 import { LandingPage } from "../../pages/LandingPage/LandingPage";
 import MortgageCalculator from "../../pages/MortgageCalculator/MortgageCalculator";
 import { ProfilePage } from "../../pages/ProfilePage/ProfilePage";

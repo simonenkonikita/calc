@@ -157,11 +157,44 @@ export class AuthController {
   }
 
   // ============================================================
-  // СОЗДАНИЕ КОМПАНИИ С АДМИНИСТРАТОРОМ (ТОЛЬКО АДМИН)
+  // 🔥 СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ АДМИНИСТРАТОРОМ (ТОЛЬКО АДМИН)
   // ============================================================
-  async createCompanyWithAdmin(req: AuthRequest, res: Response) {
+  async createUserByAdmin(req: AuthRequest, res: Response) {
     try {
       const currentUser = req.user;
+
+      // Проверяем права - только admin
+      if (!currentUser || currentUser.role !== "admin") {
+        return res.status(403).json({
+          success: false,
+          error:
+            "Доступ запрещен. Только администратор проекта может создавать пользователей",
+        });
+      }
+
+      const user = await authService.createUserByAdmin(req.body);
+
+      res.status(201).json({
+        success: true,
+        message: "Пользователь создан",
+        data: user,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: error.message || "Ошибка создания пользователя",
+      });
+    }
+  }
+
+  // ============================================================
+  // 🔥 СОЗДАНИЕ КОМПАНИИ БЕЗ АДМИНИСТРАТОРА (ТОЛЬКО АДМИН)
+  // ============================================================
+  async createCompany(req: AuthRequest, res: Response) {
+    try {
+      const currentUser = req.user;
+
+      // Проверяем права - только admin
       if (!currentUser || currentUser.role !== "admin") {
         return res.status(403).json({
           success: false,
@@ -170,36 +203,39 @@ export class AuthController {
         });
       }
 
-      const fullUser = await authService.getUserById(currentUser.id);
-      if (!fullUser) {
-        return res.status(404).json({
+      const { name, phone, address, website, description } = req.body;
+
+      // Валидация
+      if (!name || name.trim() === "") {
+        return res.status(400).json({
           success: false,
-          error: "Пользователь не найден",
+          error: "Название компании обязательно",
         });
       }
 
-      const result = await authService.createCompanyWithAdmin(
-        req.body,
-        fullUser,
-      );
+      // Проверяем, что компания не существует
+      const existing = await authService.getCompanyByName(name);
+      if (existing) {
+        return res.status(409).json({
+          success: false,
+          error: `Компания с названием "${name}" уже существует`,
+        });
+      }
+
+      // Создаем компанию
+      const company = await authService.createCompany({
+        name: name.trim(),
+        phone: phone || "",
+        address: address || "",
+        website: website || "",
+        isActive: true,
+        createdById: currentUser.id,
+      });
 
       res.status(201).json({
         success: true,
-        message: "Компания и администратор созданы",
-        data: {
-          company: {
-            id: result.company.id,
-            name: result.company.name,
-            slug: result.company.slug,
-          },
-          admin: {
-            id: result.admin.id,
-            email: result.admin.email,
-            firstName: result.admin.firstName,
-            lastName: result.admin.lastName,
-            role: result.admin.role,
-          },
-        },
+        message: "Компания создана",
+        data: company,
       });
     } catch (error: any) {
       res.status(400).json({
@@ -208,7 +244,6 @@ export class AuthController {
       });
     }
   }
-
   // ============================================================
   // СОЗДАНИЕ МЕНЕДЖЕРА КОМПАНИИ
   // ============================================================

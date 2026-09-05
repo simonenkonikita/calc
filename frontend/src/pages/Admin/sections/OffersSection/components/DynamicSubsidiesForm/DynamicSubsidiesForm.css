@@ -1,0 +1,349 @@
+/* frontend/src/pages/Admin/sections/offers/components/DynamicSubsidiesForm.css */
+
+@import "../../../../admin-variables.css";
+
+.dynamic-form {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+}
+
+.dynamic-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.dynamic-form-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dynamic-form-header h4::before {
+  content: "💰";
+  font-size: 1.1rem;
+}
+
+.dynamic-form .admin-table-wrapper {
+  background: var(--bg-white);
+  border-radius: var(--radius-sm);
+  overflow: auto;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+}
+
+.dynamic-form .admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 1000px;
+}
+
+.dynamic-form .admin-table th {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gray-500);
+  border-bottom: 2px solid var(--gray-200);
+  background: var(--gray-50);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.dynamic-form .admin-table td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--gray-100);
+  vertical-align: middle;
+}
+
+/* 🔥 Стили для drag-and-drop */
+.dynamic-form .admin-table tbody tr {
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+  user-select: none;
+  cursor: default !important;
+}
+
+.dynamic-form .admin-table tbody tr:hover {
+  background-color: var(--gray-50);
+}
+
+.dynamic-form .admin-table tbody tr:active {
+  cursor: default !important;
+}
+
+.dynamic-form .admin-table tbody tr.dragging {
+  opacity: 0.5;
+  background-color: var(--gray-200);
+}
+
+.dynamic-form .admin-table tbody tr.drag-over {
+  border-bottom: 2px solid var(--primary);
+  background-color: var(--primary-bg);
+}
+
+.dynamic-form .admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* 🔥 Drag handle */
+.drag-handle {
+  display: inline-block;
+  font-size: 1.2rem;
+  color: var(--gray-400);
+  cursor: grab;
+  user-select: none;
+  transition: all 0.2s;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: transparent;
+}
+
+.drag-handle:hover {
+  color: var(--gray-600);
+  background: var(--gray-100);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  background: var(--gray-200);
+  color: var(--gray-800);
+}
+
+/* 🔥 Поля ввода */
+.dynamic-form .admin-table input,
+.dynamic-form .admin-table select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  background: var(--bg-white);
+  width: 100%;
+  transition: var(--transition);
+  color: var(--gray-800);
+  min-height: 36px;
+}
+
+.dynamic-form .admin-table input:focus,
+.dynamic-form .admin-table select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.dynamic-form .admin-table input::placeholder {
+  color: var(--gray-400);
+  font-size: 0.75rem;
+}
+
+.dynamic-form .admin-table input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.dynamic-form .admin-table input[type="number"]::-webkit-outer-spin-button,
+.dynamic-form .admin-table input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 🔥 Стили для номера строки */
+.dynamic-form .admin-table .row-number {
+  text-align: center;
+  font-weight: 600;
+  color: var(--gray-500);
+  font-size: 0.8rem;
+  min-width: 30px;
+}
+
+/* ❌ УДАЛЯЕМ ВСЕ ПЕРЕОПРЕДЕЛЕНИЯ КНОПОК */
+/* Они будут использоваться из AdminLayout.css */
+
+/* 🔥 Кнопка дублирования - оставляем только кастомные стили */
+.admin-btn-duplicate {
+  background: var(--info-bg);
+  color: var(--info);
+  border: 1px solid var(--info-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.admin-btn-duplicate:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.admin-btn-duplicate.admin-btn-xs {
+  padding: 0.15rem 0.35rem;
+  font-size: 0.65rem;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+/* 🔥 Пустое состояние */
+.dynamic-form .empty-state {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  color: var(--gray-500);
+  font-size: 0.9rem;
+}
+
+.dynamic-form .empty-state p {
+  margin: 0;
+}
+
+.dynamic-form .empty-state .empty-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================================
+   🔥 РЕЖИМ ПРОСМОТРА
+   ============================================================ */
+
+.admin-table.view-mode tbody tr {
+  cursor: default !important;
+}
+
+.admin-table.view-mode tbody tr:hover {
+  background-color: var(--gray-50);
+}
+
+.admin-table.view-mode td {
+  padding: 0.6rem 0.8rem;
+}
+
+/* Значения в режиме просмотра */
+.view-value {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  font-weight: 500;
+  color: var(--gray-800);
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  border: 1px solid var(--gray-100);
+  min-width: 40px;
+}
+
+.view-empty {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  color: var(--gray-400);
+  font-style: italic;
+  font-size: 0.8rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--gray-200);
+}
+
+/* ============================================================
+   🔥 АДАПТИВ
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .dynamic-form {
+    padding: 0.75rem;
+  }
+
+  .dynamic-form-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dynamic-form .admin-table {
+    font-size: 0.75rem;
+    min-width: 750px;
+  }
+
+  .dynamic-form .admin-table th {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.6rem;
+  }
+
+  .dynamic-form .admin-table td {
+    padding: 0.3rem 0.4rem;
+  }
+
+  .dynamic-form .admin-table input,
+  .dynamic-form .admin-table select {
+    padding: 0.3rem 0.4rem;
+    font-size: 0.75rem;
+    min-height: 32px;
+  }
+
+  .drag-handle {
+    font-size: 1rem;
+    padding: 3px 6px;
+  }
+
+  .view-value,
+  .view-empty {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dynamic-form {
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .dynamic-form .admin-table {
+    font-size: 0.65rem;
+    min-width: 650px;
+  }
+
+  .dynamic-form .admin-table th {
+    padding: 0.3rem 0.35rem;
+    font-size: 0.55rem;
+  }
+
+  .dynamic-form .admin-table td {
+    padding: 0.2rem 0.25rem;
+  }
+
+  .dynamic-form .admin-table input,
+  .dynamic-form .admin-table select {
+    padding: 0.2rem 0.3rem;
+    font-size: 0.65rem;
+    min-height: 28px;
+  }
+
+  .drag-handle {
+    font-size: 0.9rem;
+    padding: 2px 4px;
+  }
+
+  .view-value,
+  .view-empty {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.3rem;
+  }
+}

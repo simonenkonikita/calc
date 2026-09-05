@@ -54,13 +54,23 @@ router.delete(
 );
 
 // ============================================================
-// СОЗДАНИЕ КОМПАНИИ С АДМИНИСТРАТОРОМ (ТОЛЬКО АДМИН)
+// 🔥 СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ АДМИНИСТРАТОРОМ
+// ============================================================
+router.post(
+  "/admin/users",
+  authMiddleware,
+  adminOnly,
+  authController.createUserByAdmin.bind(authController),
+);
+
+// ============================================================
+// СОЗДАНИЕ КОМПАНИИ(ТОЛЬКО АДМИН)
 // ============================================================
 router.post(
   "/admin/companies",
   authMiddleware,
   adminOnly,
-  authController.createCompanyWithAdmin.bind(authController),
+  authController.createCompany.bind(authController),
 );
 
 // ============================================================

@@ -59,84 +59,98 @@ export class AuthService {
   // ============================================================
   // СОЗДАНИЕ КОМПАНИИ И ПЕРВОГО АДМИНИСТРАТОРА (ТОЛЬКО АДМИН)
   // ============================================================
-  async createCompanyWithAdmin(
-    data: {
-      companyName: string;
-      adminEmail: string;
-      adminPassword: string;
-      adminFirstName?: string;
-      adminLastName?: string;
-      adminPhone?: string;
-      companyDescription?: string;
-      companyPhone?: string;
-      companyAddress?: string;
-      companyWebsite?: string;
-    },
-    currentUser: User,
-  ): Promise<{ company: Company; admin: User }> {
-    if (currentUser.role !== "admin") {
-      throw new Error(
-        "Доступ запрещен. Только администратор проекта может создавать компании",
-      );
-    }
+  /**
+   * Создать компанию без администратора
+   */
+  async createCompany(data: {
+    name: string;
+    phone?: string;
+    address?: string;
+    website?: string;
+    isActive?: boolean;
+    createdById?: string;
+  }): Promise<Company> {
+    const { generateSlug } = await import("../utils/slugify");
+    const slug = generateSlug(data.name);
 
-    const existingCompany = await this.companyRepository.findOne({
-      where: { name: data.companyName },
+    const company = this.companyRepository.create({
+      name: data.name,
+      slug: slug,
+      phone: data.phone || "",
+      address: data.address || "",
+      website: data.website || "",
+      isActive: data.isActive !== undefined ? data.isActive : true,
+      createdById: data.createdById || null,
     });
 
-    if (existingCompany) {
-      throw new Error(
-        `Компания с названием "${data.companyName}" уже существует`,
-      );
-    }
+    await this.companyRepository.save(company);
+    return company;
+  }
 
+  /**
+   * Найти компанию по названию
+   */
+  async getCompanyByName(name: string): Promise<Company | null> {
+    return this.companyRepository.findOne({
+      where: { name },
+    });
+  }
+
+  // ============================================================
+  // 🔥 СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ АДМИНИСТРАТОРОМ (ТОЛЬКО АДМИН)
+  // ============================================================
+  async createUserByAdmin(data: {
+    email: string;
+    password: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    role?: string;
+    companyId?: string;
+    position?: string;
+  }): Promise<Omit<User, "password">> {
+    // Проверяем, что пользователь не существует
     const existingUser = await this.userRepository.findOne({
-      where: { email: data.adminEmail },
+      where: { email: data.email },
     });
 
     if (existingUser) {
-      throw new Error(
-        `Пользователь с email "${data.adminEmail}" уже существует`,
-      );
+      throw new Error(`Пользователь с email "${data.email}" уже существует`);
     }
 
-    const { generateSlug } = await import("../utils/slugify");
-    const slug = generateSlug(data.companyName);
+    // Валидируем роль
+    const validRoles: UserRole[] = [
+      "admin",
+      "developer_admin",
+      "developer_manager",
+      "agent",
+    ];
+    const role =
+      data.role && validRoles.includes(data.role as UserRole)
+        ? (data.role as UserRole)
+        : "developer_manager";
 
-    const company = this.companyRepository.create({
-      name: data.companyName,
-      slug: slug,
-      description: data.companyDescription || "",
-      phone: data.companyPhone || "",
-      address: data.companyAddress || "",
-      website: data.companyWebsite || "",
+    // Хешируем пароль (сохраняем только хеш!)
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    // Создаем пользователя
+    const user = this.userRepository.create({
+      email: data.email,
+      password: hashedPassword, // ← сохраняем хеш
+      firstName: data.firstName || "",
+      lastName: data.lastName || "",
+      phone: data.phone || "",
+      role: role,
+      companyId: data.companyId || null,
+      position: data.position || "",
       isActive: true,
-      createdById: currentUser.id,
     });
 
-    await this.companyRepository.save(company);
+    await this.userRepository.save(user);
 
-    const hashedPassword = await bcrypt.hash(data.adminPassword, 10);
-
-    const admin = this.userRepository.create({
-      email: data.adminEmail,
-      password: hashedPassword,
-      firstName: data.adminFirstName || "",
-      lastName: data.adminLastName || "",
-      phone: data.adminPhone || "",
-      role: "developer_admin",
-      companyId: company.id,
-      company: company,
-      createdById: currentUser.id,
-    });
-
-    await this.userRepository.save(admin);
-
-    company.adminId = admin.id;
-    company.admin = admin;
-    await this.companyRepository.save(company);
-
-    return { company, admin };
+    // 🔥 Возвращаем пользователя БЕЗ пароля
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword as Omit<User, "password">;
   }
 
   // ============================================================
@@ -446,9 +460,14 @@ export class AuthService {
     if (data.position !== undefined) user.position = data.position;
     if (data.isActive !== undefined) user.isActive = data.isActive;
 
-    // Только admin может менять роль и компанию
+    // 🔥 Только admin может менять роль и компанию
     if (currentUser.role === "admin") {
-      if (data.role !== undefined) user.role = data.role;
+      const oldRole = user.role;
+      const oldCompanyId = user.companyId;
+
+      if (data.role !== undefined) {
+        user.role = data.role;
+      }
 
       if (data.companyId !== undefined) {
         user.companyId = data.companyId;
@@ -460,6 +479,41 @@ export class AuthService {
           user.company = company || null;
         } else {
           user.company = null;
+        }
+      }
+
+      // 🔥 ЕСЛИ ПОЛЬЗОВАТЕЛЬ СТАЛ АДМИНИСТРАТОРОМ КОМПАНИИ
+      if (
+        user.role === "developer_admin" &&
+        user.companyId &&
+        (oldRole !== "developer_admin" || oldCompanyId !== user.companyId)
+      ) {
+        // Находим компанию
+        const company = await this.companyRepository.findOne({
+          where: { id: user.companyId },
+        });
+
+        if (company) {
+          // 🔥 Обновляем adminId в компании
+          company.adminId = user.id;
+          await this.companyRepository.save(company);
+        }
+      }
+
+      // 🔥 ЕСЛИ ПОЛЬЗОВАТЕЛЬ БЫЛ АДМИНИСТРАТОРОМ, А ТЕПЕРЬ НЕТ
+      if (
+        oldRole === "developer_admin" &&
+        oldCompanyId &&
+        user.role !== "developer_admin"
+      ) {
+        const company = await this.companyRepository.findOne({
+          where: { id: oldCompanyId },
+        });
+
+        if (company && company.adminId === user.id) {
+          // 🔥 Убираем adminId из компании
+          company.adminId = null;
+          await this.companyRepository.save(company);
         }
       }
     }
@@ -482,6 +536,7 @@ export class AuthService {
       throw new Error("Пользователь не найден");
     }
 
+    // Проверка прав
     if (currentUser.role === "admin") {
       // Admin может удалять всех
     } else if (currentUser.role === "developer_admin") {
@@ -506,7 +561,24 @@ export class AuthService {
       throw new Error("Нельзя удалить самого себя");
     }
 
+    // 🔥 1. Проверяем, является ли пользователь администратором компании
+    const company = await this.companyRepository.findOne({
+      where: { adminId: user.id },
+    });
+
+    if (company) {
+      // 🔥 2. Убираем связь с компанией
+      company.adminId = null;
+      company.admin = null;
+      await this.companyRepository.save(company);
+      console.log(
+        `✅ Убрана связь администратора ${user.email} с компанией ${company.name}`,
+      );
+    }
+
+    // 🔥 3. Удаляем пользователя
     await this.userRepository.remove(user);
+    console.log(`✅ Пользователь ${user.email} удален`);
   }
 
   // ============================================================
