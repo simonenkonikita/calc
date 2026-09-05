@@ -1,6 +1,7 @@
 // hooks/useComplexData.ts
 import { useState, useEffect, useCallback } from "react";
 import { api } from "../../services/api";
+import { useAuthExtended } from "../ui/useAuth";
 
 interface ApartmentTypeData {
   type: string;
@@ -12,8 +13,18 @@ interface ApartmentTypeData {
   isActive: boolean;
 }
 
+interface ComplexData {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
+  isActive: boolean;
+  companyId?: string;
+}
+
 interface UseComplexDataReturn {
   complexes: string[];
+  complexData: ComplexData[];
   apartmentTypes: ApartmentTypeData[];
   loading: boolean;
   error: string | null;
@@ -22,44 +33,69 @@ interface UseComplexDataReturn {
 }
 
 export const useComplexData = () => {
+  const { user, isAdmin } = useAuthExtended();
+
   const [complexes, setComplexes] = useState<string[]>([]);
+  const [complexData, setComplexData] = useState<ComplexData[]>([]);
   const [apartmentTypes, setApartmentTypes] = useState<ApartmentTypeData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // 🔥 ИЗВЛЕКАЕМ companyId В ОТДЕЛЬНУЮ ПЕРЕМЕННУЮ
+  const companyId = user?.companyId;
+
   const loadComplexes = useCallback(async () => {
     setLoading(true);
     setError(null);
+
     try {
       const response = await api.getComplexes();
 
-      if (response.success && Array.isArray(response.data)) {
-        // Извлекаем имена из объектов
-        const names = response.data.map((item: any) => {
-          if (item && typeof item === "object" && "name" in item) {
-            return item.name;
-          }
-          if (item && typeof item === "object" && "complexName" in item) {
-            return item.complexName;
-          }
-          if (typeof item === "string") {
-            return item;
-          }
-          return String(item);
-        });
+      console.log("📊 API Response:", response);
 
+      if (response.success && Array.isArray(response.data)) {
+        let filteredData = response.data;
+
+        // 🔥 ИСПОЛЬЗУЕМ companyId ИЗ ЗАМКНУТОЙ ПЕРЕМЕННОЙ
+        if (!isAdmin && companyId) {
+          filteredData = response.data.filter(
+            (item: any) => item.companyId === companyId,
+          );
+          console.log(
+            `🔍 Filtered complexes for company ${companyId}:`,
+            filteredData.length,
+          );
+        }
+
+        const complexList = filteredData.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          slug: item.slug,
+          status: item.status,
+          isActive: item.isActive,
+          companyId: item.companyId,
+        }));
+
+        const names = complexList.map((item) => item.name);
+
+        setComplexData(complexList);
         setComplexes(names);
+
+        console.log(`✅ Loaded ${names.length} complexes`);
       } else {
         setError(response.error || "Failed to load complexes");
         setComplexes([]);
+        setComplexData([]);
       }
     } catch (err) {
+      console.error("❌ Error loading complexes:", err);
       setError(err instanceof Error ? err.message : "Failed to load complexes");
       setComplexes([]);
+      setComplexData([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAdmin, companyId]); // ✅ ТОЧНЫЕ ЗАВИСИМОСТИ
 
   const loadApartmentTypes = useCallback(async (complexName: string) => {
     if (!complexName) {
@@ -96,14 +132,15 @@ export const useComplexData = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, []); // ✅ НЕТ ЗАВИСИМОСТЕЙ
 
   useEffect(() => {
     loadComplexes();
-  }, [loadComplexes]);
+  }, [loadComplexes]); // ✅ ЗАВИСИТ ОТ loadComplexes
 
   return {
     complexes,
+    complexData,
     apartmentTypes,
     loading,
     error,

@@ -8,18 +8,23 @@ import { ConfigService } from "../services/ConfigService";
 import {
   getMortgageSurcharge,
   getPriceInfo,
-} from "../utils/mortgageSurcharges"; // ✅ Используем утилиту
+} from "../utils/mortgageSurcharges";
 import { ApartmentType } from "../entities/ApartmentType";
 import { Offer } from "../entities/Offer";
 import { Complex } from "../entities/Complex";
+import { AuthRequest } from "../types/auth.types";
 
 const complexService = new ComplexService();
 const offerService = new OfferService();
 const configService = new ConfigService();
 
-export const calculate = async (req: Request, res: Response) => {
+// ============================================================
+// 🔥 CALCULATE С ПРОВЕРКОЙ ПРАВ
+// ============================================================
+export const calculate = async (req: AuthRequest, res: Response) => {
   try {
     const { formData } = req.body;
+    const user = req.user;
 
     // 1. Получаем ЖК из БД
     const complex = await complexService.getComplexByName(formData.complex);
@@ -28,6 +33,17 @@ export const calculate = async (req: Request, res: Response) => {
         success: false,
         error: "Complex not found",
       });
+    }
+
+    // 🔥 ПРОВЕРЯЕМ ПРАВА ДОСТУПА
+    if (user && user.role !== "admin") {
+      if (complex.companyId !== user.companyId) {
+        return res.status(403).json({
+          success: false,
+          error:
+            "Access denied. You don't have permission to calculate for this complex",
+        });
+      }
     }
 
     // 2. Получаем тип квартиры
@@ -45,7 +61,7 @@ export const calculate = async (req: Request, res: Response) => {
     // 3. Базовая цена из БД
     const basePrice = Number(apartmentType.pricePerSquareMeter);
 
-    // 4. Получаем конфиг из БД (ОДИН РАЗ)
+    // 4. Получаем конфиг из БД
     const config = await configService.getConfig();
     const variables = await configService.getVariables();
 
@@ -78,17 +94,17 @@ export const calculate = async (req: Request, res: Response) => {
       formData.complex,
     );
 
-    // 10. 🔥 Вызываем калькулятор, передаём minDownPaymentPercent из конфига
+    // 9. Вызываем калькулятор
     const result = calculateFullMortgage(
       formData,
       offers,
       variables,
       finalPricePerM2,
       config.minDownPaymentPercent,
-      formData.area, // ✅ Передаём из конфига
+      formData.area,
     );
 
-    // 11. Возвращаем результат
+    // 10. Возвращаем результат
     res.json({
       success: true,
       data: {
@@ -114,11 +130,30 @@ export const calculate = async (req: Request, res: Response) => {
   }
 };
 
-export const getComplexes = async (req: Request, res: Response) => {
+// ============================================================
+// 🔥 GET COMPLEXES С ФИЛЬТРАЦИЕЙ ПО КОМПАНИИ
+// ============================================================
+export const getComplexes = async (req: AuthRequest, res: Response) => {
   try {
+    const user = req.user;
+
     const complexes = await complexService.getAllComplexes();
-    // ✅ Возвращаем полную информацию, а не только имена
-    const complexData = complexes.map((c: Complex) => ({
+
+    let filteredComplexes = complexes;
+
+    if (user && user.role !== "admin" && user.companyId) {
+      filteredComplexes = complexes.filter(
+        (c: Complex) => c.companyId === user.companyId,
+      );
+      console.log(
+        `🔍 Filtered to ${filteredComplexes.length} complexes for company ${user.companyId}`,
+      );
+    } else if (user && user.role !== "admin" && !user.companyId) {
+      filteredComplexes = [];
+      console.log("⚠️ User has no company, returning empty list");
+    }
+
+    const complexData = filteredComplexes.map((c: Complex) => ({
       id: c.id,
       name: c.name,
       slug: c.slug,
@@ -130,6 +165,7 @@ export const getComplexes = async (req: Request, res: Response) => {
       specialOffers: c.specialOffers || [],
       materialsLink: c.materialsLink,
       isActive: c.isActive,
+      companyId: c.companyId,
       apartmentTypes:
         c.apartmentTypes?.map((at: ApartmentType) => ({
           id: at.id,
@@ -150,9 +186,14 @@ export const getComplexes = async (req: Request, res: Response) => {
   }
 };
 
-export const getComplexTypes = async (req: Request, res: Response) => {
+// ============================================================
+// 🔥 GET COMPLEX TYPES С ПРОВЕРКОЙ ПРАВ
+// ============================================================
+export const getComplexTypes = async (req: AuthRequest, res: Response) => {
   try {
     const { complexName } = req.params;
+    const user = req.user;
+
     const complex = await complexService.getComplexByName(complexName);
 
     if (!complex) {
@@ -160,6 +201,16 @@ export const getComplexTypes = async (req: Request, res: Response) => {
         success: false,
         error: "Complex not found",
       });
+    }
+
+    if (user && user.role !== "admin") {
+      if (complex.companyId !== user.companyId) {
+        return res.status(403).json({
+          success: false,
+          error:
+            "Access denied. You don't have permission to view this complex",
+        });
+      }
     }
 
     const types =
@@ -183,10 +234,17 @@ export const getComplexTypes = async (req: Request, res: Response) => {
   }
 };
 
-export const getPricePerSquareMeter = async (req: Request, res: Response) => {
+// ============================================================
+// 🔥 GET PRICE PER SQUARE METER С ПРОВЕРКОЙ ПРАВ
+// ============================================================
+export const getPricePerSquareMeter = async (
+  req: AuthRequest,
+  res: Response,
+) => {
   try {
     const complex = req.query.complex as string;
     const type = req.query.type as string;
+    const user = req.user;
 
     if (!complex || !type) {
       return res.status(400).json({
@@ -203,6 +261,16 @@ export const getPricePerSquareMeter = async (req: Request, res: Response) => {
       });
     }
 
+    if (user && user.role !== "admin") {
+      if (complexData.companyId !== user.companyId) {
+        return res.status(403).json({
+          success: false,
+          error:
+            "Access denied. You don't have permission to view this complex",
+        });
+      }
+    }
+
     const apartmentType = complexData.apartmentTypes?.find(
       (at: ApartmentType) => at.type === type,
     );
@@ -214,7 +282,6 @@ export const getPricePerSquareMeter = async (req: Request, res: Response) => {
       });
     }
 
-    // 🔥 Возвращаем объект с ценой и surcharges
     res.json({
       success: true,
       data: {
@@ -231,81 +298,65 @@ export const getPricePerSquareMeter = async (req: Request, res: Response) => {
   }
 };
 
-// ✅ НОВЫЙ ЭНДПОИНТ: Получение только наценок
-export const getSurcharges = async (req: Request, res: Response) => {
-  try {
-    const complex = req.query.complex as string;
-    const type = req.query.type as string;
-
-    if (!complex || !type) {
-      return res.status(400).json({
-        success: false,
-        error: "Missing parameters: complex and type are required",
-      });
-    }
-
-    const priceInfo = await getPriceInfo(complex, type);
-
-    if (!priceInfo) {
-      return res.status(404).json({
-        success: false,
-        error: "Price info not found",
-      });
-    }
-
-    res.json({
-      success: true,
-      data: {
-        surcharges: priceInfo.surcharges,
-        pricePerSquareMeter: priceInfo.pricePerSquareMeter,
-      },
-    });
-  } catch (error) {
-    console.error("Error getting surcharges:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to get surcharges",
-    });
-  }
-};
-
-export const getAvailableBanks = async (req: Request, res: Response) => {
+// ============================================================
+// 🔥 GET AVAILABLE BANKS С ПРОВЕРКОЙ ПРАВ
+// ============================================================
+export const getAvailableBanks = async (req: AuthRequest, res: Response) => {
   try {
     const { complexName, apartmentType } = req.params;
+    const user = req.user;
 
-    // ✅ Получаем банки с наценками
-    const offers = await offerService.getOffersByComplex(complexName);
     const complex = await complexService.getComplexByName(complexName);
+    if (!complex) {
+      return res.status(404).json({
+        success: false,
+        error: "Complex not found",
+      });
+    }
 
-    // Находим тип квартиры для получения наценок
-    const apartmentTypeData = complex?.apartmentTypes?.find(
+    if (user && user.role !== "admin") {
+      if (complex.companyId !== user.companyId) {
+        return res.status(403).json({
+          success: false,
+          error:
+            "Access denied. You don't have permission to view this complex",
+        });
+      }
+    }
+
+    const offers = await offerService.getOffersByComplex(complexName);
+
+    const apartmentTypeData = complex.apartmentTypes?.find(
       (at: ApartmentType) => at.type === apartmentType,
     );
 
-    const banks = offers.map((offer: Offer) => ({
-      name: offer.bank.name,
-      bankId: offer.bank.id,
-      offers: [offer],
-    }));
+    if (!apartmentTypeData) {
+      return res.status(404).json({
+        success: false,
+        error: "Apartment type not found",
+      });
+    }
 
-    // Группируем по банкам
     const banksMap = new Map();
-    banks.forEach((bank: any) => {
-      if (!banksMap.has(bank.name)) {
-        banksMap.set(bank.name, {
-          name: bank.name,
-          bankId: bank.bankId,
+    offers.forEach((offer: Offer) => {
+      if (!offer.bank) return;
+
+      if (!banksMap.has(offer.bank.id)) {
+        banksMap.set(offer.bank.id, {
+          id: offer.bank.id,
+          name: offer.bank.name,
+          slug: offer.bank.slug,
           offers: [],
         });
       }
-      banksMap.get(bank.name).offers.push(...bank.offers);
+      banksMap.get(offer.bank.id).offers.push(offer);
     });
 
     res.json({
       success: true,
       data: {
         banks: Array.from(banksMap.values()),
-        surcharges: apartmentTypeData?.surcharges || {
+        surcharges: apartmentTypeData.surcharges || {
           withoutDownPayment: 0,
           partialDownPayment: 0,
         },

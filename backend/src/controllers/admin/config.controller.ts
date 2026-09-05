@@ -29,7 +29,6 @@ export class ConfigController extends BaseController {
   async create(req: Request, res: Response) {
     try {
       const data = req.body;
-      console.log("📝 Creating config with data:", data);
 
       // Валидация обязательных полей
       const requiredFields = [

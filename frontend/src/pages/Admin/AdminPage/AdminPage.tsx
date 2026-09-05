@@ -4,8 +4,6 @@ import React, { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { BanksSection } from "../components/BanksSection/BanksSection";
 import { ComplexesSection } from "../sections/ComplexesSection/ComplexesSection";
-import { RatesSection } from "../sections/RatesSection/RatesSection";
-import { SubsidiesSection } from "../sections/SubsidiesSection/SubsidiesSection";
 import { ConfigSection } from "../sections/ConfigSection/ConfigSection";
 import { ProgramsSection } from "../sections/ProgramsSection/ProgramsSection";
 import { OffersSection } from "../sections/OffersSection";
@@ -87,10 +85,6 @@ export const AdminPage: React.FC = () => {
         return <ComplexesSection />;
       case "offers":
         return <OffersSection />;
-      case "rates":
-        return <RatesSection />;
-      case "subsidies":
-        return <SubsidiesSection />;
       case "programs":
         return <ProgramsSection />;
       case "config":

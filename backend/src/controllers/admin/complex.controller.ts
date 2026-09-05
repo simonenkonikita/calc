@@ -36,7 +36,7 @@ export class ComplexController extends BaseController {
   }
 
   /**
-   * 🔥 ПОЛУЧИТЬ ЖК ПО ID (НОВЫЙ МЕТОД)
+   *  ПОЛУЧИТЬ ЖК ПО ID
    */
   async getOne(req: AuthRequest, res: Response) {
     try {

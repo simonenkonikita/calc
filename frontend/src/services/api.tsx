@@ -1,3 +1,5 @@
+// frontend/src/services/api.ts
+
 import {
   CalculatorFormData,
   ConfigData,
@@ -7,7 +9,40 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
-// ==================== ТИПЫ ====================
+// ==================== 🔥 ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+
+/**
+ * Получение токена из localStorage
+ */
+const getToken = (): string | null => {
+  return localStorage.getItem("token");
+};
+
+/**
+ * Получение заголовков с авторизацией
+ */
+const getAuthHeaders = (): HeadersInit => {
+  const token = getToken();
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
+
+/**
+ * Fetch с авторизацией
+ */
+const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...getAuthHeaders(),
+      ...(options.headers || {}),
+    },
+    credentials: "include",
+  });
+  return response;
+};
 
 // ==================== API КЛИЕНТ ====================
 
@@ -15,41 +50,30 @@ export const api = {
   // ==================== КАЛЬКУЛЯТОР ====================
 
   /**
-   * Рассчет стоимости квартиры на основе переданных данных
-   * @param formData - данные формы (площадь, этаж, и т.д.)
-   * @param pricePerSquareMeter - цена за квадратный метр (опционально)
-   * @returns Promise с результатом рассчета
-   * @endpoint POST /calculator/calculate
+   * Расчет стоимости квартиры
    */
   async calculate(formData: CalculatorFormData, pricePerSquareMeter?: number) {
-    const response = await fetch(`${API_URL}/calculator/calculate`, {
+    const response = await fetchWithAuth(`${API_URL}/calculator/calculate`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ formData, pricePerSquareMeter }),
     });
     return response.json();
   },
 
   /**
-   * Получение списка всех жилых комплексов
-   * @returns Promise с массивом комплексов
-   * @endpoint GET /calculator/complexes
+   * Получение списка всех жилых комплексов (с фильтрацией по компании)
    */
   async getComplexes() {
-    const response = await fetch(`${API_URL}/calculator/complexes`);
+    // 🔥 ИСПОЛЬЗУЕМ /calculator/complexes С АВТОРИЗАЦИЕЙ
+    const response = await fetchWithAuth(`${API_URL}/calculator/complexes`);
     return response.json();
   },
 
   /**
    * Получение типов квартир в конкретном жилом комплексе
-   * @param complexName - название жилого комплекса
-   * @returns Promise с массивом типов квартир
-   * @endpoint GET /calculator/complexes/{complexName}/types
    */
   async getComplexTypes(complexName: string) {
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_URL}/calculator/complexes/${encodeURIComponent(complexName)}/types`,
     );
     return response.json();
@@ -57,13 +81,9 @@ export const api = {
 
   /**
    * Получение цены для конкретного комплекса и типа квартиры
-   * @param complex - название жилого комплекса
-   * @param type - тип квартиры
-   * @returns Promise с информацией о цене
-   * @endpoint GET /calculator/price?complex={complex}&type={type}
    */
   async getPrice(complex: string, type: string) {
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_URL}/calculator/price-per-square-meter?complex=${encodeURIComponent(complex)}&type=${encodeURIComponent(type)}`,
     );
     return response.json();
@@ -71,25 +91,19 @@ export const api = {
 
   /**
    * Получение списка доступных банков для конкретного комплекса и типа квартиры
-   * @param complexName - название жилого комплекса
-   * @param apartmentType - тип квартиры
-   * @returns Promise с массивом банков и их условиями
-   * @endpoint GET /calculator/banks/{complexName}/{apartmentType}
    */
   async getAvailableBanks(complexName: string, apartmentType: string) {
-    const response = await fetch(
-      `${API_URL}/calculator/banks/${encodeURIComponent(complexName)}/${encodeURIComponent(apartmentType)}`,
+    const response = await fetchWithAuth(
+      `${API_URL}/calculator/complexes/${encodeURIComponent(complexName)}/${encodeURIComponent(apartmentType)}/banks`,
     );
     return response.json();
   },
 
   /**
-   * Получение данных по траншам (этапам финансирования)
-   * @returns Promise с данными о траншах
-   * @endpoint GET /calculator/tranche-data
+   * Получение данных по траншам
    */
   async getTrancheData() {
-    const response = await fetch(`${API_URL}/calculator/tranche-data`);
+    const response = await fetchWithAuth(`${API_URL}/calculator/tranche-data`);
     return response.json();
   },
 
@@ -97,33 +111,27 @@ export const api = {
 
   /**
    * Получение списка всех банков-партнеров
-   * @returns Promise с массивом всех банков
-   * @endpoint GET /banks
    */
   async getAllBanks() {
-    const response = await fetch(`${API_URL}/banks`);
+    const response = await fetchWithAuth(`${API_URL}/banks`);
     return response.json();
   },
 
   /**
    * Получение всех ипотечных предложений от банков
-   * @returns Promise с массивом всех предложений
-   * @endpoint GET /banks/offers
    */
   async getAllOffers() {
-    const response = await fetch(`${API_URL}/banks/offers`);
+    const response = await fetchWithAuth(`${API_URL}/banks/offers`);
     return response.json();
   },
 
   // ==================== ЛИМИТЫ ====================
 
   /**
-   * Получение лимитов для расчета ипотеки (максимальная сумма, процент, и т.д.)
-   * @returns Promise с объектом лимитов
-   * @endpoint GET /limits
+   * Получение лимитов для расчета ипотеки
    */
   async getLimits() {
-    const response = await fetch(`${API_URL}/limits`);
+    const response = await fetchWithAuth(`${API_URL}/limits`);
     return response.json();
   },
 
@@ -131,12 +139,9 @@ export const api = {
 
   /**
    * Получение списка всех строительных проектов
-   * @returns Promise с массивом проектов
-   * @throws {Error} если статус ответа не 200-299
-   * @endpoint GET /projects
    */
   async getProjects() {
-    const response = await fetch(`${API_URL}/projects`);
+    const response = await fetchWithAuth(`${API_URL}/projects`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -144,14 +149,10 @@ export const api = {
   },
 
   /**
-   * Получение детальной информации по конкретному проекту по его ID
-   * @param id - идентификатор проекта
-   * @returns Promise с деталями проекта
-   * @throws {Error} если статус ответа не 200-299
-   * @endpoint GET /projects/{id}
+   * Получение детальной информации по конкретному проекту
    */
   async getProjectById(id: string) {
-    const response = await fetch(`${API_URL}/projects/${id}`);
+    const response = await fetchWithAuth(`${API_URL}/projects/${id}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -162,13 +163,10 @@ export const api = {
 
   /**
    * Получение всех доступных ипотечных программ
-   * @returns Promise с объектом, содержащим программы и категории
-   * @endpoint GET /api/programs/config
-   * @note Использует относительный путь, а не полный API_URL
    */
   getPrograms: async (): Promise<ProgramsResponse> => {
     try {
-      const response = await fetch("/api/programs/config");
+      const response = await fetchWithAuth("/api/programs/config");
       const result = await response.json();
       return result;
     } catch (error) {
@@ -181,10 +179,6 @@ export const api = {
 
   /**
    * Получение доступных ипотечных программ для конкретного ЖК
-   * @param complexName - название жилого комплекса
-   * @returns Promise с массивом доступных программ для ЖК
-   * @endpoint GET /api/programs/complex/{complexName}
-   * @note Использует относительный путь, а не полный API_URL
    */
   getProgramsForComplex: async (
     complexName: string,
@@ -194,7 +188,7 @@ export const api = {
     error?: string;
   }> => {
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `/api/programs/complex/${encodeURIComponent(complexName)}`,
       );
       const result = await response.json();
@@ -210,10 +204,7 @@ export const api = {
   // ==================== КОНФИГУРАЦИЯ ====================
 
   /**
-   * Получение конфигурации приложения (настройки, параметры, фичи)
-   * @returns Promise с объектом конфигурации
-   * @endpoint GET /api/config
-   * @note Использует относительный путь /api/config, а не полный API_URL
+   * Получение конфигурации приложения
    */
   getConfig: async (): Promise<{
     success: boolean;
@@ -221,7 +212,7 @@ export const api = {
     error?: string;
   }> => {
     try {
-      const response = await fetch("/api/config");
+      const response = await fetchWithAuth("/api/config");
       const result = await response.json();
       return result;
     } catch (error) {

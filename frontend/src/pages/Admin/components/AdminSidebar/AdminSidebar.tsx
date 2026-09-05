@@ -29,8 +29,6 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     { id: "banks", label: "Банки", icon: "🏦" },
     { id: "programs", label: "Программы", icon: "📋" },
     { id: "offers", label: "Офферы", icon: "📄" },
-    { id: "rates", label: "Ставки", icon: "📈" },
-    { id: "subsidies", label: "Субсидии", icon: "💰" },
     { id: "config", label: "Конфигурация", icon: "⚙️", adminOnly: true },
   ];
 
