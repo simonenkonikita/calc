@@ -3,20 +3,41 @@
 import { Response } from "express";
 import { AppDataSource } from "../../data-source";
 import { Company } from "../../entities/Company";
-import { User } from "../../entities/User"; // 🔥 ДОБАВЛЯЕМ ИМПОРТ
+import { User } from "../../entities/User";
 import { BaseController } from "./base.controller";
 import { AuthRequest } from "../../types/auth.types";
 
 const companyRepository = AppDataSource.getRepository(Company);
-const userRepository = AppDataSource.getRepository(User); // 🔥 ДОБАВЛЯЕМ
+const userRepository = AppDataSource.getRepository(User);
 
 export class CompanyController extends BaseController {
   /**
-   * Получить все компании (только admin)
+   * Получить все компании (с фильтрацией по правам)
    */
   async getAll(req: AuthRequest, res: Response) {
     try {
+      const user = req.user;
+
+      // 🔥 СТРОИМ WHERE В ЗАВИСИМОСТИ ОТ РОЛИ
+      let where: any = {};
+
+      // Если пользователь НЕ админ - показываем только его компанию
+      if (user && user.role !== "admin") {
+        // developer_admin или другие роли видят только свою компанию
+        if (user.companyId) {
+          where.id = user.companyId;
+        } else {
+          // Если у пользователя нет компании - возвращаем пустой массив
+          return res.json({
+            success: true,
+            data: [],
+          });
+        }
+      }
+      // admin видит все компании (where = {})
+
       const companies = await companyRepository.find({
+        where,
         relations: ["admin", "users"],
         order: { name: "ASC" },
       });
@@ -31,11 +52,24 @@ export class CompanyController extends BaseController {
   }
 
   /**
-   * Получить компанию по ID (только admin)
+   * Получить компанию по ID (с проверкой прав)
    */
   async getOne(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
+      const user = req.user;
+
+      // 🔥 ПРОВЕРЯЕМ ДОСТУП
+      if (user && user.role !== "admin") {
+        // developer_admin может видеть только свою компанию
+        if (!user.companyId || user.companyId !== id) {
+          return res.status(403).json({
+            success: false,
+            error:
+              "Доступ запрещен. Вы можете просматривать только свою компанию",
+          });
+        }
+      }
 
       const company = await companyRepository.findOne({
         where: { id },
@@ -63,7 +97,6 @@ export class CompanyController extends BaseController {
       const data = req.body;
       const currentUser = req.user;
 
-      // Проверяем права
       if (!currentUser || currentUser.role !== "admin") {
         return res.status(403).json({
           success: false,
@@ -72,7 +105,6 @@ export class CompanyController extends BaseController {
         });
       }
 
-      // Валидация
       if (!data.name) {
         return res.status(400).json({
           success: false,
@@ -80,7 +112,6 @@ export class CompanyController extends BaseController {
         });
       }
 
-      // Проверяем, что компания не существует
       const existing = await companyRepository.findOne({
         where: { name: data.name },
       });
@@ -131,7 +162,6 @@ export class CompanyController extends BaseController {
       const data = req.body;
       const currentUser = req.user;
 
-      // Проверяем права
       if (!currentUser || currentUser.role !== "admin") {
         return res.status(403).json({
           success: false,
@@ -149,7 +179,6 @@ export class CompanyController extends BaseController {
         return this.handleNotFound(res, "Company");
       }
 
-      // Обновляем поля
       if (data.name !== undefined) existingCompany.name = data.name;
       if (data.description !== undefined)
         existingCompany.description = data.description;
@@ -159,7 +188,6 @@ export class CompanyController extends BaseController {
       if (data.isActive !== undefined) existingCompany.isActive = data.isActive;
       if (data.adminId !== undefined) existingCompany.adminId = data.adminId;
 
-      // Если изменилось имя, обновляем slug
       if (data.name && data.name !== existingCompany.name) {
         const { generateSlug } = await import("../../utils/slugify");
         existingCompany.slug = generateSlug(data.name);
@@ -190,7 +218,6 @@ export class CompanyController extends BaseController {
       const { id } = req.params;
       const currentUser = req.user;
 
-      // Проверяем права
       if (!currentUser || currentUser.role !== "admin") {
         return res.status(403).json({
           success: false,
@@ -208,12 +235,11 @@ export class CompanyController extends BaseController {
         return this.handleNotFound(res, "Company");
       }
 
-      // Отвязываем всех пользователей компании
       if (existingCompany.users && existingCompany.users.length > 0) {
         for (const user of existingCompany.users) {
           user.companyId = null;
           user.company = null;
-          await userRepository.save(user); // 🔥 ИСПОЛЬЗУЕМ userRepository
+          await userRepository.save(user);
         }
       }
 

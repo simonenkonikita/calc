@@ -90,7 +90,6 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             {userRole === "admin" ? "👑 Администратор" : "🏢 Застройщик"}
           </span>
         </div>
-        <div className="sidebar-version">v2.0.0</div>
       </div>
     </div>
   );

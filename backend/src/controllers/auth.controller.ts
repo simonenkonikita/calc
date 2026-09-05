@@ -265,6 +265,14 @@ export class AuthController {
         });
       }
 
+      // 🔥 ДЛЯ developer_admin - ПРОВЕРЯЕМ, ЧТО У НЕГО ЕСТЬ КОМПАНИЯ
+      if (currentUser.role === "developer_admin" && !currentUser.companyId) {
+        return res.status(403).json({
+          success: false,
+          error: "У вас нет компании. Вы не можете создавать менеджеров",
+        });
+      }
+
       const user = await authService.createCompanyManager(req.body, fullUser);
 
       res.status(201).json({

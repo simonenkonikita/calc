@@ -89,8 +89,8 @@ export const ProfilePage: React.FC = () => {
   const getRoleLabel = (role: string): string => {
     const roles: Record<string, string> = {
       admin: "Администратор проекта",
-      developer_admin: "Администратор застройщика",
-      developer_manager: "Менеджер застройщика",
+      developer_admin: "Администратор компании",
+      developer_manager: "Менеджер компании",
       agent: "Агент",
     };
     return roles[role] || role;

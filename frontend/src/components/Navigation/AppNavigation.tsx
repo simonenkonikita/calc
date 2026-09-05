@@ -4,13 +4,15 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthPanel } from "../Auth/AuthPanel";
 
 import "./AppNavigation.css";
-import { useAuth } from "../../hooks/ui/useAuth";
-import { ProfileDropdown } from "../Auth/ProfileDropdown/ProfileDropdown";
+import { useAuthExtended } from "../../hooks/ui/useAuth";
+import ProfileDropdown from "../Auth/ProfileDropdown/ProfileDropdown";
 
 const AppNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { user, isAuthenticated, logout, getRoleLabel, getRoleColor } =
+    useAuthExtended();
+
   const [isAuthPanelOpen, setIsAuthPanelOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -26,7 +28,6 @@ const AppNavigation = () => {
   const closeAuthPanel = () => setIsAuthPanelOpen(false);
 
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
-  const closeDropdown = () => setIsDropdownOpen(false);
 
   // Закрытие dropdown при клике вне
   useEffect(() => {
@@ -57,6 +58,43 @@ const AppNavigation = () => {
     return () => document.removeEventListener("keydown", handleEsc);
   }, []);
 
+  // 🔥 Определяем путь и текст для админ-кнопки
+  const getAdminLink = () => {
+    if (!user) return null;
+
+    const userRole = user.role?.toLowerCase();
+
+    // Администратор системы -> /admin
+    if (userRole === "admin") {
+      return {
+        path: "/admin",
+        text: "👑 Панель администратора проекта",
+      };
+    }
+
+    // Администратор компании (developer_admin) -> /developer
+    if (userRole === "developer_admin") {
+      return {
+        path: "/developer",
+        text: "🏢 Панель администратора компании",
+      };
+    }
+
+    // Менеджер, агент или другие роли - не показываем кнопку
+    return null;
+  };
+
+  const adminLink = getAdminLink();
+  const showAdminLink = adminLink !== null;
+
+  // 🔥 Проверяем активность админ-ссылки
+  const isAdminActive =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/developer");
+
+  // 🔥 Получаем цвет роли для аватара
+  const userRoleColor = getRoleColor(user?.role);
+
   return (
     <>
       <nav className="navigation">
@@ -82,11 +120,13 @@ const AppNavigation = () => {
                 >
                   <Link to="/projects">Проекты</Link>
                 </li>
-                {isAdmin && (
+                {showAdminLink && (
                   <li
-                    className={location.pathname === "/admin" ? "active" : ""}
+                    className={`admin-nav-item ${
+                      isAdminActive ? "active" : ""
+                    }`}
                   >
-                    <Link to="/admin">Админка</Link>
+                    <Link to={adminLink.path}>{adminLink.text}</Link>
                   </li>
                 )}
               </>
@@ -102,7 +142,12 @@ const AppNavigation = () => {
                   className="avatar-btn"
                   title="Профиль"
                 >
-                  <span className="avatar-circle">
+                  <span
+                    className="avatar-circle"
+                    style={{
+                      background: `linear-gradient(135deg, ${userRoleColor}, ${userRoleColor}dd)`,
+                    }}
+                  >
                     {user?.firstName?.[0] || user?.email?.[0] || "👤"}
                   </span>
                 </button>

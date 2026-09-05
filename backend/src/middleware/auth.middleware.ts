@@ -152,23 +152,22 @@ export const adminOnly = (
 /**
  * Только администратор компании
  */
-export const developerAdminOnly = (
+export const adminOrDeveloperAdmin = (
   req: AuthRequest,
   res: Response,
   next: NextFunction,
 ): void => {
   if (!req.user) {
-    res.status(401).json({
-      success: false,
-      error: "Не авторизован",
-    });
+    res.status(401).json({ success: false, error: "Не авторизован" });
     return;
   }
 
-  if (req.user.role !== "developer_admin" && req.user.role !== "admin") {
+  // ✅ ТО ЖЕ САМОЕ: пропускает admin И developer_admin
+  if (req.user.role !== "admin" && req.user.role !== "developer_admin") {
     res.status(403).json({
       success: false,
-      error: "Доступ запрещен. Требуются права администратора компании",
+      error:
+        "Доступ запрещен. Требуются права администратора проекта или компании",
     });
     return;
   }

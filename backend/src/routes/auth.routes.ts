@@ -2,7 +2,12 @@
 
 import { Router } from "express";
 import { AuthController } from "../controllers/auth.controller";
-import { authMiddleware, adminOnly } from "../middleware/auth.middleware";
+import {
+  authMiddleware,
+  adminOnly,
+  adminOrDeveloperAdmin,
+  checkWriteAccess,
+} from "../middleware/auth.middleware";
 
 const router = Router();
 const authController = new AuthController();
@@ -35,21 +40,25 @@ router.post(
 router.get(
   "/users",
   authMiddleware,
+  adminOrDeveloperAdmin,
   authController.getAllUsers.bind(authController),
 );
 router.get(
   "/companies/:companyId/users",
   authMiddleware,
+  adminOrDeveloperAdmin,
   authController.getUsersByCompany.bind(authController),
 );
 router.put(
   "/users/:id",
   authMiddleware,
+  adminOrDeveloperAdmin,
   authController.updateUser.bind(authController),
 );
 router.delete(
   "/users/:id",
   authMiddleware,
+  adminOrDeveloperAdmin,
   authController.deleteUser.bind(authController),
 );
 
@@ -79,6 +88,7 @@ router.post(
 router.post(
   "/admin/company-managers",
   authMiddleware,
+  checkWriteAccess,
   authController.createCompanyManager.bind(authController),
 );
 

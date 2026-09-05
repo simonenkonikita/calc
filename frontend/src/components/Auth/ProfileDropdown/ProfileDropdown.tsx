@@ -3,6 +3,7 @@ import React from "react";
 
 import "./ProfileDropdown.css";
 import { AuthUser } from "../../../types/auth.types";
+import { useAuthExtended } from "../../../hooks/ui/useAuth";
 
 interface ProfileDropdownProps {
   user: AuthUser | null;
@@ -15,6 +16,9 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   onProfile,
   onLogout,
 }) => {
+  // 🔥 Используем расширенный хук для получения методов работы с ролями
+  const { getRoleLabel, getRoleColor } = useAuthExtended();
+
   const getInitials = (): string => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName[0]}${user.lastName[0]}`;
@@ -35,42 +39,31 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
     return user?.email || "Пользователь";
   };
 
-  const getRoleLabel = (role: string): string => {
-    const roles: Record<string, string> = {
-      admin: "Администратор",
-      developer_admin: "Администратор застройщика",
-      developer_manager: "Менеджер застройщика",
-      agent: "Агент",
-    };
-    return roles[role] || role;
-  };
-
-  const getRoleColor = (role: string): string => {
-    const colors: Record<string, string> = {
-      admin: "#ef4444",
-      developer_admin: "#8b5cf6",
-      developer_manager: "#3b82f6",
-      agent: "#10b981",
-    };
-    return colors[role] || "#6b7280";
-  };
+  // 🔥 Используем методы из хука вместо локальных функций
+  const roleLabel = user?.role ? getRoleLabel(user.role) : null;
+  const roleColor = user?.role ? getRoleColor(user.role) : "#6b7280";
 
   return (
     <div className="profile-dropdown">
       {/* Шапка с аватаром */}
       <div className="dropdown-header">
-        <div className="dropdown-avatar">
+        <div
+          className="dropdown-avatar"
+          style={{
+            background: `linear-gradient(135deg, ${roleColor}, ${roleColor}dd)`,
+          }}
+        >
           <span className="dropdown-avatar-text">{getInitials()}</span>
         </div>
         <div className="dropdown-user-info">
           <div className="dropdown-user-name">{getFullName()}</div>
           <div className="dropdown-user-email">{user?.email}</div>
-          {user?.role && (
+          {user?.role && roleLabel && (
             <span
               className="dropdown-user-role"
-              style={{ backgroundColor: getRoleColor(user.role) }}
+              style={{ backgroundColor: roleColor }}
             >
-              {getRoleLabel(user.role)}
+              {roleLabel}
             </span>
           )}
         </div>
@@ -82,12 +75,16 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       {/* Пункты меню */}
       <div className="dropdown-menu">
         <button onClick={onProfile} className="dropdown-item">
+          <span className="dropdown-item-icon">👤</span>
           <span className="dropdown-item-text">Профиль</span>
         </button>
         <button onClick={onLogout} className="dropdown-item logout">
+          <span className="dropdown-item-icon">🚪</span>
           <span className="dropdown-item-text">Выйти</span>
         </button>
       </div>
     </div>
   );
 };
+
+export default ProfileDropdown;

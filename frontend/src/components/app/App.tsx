@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AdminPage } from "../../pages/Admin/AdminPage/AdminPage";
+import { DeveloperDashboard } from "../../pages/Developer/DeveloperDashboard"; // 🔥 ДОБАВЛЯЕМ
 import { LandingPage } from "../../pages/LandingPage/LandingPage";
 import MortgageCalculator from "../../pages/MortgageCalculator/MortgageCalculator";
 import { ProfilePage } from "../../pages/ProfilePage/ProfilePage";
@@ -14,6 +15,7 @@ const App = () => {
       <AppNavigation />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+
         <Route
           path="/calculator"
           element={
@@ -22,6 +24,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/projects"
           element={
@@ -30,6 +33,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/profile"
           element={
@@ -38,6 +42,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        {/* 🔥 АДМИН ПАНЕЛЬ - ТОЛЬКО ДЛЯ АДМИНИСТРАТОРА ПРОЕКТА */}
         <Route
           path="/admin/*"
           element={
@@ -46,6 +51,17 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
+        {/* 🔥 ПАНЕЛЬ ЗАСТРОЙЩИКА - ДЛЯ АДМИНА И РАЗРАБОТЧИКА */}
+        <Route
+          path="/developer/*"
+          element={
+            <ProtectedRoute roles={["admin", "developer_admin"]}>
+              <DeveloperDashboard />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>

@@ -1,4 +1,4 @@
-// frontend/src/pages/Admin/sections/UsersSection.tsx
+// frontend/src/pages/Admin/sections/UsersSection/UsersSection.tsx
 
 import React, { useState, useEffect } from "react";
 import { AdminLayout } from "../../components/AdminLayout/AdminLayout";
@@ -16,6 +16,8 @@ import StatusBadge from "../../components/StatusBadge/StatusBadge";
 import Tabs from "../../components/Tabs/Tabs";
 
 export const UsersSection: React.FC = () => {
+  const { user, isAdmin, isDeveloperAdmin, isDeveloperManager } =
+    useAuthExtended();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,25 +27,41 @@ export const UsersSection: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<string>("all");
 
-  const { isAdmin } = useAuthExtended();
+  const hasAccess = isAdmin || isDeveloperAdmin || isDeveloperManager;
 
   useEffect(() => {
-    if (isAdmin) {
+    if (hasAccess) {
       loadData();
     }
-  }, [isAdmin]);
+  }, [hasAccess]);
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [usersData, companiesData] = await Promise.all([
-        adminApi.getUsers(),
-        adminApi.getCompanies(),
-      ]);
+
+      const usersData = await adminApi.getUsers();
+
+      let companiesData: Company[] = [];
+      if (isAdmin) {
+        companiesData = await adminApi.getCompanies();
+      } else if ((isDeveloperAdmin || isDeveloperManager) && user?.companyId) {
+        companiesData = [
+          {
+            id: user.companyId,
+            name: user.companyName || user.company || "Моя компания",
+            slug: "",
+            isActive: true,
+            createdAt: "",
+            updatedAt: "",
+          },
+        ];
+      }
+
       setUsers(Array.isArray(usersData) ? usersData : []);
-      setCompanies(Array.isArray(companiesData) ? companiesData : []);
+      setCompanies(companiesData);
     } catch (error) {
-      console.error("Error loading data:", error);
+      console.error("❌ Error loading users:", error);
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -66,16 +84,31 @@ export const UsersSection: React.FC = () => {
     try {
       setIsSubmitting(true);
 
-      await adminApi.createUserByAdmin({
-        email: formData.email,
-        password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: formData.phone,
-        position: formData.position,
-        companyId: formData.companyId,
-        role: formData.role || "developer_manager",
-      });
+      if (isAdmin) {
+        await adminApi.createUserByAdmin({
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          position: formData.position,
+          companyId: formData.companyId || user?.companyId,
+          role: formData.role || "developer_manager",
+        });
+      } else if (isDeveloperAdmin) {
+        await adminApi.createCompanyManager({
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          position: formData.position,
+          companyId: user?.companyId,
+        });
+      } else {
+        alert("⚠️ У вас нет прав для создания пользователей");
+        return;
+      }
 
       setIsCreating(false);
       setFormData({});
@@ -92,15 +125,39 @@ export const UsersSection: React.FC = () => {
   // ОБНОВЛЕНИЕ ПОЛЬЗОВАТЕЛЯ
   // ============================================================
 
-  const handleUpdateUser = async (id: string) => {
+  const handleUpdateUser = async () => {
+    if (!editingId) return;
+
     try {
-      await adminApi.updateUser(id, formData);
+      setIsSubmitting(true);
+
+      const updateData: any = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        position: formData.position,
+        isActive: formData.isActive,
+      };
+
+      if (formData.password && formData.password.length >= 6) {
+        updateData.password = formData.password;
+      }
+
+      if (isAdmin) {
+        if (formData.role !== undefined) updateData.role = formData.role;
+        if (formData.companyId !== undefined)
+          updateData.companyId = formData.companyId;
+      }
+
+      await adminApi.updateUser(editingId, updateData);
       setEditingId(null);
       setFormData({});
       await loadData();
       alert("✅ Пользователь обновлен!");
     } catch (error: any) {
       alert(`❌ ${error.message || "Ошибка обновления"}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -156,135 +213,351 @@ export const UsersSection: React.FC = () => {
     return users.filter((u) => u.companyId === selectedTabId);
   };
 
-  // 🔥 Формируем вкладки
   const getTabs = () => {
-    const tabs = [
-      {
+    const tabs: Array<{
+      id: string;
+      label: string;
+      icon: string;
+      count: number;
+      isActive: boolean;
+    }> = [];
+
+    if (isAdmin) {
+      tabs.push(
+        {
+          id: "all",
+          label: "Все пользователи",
+          icon: "👥",
+          count: users.length,
+          isActive: true,
+        },
+        {
+          id: "admins",
+          label: "Администраторы",
+          icon: "👑",
+          count: users.filter((u) => u.role === "admin").length,
+          isActive: true,
+        },
+        {
+          id: "agents",
+          label: "Агенты",
+          icon: "🤝",
+          count: users.filter((u) => u.role === "agent").length,
+          isActive: true,
+        },
+      );
+    }
+
+    if (isAdmin || isDeveloperAdmin || isDeveloperManager) {
+      for (const company of companies) {
+        const count = users.filter((u) => u.companyId === company.id).length;
+        tabs.push({
+          id: company.id,
+          label: company.name,
+          icon: "🏢",
+          count: count,
+          isActive: company.isActive,
+        });
+      }
+    }
+
+    if (tabs.length === 0) {
+      tabs.push({
         id: "all",
         label: "Все пользователи",
         icon: "👥",
         count: users.length,
         isActive: true,
-      },
-      {
-        id: "admins",
-        label: "Администраторы",
-        icon: "👑",
-        count: users.filter((u) => u.role === "admin").length,
-        isActive: true,
-      },
-      {
-        id: "agents",
-        label: "Агенты",
-        icon: "🤝",
-        count: users.filter((u) => u.role === "agent").length,
-        isActive: true,
-      },
-    ];
-
-    for (const company of companies) {
-      const count = users.filter((u) => u.companyId === company.id).length;
-      tabs.push({
-        id: company.id,
-        label: company.name,
-        icon: "🏢",
-        count: count,
-        isActive: company.isActive,
       });
     }
 
     return tabs;
   };
 
-  // 🔥 Поля для создания пользователя
-  const userFields: AdminModalField[] = [
-    {
-      name: "lastName",
-      label: "Фамилия",
-      type: "text",
-      placeholder: "Петров",
-      value: formData.lastName || "",
-      onChange: (value) => setFormData({ ...formData, lastName: value }),
-    },
-    {
-      name: "firstName",
-      label: "Имя",
-      type: "text",
-      placeholder: "Иван",
-      value: formData.firstName || "",
-      onChange: (value) => setFormData({ ...formData, firstName: value }),
-    },
-    {
-      name: "email",
-      label: "Email",
-      type: "email",
-      placeholder: "user@example.com",
-      required: true,
-      value: formData.email || "",
-      onChange: (value) => setFormData({ ...formData, email: value }),
-      fullWidth: true,
-    },
-    {
-      name: "password",
-      label: "Пароль",
-      type: "password",
-      placeholder: "Минимум 6 символов",
-      required: true,
-      value: formData.password || "",
-      onChange: (value) => setFormData({ ...formData, password: value }),
-    },
-    {
-      name: "role",
-      label: "Роль",
-      type: "select",
-      options: [
-        { value: "developer_manager", label: "📋 Менеджер компании" },
-        { value: "admin", label: "👑 Администратор проекта" },
-        { value: "developer_admin", label: "🏢 Администратор компании" },
-        { value: "agent", label: "🤝 Агент" },
-      ],
-      required: true,
-      value: formData.role || "developer_manager",
-      onChange: (value) =>
-        setFormData({ ...formData, role: value as UserRole }),
-    },
-    {
-      name: "companyId",
-      label: "Компания",
-      type: "select",
-      options: [
-        { value: "", label: "Без компании" },
-        ...companies.map((c) => ({ value: c.id, label: c.name })),
-      ],
-      value: formData.companyId || "",
-      onChange: (value) => setFormData({ ...formData, companyId: value }),
-    },
-    {
-      name: "phone",
-      label: "Телефон",
-      type: "text",
-      placeholder: "+7 (999) 123-45-67",
-      value: formData.phone || "",
-      onChange: (value) => setFormData({ ...formData, phone: value }),
-    },
-    {
-      name: "position",
-      label: "Должность",
-      type: "text",
-      placeholder: "Старший менеджер",
-      value: formData.position || "",
-      onChange: (value) => setFormData({ ...formData, position: value }),
-      fullWidth: true,
-    },
-  ];
+  // ============================================================
+  // 🔥 ПОЛЯ ДЛЯ СОЗДАНИЯ
+  // ============================================================
+
+  const getCreateFields = (): AdminModalField[] => {
+    const fields: AdminModalField[] = [
+      {
+        name: "lastName",
+        label: "Фамилия",
+        type: "text",
+        placeholder: "Петров",
+        value: "",
+        onChange: (value) => setFormData({ ...formData, lastName: value }),
+      },
+      {
+        name: "firstName",
+        label: "Имя",
+        type: "text",
+        placeholder: "Иван",
+        value: "",
+        onChange: (value) => setFormData({ ...formData, firstName: value }),
+      },
+      {
+        name: "email",
+        label: "Email",
+        type: "email",
+        placeholder: "Введите email",
+        required: true,
+        value: "",
+        onChange: (value) => setFormData({ ...formData, email: value }),
+        fullWidth: true,
+      },
+      {
+        name: "password",
+        label: "Пароль",
+        type: "password",
+        placeholder: "Минимум 6 символов",
+        required: true,
+        value: "",
+        onChange: (value) => setFormData({ ...formData, password: value }),
+      },
+    ];
+
+    // 🔥 ПОЛЕ "РОЛЬ" - для admin показывает все роли, для developer_admin только "Менеджер компании"
+    if (isAdmin) {
+      fields.push({
+        name: "role",
+        label: "Роль",
+        type: "select",
+        options: [
+          { value: "developer_manager", label: "📋 Менеджер компании" },
+          { value: "admin", label: "👑 Администратор проекта" },
+          { value: "developer_admin", label: "🏢 Администратор компании" },
+          { value: "agent", label: "🤝 Агент" },
+        ],
+        required: true,
+        value: formData.role || "developer_manager",
+        onChange: (value) =>
+          setFormData({ ...formData, role: value as UserRole }),
+      });
+    } else if (isDeveloperAdmin) {
+      // 🔥 Для developer_admin - только менеджер, задизейблено
+      fields.push({
+        name: "role",
+        label: "Роль",
+        type: "select",
+        options: [
+          { value: "developer_manager", label: "📋 Менеджер компании" },
+        ],
+        required: true,
+        value: "developer_manager",
+        onChange: () => {},
+        disabled: true,
+      });
+    }
+
+    // 🔥 ПОЛЕ "КОМПАНИЯ"
+    if (isAdmin) {
+      fields.push({
+        name: "companyId",
+        label: "Компания",
+        type: "select",
+        options: [
+          { value: "", label: "Без компании" },
+          ...companies.map((c) => ({ value: c.id, label: c.name })),
+        ],
+        value: "",
+        onChange: (value) => setFormData({ ...formData, companyId: value }),
+      });
+    } else if (isDeveloperAdmin && user?.companyId) {
+      // 🔥 Для developer_admin - компания предустановлена и задизейблена
+      fields.push({
+        name: "companyId",
+        label: "Компания",
+        type: "select",
+        options: [
+          { value: user.companyId, label: user.companyName || "Моя компания" },
+        ],
+        value: user.companyId,
+        onChange: () => {},
+        disabled: true,
+      });
+    }
+
+    fields.push(
+      {
+        name: "phone",
+        label: "Телефон",
+        type: "text",
+        placeholder: "+7 (999) 123-45-67",
+        value: "",
+        onChange: (value) => setFormData({ ...formData, phone: value }),
+      },
+      {
+        name: "position",
+        label: "Должность",
+        type: "text",
+        placeholder: "Старший менеджер",
+        value: "",
+        onChange: (value) => setFormData({ ...formData, position: value }),
+        fullWidth: true,
+      },
+    );
+
+    return fields;
+  };
+
+  // ============================================================
+  // 🔥 ПОЛЯ ДЛЯ РЕДАКТИРОВАНИЯ
+  // ============================================================
+
+  const getEditFields = (selectedUser: AdminUser): AdminModalField[] => {
+    const fields: AdminModalField[] = [
+      {
+        name: "firstName",
+        label: "Имя",
+        type: "text",
+        placeholder: "Иван",
+        value: (formData.firstName ?? selectedUser.firstName) || "",
+        onChange: (value) => setFormData({ ...formData, firstName: value }),
+      },
+      {
+        name: "lastName",
+        label: "Фамилия",
+        type: "text",
+        placeholder: "Петров",
+        value: (formData.lastName ?? selectedUser.lastName) || "",
+        onChange: (value) => setFormData({ ...formData, lastName: value }),
+      },
+      {
+        name: "email",
+        label: "Email",
+        type: "email",
+        placeholder: "user@example.com",
+        value: selectedUser.email || "",
+        onChange: () => {},
+        fullWidth: true,
+        disabled: true,
+      },
+      {
+        name: "password",
+        label: "Новый пароль",
+        type: "password",
+        placeholder: "Оставьте пустым",
+        value: formData.password || "",
+        onChange: (value) => setFormData({ ...formData, password: value }),
+      },
+    ];
+
+    // 🔥 ПОЛЕ "РОЛЬ" - для admin показывает все роли, для developer_admin только "Менеджер компании"
+    if (isAdmin) {
+      fields.push({
+        name: "role",
+        label: "Роль",
+        type: "select",
+        options: [
+          { value: "developer_manager", label: "📋 Менеджер компании" },
+          { value: "admin", label: "👑 Администратор проекта" },
+          { value: "developer_admin", label: "🏢 Администратор компании" },
+          { value: "agent", label: "🤝 Агент" },
+        ],
+        value: formData.role ?? selectedUser.role,
+        onChange: (value) =>
+          setFormData({ ...formData, role: value as UserRole }),
+      });
+    } else if (isDeveloperAdmin) {
+      // 🔥 Для developer_admin - только менеджер, задизейблено
+      fields.push({
+        name: "role",
+        label: "Роль",
+        type: "select",
+        options: [
+          { value: "developer_manager", label: "📋 Менеджер компании" },
+        ],
+        value: "developer_manager", // Всегда только менеджер
+        onChange: () => {},
+        disabled: true,
+      });
+    }
+
+    // 🔥 ПОЛЕ "КОМПАНИЯ"
+    if (isAdmin) {
+      fields.push({
+        name: "companyId",
+        label: "Компания",
+        type: "select",
+        options: [
+          { value: "", label: "Без компании" },
+          ...companies.map((c) => ({ value: c.id, label: c.name })),
+        ],
+        value: (formData.companyId ?? selectedUser.companyId) || "",
+        onChange: (value) => setFormData({ ...formData, companyId: value }),
+      });
+    } else if (isDeveloperAdmin && user?.companyId) {
+      // 🔥 Для developer_admin - компания предустановлена и задизейблена
+      fields.push({
+        name: "companyId",
+        label: "Компания",
+        type: "select",
+        options: [
+          { value: user.companyId, label: user.companyName || "Моя компания" },
+        ],
+        value: user.companyId,
+        onChange: () => {},
+        disabled: true,
+      });
+    }
+
+    fields.push(
+      {
+        name: "isActive",
+        label: "Активен",
+        type: "select",
+        options: [
+          { value: "true", label: "✅ Активен" },
+          { value: "false", label: "❌ Неактивен" },
+        ],
+        value:
+          formData.isActive !== undefined
+            ? String(formData.isActive)
+            : String(selectedUser.isActive),
+        onChange: (value) =>
+          setFormData({ ...formData, isActive: value === "true" }),
+      },
+      {
+        name: "phone",
+        label: "Телефон",
+        type: "text",
+        placeholder: "+7 (999) 123-45-67",
+        value: (formData.phone ?? selectedUser.phone) || "",
+        onChange: (value) => setFormData({ ...formData, phone: value }),
+      },
+      {
+        name: "position",
+        label: "Должность",
+        type: "text",
+        placeholder: "Старший менеджер",
+        value: (formData.position ?? selectedUser.position) || "",
+        onChange: (value) => setFormData({ ...formData, position: value }),
+        fullWidth: true,
+      },
+    );
+
+    return fields;
+  };
 
   const filteredUsers = getFilteredUsers();
+  const selectedUser = editingId ? users.find((u) => u.id === editingId) : null;
 
   // ============================================================
   // РЕНДЕР
   // ============================================================
 
   if (loading) return <div className="admin-loading">Загрузка...</div>;
+
+  if (!hasAccess) {
+    return (
+      <AdminLayout title="👥 Пользователи">
+        <div className="admin-access-denied">
+          <p>⛔ У вас нет доступа к этому разделу</p>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <div className="users-section">
@@ -295,7 +568,16 @@ export const UsersSection: React.FC = () => {
               label: "+ Добавить пользователя",
               onClick: () => {
                 setIsCreating(true);
-                setFormData({ role: "developer_manager" });
+                setFormData({
+                  role: "developer_manager",
+                  email: "",
+                  password: "",
+                  firstName: "",
+                  lastName: "",
+                  phone: "",
+                  position: "",
+                  companyId: "",
+                });
               },
               variant: "primary",
             },
@@ -329,174 +611,49 @@ export const UsersSection: React.FC = () => {
             <tbody>
               {filteredUsers.map((user) => (
                 <tr key={user.id}>
+                  <td>{user.email}</td>
+                  <td>{`${user.firstName || ""} ${user.lastName || ""}`}</td>
                   <td>
-                    {editingId === user.id ? (
-                      <input
-                        value={formData.email || ""}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                        className="admin-input admin-input-sm"
-                      />
-                    ) : (
-                      user.email
-                    )}
+                    <span className={`role-badge ${user.role}`}>
+                      {getRoleLabel(user.role)}
+                    </span>
+                  </td>
+                  <td>{getCompanyName(user.companyId)}</td>
+                  <td>{user.phone || "-"}</td>
+                  <td>{user.position || "-"}</td>
+                  <td>
+                    <StatusBadge isActive={user.isActive} />
                   </td>
                   <td>
-                    {editingId === user.id ? (
-                      <input
-                        value={formData.firstName || ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            firstName: e.target.value,
-                          })
-                        }
-                        className="admin-input admin-input-sm"
-                      />
-                    ) : (
-                      `${user.firstName || ""} ${user.lastName || ""}`
-                    )}
-                  </td>
-                  <td>
-                    {editingId === user.id ? (
-                      <select
-                        value={formData.role || user.role}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            role: e.target.value as UserRole,
-                          })
-                        }
-                        className="admin-select admin-select-sm"
-                      >
-                        <option value="admin">Администратор проекта</option>
-                        <option value="developer_admin">
-                          Администратор компании
-                        </option>
-                        <option value="developer_manager">
-                          Менеджер компании
-                        </option>
-                        <option value="agent">Агент</option>
-                      </select>
-                    ) : (
-                      <span className={`role-badge ${user.role}`}>
-                        {getRoleLabel(user.role)}
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    {editingId === user.id ? (
-                      <select
-                        value={formData.companyId || user.companyId || ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            companyId: e.target.value,
-                          })
-                        }
-                        className="admin-select admin-select-sm"
-                      >
-                        <option value="">Без компании</option>
-                        {companies.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      getCompanyName(user.companyId)
-                    )}
-                  </td>
-                  <td>
-                    {editingId === user.id ? (
-                      <input
-                        value={formData.phone || ""}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
-                        className="admin-input admin-input-sm"
-                      />
-                    ) : (
-                      user.phone || "-"
-                    )}
-                  </td>
-                  <td>
-                    {editingId === user.id ? (
-                      <input
-                        value={formData.position || ""}
-                        onChange={(e) =>
-                          setFormData({ ...formData, position: e.target.value })
-                        }
-                        className="admin-input admin-input-sm"
-                      />
-                    ) : (
-                      user.position || "-"
-                    )}
-                  </td>
-                  <td>
-                    {editingId === user.id ? (
-                      <select
-                        value={formData.isActive ? "active" : "inactive"}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            isActive: e.target.value === "active",
-                          })
-                        }
-                        className="admin-select admin-select-sm"
-                      >
-                        <option value="active">✅ Активен</option>
-                        <option value="inactive">❌ Неактивен</option>
-                      </select>
-                    ) : (
-                      <StatusBadge isActive={user.isActive} />
-                    )}
-                  </td>
-                  <td>
-                    {editingId === user.id ? (
-                      <ActionButtons
-                        buttons={[
-                          {
-                            icon: "💾",
-                            onClick: () => handleUpdateUser(user.id),
-                            variant: "success",
-                            title: "Сохранить",
+                    <ActionButtons
+                      buttons={[
+                        {
+                          icon: "✏️",
+                          onClick: () => {
+                            setEditingId(user.id);
+                            setFormData({
+                              firstName: user.firstName,
+                              lastName: user.lastName,
+                              phone: user.phone,
+                              position: user.position,
+                              role: user.role,
+                              companyId: user.companyId,
+                              isActive: user.isActive,
+                              password: "",
+                            });
                           },
-                          {
-                            icon: "✕",
-                            onClick: () => {
-                              setEditingId(null);
-                              setFormData({});
-                            },
-                            variant: "danger",
-                            title: "Отмена",
-                          },
-                        ]}
-                        size="sm"
-                      />
-                    ) : (
-                      <ActionButtons
-                        buttons={[
-                          {
-                            icon: "✏️",
-                            onClick: () => {
-                              setEditingId(user.id);
-                              setFormData(user);
-                            },
-                            variant: "primary",
-                            title: "Редактировать",
-                          },
-                          {
-                            icon: "🗑️",
-                            onClick: () => handleDeleteUser(user.id),
-                            variant: "danger",
-                            title: "Удалить",
-                          },
-                        ]}
-                        size="sm"
-                      />
-                    )}
+                          variant: "primary",
+                          title: "Редактировать",
+                        },
+                        {
+                          icon: "🗑️",
+                          onClick: () => handleDeleteUser(user.id),
+                          variant: "danger",
+                          title: "Удалить",
+                        },
+                      ]}
+                      size="sm"
+                    />
                   </td>
                 </tr>
               ))}
@@ -519,7 +676,7 @@ export const UsersSection: React.FC = () => {
           </table>
         </div>
 
-        {/* 🔥 Модальное окно создания пользователя */}
+        {/* 🔥 Модальное окно СОЗДАНИЯ пользователя */}
         <AdminModal
           isOpen={isCreating}
           onClose={() => {
@@ -528,9 +685,24 @@ export const UsersSection: React.FC = () => {
           }}
           onSave={handleCreateUser}
           title="👤 Создание пользователя"
-          fields={userFields}
+          fields={getCreateFields()}
           isSubmitting={isSubmitting}
           saveLabel="Создать пользователя"
+          size="md"
+        />
+
+        {/* 🔥 Модальное окно РЕДАКТИРОВАНИЯ пользователя */}
+        <AdminModal
+          isOpen={editingId !== null && !!selectedUser}
+          onClose={() => {
+            setEditingId(null);
+            setFormData({});
+          }}
+          onSave={handleUpdateUser}
+          title="✏️ Редактирование пользователя"
+          fields={selectedUser ? getEditFields(selectedUser) : []}
+          isSubmitting={isSubmitting}
+          saveLabel="Сохранить изменения"
           size="md"
         />
       </AdminLayout>

@@ -360,33 +360,52 @@ export class AuthService {
   // ============================================================
 
   async getAllUsers(currentUser: User): Promise<User[]> {
+    console.log("🔍 getAllUsers - currentUser role:", currentUser.role);
+    console.log(
+      "🔍 getAllUsers - currentUser companyId:",
+      currentUser.companyId,
+    );
+
+    // Admin видит всех
     if (currentUser.role === "admin") {
-      return this.userRepository.find({
+      const users = await this.userRepository.find({
         relations: ["company"],
         order: { createdAt: "DESC" },
       });
+      console.log(`✅ Admin: found ${users.length} users`);
+      return users;
     }
 
+    // developer_admin видит только пользователей своей компании
     if (currentUser.role === "developer_admin") {
-      // 🔥 ПРОВЕРКА НА NULL
       if (!currentUser.companyId) {
+        console.log("⚠️ developer_admin has no company");
         return [];
       }
 
-      return this.userRepository.find({
+      const users = await this.userRepository.find({
         where: { companyId: currentUser.companyId },
         relations: ["company"],
         order: { createdAt: "DESC" },
       });
+      console.log(
+        `✅ developer_admin: found ${users.length} users for company ${currentUser.companyId}`,
+      );
+      return users;
     }
 
+    // developer_manager видит только себя
     if (currentUser.role === "developer_manager") {
-      return this.userRepository.find({
+      const users = await this.userRepository.find({
         where: { id: currentUser.id },
         relations: ["company"],
       });
+      console.log(`✅ developer_manager: found ${users.length} users`);
+      return users;
     }
 
+    // agent и другие роли не видят пользователей
+    console.log(`⚠️ Unknown role: ${currentUser.role}, returning empty array`);
     return [];
   }
 

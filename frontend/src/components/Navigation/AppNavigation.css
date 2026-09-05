@@ -46,6 +46,12 @@
   padding-right: 32px;
 }
 
+.nav-menu li {
+  display: flex;
+  align-items: center;
+  height: 70px;
+}
+
 .nav-menu li a {
   color: white;
   text-decoration: none;
@@ -53,6 +59,9 @@
   padding: 8px 0;
   transition: opacity 0.2s;
   position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .nav-menu li a:hover {
@@ -62,16 +71,42 @@
 .nav-menu li.active a::after {
   content: "";
   position: absolute;
-  bottom: -2px;
+  bottom: 0;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 3px;
   background: white;
-  border-radius: 2px;
+  border-radius: 2px 2px 0 0;
 }
 
-.admin-icon {
-  margin-right: 4px;
+/* ============================================================
+   🔥 АДМИН-ПУНКТ С ФОНОМ НА ВСЮ ВЫСОТУ ХЕДЕРА
+   ============================================================ */
+.admin-nav-item {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  transition: background 0.2s ease;
+}
+
+.admin-nav-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.admin-nav-item.active {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.admin-nav-item a {
+  padding: 0 20px !important;
+  height: 100% !important;
+  display: flex;
+  align-items: center;
+}
+
+.admin-nav-item.active a::after {
+  display: none !important; /* Убираем стандартную полоску */
 }
 
 /* ============================================================
@@ -331,9 +366,28 @@
     padding-right: 0;
   }
 
+  .nav-menu li {
+    height: auto;
+  }
+
   .nav-menu li a {
-    font-size: 13px;
+    height: auto;
     padding: 4px 8px;
+    font-size: 13px;
+  }
+
+  /* 🔥 Адаптив для админ-пункта */
+  .admin-nav-item {
+    height: auto;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 0 4px;
+  }
+
+  .admin-nav-item a {
+    padding: 4px 12px !important;
+    height: auto !important;
+    font-size: 13px;
   }
 
   .brand-logo {
@@ -394,6 +448,17 @@
   .nav-menu li a {
     font-size: 12px;
     padding: 4px 6px;
+  }
+
+  /* 🔥 Адаптив для админ-пункта на маленьких экранах */
+  .admin-nav-item {
+    border-radius: 6px;
+    padding: 0 2px;
+  }
+
+  .admin-nav-item a {
+    padding: 4px 8px !important;
+    font-size: 12px;
   }
 
   .avatar-circle {
