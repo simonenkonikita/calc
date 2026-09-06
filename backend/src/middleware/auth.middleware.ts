@@ -60,6 +60,11 @@ export const authMiddleware = async (
       phone: user.phone || undefined,
       position: user.position || undefined,
       isActive: user.isActive,
+      isEmailVerified: user.isEmailVerified, // 🔥 ДОБАВЛЯЕМ
+      emailVerifiedAt: user.emailVerifiedAt || undefined, // 🔥 ДОБАВЛЯЕМ
+      lastLoginAt: user.lastLoginAt || undefined, // 🔥 ДОБАВЛЯЕМ
+      createdAt: user.createdAt, // 🔥 ДОБАВЛЯЕМ
+      updatedAt: user.updatedAt, // 🔥 ДОБАВЛЯЕМ
     };
 
     next();
@@ -109,6 +114,11 @@ export const optionalAuth = async (
         phone: user.phone || undefined,
         position: user.position || undefined,
         isActive: user.isActive,
+        isEmailVerified: user.isEmailVerified, // 🔥 ДОБАВЛЯЕМ
+        emailVerifiedAt: user.emailVerifiedAt || undefined, // 🔥 ДОБАВЛЯЕМ
+        lastLoginAt: user.lastLoginAt || undefined, // 🔥 ДОБАВЛЯЕМ
+        createdAt: user.createdAt, // 🔥 ДОБАВЛЯЕМ
+        updatedAt: user.updatedAt, // 🔥 ДОБАВЛЯЕМ
       };
     }
 

@@ -11,6 +11,7 @@ import {
   OneToMany,
 } from "typeorm";
 import { Company } from "./Company";
+import { Token } from "./Token";
 
 export type UserRole =
   | "admin"
@@ -54,30 +55,52 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column({ nullable: true })
-  lastLoginAt: Date;
+  @Column({ type: "boolean", default: false })
+  isEmailVerified: boolean;
+
+  @Column({ type: "timestamp", nullable: true })
+  emailVerifiedAt: Date | null;
+
+  @Column({ type: "timestamp", nullable: true })
+  lastLoginAt: Date | null;
 
   // ============================================================
-  // 🔥 СВЯЗИ
+  // 🔥 СВЯЗИ С ПРАВИЛЬНЫМИ onDelete
   // ============================================================
 
-  // 🔥 ИСПРАВЛЯЕМ: добавляем nullable: true
+  // ✅ ТОКЕНЫ - CASCADE (безопасно)
+  @OneToMany(() => Token, (token) => token.user, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
+  tokens: Token[];
+
+  // ✅ КОМПАНИЯ - SET NULL (компания остается)
   @Column({ nullable: true })
   companyId: string | null;
 
-  @ManyToOne(() => Company, (company) => company.users, { nullable: true })
+  @ManyToOne(() => Company, (company) => company.users, {
+    nullable: true,
+    onDelete: "SET NULL", // ← Компания не удаляется
+  })
   @JoinColumn({ name: "companyId" })
   company: Company | null;
 
-  // 🔥 ИСПРАВЛЯЕМ: добавляем nullable: true
+  // ✅ КТО СОЗДАЛ - SET NULL
   @Column({ nullable: true })
   createdById: string | null;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, {
+    nullable: true,
+    onDelete: "SET NULL", // ← Кто создал не удаляется
+  })
   @JoinColumn({ name: "createdById" })
   createdBy: User | null;
 
-  @OneToMany(() => User, (user) => user.createdBy)
+  // ✅ СОЗДАННЫЕ ПОЛЬЗОВАТЕЛИ - SET NULL
+  @OneToMany(() => User, (user) => user.createdBy, {
+    onDelete: "SET NULL", // ← Созданные пользователи остаются
+  })
   createdUsers: User[];
 
   @CreateDateColumn({ name: "created_at" })

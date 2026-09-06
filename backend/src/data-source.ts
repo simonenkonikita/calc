@@ -13,6 +13,7 @@ import { SystemConfig } from "./entities/SystemConfig";
 import * as path from "path";
 import { User } from "./entities/User";
 import { Company } from "./entities/Company";
+import { Token } from "./entities/Token";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -34,6 +35,7 @@ export const AppDataSource = new DataSource({
     DynamicRate,
     DynamicSubsidy,
     SystemConfig,
+    Token,
   ],
   migrations: [path.join(__dirname, "..", "migrations", "*.ts")],
   subscribers: [],

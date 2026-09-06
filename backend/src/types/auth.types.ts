@@ -1,4 +1,5 @@
 // backend/src/types/auth.types.ts
+
 import { Request } from "express";
 import { UserRole } from "../entities/User";
 
@@ -10,14 +11,20 @@ export interface AuthUser {
   email: string;
   role: UserRole;
   company?: string; // Для обратной совместимости (название компании)
-  companyId?: string; // 🔥 НОВОЕ ПОЛЕ - ID компании
+  companyId?: string; // ID компании
   companyName?: string;
   firstName?: string;
   lastName?: string;
   phone?: string;
   position?: string;
-  isActive?: boolean;
+  isActive: boolean;
+  isEmailVerified: boolean; // 🔥 ДОБАВЛЯЕМ
+  emailVerifiedAt?: Date | string | null; // 🔥 ДОБАВЛЯЕМ (опционально)
+  lastLoginAt?: Date | string | null; // 🔥 ДОБАВЛЯЕМ (опционально)
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
+
 /**
  * Расширенный Request с пользователем
  */

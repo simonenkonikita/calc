@@ -56,7 +56,9 @@ export class Company {
   @JoinColumn({ name: "adminId" })
   admin: User | null;
 
-  @OneToMany(() => User, (user) => user.company)
+  @OneToMany(() => User, (user) => user.company, {
+    onDelete: "SET NULL",
+  })
   users: User[];
 
   // 🔥 ДОБАВЛЯЕМ СВЯЗЬ С КОМПЛЕКСАМИ
@@ -66,7 +68,10 @@ export class Company {
   @Column({ nullable: true })
   createdById: string | null;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "createdById" })
   createdBy: User | null;
 

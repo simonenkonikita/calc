@@ -36,6 +36,7 @@ export interface UpdateUserDto {
   position?: string;
   role?: UserRole;
   isActive?: boolean;
+  password?: string;
 }
 
 export interface CreateUserByAdminDto {

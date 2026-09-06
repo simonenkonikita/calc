@@ -14,16 +14,28 @@ import {
   UpdateUserDto,
   CreateUserByAdminDto,
 } from "../dtos/AuthDto";
+import { TokenService } from "./TokenService";
+import { EmailService } from "./EmailService";
+import { TokenType } from "../entities/Token";
 
 export class AuthService {
   private userRepository = AppDataSource.getRepository(User);
   private companyRepository = AppDataSource.getRepository(Company);
+
+  private tokenService: TokenService;
+  private emailService: EmailService;
+
+  constructor() {
+    this.tokenService = new TokenService();
+    this.emailService = new EmailService();
+  }
 
   // ============================================================
   // РЕГИСТРАЦИЯ (ТОЛЬКО ДЛЯ АГЕНТОВ)
   // ============================================================
   async register(
     data: RegisterDto,
+    baseUrl: string,
   ): Promise<{ user: AuthUser; token: string }> {
     if (data.role && data.role !== "agent") {
       throw new Error("Публичная регистрация доступна только для агентов");
@@ -46,9 +58,19 @@ export class AuthService {
       lastName: data.lastName,
       phone: data.phone,
       role: "agent",
+      isActive: true,
+      isEmailVerified: false,
     });
 
     await this.userRepository.save(user);
+
+    const verifyToken = await this.tokenService.createToken(
+      user.id,
+      TokenType.CONFIRM_EMAIL,
+      24,
+    );
+
+    await this.emailService.sendEmailVerification(user, verifyToken, baseUrl);
 
     const token = this.generateToken(user);
     const authUser = this.mapToAuthUser(user);
@@ -57,11 +79,102 @@ export class AuthService {
   }
 
   // ============================================================
-  // СОЗДАНИЕ КОМПАНИИ И ПЕРВОГО АДМИНИСТРАТОРА (ТОЛЬКО АДМИН)
+  // ПОДТВЕРЖДЕНИЕ EMAIL
   // ============================================================
+  async verifyEmail(token: string): Promise<User | null> {
+    const user = await this.tokenService.verifyToken(
+      token,
+      TokenType.CONFIRM_EMAIL,
+    );
+
+    if (!user) {
+      return null;
+    }
+
+    user.isEmailVerified = true;
+    user.isActive = true;
+    user.emailVerifiedAt = new Date();
+    await this.userRepository.save(user);
+
+    return user;
+  }
+
+  // ============================================================
+  // ОТПРАВКА ССЫЛКИ ДЛЯ СБРОСА ПАРОЛЯ
+  // ============================================================
+  async sendPasswordReset(email: string, baseUrl: string): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { email },
+    });
+
+    if (!user) {
+      return;
+    }
+
+    await this.tokenService.deleteUserTokens(user.id, TokenType.RESET_PASSWORD);
+
+    const resetToken = await this.tokenService.createToken(
+      user.id,
+      TokenType.RESET_PASSWORD,
+      1,
+    );
+
+    await this.emailService.sendPasswordReset(user, resetToken, baseUrl);
+  }
+
+  // ============================================================
+  // СБРОС ПАРОЛЯ
+  // ============================================================
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<User | null> {
+    const user = await this.tokenService.verifyToken(
+      token,
+      TokenType.RESET_PASSWORD,
+    );
+
+    if (!user) {
+      return null;
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await this.userRepository.save(user);
+
+    return user;
+  }
+
   /**
-   * Создать компанию без администратора
+   * Повторная отправка письма подтверждения
    */
+  async resendVerification(userId: string, baseUrl: string): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error("Пользователь не найден");
+    }
+
+    if (user.isEmailVerified) {
+      throw new Error("Email уже подтвержден");
+    }
+
+    await this.tokenService.deleteUserTokens(user.id, TokenType.CONFIRM_EMAIL);
+
+    const verifyToken = await this.tokenService.createToken(
+      user.id,
+      TokenType.CONFIRM_EMAIL,
+      24,
+    );
+
+    await this.emailService.sendEmailVerification(user, verifyToken, baseUrl);
+  }
+
+  // ============================================================
+  // СОЗДАНИЕ КОМПАНИИ
+  // ============================================================
   async createCompany(data: {
     name: string;
     phone?: string;
@@ -97,19 +210,21 @@ export class AuthService {
   }
 
   // ============================================================
-  // 🔥 СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ АДМИНИСТРАТОРОМ (ТОЛЬКО АДМИН)
+  // СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ АДМИНИСТРАТОРОМ (ТОЛЬКО АДМИН)
   // ============================================================
-  async createUserByAdmin(data: {
-    email: string;
-    password: string;
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    role?: string;
-    companyId?: string;
-    position?: string;
-  }): Promise<Omit<User, "password">> {
-    // Проверяем, что пользователь не существует
+  async createUserByAdmin(
+    data: {
+      email: string;
+      password: string;
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      role?: string;
+      companyId?: string;
+      position?: string;
+    },
+    baseUrl?: string,
+  ): Promise<Omit<User, "password">> {
     const existingUser = await this.userRepository.findOne({
       where: { email: data.email },
     });
@@ -118,7 +233,6 @@ export class AuthService {
       throw new Error(`Пользователь с email "${data.email}" уже существует`);
     }
 
-    // Валидируем роль
     const validRoles: UserRole[] = [
       "admin",
       "developer_admin",
@@ -130,31 +244,46 @@ export class AuthService {
         ? (data.role as UserRole)
         : "developer_manager";
 
-    // Хешируем пароль (сохраняем только хеш!)
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    // Создаем пользователя
     const user = this.userRepository.create({
       email: data.email,
-      password: hashedPassword, // ← сохраняем хеш
+      password: hashedPassword,
       firstName: data.firstName || "",
       lastName: data.lastName || "",
       phone: data.phone || "",
       role: role,
       companyId: data.companyId || null,
       position: data.position || "",
-      isActive: true,
+      isActive: false,
+      isEmailVerified: false,
     });
 
     await this.userRepository.save(user);
 
-    // 🔥 Возвращаем пользователя БЕЗ пароля
+    if (baseUrl) {
+      try {
+        const verifyToken = await this.tokenService.createToken(
+          user.id,
+          TokenType.CONFIRM_EMAIL,
+          24,
+        );
+        await this.emailService.sendEmailVerification(
+          user,
+          verifyToken,
+          baseUrl,
+        );
+      } catch (error) {
+        console.error("❌ Failed to send verification email:", error);
+      }
+    }
+
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword as Omit<User, "password">;
   }
 
   // ============================================================
-  // СОЗДАНИЕ МЕНЕДЖЕРА КОМПАНИИ (АДМИН КОМПАНИИ)
+  // СОЗДАНИЕ МЕНЕДЖЕРА КОМПАНИИ
   // ============================================================
   async createCompanyManager(
     data: {
@@ -167,6 +296,7 @@ export class AuthService {
       companyId?: string;
     },
     currentUser: User,
+    baseUrl?: string,
   ): Promise<User> {
     if (
       currentUser.role !== "admin" &&
@@ -219,11 +349,82 @@ export class AuthService {
       companyId: companyId,
       company: company,
       createdById: currentUser.id,
+      isActive: false,
+      isEmailVerified: false,
     });
 
     await this.userRepository.save(manager);
 
+    if (baseUrl) {
+      try {
+        const verifyToken = await this.tokenService.createToken(
+          manager.id,
+          TokenType.CONFIRM_EMAIL,
+          24,
+        );
+        await this.emailService.sendEmailVerification(
+          manager,
+          verifyToken,
+          baseUrl,
+        );
+      } catch (error) {
+        console.error("❌ Failed to send verification email:", error);
+      }
+    }
+
     return manager;
+  }
+
+  // ============================================================
+  // СБРОС ПАРОЛЯ (из админки)
+  // ============================================================
+  async resetPasswordByAdmin(
+    userId: string,
+    newPassword: string,
+    baseUrl: string,
+  ): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error("Пользователь не найден");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await this.userRepository.save(user);
+
+    try {
+      await this.emailService.sendPasswordChangedEmail(user, baseUrl);
+    } catch (error) {
+      console.error("❌ Failed to send password change notification:", error);
+    }
+
+    return user;
+  }
+
+  // ============================================================
+  // ОТПРАВКА ССЫЛКИ ДЛЯ СБРОСА ПАРОЛЯ (из админки)
+  // ============================================================
+  async sendPasswordResetLink(userId: string, baseUrl: string): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error("Пользователь не найден");
+    }
+
+    await this.tokenService.deleteUserTokens(user.id, TokenType.RESET_PASSWORD);
+
+    const resetToken = await this.tokenService.createToken(
+      user.id,
+      TokenType.RESET_PASSWORD,
+      1,
+    );
+
+    await this.emailService.sendPasswordReset(user, resetToken, baseUrl);
   }
 
   // ============================================================
@@ -244,6 +445,10 @@ export class AuthService {
 
     if (!user.isActive) {
       throw new Error("Учетная запись деактивирована");
+    }
+
+    if (!user.isEmailVerified) {
+      throw new Error("Email не подтвержден. Проверьте вашу почту.");
     }
 
     const isValid = await bcrypt.compare(data.password, user.password);
@@ -358,54 +563,33 @@ export class AuthService {
   // ============================================================
   // ПОЛУЧЕНИЕ ПОЛЬЗОВАТЕЛЕЙ С УЧЕТОМ ПРАВ
   // ============================================================
-
   async getAllUsers(currentUser: User): Promise<User[]> {
-    console.log("🔍 getAllUsers - currentUser role:", currentUser.role);
-    console.log(
-      "🔍 getAllUsers - currentUser companyId:",
-      currentUser.companyId,
-    );
-
-    // Admin видит всех
     if (currentUser.role === "admin") {
-      const users = await this.userRepository.find({
+      return this.userRepository.find({
         relations: ["company"],
         order: { createdAt: "DESC" },
       });
-      console.log(`✅ Admin: found ${users.length} users`);
-      return users;
     }
 
-    // developer_admin видит только пользователей своей компании
     if (currentUser.role === "developer_admin") {
       if (!currentUser.companyId) {
-        console.log("⚠️ developer_admin has no company");
         return [];
       }
 
-      const users = await this.userRepository.find({
+      return this.userRepository.find({
         where: { companyId: currentUser.companyId },
         relations: ["company"],
         order: { createdAt: "DESC" },
       });
-      console.log(
-        `✅ developer_admin: found ${users.length} users for company ${currentUser.companyId}`,
-      );
-      return users;
     }
 
-    // developer_manager видит только себя
     if (currentUser.role === "developer_manager") {
-      const users = await this.userRepository.find({
+      return this.userRepository.find({
         where: { id: currentUser.id },
         relations: ["company"],
       });
-      console.log(`✅ developer_manager: found ${users.length} users`);
-      return users;
     }
 
-    // agent и другие роли не видят пользователей
-    console.log(`⚠️ Unknown role: ${currentUser.role}, returning empty array`);
     return [];
   }
 
@@ -451,7 +635,6 @@ export class AuthService {
       throw new Error("Пользователь не найден");
     }
 
-    // Проверяем права
     if (currentUser.role === "admin") {
       // Admin может редактировать всех
     } else if (currentUser.role === "developer_admin") {
@@ -472,14 +655,17 @@ export class AuthService {
       throw new Error("Доступ запрещен. Недостаточно прав");
     }
 
-    // Обновляем поля
     if (data.firstName !== undefined) user.firstName = data.firstName;
     if (data.lastName !== undefined) user.lastName = data.lastName;
     if (data.phone !== undefined) user.phone = data.phone;
     if (data.position !== undefined) user.position = data.position;
     if (data.isActive !== undefined) user.isActive = data.isActive;
 
-    // 🔥 Только admin может менять роль и компанию
+    if (data.password && data.password.length >= 6) {
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      user.password = hashedPassword;
+    }
+
     if (currentUser.role === "admin") {
       const oldRole = user.role;
       const oldCompanyId = user.companyId;
@@ -501,25 +687,21 @@ export class AuthService {
         }
       }
 
-      // 🔥 ЕСЛИ ПОЛЬЗОВАТЕЛЬ СТАЛ АДМИНИСТРАТОРОМ КОМПАНИИ
       if (
         user.role === "developer_admin" &&
         user.companyId &&
         (oldRole !== "developer_admin" || oldCompanyId !== user.companyId)
       ) {
-        // Находим компанию
         const company = await this.companyRepository.findOne({
           where: { id: user.companyId },
         });
 
         if (company) {
-          // 🔥 Обновляем adminId в компании
           company.adminId = user.id;
           await this.companyRepository.save(company);
         }
       }
 
-      // 🔥 ЕСЛИ ПОЛЬЗОВАТЕЛЬ БЫЛ АДМИНИСТРАТОРОМ, А ТЕПЕРЬ НЕТ
       if (
         oldRole === "developer_admin" &&
         oldCompanyId &&
@@ -530,7 +712,6 @@ export class AuthService {
         });
 
         if (company && company.adminId === user.id) {
-          // 🔥 Убираем adminId из компании
           company.adminId = null;
           await this.companyRepository.save(company);
         }
@@ -555,7 +736,6 @@ export class AuthService {
       throw new Error("Пользователь не найден");
     }
 
-    // Проверка прав
     if (currentUser.role === "admin") {
       // Admin может удалять всех
     } else if (currentUser.role === "developer_admin") {
@@ -580,33 +760,22 @@ export class AuthService {
       throw new Error("Нельзя удалить самого себя");
     }
 
-    // 🔥 1. Проверяем, является ли пользователь администратором компании
     const company = await this.companyRepository.findOne({
       where: { adminId: user.id },
     });
 
     if (company) {
-      // 🔥 2. Убираем связь с компанией
       company.adminId = null;
       company.admin = null;
       await this.companyRepository.save(company);
-      console.log(
-        `✅ Убрана связь администратора ${user.email} с компанией ${company.name}`,
-      );
     }
 
-    // 🔥 3. Удаляем пользователя
     await this.userRepository.remove(user);
-    console.log(`✅ Пользователь ${user.email} удален`);
   }
 
   // ============================================================
-  // 🔥 УПРАВЛЕНИЕ КОМПАНИЯМИ
+  // УПРАВЛЕНИЕ КОМПАНИЯМИ
   // ============================================================
-
-  /**
-   * Получить все компании
-   */
   async getCompanies(): Promise<Company[]> {
     return this.companyRepository.find({
       relations: ["admin", "users"],
@@ -614,9 +783,6 @@ export class AuthService {
     });
   }
 
-  /**
-   * Получить компанию по ID
-   */
   async getCompanyById(id: string): Promise<Company | null> {
     return this.companyRepository.findOne({
       where: { id },
@@ -624,9 +790,6 @@ export class AuthService {
     });
   }
 
-  /**
-   * Обновить компанию
-   */
   async updateCompany(id: string, data: Partial<Company>): Promise<Company> {
     const company = await this.companyRepository.findOne({
       where: { id },
@@ -637,7 +800,6 @@ export class AuthService {
       throw new Error("Компания не найдена");
     }
 
-    // Обновляем поля
     if (data.name !== undefined) company.name = data.name;
     if (data.slug !== undefined) {
       if (data.name && data.name !== company.name) {
@@ -655,7 +817,6 @@ export class AuthService {
     if (data.metadata !== undefined) company.metadata = data.metadata;
     if (data.isActive !== undefined) company.isActive = data.isActive;
 
-    // Если меняется adminId
     if (data.adminId !== undefined) {
       company.adminId = data.adminId;
       if (data.adminId) {
@@ -673,9 +834,6 @@ export class AuthService {
     return this.getCompanyById(id) as Promise<Company>;
   }
 
-  /**
-   * Удалить компанию
-   */
   async deleteCompany(id: string): Promise<void> {
     const company = await this.companyRepository.findOne({
       where: { id },
@@ -686,7 +844,6 @@ export class AuthService {
       throw new Error("Компания не найдена");
     }
 
-    // Отвязываем всех пользователей компании
     if (company.users && company.users.length > 0) {
       for (const user of company.users) {
         user.companyId = null;
@@ -701,7 +858,6 @@ export class AuthService {
   // ============================================================
   // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
   // ============================================================
-
   private mapToAuthUser(user: User): AuthUser {
     return {
       id: user.id,
@@ -714,6 +870,11 @@ export class AuthService {
       phone: user.phone || undefined,
       position: user.position || undefined,
       isActive: user.isActive,
+      isEmailVerified: user.isEmailVerified,
+      emailVerifiedAt: user.emailVerifiedAt || undefined,
+      lastLoginAt: user.lastLoginAt || undefined,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   }
 }

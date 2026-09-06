@@ -20,6 +20,30 @@ router.post("/login", authController.login.bind(authController));
 router.post("/logout", authController.logout.bind(authController));
 
 // ============================================================
+// РАБОТА С ПОРОЛЕМ И СБРОСОМ
+// ============================================================
+router.post("/verify-email", authController.verifyEmail.bind(authController));
+
+router.post(
+  "/resend-verification",
+  authController.resendVerification.bind(authController),
+);
+router.post(
+  "/forgot-password",
+  authController.forgotPassword.bind(authController),
+);
+router.post(
+  "/reset-password",
+  authController.resetPassword.bind(authController),
+);
+
+router.post(
+  "/admin/users/:id/send-reset-link",
+  authMiddleware,
+  authController.sendPasswordResetLink.bind(authController),
+);
+
+// ============================================================
 // ЗАЩИЩЕННЫЕ МАРШРУТЫ
 // ============================================================
 router.get("/me", authMiddleware, authController.me.bind(authController));
@@ -90,6 +114,16 @@ router.post(
   authMiddleware,
   checkWriteAccess,
   authController.createCompanyManager.bind(authController),
+);
+
+// ============================================================
+// ПОВТОРНАЯ ОТПРАВКА ПИСЬМА ПОДТВЕРЖДЕНИЯ (ДЛЯ АДМИНА)
+// ============================================================
+router.post(
+  "/admin/users/:id/resend-verification",
+  authMiddleware,
+  adminOrDeveloperAdmin,
+  authController.resendVerificationByAdmin.bind(authController),
 );
 
 export default router;

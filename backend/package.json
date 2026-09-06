@@ -11,6 +11,7 @@
     "migrate:data": "ts-node migrations/migrateFromTypescript.ts"
   },
   "dependencies": {
+    "@types/uuid": "^10.0.0",
     "bcryptjs": "^3.0.3",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.7",
@@ -19,9 +20,11 @@
     "express": "^4.18.2",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^10.0.0",
     "pg": "^8.23.0",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.17"
+    "typeorm": "^0.3.17",
+    "uuid": "^14.0.2"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -32,6 +35,7 @@
     "@types/helmet": "^0.0.48",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20.10.0",
+    "@types/nodemailer": "^8.0.1",
     "@types/pg": "^8.21.0",
     "@types/react": "^19.2.18",
     "nodemon": "^3.0.1",

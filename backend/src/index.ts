@@ -1,10 +1,12 @@
 // server/src/index.ts
-
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 import dotenv from "dotenv";
+
+dotenv.config();
+
 import { AppDataSource } from "./data-source";
 import calculatorRoutes from "./routes/calculator.routes";
 import banksRoutes from "./routes/banks.routes";
@@ -15,8 +17,6 @@ import adminRoutes from "./routes/admin.routes";
 import programsRoutes from "./routes/programs.routes";
 import authRoutes from "./routes/auth.routes";
 import { corsOptions } from "./config/cors";
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
