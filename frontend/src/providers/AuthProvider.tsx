@@ -9,8 +9,9 @@ import {
   UserRole,
   AuthContextType,
 } from "../types/auth.types";
-import { authApi } from "../services/auth";
+
 import { adminApi } from "../services/adminApi";
+import { authApi } from "../services/auth";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -37,7 +38,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(response.data);
           console.log("✅ User set:", response.data);
 
-          // 🔥 Если у пользователя есть компания, загружаем её данные
           if (response.data.companyId) {
             try {
               const company = await adminApi.getCompany(
@@ -79,7 +79,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(response.data);
         console.log("🔄 User refreshed:", response.data);
 
-        // Обновляем компанию
         if (response.data.companyId) {
           try {
             const company = await adminApi.getCompany(response.data.companyId);
@@ -104,13 +103,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
     try {
       const response = await authApi.login({ email, password });
+
       if (response.success && response.data) {
         setUser(response.data);
         if (response.token) {
           localStorage.setItem("token", response.token);
         }
 
-        // Загружаем компанию
         if (response.data.companyId) {
           try {
             const company = await adminApi.getCompany(response.data.companyId);
@@ -122,9 +121,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         return true;
       }
+
+      // 🔥 ОБРАБОТКА ОШИБКИ "Email не подтвержден"
+      if (
+        response.message &&
+        response.message.includes("Email не подтвержден")
+      ) {
+        setError(
+          "Email не подтвержден. Проверьте вашу почту или запросите повторную отправку.",
+        );
+        return false;
+      }
+
       setError(response.message || "Ошибка входа");
       return false;
     } catch (err: any) {
+      // 🔥 ОБРАБОТКА ОШИБКИ "Email не подтвержден" из catch
+      if (err.message && err.message.includes("Email не подтвержден")) {
+        setError(
+          "Email не подтвержден. Проверьте вашу почту или запросите повторную отправку.",
+        );
+        return false;
+      }
       setError(err.message || "Ошибка входа");
       return false;
     }
@@ -208,19 +226,87 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // ============================================================
-  // 🔥 ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ
+  // 🔥 НОВЫЕ МЕТОДЫ ДЛЯ EMAIL
   // ============================================================
 
   /**
-   * Получить компанию пользователя
+   * Подтверждение email
    */
+  const verifyEmail = async (
+    token: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    try {
+      const result = await authApi.verifyEmail(token);
+      return result;
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.message || "Ошибка подтверждения email",
+      };
+    }
+  };
+
+  /**
+   * Повторная отправка письма подтверждения
+   */
+  const resendVerification = async (): Promise<{
+    success: boolean;
+    message: string;
+  }> => {
+    try {
+      const result = await authApi.resendVerification();
+      return result;
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.message || "Ошибка отправки письма",
+      };
+    }
+  };
+
+  /**
+   * Запрос на сброс пароля
+   */
+  const forgotPassword = async (
+    email: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    try {
+      const result = await authApi.forgotPassword(email);
+      return result;
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.message || "Ошибка отправки письма",
+      };
+    }
+  };
+
+  /**
+   * Сброс пароля
+   */
+  const resetPassword = async (
+    token: string,
+    newPassword: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    try {
+      const result = await authApi.resetPassword(token, newPassword);
+      return result;
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.message || "Ошибка сброса пароля",
+      };
+    }
+  };
+
+  // ============================================================
+  // 🔥 ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ
+  // ============================================================
+
   const getUserCompany = useCallback((): Company | null => {
     return userCompany;
   }, [userCompany]);
 
-  /**
-   * Проверка наличия роли
-   */
   const hasRole = useCallback(
     (roles: UserRole | UserRole[]): boolean => {
       if (!user) return false;
@@ -230,17 +316,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     [user],
   );
 
-  /**
-   * Проверка доступа к сущности по companyId
-   */
   const hasAccessToEntity = useCallback(
     (entityCompanyId: string | null | undefined): boolean => {
       if (!user) return false;
-      // Admin имеет доступ ко всему
       if (user.role === "admin") return true;
-      // Если у сущности нет компании, доступ запрещен для не-админов
       if (!entityCompanyId) return false;
-      // Проверяем, что компания пользователя совпадает с компанией сущности
       return user.companyId === entityCompanyId;
     },
     [user],
@@ -273,6 +353,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     updateProfile,
     changePassword,
     refreshUser,
+
+    // 🔥 НОВЫЕ МЕТОДЫ
+    verifyEmail,
+    resendVerification,
+    forgotPassword,
+    resetPassword,
 
     // Проверки
     isAuthenticated,

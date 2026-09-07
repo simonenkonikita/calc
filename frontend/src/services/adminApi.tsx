@@ -15,6 +15,10 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
+// 🔥 Получение токена из localStorage
+const getToken = (): string | null => {
+  return localStorage.getItem("token");
+};
 // ============================================================
 // 🔥 ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // ============================================================
@@ -154,6 +158,40 @@ export const adminApi = {
     await fetchWithAuth<void>(`${API_URL}/auth/users/${id}`, {
       method: "DELETE",
     });
+  },
+
+  // ============================================================
+  // 🔥 УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ (АДМИНКА)
+  // ============================================================
+
+  /**
+   * Сбросить пароль пользователя (только admin или developer_admin)
+   */
+  async resetUserPassword(
+    id: string,
+    newPassword: string,
+  ): Promise<{ success: boolean; message: string }> {
+    return fetchWithAuth<{ success: boolean; message: string }>(
+      `${API_URL}/auth/admin/users/${id}/reset-password`,
+      {
+        method: "POST",
+        body: JSON.stringify({ newPassword }),
+      },
+    );
+  },
+
+  /**
+   * Отправить ссылку для сброса пароля (только admin или developer_admin)
+   */
+  async sendPasswordResetLink(
+    id: string,
+  ): Promise<{ success: boolean; message: string }> {
+    return fetchWithAuth<{ success: boolean; message: string }>(
+      `${API_URL}/auth/admin/users/${id}/send-reset-link`,
+      {
+        method: "POST",
+      },
+    );
   },
 
   // ============================================================
@@ -731,6 +769,32 @@ export const adminApi = {
     byOffer: { offerId: string; count: string }[];
   }> {
     return fetchWithAuth<any>(`${API_URL}/admin/dynamic-subsidies/stats`);
+  },
+
+  // ============================================================
+  // 🔥 ПОВТОРНАЯ ОТПРАВКА ПИСЬМА ПОДТВЕРЖДЕНИЯ (для админа - по ID пользователя)
+  // ============================================================
+  resendVerificationByAdmin: async (
+    userId: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    const token = getToken();
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(
+      `${API_URL}/auth/admin/users/${userId}/resend-verification`,
+      {
+        method: "POST",
+        headers,
+        credentials: "include",
+      },
+    );
+    return handleResponse(response);
   },
 };
 

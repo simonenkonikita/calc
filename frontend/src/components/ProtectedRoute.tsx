@@ -16,13 +16,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { isAuthenticated, user, loading } = useAuth();
 
-  // 🔥 ЛОГИ ДЛЯ ДИАГНОСТИКИ
-  console.log("🔍 ProtectedRoute - loading:", loading);
-  console.log("🔍 ProtectedRoute - isAuthenticated:", isAuthenticated);
-  console.log("🔍 ProtectedRoute - user:", user);
-  console.log("🔍 ProtectedRoute - user role:", user?.role);
-  console.log("🔍 ProtectedRoute - required roles:", roles);
-
   if (loading) {
     return (
       <div className="loading-container">

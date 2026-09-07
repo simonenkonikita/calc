@@ -22,7 +22,12 @@ export const UsersSection: React.FC = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<AdminUser>>({});
+  const [formData, setFormData] = useState<
+    Partial<AdminUser> & {
+      newPassword?: string;
+      confirmPassword?: string;
+    }
+  >({});
   const [isCreating, setIsCreating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<string>("all");
@@ -76,8 +81,16 @@ export const UsersSection: React.FC = () => {
       alert("⚠️ Введите email");
       return;
     }
-    if (!formData.password || formData.password.length < 6) {
+
+    const password = formData.password || "";
+    const confirmPassword = formData.confirmPassword || "";
+
+    if (!password || password.length < 6) {
       alert("⚠️ Пароль должен быть не менее 6 символов");
+      return;
+    }
+    if (password !== confirmPassword) {
+      alert("⚠️ Пароли не совпадают");
       return;
     }
 
@@ -87,23 +100,23 @@ export const UsersSection: React.FC = () => {
       if (isAdmin) {
         await adminApi.createUserByAdmin({
           email: formData.email,
-          password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phone: formData.phone,
-          position: formData.position,
-          companyId: formData.companyId || user?.companyId,
+          password: password,
+          firstName: formData.firstName || "",
+          lastName: formData.lastName || "",
+          phone: formData.phone || "",
+          position: formData.position || "",
+          companyId: formData.companyId || user?.companyId || "",
           role: formData.role || "developer_manager",
         });
       } else if (isDeveloperAdmin) {
         await adminApi.createCompanyManager({
           email: formData.email,
-          password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phone: formData.phone,
-          position: formData.position,
-          companyId: user?.companyId,
+          password: password,
+          firstName: formData.firstName || "",
+          lastName: formData.lastName || "",
+          phone: formData.phone || "",
+          position: formData.position || "",
+          companyId: user?.companyId || "",
         });
       } else {
         alert("⚠️ У вас нет прав для создания пользователей");
@@ -113,7 +126,9 @@ export const UsersSection: React.FC = () => {
       setIsCreating(false);
       setFormData({});
       await loadData();
-      alert("✅ Пользователь создан!");
+      alert(
+        "✅ Пользователь создан! На email отправлено письмо с подтверждением.",
+      );
     } catch (error: any) {
       alert(`❌ ${error.message || "Ошибка создания пользователя"}`);
     } finally {
@@ -128,19 +143,33 @@ export const UsersSection: React.FC = () => {
   const handleUpdateUser = async () => {
     if (!editingId) return;
 
+    const newPassword = formData.newPassword || "";
+    const confirmPassword = formData.confirmPassword || "";
+
+    if (newPassword || confirmPassword) {
+      if (!newPassword || newPassword.length < 6) {
+        alert("⚠️ Пароль должен быть не менее 6 символов");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        alert("⚠️ Пароли не совпадают");
+        return;
+      }
+    }
+
     try {
       setIsSubmitting(true);
 
       const updateData: any = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: formData.phone,
-        position: formData.position,
-        isActive: formData.isActive,
+        firstName: formData.firstName || "",
+        lastName: formData.lastName || "",
+        phone: formData.phone || "",
+        position: formData.position || "",
+        isActive: formData.isActive !== undefined ? formData.isActive : true,
       };
 
-      if (formData.password && formData.password.length >= 6) {
-        updateData.password = formData.password;
+      if (newPassword && newPassword.length >= 6) {
+        updateData.password = newPassword;
       }
 
       if (isAdmin) {
@@ -173,6 +202,40 @@ export const UsersSection: React.FC = () => {
       alert("✅ Пользователь удален!");
     } catch (error: any) {
       alert(`❌ ${error.message || "Ошибка удаления"}`);
+    }
+  };
+
+  // ============================================================
+  // 🔥 ПОВТОРНАЯ ОТПРАВКА ПИСЬМА ПОДТВЕРЖДЕНИЯ EMAIL
+  // ============================================================
+
+  const handleResendVerification = async (
+    userId: string,
+    userEmail: string,
+  ) => {
+    if (
+      !confirm(`Отправить повторное письмо с подтверждением на ${userEmail}?`)
+    )
+      return;
+    try {
+      await adminApi.resendVerificationByAdmin(userId);
+      alert(`✅ Письмо с подтверждением отправлено повторно на ${userEmail}!`);
+    } catch (error: any) {
+      alert(`❌ ${error.message || "Ошибка отправки письма"}`);
+    }
+  };
+
+  // ============================================================
+  // ОТПРАВКА ССЫЛКИ ДЛЯ СБРОСА ПАРОЛЯ
+  // ============================================================
+
+  const handleSendResetLink = async (userId: string, userEmail: string) => {
+    if (!confirm(`Отправить ссылку для сброса пароля на ${userEmail}?`)) return;
+    try {
+      const result = await adminApi.sendPasswordResetLink(userId);
+      alert(`✅ ${result.message || "Ссылка для сброса пароля отправлена!"}`);
+    } catch (error: any) {
+      alert(`❌ ${error.message || "Ошибка отправки ссылки"}`);
     }
   };
 
@@ -275,7 +338,7 @@ export const UsersSection: React.FC = () => {
   };
 
   // ============================================================
-  // 🔥 ПОЛЯ ДЛЯ СОЗДАНИЯ
+  // ПОЛЯ ДЛЯ СОЗДАНИЯ
   // ============================================================
 
   const getCreateFields = (): AdminModalField[] => {
@@ -285,7 +348,7 @@ export const UsersSection: React.FC = () => {
         label: "Фамилия",
         type: "text",
         placeholder: "Петров",
-        value: "",
+        value: formData.lastName || "",
         onChange: (value) => setFormData({ ...formData, lastName: value }),
       },
       {
@@ -293,7 +356,7 @@ export const UsersSection: React.FC = () => {
         label: "Имя",
         type: "text",
         placeholder: "Иван",
-        value: "",
+        value: formData.firstName || "",
         onChange: (value) => setFormData({ ...formData, firstName: value }),
       },
       {
@@ -302,7 +365,7 @@ export const UsersSection: React.FC = () => {
         type: "email",
         placeholder: "Введите email",
         required: true,
-        value: "",
+        value: formData.email || "",
         onChange: (value) => setFormData({ ...formData, email: value }),
         fullWidth: true,
       },
@@ -312,12 +375,25 @@ export const UsersSection: React.FC = () => {
         type: "password",
         placeholder: "Минимум 6 символов",
         required: true,
-        value: "",
+        value: formData.password || "",
         onChange: (value) => setFormData({ ...formData, password: value }),
+        hint: "Пароль должен содержать не менее 6 символов",
+        fullWidth: true,
+      },
+      {
+        name: "confirmPassword",
+        label: "Подтвердите пароль",
+        type: "password",
+        placeholder: "Повторите пароль",
+        required: true,
+        value: formData.confirmPassword || "",
+        onChange: (value) =>
+          setFormData({ ...formData, confirmPassword: value }),
+        hint: "Пароли должны совпадать",
+        fullWidth: true,
       },
     ];
 
-    // 🔥 ПОЛЕ "РОЛЬ" - для admin показывает все роли, для developer_admin только "Менеджер компании"
     if (isAdmin) {
       fields.push({
         name: "role",
@@ -335,7 +411,6 @@ export const UsersSection: React.FC = () => {
           setFormData({ ...formData, role: value as UserRole }),
       });
     } else if (isDeveloperAdmin) {
-      // 🔥 Для developer_admin - только менеджер, задизейблено
       fields.push({
         name: "role",
         label: "Роль",
@@ -350,7 +425,6 @@ export const UsersSection: React.FC = () => {
       });
     }
 
-    // 🔥 ПОЛЕ "КОМПАНИЯ"
     if (isAdmin) {
       fields.push({
         name: "companyId",
@@ -360,11 +434,10 @@ export const UsersSection: React.FC = () => {
           { value: "", label: "Без компании" },
           ...companies.map((c) => ({ value: c.id, label: c.name })),
         ],
-        value: "",
+        value: formData.companyId || "",
         onChange: (value) => setFormData({ ...formData, companyId: value }),
       });
     } else if (isDeveloperAdmin && user?.companyId) {
-      // 🔥 Для developer_admin - компания предустановлена и задизейблена
       fields.push({
         name: "companyId",
         label: "Компания",
@@ -384,7 +457,7 @@ export const UsersSection: React.FC = () => {
         label: "Телефон",
         type: "text",
         placeholder: "+7 (999) 123-45-67",
-        value: "",
+        value: formData.phone || "",
         onChange: (value) => setFormData({ ...formData, phone: value }),
       },
       {
@@ -392,7 +465,7 @@ export const UsersSection: React.FC = () => {
         label: "Должность",
         type: "text",
         placeholder: "Старший менеджер",
-        value: "",
+        value: formData.position || "",
         onChange: (value) => setFormData({ ...formData, position: value }),
         fullWidth: true,
       },
@@ -402,7 +475,7 @@ export const UsersSection: React.FC = () => {
   };
 
   // ============================================================
-  // 🔥 ПОЛЯ ДЛЯ РЕДАКТИРОВАНИЯ
+  // ПОЛЯ ДЛЯ РЕДАКТИРОВАНИЯ
   // ============================================================
 
   const getEditFields = (selectedUser: AdminUser): AdminModalField[] => {
@@ -434,16 +507,28 @@ export const UsersSection: React.FC = () => {
         disabled: true,
       },
       {
-        name: "password",
+        name: "newPassword",
         label: "Новый пароль",
         type: "password",
-        placeholder: "Оставьте пустым",
-        value: formData.password || "",
-        onChange: (value) => setFormData({ ...formData, password: value }),
+        placeholder: "Введите новый пароль (мин. 6 символов)",
+        value: formData.newPassword || "",
+        onChange: (value) => setFormData({ ...formData, newPassword: value }),
+        hint: "Оставьте пустым, чтобы не менять пароль",
+        fullWidth: true,
+      },
+      {
+        name: "confirmPassword",
+        label: "Подтвердите пароль",
+        type: "password",
+        placeholder: "Повторите новый пароль",
+        value: formData.confirmPassword || "",
+        onChange: (value) =>
+          setFormData({ ...formData, confirmPassword: value }),
+        hint: "Пароли должны совпадать",
+        fullWidth: true,
       },
     ];
 
-    // 🔥 ПОЛЕ "РОЛЬ" - для admin показывает все роли, для developer_admin только "Менеджер компании"
     if (isAdmin) {
       fields.push({
         name: "role",
@@ -460,7 +545,6 @@ export const UsersSection: React.FC = () => {
           setFormData({ ...formData, role: value as UserRole }),
       });
     } else if (isDeveloperAdmin) {
-      // 🔥 Для developer_admin - только менеджер, задизейблено
       fields.push({
         name: "role",
         label: "Роль",
@@ -468,13 +552,12 @@ export const UsersSection: React.FC = () => {
         options: [
           { value: "developer_manager", label: "📋 Менеджер компании" },
         ],
-        value: "developer_manager", // Всегда только менеджер
+        value: "developer_manager",
         onChange: () => {},
         disabled: true,
       });
     }
 
-    // 🔥 ПОЛЕ "КОМПАНИЯ"
     if (isAdmin) {
       fields.push({
         name: "companyId",
@@ -488,7 +571,6 @@ export const UsersSection: React.FC = () => {
         onChange: (value) => setFormData({ ...formData, companyId: value }),
       });
     } else if (isDeveloperAdmin && user?.companyId) {
-      // 🔥 Для developer_admin - компания предустановлена и задизейблена
       fields.push({
         name: "companyId",
         label: "Компания",
@@ -572,6 +654,7 @@ export const UsersSection: React.FC = () => {
                   role: "developer_manager",
                   email: "",
                   password: "",
+                  confirmPassword: "",
                   firstName: "",
                   lastName: "",
                   phone: "",
@@ -605,6 +688,7 @@ export const UsersSection: React.FC = () => {
                 <th>Телефон</th>
                 <th>Должность</th>
                 <th>Активен</th>
+                <th>📧 Подтвержден</th> {/* 🔥 НОВАЯ КОЛОНКА */}
                 <th>Действия</th>
               </tr>
             </thead>
@@ -625,6 +709,14 @@ export const UsersSection: React.FC = () => {
                     <StatusBadge isActive={user.isActive} />
                   </td>
                   <td>
+                    {/* 🔥 БЭЙДЖ ПОДТВЕРЖДЕНИЯ EMAIL */}
+                    <span
+                      className={`email-verified-badge ${user.isEmailVerified ? "verified" : "unverified"}`}
+                    >
+                      {user.isEmailVerified ? "✅ Да" : "❌ Нет"}
+                    </span>
+                  </td>
+                  <td>
                     <ActionButtons
                       buttons={[
                         {
@@ -639,20 +731,38 @@ export const UsersSection: React.FC = () => {
                               role: user.role,
                               companyId: user.companyId,
                               isActive: user.isActive,
-                              password: "",
+                              newPassword: "",
+                              confirmPassword: "",
                             });
                           },
                           variant: "primary",
-                          title: "Редактировать",
+                          title: "Редактировать пользователя",
+                        },
+                        // 🔥 КНОПКА - повторная отправка подтверждения email
+                        {
+                          icon: "📧",
+                          onClick: () =>
+                            handleResendVerification(user.id, user.email),
+                          variant: "info",
+                          title:
+                            "Отправить повторно письмо с подтверждением email",
+                        },
+                        {
+                          icon: "🔑",
+                          onClick: () =>
+                            handleSendResetLink(user.id, user.email),
+                          variant: "warning",
+                          title: "Отправить ссылку для сброса пароля",
                         },
                         {
                           icon: "🗑️",
                           onClick: () => handleDeleteUser(user.id),
                           variant: "danger",
-                          title: "Удалить",
+                          title: "Удалить пользователя",
                         },
                       ]}
                       size="sm"
+                      gap="sm"
                     />
                   </td>
                 </tr>
@@ -661,7 +771,7 @@ export const UsersSection: React.FC = () => {
               {filteredUsers.length === 0 && !isCreating && (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={9} // ← измените с 8 на 9
                     style={{
                       textAlign: "center",
                       padding: "2rem",
@@ -676,7 +786,7 @@ export const UsersSection: React.FC = () => {
           </table>
         </div>
 
-        {/* 🔥 Модальное окно СОЗДАНИЯ пользователя */}
+        {/* Модальные окна остаются без изменений */}
         <AdminModal
           isOpen={isCreating}
           onClose={() => {
@@ -691,7 +801,6 @@ export const UsersSection: React.FC = () => {
           size="md"
         />
 
-        {/* 🔥 Модальное окно РЕДАКТИРОВАНИЯ пользователя */}
         <AdminModal
           isOpen={editingId !== null && !!selectedUser}
           onClose={() => {

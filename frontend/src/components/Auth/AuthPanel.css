@@ -28,22 +28,22 @@
 .auth-panel {
   position: fixed;
   top: 0;
-  right: 0; /* ← меняем left на right */
+  right: 0;
   bottom: 0;
   width: 420px;
   max-width: 90vw;
   background: #ffffff;
   z-index: 1000;
-  transform: translateX(100%); /* ← меняем -100% на 100% */
+  transform: translateX(100%);
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: -4px 0 30px rgba(0, 0, 0, 0.15); /* ← меняем направление тени */
+  box-shadow: -4px 0 30px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
 }
 
 .auth-panel.open {
-  transform: translateX(0); /* ← без изменений */
+  transform: translateX(0);
 }
 
 /* ============================================================
@@ -88,6 +88,12 @@
 
 .auth-panel-logo .logo-highlight {
   color: #6c5ce7;
+}
+
+.auth-panel-logo .logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 /* ============================================================
@@ -175,6 +181,29 @@
   gap: 12px;
 }
 
+/* ============================================================
+   🔥 ЗАБЫЛИ ПАРОЛЬ?
+   ============================================================ */
+.auth-forgot-password {
+  text-align: right;
+  margin-top: -4px;
+}
+
+.auth-forgot-password a {
+  color: #6c5ce7;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.auth-forgot-password a:hover {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+
+/* ============================================================
+   КНОПКА ОТПРАВКИ
+   ============================================================ */
 .auth-submit-btn {
   background: linear-gradient(135deg, #6c5ce7, #a855f7);
   color: white;
@@ -266,54 +295,110 @@
   }
 }
 
-/* ============================================================
-   ХЕДЕР
-   ============================================================ */
-.auth-panel-header {
-  padding: 24px 30px 16px;
-  border-bottom: 1px solid #f1f5f9;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-}
+/* frontend/src/components/Auth/AuthPanel.css */
 
-.auth-close-btn {
+/* ============================================================
+   🔥 ДОБАВЛЯЕМ В КОНЕЦ ФАЙЛА
+   ============================================================ */
+
+/* ============================================================
+   КНОПКА "ЗАБЫЛИ ПАРОЛЬ?" В ВИДЕ ССЫЛКИ
+   ============================================================ */
+.auth-forgot-link-btn {
   background: none;
   border: none;
-  font-size: 24px;
-  color: #94a3b8;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-
-.auth-close-btn:hover {
-  background: #f1f5f9;
-  color: #1e293b;
-}
-
-.auth-panel-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-/* 🔥 Стили для логотипа как на LandingPage */
-.auth-panel-logo .logo-text {
-  font-size: 20px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.auth-panel-logo .logo-highlight {
   color: #6c5ce7;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.2s;
+  text-decoration: none;
 }
 
-/* Если у вас есть иконка */
-.auth-panel-logo .logo-icon {
-  font-size: 24px;
+.auth-forgot-link-btn:hover {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+
+/* ============================================================
+   УСПЕШНОЕ СОСТОЯНИЕ ДЛЯ ВОССТАНОВЛЕНИЯ
+   ============================================================ */
+.auth-forgot-success {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.auth-forgot-icon {
+  font-size: 3rem;
+  margin-bottom: 8px;
+}
+
+.auth-forgot-message {
+  font-size: 1.1rem;
+  color: #16a34a;
+  font-weight: 500;
+  margin: 8px 0 4px;
+}
+
+.auth-forgot-hint {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 8px 0 20px;
+}
+
+.auth-forgot-error {
+  padding: 12px 16px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 8px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  border: 1px solid #fecaca;
+}
+
+/* ============================================================
+   КНОПКА "ОТПРАВИТЬ ПОВТОРНО"
+   ============================================================ */
+.auth-forgot-resend-btn {
+  width: 100%;
+  padding: 10px;
+  background: #e2e8f0;
+  color: #1e293b;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 8px;
+}
+
+.auth-forgot-resend-btn:hover:not(:disabled) {
+  background: #cbd5e1;
+}
+
+.auth-forgot-resend-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   КНОПКА "ВЕРНУТЬСЯ КО ВХОДУ"
+   ============================================================ */
+.auth-back-link {
+  background: none;
+  border: none;
+  display: block;
+  text-align: center;
+  margin-top: 12px;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  width: 100%;
+}
+
+.auth-back-link:hover {
+  color: #1e293b;
 }

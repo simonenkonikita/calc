@@ -109,7 +109,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         return <input {...commonProps} type="email" />;
 
       case "password":
-        return <input {...commonProps} type="password" />;
+        return (
+          <input {...commonProps} type="password" autoComplete="new-password" />
+        );
 
       case "date":
         return <input {...commonProps} type="date" />;

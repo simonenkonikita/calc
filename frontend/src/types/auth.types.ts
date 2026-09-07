@@ -21,6 +21,9 @@ export interface AuthUser {
   phone?: string;
   position?: string;
   isActive: boolean;
+  isEmailVerified: boolean; // 🔥 ДОБАВЛЯЕМ
+  emailVerifiedAt?: string | null; // 🔥 ДОБАВЛЯЕМ (опционально)
+  lastLoginAt?: string | null; // 🔥 ДОБАВЛЯЕМ (опционально)
   createdAt?: string;
   updatedAt?: string;
 }
@@ -41,6 +44,8 @@ export interface User extends Omit<AuthUser, "company"> {
   createdBy?: User;
   createdUsers?: User[];
   lastLoginAt?: string;
+  isEmailVerified: boolean; // 🔥 ДОБАВЛЯЕМ (явно, чтобы TypeScript видел)
+  emailVerifiedAt?: string | null; // 🔥 ДОБАВЛЯЕМ
 }
 
 // ============================================================
@@ -88,6 +93,17 @@ export interface AuthContextType {
   refreshUser: () => Promise<void>;
   getUserCompany: () => Company | null;
   hasRole: (roles: UserRole | UserRole[]) => boolean;
+  verifyEmail: (
+    token: string,
+  ) => Promise<{ success: boolean; message: string }>;
+  resendVerification: () => Promise<{ success: boolean; message: string }>;
+  forgotPassword: (
+    email: string,
+  ) => Promise<{ success: boolean; message: string }>;
+  resetPassword: (
+    token: string,
+    newPassword: string,
+  ) => Promise<{ success: boolean; message: string }>;
 }
 
 export interface RegisterData {
@@ -163,4 +179,31 @@ export interface AuthResponse {
   data: AuthUser;
   token?: string;
   message?: string;
+}
+
+// ============================================================
+// 🔥 НОВЫЕ ТИПЫ ДЛЯ ПОДТВЕРЖДЕНИЯ EMAIL И СБРОСА ПАРОЛЯ
+// ============================================================
+
+export interface VerifyEmailResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    email: string;
+  };
+}
+
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ResendVerificationResponse {
+  success: boolean;
+  message: string;
 }

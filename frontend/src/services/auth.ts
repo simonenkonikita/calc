@@ -1,4 +1,5 @@
 // frontend/src/api/auth.ts
+
 import { RegisterData, LoginData, AuthResponse } from "../types/auth.types";
 
 const API_URL = import.meta.env.VITE_API_URL || "/api";
@@ -43,7 +44,6 @@ export const authApi = {
     });
     const result = await handleResponse<AuthResponse>(response);
 
-    // 🔥 Сохраняем токен (result.token, а не result.data.token)
     if (result.success && result.token) {
       setToken(result.token);
     }
@@ -65,7 +65,6 @@ export const authApi = {
     });
     const result = await handleResponse<AuthResponse>(response);
 
-    // 🔥 Сохраняем токен (result.token, а не result.data.token)
     if (result.success && result.token) {
       setToken(result.token);
     }
@@ -84,7 +83,6 @@ export const authApi = {
       });
       await handleResponse(response);
     } finally {
-      // 🔥 Всегда удаляем токен
       removeToken();
     }
   },
@@ -98,7 +96,6 @@ export const authApi = {
       "Content-Type": "application/json",
     };
 
-    // 🔥 Добавляем Bearer token если есть
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
@@ -109,6 +106,79 @@ export const authApi = {
       credentials: "include",
     });
     return handleResponse<AuthResponse>(response);
+  },
+
+  // ============================================================
+  // 🔥 ПОДТВЕРЖДЕНИЕ EMAIL
+  // ============================================================
+  verifyEmail: async (
+    token: string,
+  ): Promise<{ success: boolean; message: string; data?: any }> => {
+    const response = await fetch(`${API_URL}/auth/verify-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token }),
+    });
+    return handleResponse(response);
+  },
+
+  // ============================================================
+  // 🔥 ПОВТОРНАЯ ОТПРАВКА ПИСЬМА ПОДТВЕРЖДЕНИЯ
+  // ============================================================
+  resendVerification: async (): Promise<{
+    success: boolean;
+    message: string;
+  }> => {
+    const token = getToken();
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_URL}/auth/resend-verification`, {
+      method: "POST",
+      headers,
+      credentials: "include",
+    });
+    return handleResponse(response);
+  },
+
+  // ============================================================
+  // 🔥 ЗАБЫЛИ ПАРОЛЬ
+  // ============================================================
+  forgotPassword: async (
+    email: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+    return handleResponse(response);
+  },
+
+  // ============================================================
+  // 🔥 СБРОС ПАРОЛЯ
+  // ============================================================
+  resetPassword: async (
+    token: string,
+    newPassword: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token, newPassword }),
+    });
+    return handleResponse(response);
   },
 
   // ============================================================
@@ -155,6 +225,27 @@ export const authApi = {
       credentials: "include",
       body: JSON.stringify(data),
     });
+    return handleResponse(response);
+  },
+
+  // ============================================================
+  // ПОВТОРНАЯ ОТПРАВКА ПИСЬМА ПОДТВЕРЖДЕНИЯ (АДМИН)
+  // ============================================================
+  resendVerification: async (
+    userId: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    const token = getToken();
+    const response = await fetch(
+      `${API_URL}/auth/admin/users/${userId}/resend-verification`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        credentials: "include",
+      },
+    );
     return handleResponse(response);
   },
 };

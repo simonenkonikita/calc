@@ -8,6 +8,8 @@ import { ProjectsPage } from "../../pages/ProjectsPage/ProjectsPage";
 import { AuthProvider } from "../../providers/AuthProvider";
 import { ProtectedRoute } from "../ProtectedRoute";
 import AppNavigation from "../Navigation/AppNavigation";
+import { VerifyEmail } from "../../pages/VerifyEmail/VerifyEmail";
+import { ResetPassword } from "../../pages/ResetPassword/ResetPassword";
 
 const App = () => {
   return (
@@ -15,6 +17,10 @@ const App = () => {
       <AppNavigation />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        {/*   <Route path="/forgot-password" element={<ForgotPassword />} /> */}
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route
           path="/calculator"
