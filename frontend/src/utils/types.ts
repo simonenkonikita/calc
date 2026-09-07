@@ -103,7 +103,7 @@ export interface ProjectInfo {
   name: string;
   status: string;
   statusIcon: string;
-  companyId?: string;
+  companyId: string;
   description?: string;
   priceInfo: string;
   paymentTerms: string[];
@@ -122,6 +122,7 @@ export interface RawProjectData {
   statusIcon: string;
   description?: string;
   priceInfo: string;
+  companyId: string;
   paymentTerms: string[];
   promotions: string[];
   banks: string[];

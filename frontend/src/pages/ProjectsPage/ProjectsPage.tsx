@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from "react";
+// frontend/src/pages/ProjectsPage/ProjectsPage.tsx
+
+import React, { useState, useMemo, useEffect } from "react";
 import "./ProjectsPage.css";
 import { useProjects } from "../../hooks/api/useProjects";
 import { useAuthExtended } from "../../hooks/ui/useAuth";
@@ -12,14 +14,14 @@ export const ProjectsPage: React.FC = () => {
     null,
   );
 
-  // 🔥 Фильтруем проекты в зависимости от роли пользователя
+  // Фильтруем проекты в зависимости от роли пользователя
   const filteredProjects = useMemo(() => {
     // Если пользователь - администратор, показываем все проекты
     if (isAdmin) {
       return projects;
     }
 
-    // Если пользователь - представитель компании (developer_admin или другая роль)
+    // Если пользователь - представитель компании
     // показываем только проекты его компании
     if (user?.companyId) {
       return projects.filter((project) => project.companyId === user.companyId);
@@ -29,8 +31,8 @@ export const ProjectsPage: React.FC = () => {
     return [];
   }, [projects, user, isAdmin]);
 
-  // 🔥 Автоматически выбираем первый проект из отфильтрованного списка
-  React.useEffect(() => {
+  // Автоматически выбираем первый проект из отфильтрованного списка
+  useEffect(() => {
     if (filteredProjects.length > 0 && !selectedProjectId) {
       setSelectedProjectId(filteredProjects[0].id);
     }

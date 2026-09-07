@@ -19,14 +19,13 @@ const offerService = new OfferService();
 const configService = new ConfigService();
 
 // ============================================================
-// 🔥 CALCULATE С ПРОВЕРКОЙ ПРАВ
+// CALCULATE С ПРОВЕРКОЙ ПРАВ
 // ============================================================
 export const calculate = async (req: AuthRequest, res: Response) => {
   try {
     const { formData } = req.body;
     const user = req.user;
 
-    // 1. Получаем ЖК из БД
     const complex = await complexService.getComplexByName(formData.complex);
     if (!complex) {
       return res.status(404).json({
@@ -35,7 +34,6 @@ export const calculate = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // 🔥 ПРОВЕРЯЕМ ПРАВА ДОСТУПА
     if (user && user.role !== "admin") {
       if (complex.companyId !== user.companyId) {
         return res.status(403).json({
@@ -46,7 +44,6 @@ export const calculate = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    // 2. Получаем тип квартиры
     const apartmentType = complex.apartmentTypes?.find(
       (at: ApartmentType) => at.type === formData.apartmentType,
     );
@@ -58,14 +55,11 @@ export const calculate = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // 3. Базовая цена из БД
     const basePrice = Number(apartmentType.pricePerSquareMeter);
 
-    // 4. Получаем конфиг из БД
     const config = await configService.getConfig();
     const variables = await configService.getVariables();
 
-    // 5. Используем утилиту для расчета наценки
     const surcharge = await getMortgageSurcharge(
       formData.complex,
       formData.apartmentType,
@@ -73,13 +67,11 @@ export const calculate = async (req: AuthRequest, res: Response) => {
       formData.mortgagePartialDownPayment,
     );
 
-    // 6. Финальная цена
     const finalPricePerM2 =
       formData.mortgageWithoutDownPayment || formData.mortgagePartialDownPayment
         ? basePrice + surcharge
         : basePrice;
 
-    // 7. Получаем surcharges для ответа
     const priceInfo = await getPriceInfo(
       formData.complex,
       formData.apartmentType,
@@ -89,12 +81,10 @@ export const calculate = async (req: AuthRequest, res: Response) => {
       partialDownPayment: 0,
     };
 
-    // 8. Получаем офферы
     const offers: Offer[] = await offerService.getOffersByComplex(
       formData.complex,
     );
 
-    // 9. Вызываем калькулятор
     const result = calculateFullMortgage(
       formData,
       offers,
@@ -104,7 +94,6 @@ export const calculate = async (req: AuthRequest, res: Response) => {
       formData.area,
     );
 
-    // 10. Возвращаем результат
     res.json({
       success: true,
       data: {
@@ -131,7 +120,7 @@ export const calculate = async (req: AuthRequest, res: Response) => {
 };
 
 // ============================================================
-// 🔥 GET COMPLEXES С ФИЛЬТРАЦИЕЙ ПО КОМПАНИИ
+// GET COMPLEXES С ФИЛЬТРАЦИЕЙ ПО КОМПАНИИ
 // ============================================================
 export const getComplexes = async (req: AuthRequest, res: Response) => {
   try {
@@ -145,12 +134,8 @@ export const getComplexes = async (req: AuthRequest, res: Response) => {
       filteredComplexes = complexes.filter(
         (c: Complex) => c.companyId === user.companyId,
       );
-      console.log(
-        `🔍 Filtered to ${filteredComplexes.length} complexes for company ${user.companyId}`,
-      );
     } else if (user && user.role !== "admin" && !user.companyId) {
       filteredComplexes = [];
-      console.log("⚠️ User has no company, returning empty list");
     }
 
     const complexData = filteredComplexes.map((c: Complex) => ({
@@ -187,7 +172,7 @@ export const getComplexes = async (req: AuthRequest, res: Response) => {
 };
 
 // ============================================================
-// 🔥 GET COMPLEX TYPES С ПРОВЕРКОЙ ПРАВ
+// GET COMPLEX TYPES С ПРОВЕРКОЙ ПРАВ
 // ============================================================
 export const getComplexTypes = async (req: AuthRequest, res: Response) => {
   try {
@@ -235,7 +220,7 @@ export const getComplexTypes = async (req: AuthRequest, res: Response) => {
 };
 
 // ============================================================
-// 🔥 GET PRICE PER SQUARE METER С ПРОВЕРКОЙ ПРАВ
+// GET PRICE PER SQUARE METER С ПРОВЕРКОЙ ПРАВ
 // ============================================================
 export const getPricePerSquareMeter = async (
   req: AuthRequest,
@@ -299,7 +284,7 @@ export const getPricePerSquareMeter = async (
 };
 
 // ============================================================
-// 🔥 GET AVAILABLE BANKS С ПРОВЕРКОЙ ПРАВ
+// GET AVAILABLE BANKS С ПРОВЕРКОЙ ПРАВ
 // ============================================================
 export const getAvailableBanks = async (req: AuthRequest, res: Response) => {
   try {

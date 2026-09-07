@@ -40,6 +40,9 @@ export interface AdminApartmentType {
   updatedAt?: string;
 }
 
+// ============================================================
+// 🔥 ADMIN COMPLEX - С ОБЯЗАТЕЛЬНЫМ companyId
+// ============================================================
 export interface AdminComplex {
   id: string;
   name: string;
@@ -53,7 +56,7 @@ export interface AdminComplex {
   materialsLink: string;
   isActive: boolean;
   apartmentTypes: AdminApartmentType[];
-  companyId?: string;
+  companyId: string; // 🔥 ОБЯЗАТЕЛЬНОЕ ПОЛЕ (было опциональным)
   company?: AdminCompany;
   createdById?: string;
   createdBy?: AdminUser;
@@ -61,6 +64,42 @@ export interface AdminComplex {
   updatedBy?: AdminUser;
   createdAt?: string;
   updatedAt?: string;
+}
+
+// ============================================================
+// 🔥 DTO ДЛЯ СОЗДАНИЯ ЖК (фронтенд -> бэкенд)
+// ============================================================
+export interface CreateComplexDTO {
+  name: string;
+  status: "строится" | "сдан" | "проект";
+  description?: string;
+  banks?: string[];
+  paymentTerms?: string[];
+  promotions?: string[];
+  specialOffers?: string[];
+  materialsLink?: string;
+  isActive?: boolean;
+  companyId: string; // 🔥 ОБЯЗАТЕЛЬНОЕ ПОЛЕ
+  apartmentTypes?: Omit<
+    AdminApartmentType,
+    "id" | "complexId" | "createdAt" | "updatedAt"
+  >[];
+}
+
+// ============================================================
+// 🔥 DTO ДЛЯ ОБНОВЛЕНИЯ ЖК (фронтенд -> бэкенд)
+// ============================================================
+export interface UpdateComplexDTO {
+  name?: string;
+  status?: "строится" | "сдан" | "проект";
+  description?: string;
+  banks?: string[];
+  paymentTerms?: string[];
+  promotions?: string[];
+  specialOffers?: string[];
+  materialsLink?: string;
+  isActive?: boolean;
+  companyId?: string; // 🔥 Опционально при обновлении
 }
 
 export interface AdminProgram {

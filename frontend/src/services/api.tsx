@@ -64,7 +64,6 @@ export const api = {
    * Получение списка всех жилых комплексов (с фильтрацией по компании)
    */
   async getComplexes() {
-    // 🔥 ИСПОЛЬЗУЕМ /calculator/complexes С АВТОРИЗАЦИЕЙ
     const response = await fetchWithAuth(`${API_URL}/calculator/complexes`);
     return response.json();
   },
@@ -159,6 +158,90 @@ export const api = {
     return response.json();
   },
 
+  /**
+   * 🔥 НОВЫЙ МЕТОД: Получение ипотечных программ для проекта по ID
+   */
+  async getProjectPrograms(id: string): Promise<{
+    success: boolean;
+    data?: any[];
+    error?: string;
+  }> {
+    try {
+      const response = await fetchWithAuth(
+        `${API_URL}/projects/${id}/programs`,
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("Error fetching project programs:", error);
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to load programs",
+      };
+    }
+  },
+
+  /**
+   * 🔥 НОВЫЙ МЕТОД: Получение банков для проекта по ID
+   */
+  async getProjectBanks(id: string): Promise<{
+    success: boolean;
+    data?: string[];
+    error?: string;
+  }> {
+    try {
+      const response = await fetchWithAuth(`${API_URL}/projects/${id}/banks`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("Error fetching project banks:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to load banks",
+      };
+    }
+  },
+
+  /**
+   * 🔥 НОВЫЙ МЕТОД: Получение типов квартир для проекта по ID
+   */
+  async getProjectApartmentTypes(id: string): Promise<{
+    success: boolean;
+    data?: any[];
+    error?: string;
+  }> {
+    try {
+      const response = await fetchWithAuth(`${API_URL}/projects/${id}/types`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("Error fetching apartment types:", error);
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to load apartment types",
+      };
+    }
+  },
+
   // ==================== ПРОГРАММЫ ====================
 
   /**
@@ -166,7 +249,7 @@ export const api = {
    */
   getPrograms: async (): Promise<ProgramsResponse> => {
     try {
-      const response = await fetchWithAuth("/api/programs/config");
+      const response = await fetchWithAuth(`${API_URL}/programs/config`);
       const result = await response.json();
       return result;
     } catch (error) {
@@ -178,7 +261,7 @@ export const api = {
   },
 
   /**
-   * Получение доступных ипотечных программ для конкретного ЖК
+   * Получение доступных ипотечных программ для конкретного ЖК (по названию)
    */
   getProgramsForComplex: async (
     complexName: string,
@@ -189,7 +272,7 @@ export const api = {
   }> => {
     try {
       const response = await fetchWithAuth(
-        `/api/programs/complex/${encodeURIComponent(complexName)}`,
+        `${API_URL}/programs/complex/${encodeURIComponent(complexName)}`,
       );
       const result = await response.json();
       return result;
@@ -212,7 +295,7 @@ export const api = {
     error?: string;
   }> => {
     try {
-      const response = await fetchWithAuth("/api/config");
+      const response = await fetchWithAuth(`${API_URL}/config`);
       const result = await response.json();
       return result;
     } catch (error) {

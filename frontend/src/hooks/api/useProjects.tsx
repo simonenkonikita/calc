@@ -32,7 +32,7 @@ export const useProjects = () => {
   }, []);
 
   // ============================================================
-  // 🔥 ХЕЛПЕРЫ
+  // ХЕЛПЕРЫ
   // ============================================================
 
   const getProjectById = (id: string): ProjectInfo | undefined => {
@@ -104,7 +104,7 @@ export const useProjects = () => {
 };
 
 // ============================================================
-// 🔥 ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ГРУППИРОВКИ
+// ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ГРУППИРОВКИ
 // ============================================================
 
 const groupProjectsByComplex = (data: RawProjectData[]): ProjectInfo[] => {
@@ -120,6 +120,7 @@ const groupProjectsByComplex = (data: RawProjectData[]): ProjectInfo[] => {
         name: item.complexName,
         status: item.status,
         statusIcon: item.statusIcon,
+        companyId: item.companyId,
         description: item.description,
         priceInfo: item.priceInfo,
         paymentTerms: item.paymentTerms,
@@ -140,6 +141,5 @@ const groupProjectsByComplex = (data: RawProjectData[]): ProjectInfo[] => {
     });
   });
 
-  const result = Array.from(groupedMap.values());
-  return result;
+  return Array.from(groupedMap.values());
 };

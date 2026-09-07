@@ -90,6 +90,7 @@ export class ComplexService {
       specialOffers: data.specialOffers || [],
       materialsLink: data.materialsLink || "",
       isActive: data.isActive !== undefined ? data.isActive : true,
+      companyId: data.companyId,
     });
 
     await this.complexRepository.save(complex);
@@ -124,6 +125,7 @@ export class ComplexService {
     if (data.materialsLink !== undefined)
       complex.materialsLink = data.materialsLink;
     if (data.isActive !== undefined) complex.isActive = data.isActive;
+    if (data.companyId !== undefined) complex.companyId = data.companyId;
 
     // Если изменилось имя, обновляем slug
     if (data.name && data.name !== complex.name) {
