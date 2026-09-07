@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AdminPage } from "../../pages/Admin/AdminPage/AdminPage";
-import { DeveloperDashboard } from "../../pages/Developer/DeveloperDashboard"; // 🔥 ДОБАВЛЯЕМ
+
 import { LandingPage } from "../../pages/LandingPage/LandingPage";
 import MortgageCalculator from "../../pages/MortgageCalculator/MortgageCalculator";
 import { ProfilePage } from "../../pages/ProfilePage/ProfilePage";
@@ -10,6 +9,8 @@ import { ProtectedRoute } from "../ProtectedRoute";
 import AppNavigation from "../Navigation/AppNavigation";
 import { VerifyEmail } from "../../pages/VerifyEmail/VerifyEmail";
 import { ResetPassword } from "../../pages/ResetPassword/ResetPassword";
+import { AdminPage } from "../../pages/Admin/AdminPage/AdminPage";
+import { DeveloperDashboard } from "../../pages/Developer/DeveloperDashboard";
 
 const App = () => {
   return (

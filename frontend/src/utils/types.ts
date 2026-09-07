@@ -103,6 +103,7 @@ export interface ProjectInfo {
   name: string;
   status: string;
   statusIcon: string;
+  companyId?: string;
   description?: string;
   priceInfo: string;
   paymentTerms: string[];

@@ -11,6 +11,14 @@ export class ComplexService {
   private apartmentTypeRepository = AppDataSource.getRepository(ApartmentType);
   private programService = new ProgramService();
 
+  async getComplexesByCompany(companyId: string): Promise<Complex[]> {
+    return this.complexRepository.find({
+      where: { companyId, isActive: true },
+      relations: ["apartmentTypes", "company"],
+      order: { name: "ASC" },
+    });
+  }
+
   /**
    * Получить все ЖК
    */
@@ -108,10 +116,13 @@ export class ComplexService {
     if (data.status !== undefined) complex.status = data.status;
     if (data.description !== undefined) complex.description = data.description;
     if (data.banks !== undefined) complex.banks = data.banks;
-    if (data.paymentTerms !== undefined) complex.paymentTerms = data.paymentTerms;
+    if (data.paymentTerms !== undefined)
+      complex.paymentTerms = data.paymentTerms;
     if (data.promotions !== undefined) complex.promotions = data.promotions;
-    if (data.specialOffers !== undefined) complex.specialOffers = data.specialOffers;
-    if (data.materialsLink !== undefined) complex.materialsLink = data.materialsLink;
+    if (data.specialOffers !== undefined)
+      complex.specialOffers = data.specialOffers;
+    if (data.materialsLink !== undefined)
+      complex.materialsLink = data.materialsLink;
     if (data.isActive !== undefined) complex.isActive = data.isActive;
 
     // Если изменилось имя, обновляем slug
@@ -204,7 +215,7 @@ export class ComplexService {
 
     // Фильтруем по банкам
     const filtered = complexes.filter(
-      (complex) => complex.banks && complex.banks.includes(bankName)
+      (complex) => complex.banks && complex.banks.includes(bankName),
     );
 
     for (const complex of filtered) {
