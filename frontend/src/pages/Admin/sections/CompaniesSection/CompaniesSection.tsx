@@ -27,14 +27,6 @@ export const CompaniesSection: React.FC = () => {
     null,
   );
 
-  // Состояния для управления комплексами
-  const [expandedCompanyId, setExpandedCompanyId] = useState<string | null>(
-    null,
-  );
-  const [expandedUsersCompanyId, setExpandedUsersCompanyId] = useState<
-    string | null
-  >(null);
-
   const [showComplexModal, setShowComplexModal] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [complexForm, setComplexForm] = useState({
@@ -86,6 +78,9 @@ export const CompaniesSection: React.FC = () => {
         adminApi.getComplexes(),
         adminApi.getUsers(),
       ]);
+
+      console.log("📊 Companies data:", companiesData);
+
       setCompanies(Array.isArray(companiesData) ? companiesData : []);
       setComplexes(Array.isArray(complexesData) ? complexesData : []);
       setUsers(Array.isArray(usersData) ? usersData : []);
@@ -534,7 +529,6 @@ export const CompaniesSection: React.FC = () => {
             <thead>
               <tr>
                 <th>Название</th>
-                <th>Администратор</th>
                 <th>Пользователей</th>
                 <th>ЖК</th>
                 <th>Телефон</th>
@@ -546,9 +540,6 @@ export const CompaniesSection: React.FC = () => {
             <tbody>
               {companies.map((company) => {
                 const companyComplexes = getCompanyComplexes(company.id);
-                const companyUsers = getCompanyUsers(company.id);
-                const isExpanded = expandedCompanyId === company.id;
-                const isUsersExpanded = expandedUsersCompanyId === company.id;
 
                 return (
                   <React.Fragment key={company.id}>
@@ -556,7 +547,6 @@ export const CompaniesSection: React.FC = () => {
                       <td>
                         <strong>{company.name}</strong>
                       </td>
-                      <td>{getAdminName(company.admin)}</td>
                       <td>
                         <div
                           style={{
@@ -566,23 +556,6 @@ export const CompaniesSection: React.FC = () => {
                           }}
                         >
                           <span>{getUsersCount(company.users)}</span>
-                          {companyUsers.length > 0 && (
-                            <button
-                              onClick={() =>
-                                setExpandedUsersCompanyId(
-                                  isUsersExpanded ? null : company.id,
-                                )
-                              }
-                              className="admin-btn admin-btn-secondary admin-btn-sm"
-                              title={
-                                isUsersExpanded
-                                  ? "Скрыть пользователей"
-                                  : "Показать пользователей"
-                              }
-                            >
-                              {isUsersExpanded ? "🔼" : "🔽"}
-                            </button>
-                          )}
                         </div>
                       </td>
                       <td>
@@ -594,19 +567,6 @@ export const CompaniesSection: React.FC = () => {
                           }}
                         >
                           <span>{companyComplexes.length}</span>
-                          {companyComplexes.length > 0 && (
-                            <button
-                              onClick={() =>
-                                setExpandedCompanyId(
-                                  isExpanded ? null : company.id,
-                                )
-                              }
-                              className="admin-btn admin-btn-secondary admin-btn-sm"
-                              title={isExpanded ? "Скрыть ЖК" : "Показать ЖК"}
-                            >
-                              {isExpanded ? "🔼" : "🔽"}
-                            </button>
-                          )}
                         </div>
                       </td>
                       <td>{company.phone || "-"}</td>
@@ -650,138 +610,6 @@ export const CompaniesSection: React.FC = () => {
                         />
                       </td>
                     </tr>
-
-                    {/* 🔥 Список пользователей компании - стилизованный как в UsersSection */}
-                    {isUsersExpanded && companyUsers.length > 0 && (
-                      <tr>
-                        <td colSpan={8} style={{ padding: "0.5rem 1rem" }}>
-                          <div className="company-users-list">
-                            <div
-                              style={{
-                                display: "grid",
-                                gridTemplateColumns: "1fr 1fr 1fr 1.2fr 0.8fr",
-                                gap: "0.5rem",
-                                fontSize: "0.75rem",
-                                fontWeight: 600,
-                                color: "#6b7280",
-                                padding: "0.5rem 0",
-                                borderBottom: "1px solid #e5e7eb",
-                                textTransform: "uppercase",
-                                letterSpacing: "0.5px",
-                              }}
-                            >
-                              <span>Пользователь</span>
-                              <span>Роль</span>
-                              <span>Email</span>
-                              <span>Телефон</span>
-                              <span>Статус</span>
-                            </div>
-                            {companyUsers.map((user) => (
-                              <div
-                                key={user.id}
-                                style={{
-                                  display: "grid",
-                                  gridTemplateColumns:
-                                    "1fr 1fr 1fr 1.2fr 0.8fr",
-                                  gap: "0.5rem",
-                                  padding: "0.5rem 0",
-                                  borderBottom: "1px solid #f3f4f6",
-                                  alignItems: "center",
-                                  fontSize: "0.85rem",
-                                }}
-                              >
-                                <span>
-                                  {[user.firstName, user.lastName]
-                                    .filter(Boolean)
-                                    .join(" ") ||
-                                    user.email ||
-                                    "-"}
-                                </span>
-                                <span>
-                                  <span
-                                    className={`role-badge ${getRoleBadgeClass(user.role)}`}
-                                  >
-                                    {getUserRoleLabel(user.role)}
-                                  </span>
-                                </span>
-                                <span
-                                  style={{
-                                    fontSize: "0.8rem",
-                                    color: "#6b7280",
-                                  }}
-                                >
-                                  {user.email}
-                                </span>
-                                <span>{user.phone || "-"}</span>
-                                <span>
-                                  <StatusBadge
-                                    isActive={
-                                      user.isActive !== undefined
-                                        ? user.isActive
-                                        : true
-                                    }
-                                    activeText="Активен"
-                                  />
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-
-                    {/* Список ЖК компании */}
-                    {isExpanded && companyComplexes.length > 0 && (
-                      <tr>
-                        <td colSpan={8} style={{ padding: "0.5rem 1rem" }}>
-                          <div className="company-complexes-list">
-                            <div
-                              style={{
-                                display: "grid",
-                                gridTemplateColumns: "1fr 1fr 1fr 0.8fr 0.8fr",
-                                gap: "0.5rem",
-                                fontSize: "0.75rem",
-                                fontWeight: 600,
-                                color: "#6b7280",
-                                padding: "0.5rem 0",
-                                borderBottom: "1px solid #e5e7eb",
-                                textTransform: "uppercase",
-                                letterSpacing: "0.5px",
-                              }}
-                            >
-                              <span>Название</span>
-                              <span>Статус</span>
-                              <span>Банки</span>
-                              <span>Активен</span>
-                              <span>Типы квартир</span>
-                            </div>
-                            {companyComplexes.map((complex) => (
-                              <div
-                                key={complex.id}
-                                style={{
-                                  display: "grid",
-                                  gridTemplateColumns:
-                                    "1fr 1fr 1fr 0.8fr 0.8fr",
-                                  gap: "0.5rem",
-                                  padding: "0.4rem 0",
-                                  borderBottom: "1px solid #f3f4f6",
-                                  alignItems: "center",
-                                  fontSize: "0.85rem",
-                                }}
-                              >
-                                <span>{complex.name}</span>
-                                <span>{getStatusLabel(complex.status)}</span>
-                                <span>{complex.banks?.join(", ") || "-"}</span>
-                                <span>{complex.isActive ? "✅" : "❌"}</span>
-                                <span>
-                                  {complex.apartmentTypes?.length || 0}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </td>
-                      </tr>
-                    )}
                   </React.Fragment>
                 );
               })}

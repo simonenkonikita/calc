@@ -11,7 +11,7 @@ import {
   JoinColumn,
 } from "typeorm";
 import { User } from "./User";
-import { Complex } from "./Complex"; // 🔥 ДОБАВЛЯЕМ ИМПОРТ
+import { Complex } from "./Complex";
 
 @Entity("companies")
 export class Company {
@@ -46,28 +46,36 @@ export class Company {
   isActive: boolean;
 
   // ============================================================
-  // 🔥 СВЯЗИ
+  // 🔥 СВЯЗИ С ПРАВИЛЬНЫМИ onDelete
   // ============================================================
 
   @Column({ nullable: true })
   adminId: string | null;
 
-  @ManyToOne(() => User, { nullable: true })
+  // ✅ АДМИНИСТРАТОР - SET NULL
+  @ManyToOne(() => User, {
+    nullable: true,
+    onDelete: "SET NULL", // ← При удалении пользователя - SET NULL
+  })
   @JoinColumn({ name: "adminId" })
   admin: User | null;
 
+  // ✅ ПОЛЬЗОВАТЕЛИ - SET NULL (безопасно)
   @OneToMany(() => User, (user) => user.company, {
-    onDelete: "SET NULL",
+    onDelete: "SET NULL", // ← При удалении компании - SET NULL
   })
   users: User[];
 
-  // 🔥 ДОБАВЛЯЕМ СВЯЗЬ С КОМПЛЕКСАМИ
-  @OneToMany(() => Complex, (complex) => complex.company)
+  // ✅ КОМПЛЕКСЫ - SET NULL (безопасно)
+  @OneToMany(() => Complex, (complex) => complex.company, {
+    onDelete: "SET NULL", // ← При удалении компании - SET NULL
+  })
   complexes: Complex[];
 
   @Column({ nullable: true })
   createdById: string | null;
 
+  // ✅ КТО СОЗДАЛ - SET NULL
   @ManyToOne(() => User, {
     nullable: true,
     onDelete: "SET NULL",

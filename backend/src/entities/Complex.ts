@@ -50,37 +50,52 @@ export class Complex {
   isActive: boolean;
 
   // ============================================================
-  // 🔥 СВЯЗИ
+  // 🔥 СВЯЗИ С ПРАВИЛЬНЫМИ onDelete
   // ============================================================
 
   @Column({ nullable: true })
   companyId: string | null;
 
-  // 🔥 ИСПРАВЛЯЕМ: company -> Company
-  @ManyToOne(() => Company, (company) => company.complexes, { nullable: true })
+  // ✅ КОМПАНИЯ - SET NULL (компания остается)
+  @ManyToOne(() => Company, (company) => company.complexes, {
+    nullable: true,
+    onDelete: "SET NULL", // ← При удалении компании - SET NULL
+  })
   @JoinColumn({ name: "companyId" })
   company: Company | null;
 
   @Column({ nullable: true })
   createdById: string | null;
 
-  @ManyToOne(() => User, { nullable: true })
+  // ✅ КТО СОЗДАЛ - SET NULL (пользователь не удаляется)
+  @ManyToOne(() => User, {
+    nullable: true,
+    onDelete: "SET NULL", // ← При удалении пользователя - SET NULL
+  })
   @JoinColumn({ name: "createdById" })
   createdBy: User | null;
 
   @Column({ nullable: true })
   updatedById: string | null;
 
-  @ManyToOne(() => User, { nullable: true })
+  // ✅ КТО ОБНОВИЛ - SET NULL
+  @ManyToOne(() => User, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "updatedById" })
   updatedBy: User | null;
+
+  // ✅ ТИПЫ КВАРТИР - CASCADE (при удалении ЖК удаляются типы квартир)
+  @OneToMany(() => ApartmentType, (apartmentType) => apartmentType.complex, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
+  apartmentTypes: ApartmentType[];
 
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 
   @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;
-
-  @OneToMany(() => ApartmentType, (apartmentType) => apartmentType.complex)
-  apartmentTypes: ApartmentType[];
 }

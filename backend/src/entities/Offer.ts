@@ -1,4 +1,5 @@
 // backend/src/entities/Offer.ts
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -94,27 +95,41 @@ export class Offer {
   isActive: boolean;
 
   // ============================================================
-  // 🔥 СВЯЗИ
+  // 🔥 СВЯЗИ С ПРАВИЛЬНЫМИ onDelete
   // ============================================================
 
-  @ManyToOne(() => Bank, (bank) => bank.offers)
+  // ✅ БАНК - RESTRICT (нельзя удалить банк, если есть офферы)
+  @ManyToOne(() => Bank, (bank) => bank.offers, {
+    onDelete: "RESTRICT", // ← Защита от удаления банка с офферами
+  })
   @JoinColumn({ name: "bankId" })
   bank: Bank;
 
   @Column({ type: "uuid" })
   bankId: string;
 
-  @ManyToOne(() => Program, (program) => program.offers)
+  // ✅ ПРОГРАММА - RESTRICT (нельзя удалить программу, если есть офферы)
+  @ManyToOne(() => Program, (program) => program.offers, {
+    onDelete: "RESTRICT", // ← Защита от удаления программы с офферами
+  })
   @JoinColumn({ name: "programId" })
   programEntity: Program;
 
   @Column({ type: "uuid" })
   programId: string;
 
-  @OneToMany(() => DynamicRate, (rate) => rate.offer)
+  // ✅ ДИНАМИЧЕСКИЕ СТАВКИ - CASCADE (удаляются с оффером)
+  @OneToMany(() => DynamicRate, (rate) => rate.offer, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
   dynamicRates: DynamicRate[];
 
-  @OneToMany(() => DynamicSubsidy, (subsidy) => subsidy.offer)
+  // ✅ ДИНАМИЧЕСКИЕ СУБСИДИИ - CASCADE (удаляются с оффером)
+  @OneToMany(() => DynamicSubsidy, (subsidy) => subsidy.offer, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
   dynamicSubsidies: DynamicSubsidy[];
 
   // ============================================================
@@ -124,21 +139,33 @@ export class Offer {
   @Column({ nullable: true })
   companyId: string;
 
-  @ManyToOne(() => Company, { nullable: true })
+  // ✅ КОМПАНИЯ - SET NULL (безопасно)
+  @ManyToOne(() => Company, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "companyId" })
   company: Company;
 
   @Column({ nullable: true })
   createdById: string;
 
-  @ManyToOne(() => User, { nullable: true })
+  // ✅ КТО СОЗДАЛ - SET NULL
+  @ManyToOne(() => User, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "createdById" })
   createdBy: User;
 
   @Column({ nullable: true })
   updatedById: string;
 
-  @ManyToOne(() => User, { nullable: true })
+  // ✅ КТО ОБНОВИЛ - SET NULL
+  @ManyToOne(() => User, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "updatedById" })
   updatedBy: User;
 
