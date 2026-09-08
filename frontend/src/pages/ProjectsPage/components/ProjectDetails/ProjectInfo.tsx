@@ -2,11 +2,11 @@
 
 import React from "react";
 import "./ProjectInfo.css";
-import { ProjectInfo } from "../../utils/types";
+import { ProjectInfo } from "../../../../utils/types";
 
 interface ProjectInfoProps {
   project: ProjectInfo;
-  programs?: any[]; // 🔥 Получаем программы из пропсов
+  programs?: any[];
   loading?: boolean;
 }
 
@@ -15,7 +15,7 @@ export const ProjectInfoSection: React.FC<ProjectInfoProps> = ({
   programs = [],
   loading = false,
 }) => {
-  // 🔥 Извлекаем уникальные банки из программ (без дополнительного запроса)
+  // 🔥 Извлекаем уникальные банки из программ
   const banks = React.useMemo(() => {
     const bankSet = new Set<string>();
     programs.forEach((program) => {
@@ -70,19 +70,38 @@ export const ProjectInfoSection: React.FC<ProjectInfoProps> = ({
 
   return (
     <>
-      {/* Акции */}
-      {project.promotions && project.promotions.length > 0 && (
-        <div className="details-section highlight">
+      {/* 🔥 Акции и спецпредложения - ВСЕГДА отображаются */}
+      <div className="details-row">
+        {/* Акции */}
+        <div className="details-section half highlight">
           <div className="section-label">🔥 Акции и предложения</div>
-          <ul className="info-list promotions">
-            {project.promotions.map((promo, index) => (
-              <li key={index}>{promo}</li>
-            ))}
-          </ul>
+          {project.promotions && project.promotions.length > 0 ? (
+            <ul className="info-list promotions">
+              {project.promotions.map((promo, index) => (
+                <li key={index}>{promo}</li>
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-message">Нет активных акций</div>
+          )}
         </div>
-      )}
 
-      {/* Цены и условия */}
+        {/* Спецпредложения */}
+        <div className="details-section half special">
+          <div className="section-label">⭐ Спецпредложения</div>
+          {project.specialOffers && project.specialOffers.length > 0 ? (
+            <ul className="info-list special">
+              {project.specialOffers.map((offer, index) => (
+                <li key={index}>{offer}</li>
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-message">Нет спецпредложений</div>
+          )}
+        </div>
+      </div>
+
+      {/* Цены и условия оплаты */}
       <div className="details-row">
         <div className="details-section half">
           <div className="section-label">💰 Цены</div>
@@ -91,15 +110,19 @@ export const ProjectInfoSection: React.FC<ProjectInfoProps> = ({
 
         <div className="details-section half">
           <div className="section-label">💳 Условия оплаты</div>
-          <ul className="info-list">
-            {project.paymentTerms.map((term, index) => (
-              <li key={index}>{term}</li>
-            ))}
-          </ul>
+          {project.paymentTerms && project.paymentTerms.length > 0 ? (
+            <ul className="info-list">
+              {project.paymentTerms.map((term, index) => (
+                <li key={index}>{term}</li>
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-message">Нет условий оплаты</div>
+          )}
         </div>
       </div>
 
-      {/* 🔥 БАНКИ - из программ (без дополнительного запроса) */}
+      {/* Банки */}
       <div className="details-section">
         <div className="section-label">🏦 Банки-партнеры</div>
         <div className="banks-tags">
@@ -116,18 +139,6 @@ export const ProjectInfoSection: React.FC<ProjectInfoProps> = ({
           )}
         </div>
       </div>
-
-      {/* Спецпредложения */}
-      {project.specialOffers && project.specialOffers.length > 0 && (
-        <div className="details-section special">
-          <div className="section-label">⭐ Спецпредложения</div>
-          <ul className="info-list special">
-            {project.specialOffers.map((offer, index) => (
-              <li key={index}>{offer}</li>
-            ))}
-          </ul>
-        </div>
-      )}
     </>
   );
 };

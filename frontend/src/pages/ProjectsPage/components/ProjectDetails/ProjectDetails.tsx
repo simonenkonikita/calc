@@ -5,8 +5,8 @@ import "./ProjectDetails.css";
 import { ProjectHeader } from "./ProjectHeader";
 import { ProjectInfoSection } from "./ProjectInfo";
 import { ProjectPrograms } from "./ProjectPrograms";
-import { ProjectInfo } from "../../utils/types";
-import { api } from "../../services/api";
+import { ProjectInfo } from "../../../../utils/types";
+import { api } from "../../../../services/api";
 
 interface ProjectDetailsProps {
   project: ProjectInfo | null;

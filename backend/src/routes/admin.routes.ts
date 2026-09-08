@@ -361,6 +361,24 @@ router.post(
   subsidyController.copyFromOffer.bind(subsidyController),
 );
 
+// 🔥 УПРАВЛЕНИЕ УСЛОВИЯМИ ОПЛАТЫ
+router.post(
+  "/:id/payment-terms",
+  adminOrDeveloperAdmin,
+  complexController.addPaymentTerm.bind(complexController),
+);
+
+router.delete(
+  "/:id/payment-terms",
+  adminOrDeveloperAdmin,
+  complexController.removePaymentTerm.bind(complexController),
+);
+
+router.put(
+  "/:id/payment-terms",
+  adminOrDeveloperAdmin,
+  complexController.updatePaymentTerms.bind(complexController),
+);
 // ============================================================
 // 🔥 КОНФИГУРАЦИЯ - ТОЛЬКО ДЛЯ АДМИНА
 // ============================================================

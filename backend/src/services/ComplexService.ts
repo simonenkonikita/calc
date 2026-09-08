@@ -227,4 +227,65 @@ export class ComplexService {
 
     return filtered;
   }
+
+  // ============================================================
+  // 🔥 УПРАВЛЕНИЕ УСЛОВИЯМИ ОПЛАТЫ
+  // ============================================================
+
+  // Добавить условие оплаты
+  async addPaymentTerm(
+    complexId: string,
+    term: string,
+    userId: string,
+  ): Promise<Complex | null> {
+    const complex = await this.getComplexById(complexId);
+    if (!complex) return null;
+
+    if (!complex.paymentTerms) {
+      complex.paymentTerms = [];
+    }
+
+    // Проверяем, что такое условие еще не добавлено
+    if (!complex.paymentTerms.includes(term)) {
+      complex.paymentTerms.push(term);
+      complex.updatedById = userId;
+      await this.complexRepository.save(complex);
+    }
+
+    return complex;
+  }
+
+  // Удалить условие оплаты
+  async removePaymentTerm(
+    complexId: string,
+    term: string,
+    userId: string,
+  ): Promise<Complex | null> {
+    const complex = await this.getComplexById(complexId);
+    if (!complex) return null;
+
+    if (complex.paymentTerms) {
+      complex.paymentTerms = complex.paymentTerms.filter((t) => t !== term);
+      complex.updatedById = userId;
+      await this.complexRepository.save(complex);
+    }
+
+    return complex;
+  }
+
+  // Обновить все условия оплаты (массовое обновление)
+  async updatePaymentTerms(
+    complexId: string,
+    terms: string[],
+    userId: string,
+  ): Promise<Complex | null> {
+    const complex = await this.getComplexById(complexId);
+    if (!complex) return null;
+
+    complex.paymentTerms = terms;
+    complex.updatedById = userId;
+    await this.complexRepository.save(complex);
+
+    return complex;
+  }
 }

@@ -35,8 +35,8 @@ type ComplexFormData = {
   description: string;
   banks: string[];
   paymentTerms: string[];
-  promotions: string[];
-  specialOffers: string[];
+  promotions: string[]; // 🔥 ДОБАВЛЯЕМ
+  specialOffers: string[]; // 🔥 ДОБАВЛЯЕМ
   materialsLink: string;
   isActive: boolean;
   companyId: string;
@@ -57,6 +57,11 @@ export const ComplexesSection: React.FC = () => {
     null,
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 🔥 Состояния для новых значений
+  const [newPaymentTerm, setNewPaymentTerm] = useState("");
+  const [newPromotion, setNewPromotion] = useState("");
+  const [newSpecialOffer, setNewSpecialOffer] = useState("");
 
   // Форма
   const [formData, setFormData] = useState<ComplexFormData>({
@@ -129,6 +134,99 @@ export const ComplexesSection: React.FC = () => {
   const filteredComplexes = getComplexesByCompany(selectedCompanyId);
 
   // ============================================================
+  // 🔥 УПРАВЛЕНИЕ УСЛОВИЯМИ ОПЛАТЫ
+  // ============================================================
+
+  const addPaymentTerm = () => {
+    if (!newPaymentTerm.trim()) return;
+    if (formData.paymentTerms.includes(newPaymentTerm.trim())) {
+      alert("Такое условие оплаты уже добавлено");
+      return;
+    }
+    setFormData({
+      ...formData,
+      paymentTerms: [...formData.paymentTerms, newPaymentTerm.trim()],
+    });
+    setNewPaymentTerm("");
+  };
+
+  const removePaymentTerm = (termToRemove: string) => {
+    setFormData({
+      ...formData,
+      paymentTerms: formData.paymentTerms.filter((t) => t !== termToRemove),
+    });
+  };
+
+  const handlePaymentTermKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addPaymentTerm();
+    }
+  };
+
+  // ============================================================
+  // 🔥 УПРАВЛЕНИЕ АКЦИЯМИ
+  // ============================================================
+
+  const addPromotion = () => {
+    if (!newPromotion.trim()) return;
+    if (formData.promotions.includes(newPromotion.trim())) {
+      alert("Такая акция уже добавлена");
+      return;
+    }
+    setFormData({
+      ...formData,
+      promotions: [...formData.promotions, newPromotion.trim()],
+    });
+    setNewPromotion("");
+  };
+
+  const removePromotion = (promotionToRemove: string) => {
+    setFormData({
+      ...formData,
+      promotions: formData.promotions.filter((p) => p !== promotionToRemove),
+    });
+  };
+
+  const handlePromotionKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addPromotion();
+    }
+  };
+
+  // ============================================================
+  // 🔥 УПРАВЛЕНИЕ СПЕЦПРЕДЛОЖЕНИЯМИ
+  // ============================================================
+
+  const addSpecialOffer = () => {
+    if (!newSpecialOffer.trim()) return;
+    if (formData.specialOffers.includes(newSpecialOffer.trim())) {
+      alert("Такое спецпредложение уже добавлено");
+      return;
+    }
+    setFormData({
+      ...formData,
+      specialOffers: [...formData.specialOffers, newSpecialOffer.trim()],
+    });
+    setNewSpecialOffer("");
+  };
+
+  const removeSpecialOffer = (offerToRemove: string) => {
+    setFormData({
+      ...formData,
+      specialOffers: formData.specialOffers.filter((o) => o !== offerToRemove),
+    });
+  };
+
+  const handleSpecialOfferKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addSpecialOffer();
+    }
+  };
+
+  // ============================================================
   // УПРАВЛЕНИЕ ТИПАМИ КВАРТИР
   // ============================================================
 
@@ -171,6 +269,9 @@ export const ComplexesSection: React.FC = () => {
 
   const openCreateModal = () => {
     setEditingComplex(null);
+    setNewPaymentTerm("");
+    setNewPromotion("");
+    setNewSpecialOffer("");
     setFormData({
       name: "",
       status: "строится",
@@ -199,6 +300,9 @@ export const ComplexesSection: React.FC = () => {
 
   const openEditModal = (complex: AdminComplex) => {
     setEditingComplex(complex);
+    setNewPaymentTerm("");
+    setNewPromotion("");
+    setNewSpecialOffer("");
     setFormData({
       name: complex.name,
       status: complex.status,
@@ -209,7 +313,7 @@ export const ComplexesSection: React.FC = () => {
       specialOffers: complex.specialOffers || [],
       materialsLink: complex.materialsLink || "",
       isActive: complex.isActive,
-      companyId: complex.companyId,
+      companyId: complex.companyId || "",
       apartmentTypes:
         complex.apartmentTypes?.map((at) => ({
           id: at.id,
@@ -228,6 +332,9 @@ export const ComplexesSection: React.FC = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingComplex(null);
+    setNewPaymentTerm("");
+    setNewPromotion("");
+    setNewSpecialOffer("");
   };
 
   const handleSave = async () => {
@@ -286,8 +393,8 @@ export const ComplexesSection: React.FC = () => {
       description: formData.description,
       banks: formData.banks,
       paymentTerms: formData.paymentTerms,
-      promotions: formData.promotions,
-      specialOffers: formData.specialOffers,
+      promotions: formData.promotions, // 🔥 ДОБАВЛЯЕМ
+      specialOffers: formData.specialOffers, // 🔥 ДОБАВЛЯЕМ
       materialsLink: formData.materialsLink,
       isActive: formData.isActive,
       companyId: formData.companyId,
@@ -299,10 +406,12 @@ export const ComplexesSection: React.FC = () => {
       })),
     };
 
+    console.log("📊 Creating complex:", createData);
+
     const newComplex = await adminApi.createComplex(createData);
     setComplexes([...complexes, newComplex]);
     closeModal();
-    alert("✅ ЖК успешно создан с типами квартир!");
+    alert("✅ ЖК успешно создан!");
   };
 
   const handleUpdate = async () => {
@@ -314,15 +423,18 @@ export const ComplexesSection: React.FC = () => {
       description: formData.description,
       banks: formData.banks,
       paymentTerms: formData.paymentTerms,
-      promotions: formData.promotions,
-      specialOffers: formData.specialOffers,
+      promotions: formData.promotions, // 🔥 ДОБАВЛЯЕМ
+      specialOffers: formData.specialOffers, // 🔥 ДОБАВЛЯЕМ
       materialsLink: formData.materialsLink,
       isActive: formData.isActive,
       companyId: formData.companyId,
     };
 
+    console.log("📊 Updating complex:", updateData);
+
     await adminApi.updateComplex(editingComplex.id, updateData);
 
+    // Обновляем типы квартир
     const existingTypes = await adminApi.getApartmentTypes(editingComplex.id);
     const formTypes = formData.apartmentTypes;
 
@@ -354,7 +466,7 @@ export const ComplexesSection: React.FC = () => {
     const freshComplexes = await adminApi.getComplexes();
     setComplexes(freshComplexes);
     closeModal();
-    alert("✅ ЖК и типы квартир успешно обновлены!");
+    alert("✅ ЖК успешно обновлен!");
   };
 
   const handleDelete = async (id: string, name: string) => {
@@ -494,6 +606,7 @@ export const ComplexesSection: React.FC = () => {
                 <th>Название</th>
                 <th>Статус</th>
                 <th>Банки</th>
+                <th>Условия оплаты</th>
                 <th>Активен</th>
                 <th>Действия</th>
               </tr>
@@ -513,6 +626,25 @@ export const ComplexesSection: React.FC = () => {
                       </span>
                     </td>
                     <td>{complex.banks?.join(", ") || "-"}</td>
+                    <td>
+                      {complex.paymentTerms &&
+                      complex.paymentTerms.length > 0 ? (
+                        <div className="payment-terms-preview">
+                          {complex.paymentTerms.slice(0, 2).map((term, idx) => (
+                            <span key={idx} className="payment-term-tag">
+                              {term}
+                            </span>
+                          ))}
+                          {complex.paymentTerms.length > 2 && (
+                            <span className="payment-term-more">
+                              +{complex.paymentTerms.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-muted">—</span>
+                      )}
+                    </td>
                     <td>
                       <StatusBadge isActive={complex.isActive} />
                     </td>
@@ -543,7 +675,7 @@ export const ComplexesSection: React.FC = () => {
               {filteredComplexes.length === 0 && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     style={{
                       textAlign: "center",
                       padding: "2rem",
@@ -559,7 +691,7 @@ export const ComplexesSection: React.FC = () => {
           </table>
         </div>
 
-        {/* ЕДИНОЕ МОДАЛЬНОЕ ОКНО ДЛЯ СОЗДАНИЯ/РЕДАКТИРОВАНИЯ */}
+        {/* ЕДИНОЕ МОДАЛЬНОЕ ОКНО */}
         <AdminModal
           isOpen={isModalOpen}
           onClose={closeModal}
@@ -575,8 +707,158 @@ export const ComplexesSection: React.FC = () => {
           cancelLabel="Отмена"
           size="full"
         >
+          {/* 🔥 УСЛОВИЯ ОПЛАТЫ */}
+          <div className="payment-terms-in-modal">
+            <div className="payment-terms-header">
+              <h4>💳 Условия оплаты</h4>
+            </div>
+
+            <div className="payment-terms-input">
+              <input
+                type="text"
+                value={newPaymentTerm}
+                onChange={(e) => setNewPaymentTerm(e.target.value)}
+                onKeyPress={handlePaymentTermKeyPress}
+                placeholder="Введите условие оплаты..."
+                className="admin-modal-input"
+                disabled={isSubmitting}
+              />
+              <button
+                type="button"
+                onClick={addPaymentTerm}
+                disabled={!newPaymentTerm.trim() || isSubmitting}
+                className="admin-btn admin-btn-primary admin-btn-sm"
+              >
+                Добавить
+              </button>
+            </div>
+
+            {formData.paymentTerms.length > 0 ? (
+              <div className="payment-terms-list">
+                {formData.paymentTerms.map((term, index) => (
+                  <div key={index} className="payment-term-item">
+                    <span className="payment-term-text">{term}</span>
+                    <button
+                      type="button"
+                      onClick={() => removePaymentTerm(term)}
+                      className="payment-term-remove"
+                      disabled={isSubmitting}
+                      title="Удалить условие"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="payment-terms-empty">
+                <p>Нет условий оплаты</p>
+              </div>
+            )}
+          </div>
+
+          {/* 🔥 АКЦИИ */}
+          <div className="promotions-in-modal">
+            <div className="promotions-header">
+              <h4>🔥 Акции и предложения</h4>
+            </div>
+
+            <div className="promotions-input">
+              <input
+                type="text"
+                value={newPromotion}
+                onChange={(e) => setNewPromotion(e.target.value)}
+                onKeyPress={handlePromotionKeyPress}
+                placeholder="Введите акцию (например: Скидка 5% до 31.12)..."
+                className="admin-modal-input"
+                disabled={isSubmitting}
+              />
+              <button
+                type="button"
+                onClick={addPromotion}
+                disabled={!newPromotion.trim() || isSubmitting}
+                className="admin-btn admin-btn-primary admin-btn-sm"
+              >
+                Добавить
+              </button>
+            </div>
+
+            {formData.promotions.length > 0 ? (
+              <div className="promotions-list">
+                {formData.promotions.map((promo, index) => (
+                  <div key={index} className="promotion-item">
+                    <span className="promotion-text">🔥 {promo}</span>
+                    <button
+                      type="button"
+                      onClick={() => removePromotion(promo)}
+                      className="promotion-remove"
+                      disabled={isSubmitting}
+                      title="Удалить акцию"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="promotions-empty">
+                <p>Нет акций</p>
+              </div>
+            )}
+          </div>
+
+          {/* 🔥 СПЕЦПРЕДЛОЖЕНИЯ */}
+          <div className="special-offers-in-modal">
+            <div className="special-offers-header">
+              <h4>⭐ Спецпредложения</h4>
+            </div>
+
+            <div className="special-offers-input">
+              <input
+                type="text"
+                value={newSpecialOffer}
+                onChange={(e) => setNewSpecialOffer(e.target.value)}
+                onKeyPress={handleSpecialOfferKeyPress}
+                placeholder="Введите спецпредложение (например: Ипотека 0.1% первый год)..."
+                className="admin-modal-input"
+                disabled={isSubmitting}
+              />
+              <button
+                type="button"
+                onClick={addSpecialOffer}
+                disabled={!newSpecialOffer.trim() || isSubmitting}
+                className="admin-btn admin-btn-primary admin-btn-sm"
+              >
+                Добавить
+              </button>
+            </div>
+
+            {formData.specialOffers.length > 0 ? (
+              <div className="special-offers-list">
+                {formData.specialOffers.map((offer, index) => (
+                  <div key={index} className="special-offer-item">
+                    <span className="special-offer-text">⭐ {offer}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeSpecialOffer(offer)}
+                      className="special-offer-remove"
+                      disabled={isSubmitting}
+                      title="Удалить спецпредложение"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="special-offers-empty">
+                <p>Нет спецпредложений</p>
+              </div>
+            )}
+          </div>
+
           {/* БАНКИ */}
-          {/*     <div className="bank-selector-in-modal">
+          <div className="bank-selector-in-modal">
             <div className="bank-selector-header">
               <h4>🏦 Банки-партнеры</h4>
             </div>
@@ -588,9 +870,9 @@ export const ComplexesSection: React.FC = () => {
               banks={banks}
               placeholder="Выберите банки..."
             />
-          </div> */}
+          </div>
 
-          {/* БЛОК ТИПОВ КВАРТИР */}
+          {/* ТИПЫ КВАРТИР */}
           <div className="apartment-types-in-modal">
             <div className="apartment-types-header">
               <h4>🏠 Типы квартир</h4>

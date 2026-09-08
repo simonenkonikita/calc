@@ -17,10 +17,6 @@ export const LandingPage: React.FC = () => {
       <section className="hero">
         <div className="hero-container">
           <div className={`hero-content ${isVisible ? "fade-in-up" : ""}`}>
-            {/* <div className="hero-badge">
-              <span className="badge-dot"></span>
-              Интеллектуальный расчёт ипотеки
-            </div> */}
             <h1 className="hero-title">
               Найдите идеальное ипотечное решение
               <br />
@@ -34,7 +30,6 @@ export const LandingPage: React.FC = () => {
               <Link to="/calculator" className="btn-primary">
                 🚀 Начать расчёт
               </Link>
-              {/*  <button className="btn-secondary">📹 Смотреть демо</button> */}
             </div>
             <div className="hero-stats">
               <div className="stat-item">
@@ -93,7 +88,7 @@ export const LandingPage: React.FC = () => {
           <div className="section-header">
             <h2 className="section-title">Что вы можете</h2>
             <p className="section-subtitle">
-              Все инструменты что вы могли найти верное решение
+              Все инструменты, чтобы найти верное решение
             </p>
           </div>
           <div className="features-grid">
@@ -150,8 +145,8 @@ export const LandingPage: React.FC = () => {
         <div className="container">
           <div className="cta-content">
             <h2 className="cta-title">
-              Готовы узнать идеальный вариант ипоетки <br />
-              для вашего клента?
+              Готовы узнать идеальный вариант ипотеки <br />
+              для вашего клиента?
             </h2>
             <p className="cta-description">
               Введите параметры и получите полный расчёт за 30 секунд
@@ -168,33 +163,11 @@ export const LandingPage: React.FC = () => {
         <div className="container">
           <div className="footer-content">
             <div className="footer-brand">
-              {/*    <span className="logo-icon">🏠</span> */}
               <span className="logo-text">
-                {/*  Mortgage<span className="logo-highlight">Calc</span> */}
                 Ipoteka<span className="logo-highlight">Partner</span>
               </span>
-              {/*      <p className="footer-desc">
-                Умный ипотечный калькулятор для принятия правильных решений
-              </p> */}
             </div>
-            {/* <div className="footer-links">
-              <div className="footer-column">
-                <h4>Продукт</h4>
-                <a href="#features">Возможности</a>
-                <a href="#">Преимущества</a>
-                <a href="#">Цены</a>
-              </div>
-              <div className="footer-column">
-                <h4>Поддержка</h4>
-                <a href="#">FAQ</a>
-                <a href="#">Контакты</a>
-                <a href="#">Блог</a>
-              </div>
-            </div> */}
           </div>
-          {/*      <div className="footer-bottom">
-            <span>© 2026 MortgageCalc. Все права защищены.</span>
-          </div> */}
         </div>
       </footer>
     </div>

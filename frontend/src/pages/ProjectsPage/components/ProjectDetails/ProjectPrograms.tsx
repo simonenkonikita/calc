@@ -2,9 +2,10 @@
 
 import React, { useState, useMemo } from "react";
 import "./ProjectPrograms.css";
-import { BankOffer, ProgramInfo, ProjectInfo } from "../../utils/types";
+
 import { ProgramCard } from "../ProgramCard/ProgramCard";
 import { OfferRow } from "../OfferRow/OfferRow";
+import { BankOffer, ProgramInfo, ProjectInfo } from "../../../../utils/types";
 
 interface ProjectProgramsProps {
   project: ProjectInfo;

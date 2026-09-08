@@ -90,9 +90,10 @@ export interface HousingComplexPrice {
 }
 
 export interface ApartmentType {
+  id?: string;
   type: string;
   pricePerSquareMeter: number;
-  surcharges?: {
+  surcharges: {
     withoutDownPayment: number;
     partialDownPayment: number;
   };
@@ -101,40 +102,33 @@ export interface ApartmentType {
 export interface ProjectInfo {
   id: string;
   name: string;
+  slug?: string;
   status: string;
   statusIcon: string;
-  companyId: string;
+  companyId?: string;
+  company?: {
+    id: string;
+    name: string;
+  };
   description?: string;
-  priceInfo: string;
+  priceInfo?: any;
   paymentTerms: string[];
   promotions: string[];
   banks: string[];
-  specialOffers?: string[];
-  materialsLink?: string;
+  specialOffers: string[];
   apartmentTypes: ApartmentType[];
-  eligiblePrograms?: ProgramInfo[];
+  eligiblePrograms?: string[];
+  materialsLink?: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface RawProjectData {
-  id: string;
-  complexName: string;
-  status: string;
-  statusIcon: string;
-  description?: string;
-  priceInfo: string;
-  companyId: string;
-  paymentTerms: string[];
-  promotions: string[];
-  banks: string[];
-  specialOffers?: string[];
-  apartmentType: string;
-  pricePerSquareMeter: number;
-  surcharges?: {
-    withoutDownPayment: number;
-    partialDownPayment: number;
-  };
-  eligiblePrograms?: ProgramInfo[];
-  materialsLink?: string;
+// 🔥 НОВЫЙ ТИП ДЛЯ ОТВЕТА ОТ БЭКЕНДА
+export interface ProjectsResponse {
+  success: boolean;
+  data: ProjectInfo[];
+  error?: string;
 }
 
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========

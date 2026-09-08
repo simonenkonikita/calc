@@ -6,9 +6,11 @@ import { Complex } from "../../entities/Complex";
 import { ApartmentType } from "../../entities/ApartmentType";
 import { BaseController } from "./base.controller";
 import { AuthRequest } from "../../types/auth.types";
+import { ComplexService } from "../../services/ComplexService";
 
 const complexRepository = AppDataSource.getRepository(Complex);
 const apartmentTypeRepository = AppDataSource.getRepository(ApartmentType);
+const complexService = new ComplexService();
 
 export class ComplexController extends BaseController {
   /**
@@ -313,6 +315,154 @@ export class ComplexController extends BaseController {
       this.handleError(res, error, "Failed to delete complex");
     }
   }
+
+  // ============================================================
+  // 🔥 УПРАВЛЕНИЕ УСЛОВИЯМИ ОПЛАТЫ
+  // ============================================================
+
+  // Добавить условие оплаты
+  addPaymentTerm = async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { term } = req.body;
+      const user = req.user;
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          error: "Не авторизован",
+        });
+      }
+
+      if (!term || term.trim() === "") {
+        return res.status(400).json({
+          success: false,
+          error: "Условие оплаты обязательно",
+        });
+      }
+
+      const complex = await complexService.addPaymentTerm(
+        id,
+        term.trim(),
+        user.id,
+      );
+
+      if (!complex) {
+        return res.status(404).json({
+          success: false,
+          error: "ЖК не найден",
+        });
+      }
+
+      res.json({
+        success: true,
+        data: complex.paymentTerms,
+        message: "Условие оплаты добавлено",
+      });
+    } catch (error) {
+      console.error("Error adding payment term:", error);
+      res.status(500).json({
+        success: false,
+        error: "Ошибка добавления условия оплаты",
+      });
+    }
+  };
+
+  // Удалить условие оплаты
+  removePaymentTerm = async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { term } = req.body;
+      const user = req.user;
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          error: "Не авторизован",
+        });
+      }
+
+      if (!term || term.trim() === "") {
+        return res.status(400).json({
+          success: false,
+          error: "Условие оплаты обязательно",
+        });
+      }
+
+      const complex = await complexService.removePaymentTerm(
+        id,
+        term.trim(),
+        user.id,
+      );
+
+      if (!complex) {
+        return res.status(404).json({
+          success: false,
+          error: "ЖК не найден",
+        });
+      }
+
+      res.json({
+        success: true,
+        data: complex.paymentTerms,
+        message: "Условие оплаты удалено",
+      });
+    } catch (error) {
+      console.error("Error removing payment term:", error);
+      res.status(500).json({
+        success: false,
+        error: "Ошибка удаления условия оплаты",
+      });
+    }
+  };
+
+  // Обновить все условия оплаты
+  updatePaymentTerms = async (req: AuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { terms } = req.body;
+      const user = req.user;
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          error: "Не авторизован",
+        });
+      }
+
+      if (!terms || !Array.isArray(terms)) {
+        return res.status(400).json({
+          success: false,
+          error: "Массив условий оплаты обязателен",
+        });
+      }
+
+      const complex = await complexService.updatePaymentTerms(
+        id,
+        terms,
+        user.id,
+      );
+
+      if (!complex) {
+        return res.status(404).json({
+          success: false,
+          error: "ЖК не найден",
+        });
+      }
+
+      res.json({
+        success: true,
+        data: complex.paymentTerms,
+        message: "Условия оплаты обновлены",
+      });
+    } catch (error) {
+      console.error("Error updating payment terms:", error);
+      res.status(500).json({
+        success: false,
+        error: "Ошибка обновления условий оплаты",
+      });
+    }
+  };
 }
 
 export const complexController = new ComplexController();

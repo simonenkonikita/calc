@@ -11,7 +11,7 @@ import {
   AdminOffer,
   AdminUser,
   AdminCompany,
-  CreateComplexDTO, // 🔥 Добавляем импорт
+  CreateComplexDTO,
   UpdateComplexDTO,
 } from "../pages/Admin/types/admin.types";
 
@@ -316,7 +316,7 @@ export const adminApi = {
     return fetchWithAuth<AdminComplex>(`${API_URL}/admin/complexes/${id}`);
   },
 
-  async createComplex(data: Partial<AdminComplex>): Promise<AdminComplex> {
+  async createComplex(data: CreateComplexDTO): Promise<AdminComplex> {
     return fetchWithAuth<AdminComplex>(`${API_URL}/admin/complexes`, {
       method: "POST",
       body: JSON.stringify(data),
@@ -325,7 +325,7 @@ export const adminApi = {
 
   async updateComplex(
     id: string,
-    data: Partial<AdminComplex>,
+    data: UpdateComplexDTO,
   ): Promise<AdminComplex> {
     return fetchWithAuth<AdminComplex>(`${API_URL}/admin/complexes/${id}`, {
       method: "PUT",
@@ -797,6 +797,52 @@ export const adminApi = {
       },
     );
     return handleResponse(response);
+  },
+
+  // ============================================================
+  // УПРАВЛЕНИЕ УСЛОВИЯМИ ОПЛАТЫ ДЛЯ ЖК
+  // ============================================================
+
+  // Добавить условие оплаты
+  async addPaymentTerm(
+    complexId: string,
+    term: string,
+  ): Promise<{ success: boolean; data: string[]; message: string }> {
+    return fetchWithAuth<{ success: boolean; data: string[]; message: string }>(
+      `${API_URL}/admin/complexes/${complexId}/payment-terms`,
+      {
+        method: "POST",
+        body: JSON.stringify({ term }),
+      },
+    );
+  },
+
+  // Удалить условие оплаты
+  async removePaymentTerm(
+    complexId: string,
+    term: string,
+  ): Promise<{ success: boolean; data: string[]; message: string }> {
+    return fetchWithAuth<{ success: boolean; data: string[]; message: string }>(
+      `${API_URL}/admin/complexes/${complexId}/payment-terms`,
+      {
+        method: "DELETE",
+        body: JSON.stringify({ term }),
+      },
+    );
+  },
+
+  // Обновить все условия оплаты
+  async updatePaymentTerms(
+    complexId: string,
+    terms: string[],
+  ): Promise<{ success: boolean; data: string[]; message: string }> {
+    return fetchWithAuth<{ success: boolean; data: string[]; message: string }>(
+      `${API_URL}/admin/complexes/${complexId}/payment-terms`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ terms }),
+      },
+    );
   },
 };
 

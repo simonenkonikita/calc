@@ -1,7 +1,7 @@
 // src/pages/ProjectsPage/components/ProjectDetails/ProjectHeader.tsx
 import React from "react";
 import "./ProjectHeader.css";
-import { ProjectInfo } from "../../utils/types";
+import { ProjectInfo } from "../../../../utils/types";
 
 interface ProjectHeaderProps {
   project: ProjectInfo;
@@ -59,7 +59,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({ project }) => {
                   <polyline points="15 3 21 3 21 9" />
                   <line x1="10" y1="14" x2="21" y2="3" />
                 </svg>
-                Сайт проекта
+                Дом.РФ
               </button>
             )}
           </div>

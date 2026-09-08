@@ -315,3 +315,445 @@
     min-width: 100%;
   }
 }
+/* frontend/src/pages/Admin/sections/ComplexesSection.css */
+
+/* ... существующие стили ... */
+
+/* ============================================================
+   🔥 УСЛОВИЯ ОПЛАТЫ В МОДАЛЬНОМ ОКНЕ
+   ============================================================ */
+
+.payment-terms-in-modal {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.payment-terms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.payment-terms-header h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 0;
+}
+
+.payment-terms-input {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.payment-terms-input .admin-modal-input {
+  flex: 1;
+  min-height: 38px;
+}
+
+.payment-terms-input .admin-btn {
+  min-width: 100px;
+  height: 38px;
+}
+
+.payment-terms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.25rem;
+}
+
+.payment-terms-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.payment-terms-list::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 3px;
+}
+
+.payment-terms-list::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 3px;
+}
+
+.payment-terms-list::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+
+.payment-term-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--gray-700);
+  transition: var(--transition);
+}
+
+.payment-term-item:hover {
+  border-color: var(--gray-300);
+  background: var(--gray-100);
+}
+
+.payment-term-text {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.payment-term-remove {
+  background: none;
+  border: none;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+  font-size: 0.8rem;
+}
+
+.payment-term-remove:hover:not(:disabled) {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.payment-term-remove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.payment-terms-empty {
+  text-align: center;
+  color: var(--gray-500);
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--gray-300);
+}
+
+/* ============================================================
+   🔥 УСЛОВИЯ ОПЛАТЫ В ТАБЛИЦЕ (ПРЕВЬЮ)
+   ============================================================ */
+
+.payment-terms-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.payment-term-tag {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  background: var(--gray-100);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: var(--gray-600);
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.payment-term-more {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  background: var(--primary-bg);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.text-muted {
+  color: var(--gray-400);
+}
+
+/* ============================================================
+   🔥 АДАПТИВ
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .payment-terms-input {
+    flex-direction: column;
+  }
+
+  .payment-terms-input .admin-btn {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .payment-term-item {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .payment-term-text {
+    max-width: 150px;
+  }
+
+  .payment-terms-preview {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+  }
+
+  .payment-term-tag {
+    max-width: 100px;
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-term-item {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .payment-term-text {
+    max-width: 100px;
+  }
+
+  .payment-term-tag {
+    max-width: 80px;
+    font-size: 0.6rem;
+  }
+}
+/* frontend/src/pages/Admin/sections/ComplexesSection.css */
+
+/* ============================================================
+   🔥 АКЦИИ В МОДАЛЬНОМ ОКНЕ
+   ============================================================ */
+
+.promotions-in-modal {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.promotions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.promotions-header h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 0;
+}
+
+.promotions-input {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.promotions-input .admin-modal-input {
+  flex: 1;
+  min-height: 38px;
+}
+
+.promotions-input .admin-btn {
+  min-width: 100px;
+  height: 38px;
+}
+
+.promotions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 0.25rem;
+}
+
+.promotions-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.promotions-list::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 3px;
+}
+
+.promotions-list::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 3px;
+}
+
+.promotion-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: #92400e;
+  transition: var(--transition);
+}
+
+.promotion-item:hover {
+  background: #fde68a;
+}
+
+.promotion-text {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.promotion-remove {
+  background: none;
+  border: none;
+  color: #92400e;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+  font-size: 0.8rem;
+}
+
+.promotion-remove:hover:not(:disabled) {
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.promotions-empty {
+  text-align: center;
+  color: var(--gray-500);
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--gray-300);
+}
+
+/* ============================================================
+   🔥 СПЕЦПРЕДЛОЖЕНИЯ В МОДАЛЬНОМ ОКНЕ
+   ============================================================ */
+
+.special-offers-in-modal {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.special-offers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.special-offers-header h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 0;
+}
+
+.special-offers-input {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.special-offers-input .admin-modal-input {
+  flex: 1;
+  min-height: 38px;
+}
+
+.special-offers-input .admin-btn {
+  min-width: 100px;
+  height: 38px;
+}
+
+.special-offers-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 0.25rem;
+}
+
+.special-offers-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.special-offers-list::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 3px;
+}
+
+.special-offers-list::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 3px;
+}
+
+.special-offer-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  background: #fef9e7;
+  border: 1px solid #f59e0b;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: #92400e;
+  transition: var(--transition);
+}
+
+.special-offer-item:hover {
+  background: #fde68a;
+}
+
+.special-offer-text {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.special-offer-remove {
+  background: none;
+  border: none;
+  color: #92400e;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+  font-size: 0.8rem;
+}
+
+.special-offer-remove:hover:not(:disabled) {
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.special-offers-empty {
+  text-align: center;
+  color: var(--gray-500);
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--gray-300);
+}
