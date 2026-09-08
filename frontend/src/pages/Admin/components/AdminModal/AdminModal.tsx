@@ -35,7 +35,7 @@ export interface AdminModalProps {
   isSubmitting?: boolean;
   saveLabel?: string;
   cancelLabel?: string;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | "full";
   className?: string;
   children?: ReactNode;
 }
@@ -60,6 +60,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     md: "admin-modal-md",
     lg: "admin-modal-lg",
     xl: "admin-modal-xl",
+    full: "admin-modal-full",
   };
 
   const renderField = (field: AdminModalField) => {

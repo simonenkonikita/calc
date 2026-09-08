@@ -1,54 +1,25 @@
 // src/pages/ProjectsPage/components/ProjectDetails/ProjectPrograms.tsx
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import "./ProjectPrograms.css";
 import { BankOffer, ProgramInfo, ProjectInfo } from "../../utils/types";
-
 import { ProgramCard } from "../ProgramCard/ProgramCard";
 import { OfferRow } from "../OfferRow/OfferRow";
-import { api } from "../../services/api";
 
 interface ProjectProgramsProps {
   project: ProjectInfo;
+  programs: any[]; // 🔥 Получаем программы из пропсов
+  loading?: boolean;
+  error?: string | null;
 }
 
 export const ProjectPrograms: React.FC<ProjectProgramsProps> = ({
   project,
+  programs = [],
+  loading = false,
+  error = null,
 }) => {
-  const [programs, setPrograms] = useState<ProgramInfo[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [expandedProgram, setExpandedProgram] = useState<string | null>(null);
-
-  // 🔥 Загружаем программы отдельно по API через новый метод
-  useEffect(() => {
-    const loadPrograms = async () => {
-      if (!project?.id) return;
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        // 🔥 ИСПОЛЬЗУЕМ НОВЫЙ МЕТОД getProjectPrograms
-        const response = await api.getProjectPrograms(project.id);
-
-        if (response.success) {
-          setPrograms(response.data || []);
-        } else {
-          setError(response.error || "Failed to load programs");
-          setPrograms([]);
-        }
-      } catch (err) {
-        console.error("Error loading programs:", err);
-        setError("Ошибка при загрузке программ");
-        setPrograms([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPrograms();
-  }, [project?.id]);
 
   // 🔥 Группируем предложения по типам программ
   const groupedByProgram = useMemo(() => {
@@ -106,24 +77,8 @@ export const ProjectPrograms: React.FC<ProjectProgramsProps> = ({
           <button
             className="programs-retry-btn"
             onClick={() => {
-              // Повторная загрузка
-              const retry = async () => {
-                try {
-                  setLoading(true);
-                  setError(null);
-                  const response = await api.getProjectPrograms(project.id);
-                  if (response.success) {
-                    setPrograms(response.data || []);
-                  } else {
-                    setError(response.error || "Failed to load programs");
-                  }
-                } catch (err) {
-                  setError("Ошибка при загрузке программ");
-                } finally {
-                  setLoading(false);
-                }
-              };
-              retry();
+              // Повторная загрузка через перезагрузку компонента
+              window.location.reload();
             }}
           >
             Повторить

@@ -1,13 +1,35 @@
 // src/pages/ProjectsPage/components/ProjectDetails/ProjectInfo.tsx
+
 import React from "react";
 import "./ProjectInfo.css";
 import { ProjectInfo } from "../../utils/types";
 
 interface ProjectInfoProps {
   project: ProjectInfo;
+  programs?: any[]; // 🔥 Получаем программы из пропсов
+  loading?: boolean;
 }
 
-export const ProjectInfoSection: React.FC<ProjectInfoProps> = ({ project }) => {
+export const ProjectInfoSection: React.FC<ProjectInfoProps> = ({
+  project,
+  programs = [],
+  loading = false,
+}) => {
+  // 🔥 Извлекаем уникальные банки из программ (без дополнительного запроса)
+  const banks = React.useMemo(() => {
+    const bankSet = new Set<string>();
+    programs.forEach((program) => {
+      if (program.offers && program.offers.length > 0) {
+        program.offers.forEach((offer: any) => {
+          if (offer.bank) {
+            bankSet.add(offer.bank);
+          }
+        });
+      }
+    });
+    return Array.from(bankSet);
+  }, [programs]);
+
   const getPriceInfo = () => {
     if (!project.apartmentTypes || project.apartmentTypes.length === 0) {
       return "—";
@@ -16,9 +38,9 @@ export const ProjectInfoSection: React.FC<ProjectInfoProps> = ({ project }) => {
     return (
       <div className="price-types-list">
         {project.apartmentTypes.map((apt, index) => {
-          const basePrice = apt.pricePerSquareMeter;
-          const withoutPV = apt.surcharges?.withoutDownPayment || 0;
-          const partialPV = apt.surcharges?.partialDownPayment || 0;
+          const basePrice = Number(apt.pricePerSquareMeter) || 0;
+          const withoutPV = Number(apt.surcharges?.withoutDownPayment) || 0;
+          const partialPV = Number(apt.surcharges?.partialDownPayment) || 0;
 
           return (
             <div key={index} className="price-type-item">
@@ -77,12 +99,14 @@ export const ProjectInfoSection: React.FC<ProjectInfoProps> = ({ project }) => {
         </div>
       </div>
 
-      {/* Банки */}
+      {/* 🔥 БАНКИ - из программ (без дополнительного запроса) */}
       <div className="details-section">
         <div className="section-label">🏦 Банки-партнеры</div>
         <div className="banks-tags">
-          {project.banks && project.banks.length > 0 ? (
-            project.banks.map((bank) => (
+          {loading ? (
+            <span className="bank-tag-empty">Загрузка банков...</span>
+          ) : banks && banks.length > 0 ? (
+            banks.map((bank) => (
               <span key={bank} className="bank-tag">
                 {bank}
               </span>

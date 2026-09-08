@@ -43,7 +43,6 @@
   box-shadow: var(--shadow-lg);
   animation: adminModalSlideUp 0.3s ease-out;
   max-height: 90vh;
-  width: 100%;
   overflow: hidden; /* ← чтобы содержимое не вылезало за скругления */
 }
 

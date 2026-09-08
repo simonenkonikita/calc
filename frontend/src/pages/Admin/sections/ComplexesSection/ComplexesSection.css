@@ -32,7 +32,7 @@
 }
 
 /* ============================================================
-   📊 BANK SELECTOR (используется внутри)
+   📊 BANK SELECTOR
    ============================================================ */
 
 .complexes-section .bank-selector {
@@ -128,6 +128,151 @@
 }
 
 /* ============================================================
+   🏦 БАНКИ В МОДАЛЬНОМ ОКНЕ
+   ============================================================ */
+
+.bank-selector-in-modal {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.bank-selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.bank-selector-header h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 0;
+}
+
+/* Адаптив для BankSelector в модалке */
+.bank-selector-in-modal .bank-selector {
+  min-width: 100%;
+}
+
+/* ============================================================
+   🏠 ТИПЫ КВАРТИР В МОДАЛЬНОМ ОКНЕ
+   ============================================================ */
+
+.apartment-types-in-modal {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.apartment-types-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.apartment-types-header h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 0;
+}
+
+.apartment-types-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.apartment-types-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.apartment-types-list::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 3px;
+}
+
+.apartment-types-list::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 3px;
+}
+
+.apartment-types-list::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+
+.apartment-type-row {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr 0.7fr 0.7fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-200);
+  transition: var(--transition);
+}
+
+.apartment-type-row:hover {
+  border-color: var(--gray-300);
+  background: var(--gray-100);
+}
+
+.apartment-type-row .type-field {
+  min-width: 0;
+}
+
+.apartment-type-row .type-field input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  background: var(--bg-white);
+  transition: var(--transition);
+}
+
+.apartment-type-row .type-field input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.apartment-type-row .type-field input::placeholder {
+  color: var(--gray-400);
+  font-size: 0.8rem;
+}
+
+.apartment-type-row .type-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.apartment-type-row .type-actions .admin-btn {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 0.4rem;
+  font-size: 0.75rem;
+}
+
+.apartment-types-empty {
+  text-align: center;
+  color: var(--gray-500);
+  padding: 1rem;
+  font-size: 0.85rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--gray-300);
+}
+
+/* ============================================================
    📱 АДАПТИВ
    ============================================================ */
 
@@ -138,5 +283,35 @@
 
   .complexes-section .bank-selector-dropdown {
     max-height: 150px;
+  }
+
+  .bank-selector-in-modal .bank-selector {
+    min-width: 100%;
+  }
+
+  .apartment-type-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3rem;
+  }
+
+  .apartment-type-row .type-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .apartment-type-row {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+
+  .apartment-type-row .type-actions {
+    grid-column: 1;
+    justify-content: flex-end;
+  }
+
+  .bank-selector-in-modal .bank-selector {
+    min-width: 100%;
   }
 }

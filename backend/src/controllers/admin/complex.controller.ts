@@ -3,10 +3,12 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../../data-source";
 import { Complex } from "../../entities/Complex";
+import { ApartmentType } from "../../entities/ApartmentType";
 import { BaseController } from "./base.controller";
 import { AuthRequest } from "../../types/auth.types";
 
 const complexRepository = AppDataSource.getRepository(Complex);
+const apartmentTypeRepository = AppDataSource.getRepository(ApartmentType);
 
 export class ComplexController extends BaseController {
   /**
@@ -18,7 +20,6 @@ export class ComplexController extends BaseController {
 
       let where: any = {};
 
-      // Если пользователь не админ, показываем только его компанию
       if (user && user.role !== "admin") {
         where.companyId = user.companyId;
       }
@@ -36,7 +37,7 @@ export class ComplexController extends BaseController {
   }
 
   /**
-   *  ПОЛУЧИТЬ ЖК ПО ID
+   * Получить ЖК по ID
    */
   async getOne(req: AuthRequest, res: Response) {
     try {
@@ -52,7 +53,6 @@ export class ComplexController extends BaseController {
         return this.handleNotFound(res, "Complex");
       }
 
-      // Проверяем права доступа
       if (user?.role !== "admin") {
         if (complex.companyId !== user?.companyId) {
           return res.status(403).json({
@@ -69,7 +69,7 @@ export class ComplexController extends BaseController {
   }
 
   /**
-   * Создать ЖК (только admin или developer_admin)
+   * Создать ЖК (только admin или developer_admin) с типами квартир
    */
   async create(req: AuthRequest, res: Response) {
     try {
@@ -99,6 +99,14 @@ export class ComplexController extends BaseController {
         data.companyId = currentUser.companyId;
       }
 
+      // 🔥 ДЛЯ ADMIN - проверяем, что companyId передан
+      if (currentUser.role === "admin" && !data.companyId) {
+        return res.status(400).json({
+          success: false,
+          error: "Для создания ЖК необходимо указать companyId",
+        });
+      }
+
       // Валидация
       if (!data.name) {
         return res.status(400).json({
@@ -117,6 +125,7 @@ export class ComplexController extends BaseController {
       const { generateSlug } = await import("../../utils/slugify");
       const slug = generateSlug(data.name);
 
+      // Создаем ЖК
       const complex = complexRepository.create({
         name: data.name,
         slug: slug,
@@ -134,6 +143,24 @@ export class ComplexController extends BaseController {
 
       await complexRepository.save(complex);
 
+      // 🔥 СОЗДАЕМ ТИПЫ КВАРТИР
+      if (data.apartmentTypes && data.apartmentTypes.length > 0) {
+        for (const at of data.apartmentTypes) {
+          const apartmentType = apartmentTypeRepository.create({
+            type: at.type,
+            pricePerSquareMeter: at.pricePerSquareMeter,
+            surcharges: at.surcharges || {
+              withoutDownPayment: 0,
+              partialDownPayment: 0,
+            },
+            isActive: at.isActive !== undefined ? at.isActive : true,
+            complexId: complex.id,
+          });
+          await apartmentTypeRepository.save(apartmentType);
+        }
+      }
+
+      // Возвращаем созданный ЖК с отношениями
       const created = await complexRepository.findOne({
         where: { id: complex.id },
         relations: ["apartmentTypes", "company"],
@@ -156,7 +183,7 @@ export class ComplexController extends BaseController {
 
       const existingComplex = await complexRepository.findOne({
         where: { id },
-        relations: ["company"],
+        relations: ["company", "apartmentTypes"],
       });
 
       if (!existingComplex) {
@@ -208,6 +235,27 @@ export class ComplexController extends BaseController {
 
       await complexRepository.save(existingComplex);
 
+      // 🔥 ОБНОВЛЯЕМ ТИПЫ КВАРТИР (если переданы)
+      if (data.apartmentTypes && data.apartmentTypes.length > 0) {
+        // Удаляем старые типы
+        await apartmentTypeRepository.delete({ complexId: id });
+
+        // Создаем новые типы
+        for (const at of data.apartmentTypes) {
+          const apartmentType = apartmentTypeRepository.create({
+            type: at.type,
+            pricePerSquareMeter: at.pricePerSquareMeter,
+            surcharges: at.surcharges || {
+              withoutDownPayment: 0,
+              partialDownPayment: 0,
+            },
+            isActive: at.isActive !== undefined ? at.isActive : true,
+            complexId: id,
+          });
+          await apartmentTypeRepository.save(apartmentType);
+        }
+      }
+
       const updated = await complexRepository.findOne({
         where: { id },
         relations: ["apartmentTypes", "company"],
@@ -229,6 +277,7 @@ export class ComplexController extends BaseController {
 
       const existingComplex = await complexRepository.findOne({
         where: { id },
+        relations: ["apartmentTypes"],
       });
 
       if (!existingComplex) {
@@ -248,6 +297,14 @@ export class ComplexController extends BaseController {
           success: false,
           error: "Доступ запрещен. Недостаточно прав",
         });
+      }
+
+      // Удаляем типы квартир
+      if (
+        existingComplex.apartmentTypes &&
+        existingComplex.apartmentTypes.length > 0
+      ) {
+        await apartmentTypeRepository.delete({ complexId: id });
       }
 
       await complexRepository.delete(id);

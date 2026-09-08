@@ -11,6 +11,8 @@ import {
   AdminOffer,
   AdminUser,
   AdminCompany,
+  CreateComplexDTO, // 🔥 Добавляем импорт
+  UpdateComplexDTO,
 } from "../pages/Admin/types/admin.types";
 
 const API_URL = import.meta.env.VITE_API_URL || "/api";

@@ -16,16 +16,25 @@ import StatusBadge from "../../components/StatusBadge/StatusBadge";
 export const CompaniesSection: React.FC = () => {
   const [companies, setCompanies] = useState<AdminCompany[]>([]);
   const [complexes, setComplexes] = useState<AdminComplex[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<AdminCompany>>({});
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 🔥 Состояния для управления комплексами
+  // Состояния для модальных окон
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingCompany, setEditingCompany] = useState<AdminCompany | null>(
+    null,
+  );
+
+  // Состояния для управления комплексами
   const [expandedCompanyId, setExpandedCompanyId] = useState<string | null>(
     null,
   );
+  const [expandedUsersCompanyId, setExpandedUsersCompanyId] = useState<
+    string | null
+  >(null);
+
   const [showComplexModal, setShowComplexModal] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [complexForm, setComplexForm] = useState({
@@ -44,11 +53,21 @@ export const CompaniesSection: React.FC = () => {
     {},
   );
 
+  // Формы
   const [companyForm, setCompanyForm] = useState({
     name: "",
     phone: "",
     address: "",
     website: "",
+    isActive: true,
+  });
+
+  const [editForm, setEditForm] = useState<Partial<AdminCompany>>({
+    name: "",
+    phone: "",
+    address: "",
+    website: "",
+    isActive: true,
   });
 
   const { isAdmin } = useAuthExtended();
@@ -62,12 +81,14 @@ export const CompaniesSection: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [companiesData, complexesData] = await Promise.all([
+      const [companiesData, complexesData, usersData] = await Promise.all([
         adminApi.getCompanies(),
         adminApi.getComplexes(),
+        adminApi.getUsers(),
       ]);
       setCompanies(Array.isArray(companiesData) ? companiesData : []);
       setComplexes(Array.isArray(complexesData) ? complexesData : []);
+      setUsers(Array.isArray(usersData) ? usersData : []);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -91,6 +112,29 @@ export const CompaniesSection: React.FC = () => {
   // УПРАВЛЕНИЕ КОМПАНИЯМИ
   // ============================================================
 
+  const openCreateModal = () => {
+    setCompanyForm({
+      name: "",
+      phone: "",
+      address: "",
+      website: "",
+      isActive: true,
+    });
+    setShowCreateModal(true);
+  };
+
+  const openEditModal = (company: AdminCompany) => {
+    setEditingCompany(company);
+    setEditForm({
+      name: company.name || "",
+      phone: company.phone || "",
+      address: company.address || "",
+      website: company.website || "",
+      isActive: company.isActive !== undefined ? company.isActive : true,
+    });
+    setShowEditModal(true);
+  };
+
   const handleCreateCompany = async () => {
     if (!companyForm.name.trim()) {
       alert("⚠️ Введите название компании");
@@ -107,9 +151,6 @@ export const CompaniesSection: React.FC = () => {
         website: companyForm.website?.trim() || "",
       });
 
-      console.log("✅ Company created:", result);
-      console.log("✅ Company name:", result?.name);
-
       if (!result || !result.name) {
         console.error("❌ Invalid response structure:", result);
         alert("❌ Ошибка: сервер вернул некорректный ответ");
@@ -122,6 +163,7 @@ export const CompaniesSection: React.FC = () => {
         phone: "",
         address: "",
         website: "",
+        isActive: true,
       });
 
       await loadCompanies();
@@ -134,15 +176,36 @@ export const CompaniesSection: React.FC = () => {
     }
   };
 
-  const handleUpdateCompany = async (id: string) => {
+  const handleUpdateCompany = async () => {
+    if (!editingCompany) return;
+
+    if (!editForm.name?.trim()) {
+      alert("⚠️ Введите название компании");
+      return;
+    }
+
     try {
-      await adminApi.updateCompany(id, formData);
-      setEditingId(null);
-      setFormData({});
+      setIsSubmitting(true);
+
+      await adminApi.updateCompany(editingCompany.id, {
+        name: editForm.name.trim(),
+        phone: editForm.phone?.trim() || "",
+        address: editForm.address?.trim() || "",
+        website: editForm.website?.trim() || "",
+        isActive: editForm.isActive,
+      });
+
+      setShowEditModal(false);
+      setEditingCompany(null);
+      setEditForm({});
+
       await loadCompanies();
-      alert("✅ Компания обновлена!");
+      alert(`✅ Компания "${editForm.name}" обновлена!`);
     } catch (error: any) {
-      alert(`❌ ${error.message || "Ошибка обновления"}`);
+      console.error("❌ Error updating company:", error);
+      alert(`❌ ${error.message || "Ошибка обновления компании"}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -159,7 +222,7 @@ export const CompaniesSection: React.FC = () => {
   };
 
   // ============================================================
-  // 🔥 УПРАВЛЕНИЕ КОМПЛЕКСАМИ
+  // УПРАВЛЕНИЕ КОМПЛЕКСАМИ
   // ============================================================
 
   const handleCreateComplex = async () => {
@@ -235,6 +298,10 @@ export const CompaniesSection: React.FC = () => {
     return complexes.filter((c) => c.companyId === companyId);
   };
 
+  const getCompanyUsers = (companyId: string): any[] => {
+    return users.filter((u) => u.companyId === companyId);
+  };
+
   // ============================================================
   // ВСПОМОГАТЕЛЬНЫЕ
   // ============================================================
@@ -259,11 +326,31 @@ export const CompaniesSection: React.FC = () => {
     return labels[status] || status;
   };
 
+  const getUserRoleLabel = (role: string) => {
+    const labels: Record<string, string> = {
+      admin: "Администратор",
+      developer_admin: "Админ компании",
+      developer_manager: "Менеджер",
+      agent: "Агент",
+    };
+    return labels[role] || role;
+  };
+
+  // 🔥 Функция для получения стиля бейджа роли
+  const getRoleBadgeClass = (role: string) => {
+    const classes: Record<string, string> = {
+      admin: "role-admin",
+      developer_admin: "role-developer-admin",
+      developer_manager: "role-developer-manager",
+      agent: "role-agent",
+    };
+    return classes[role] || "role-default";
+  };
+
   // ============================================================
-  // 🔥 ПОЛЯ ДЛЯ МОДАЛЬНЫХ ОКОН
+  // ПОЛЯ ДЛЯ МОДАЛЬНЫХ ОКОН
   // ============================================================
 
-  // Поля для создания компании
   const companyFields: AdminModalField[] = [
     {
       name: "name",
@@ -300,9 +387,74 @@ export const CompaniesSection: React.FC = () => {
       onChange: (value) => setCompanyForm({ ...companyForm, address: value }),
       fullWidth: true,
     },
+    {
+      name: "isActive",
+      label: "Активна",
+      type: "select",
+      options: [
+        { value: "true", label: "✅ Активна" },
+        { value: "false", label: "❌ Неактивна" },
+      ],
+      value: companyForm.isActive ? "true" : "false",
+      onChange: (value) =>
+        setCompanyForm({ ...companyForm, isActive: value === "true" }),
+    },
   ];
 
-  // Поля для создания ЖК
+  const editCompanyFields = (): AdminModalField[] => {
+    if (!editingCompany) return [];
+
+    return [
+      {
+        name: "name",
+        label: "Название компании",
+        type: "text",
+        placeholder: "Например: Строй-Групп",
+        required: true,
+        value: editForm.name || "",
+        onChange: (value) => setEditForm({ ...editForm, name: value }),
+        fullWidth: true,
+      },
+      {
+        name: "phone",
+        label: "Телефон",
+        type: "text",
+        placeholder: "+7 (999) 123-45-67",
+        value: editForm.phone || "",
+        onChange: (value) => setEditForm({ ...editForm, phone: value }),
+      },
+      {
+        name: "website",
+        label: "Сайт",
+        type: "text",
+        placeholder: "https://company.ru",
+        value: editForm.website || "",
+        onChange: (value) => setEditForm({ ...editForm, website: value }),
+      },
+      {
+        name: "address",
+        label: "Адрес",
+        type: "text",
+        placeholder: "г. Москва, ул. Примерная, д. 1",
+        value: editForm.address || "",
+        onChange: (value) => setEditForm({ ...editForm, address: value }),
+        fullWidth: true,
+      },
+      {
+        name: "isActive",
+        label: "Активна",
+        type: "select",
+        options: [
+          { value: "true", label: "✅ Активна" },
+          { value: "false", label: "❌ Неактивна" },
+        ],
+        value: editForm.isActive ? "true" : "false",
+        onChange: (value) =>
+          setEditForm({ ...editForm, isActive: value === "true" }),
+      },
+    ];
+  };
+
   const complexFields: AdminModalField[] = [
     {
       name: "name",
@@ -365,7 +517,7 @@ export const CompaniesSection: React.FC = () => {
           buttons={[
             {
               label: "+ Создать компанию",
-              onClick: () => setShowCreateModal(true),
+              onClick: openCreateModal,
               variant: "primary",
             },
             {
@@ -394,41 +546,45 @@ export const CompaniesSection: React.FC = () => {
             <tbody>
               {companies.map((company) => {
                 const companyComplexes = getCompanyComplexes(company.id);
+                const companyUsers = getCompanyUsers(company.id);
                 const isExpanded = expandedCompanyId === company.id;
+                const isUsersExpanded = expandedUsersCompanyId === company.id;
 
                 return (
                   <React.Fragment key={company.id}>
                     <tr>
                       <td>
-                        {editingId === company.id ? (
-                          <input
-                            value={formData.name || ""}
-                            onChange={(e) =>
-                              setFormData({ ...formData, name: e.target.value })
-                            }
-                            className="admin-input admin-input-sm"
-                          />
-                        ) : (
-                          <strong>{company.name}</strong>
-                        )}
+                        <strong>{company.name}</strong>
                       </td>
+                      <td>{getAdminName(company.admin)}</td>
                       <td>
-                        {editingId === company.id ? (
-                          <input
-                            value={formData.adminId || ""}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                adminId: e.target.value,
-                              })
-                            }
-                            className="admin-input admin-input-sm"
-                          />
-                        ) : (
-                          getAdminName(company.admin)
-                        )}
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "0.5rem",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span>{getUsersCount(company.users)}</span>
+                          {companyUsers.length > 0 && (
+                            <button
+                              onClick={() =>
+                                setExpandedUsersCompanyId(
+                                  isUsersExpanded ? null : company.id,
+                                )
+                              }
+                              className="admin-btn admin-btn-secondary admin-btn-sm"
+                              title={
+                                isUsersExpanded
+                                  ? "Скрыть пользователей"
+                                  : "Показать пользователей"
+                              }
+                            >
+                              {isUsersExpanded ? "🔼" : "🔽"}
+                            </button>
+                          )}
+                        </div>
                       </td>
-                      <td>{getUsersCount(company.users)}</td>
                       <td>
                         <div
                           style={{
@@ -438,16 +594,6 @@ export const CompaniesSection: React.FC = () => {
                           }}
                         >
                           <span>{companyComplexes.length}</span>
-                          <button
-                            onClick={() => {
-                              setSelectedCompanyId(company.id);
-                              setShowComplexModal(true);
-                            }}
-                            className="admin-btn admin-btn-success admin-btn-sm"
-                            title="Добавить ЖК"
-                          >
-                            + ЖК
-                          </button>
                           {companyComplexes.length > 0 && (
                             <button
                               onClick={() =>
@@ -456,41 +602,16 @@ export const CompaniesSection: React.FC = () => {
                                 )
                               }
                               className="admin-btn admin-btn-secondary admin-btn-sm"
+                              title={isExpanded ? "Скрыть ЖК" : "Показать ЖК"}
                             >
                               {isExpanded ? "🔼" : "🔽"}
                             </button>
                           )}
                         </div>
                       </td>
+                      <td>{company.phone || "-"}</td>
                       <td>
-                        {editingId === company.id ? (
-                          <input
-                            value={formData.phone || ""}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                phone: e.target.value,
-                              })
-                            }
-                            className="admin-input admin-input-sm"
-                          />
-                        ) : (
-                          company.phone || "-"
-                        )}
-                      </td>
-                      <td>
-                        {editingId === company.id ? (
-                          <input
-                            value={formData.website || ""}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                website: e.target.value,
-                              })
-                            }
-                            className="admin-input admin-input-sm"
-                          />
-                        ) : company.website ? (
+                        {company.website ? (
                           <a
                             href={company.website}
                             target="_blank"
@@ -503,76 +624,113 @@ export const CompaniesSection: React.FC = () => {
                         )}
                       </td>
                       <td>
-                        {editingId === company.id ? (
-                          <select
-                            value={formData.isActive ? "active" : "inactive"}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                isActive: e.target.value === "active",
-                              })
-                            }
-                            className="admin-select admin-select-sm"
-                          >
-                            <option value="active">✅ Активна</option>
-                            <option value="inactive">❌ Неактивна</option>
-                          </select>
-                        ) : (
-                          <StatusBadge
-                            isActive={company.isActive}
-                            activeText="Активна"
-                          />
-                        )}
+                        <StatusBadge
+                          isActive={company.isActive}
+                          activeText="Активна"
+                        />
                       </td>
                       <td>
-                        {editingId === company.id ? (
-                          <ActionButtons
-                            buttons={[
-                              {
-                                icon: "💾",
-                                onClick: () => handleUpdateCompany(company.id),
-                                variant: "success",
-                                title: "Сохранить",
-                              },
-                              {
-                                icon: "✕",
-                                onClick: () => {
-                                  setEditingId(null);
-                                  setFormData({});
-                                },
-                                variant: "danger",
-                                title: "Отмена",
-                              },
-                            ]}
-                            size="sm"
-                          />
-                        ) : (
-                          <ActionButtons
-                            buttons={[
-                              {
-                                icon: "✏️",
-                                onClick: () => {
-                                  setEditingId(company.id);
-                                  setFormData(company);
-                                },
-                                variant: "primary",
-                                title: "Редактировать",
-                              },
-                              {
-                                icon: "🗑️",
-                                onClick: () =>
-                                  handleDeleteCompany(company.id, company.name),
-                                variant: "danger",
-                                title: "Удалить",
-                              },
-                            ]}
-                            size="sm"
-                          />
-                        )}
+                        <ActionButtons
+                          buttons={[
+                            {
+                              icon: "✏️",
+                              onClick: () => openEditModal(company),
+                              variant: "primary",
+                              title: "Редактировать",
+                            },
+                            {
+                              icon: "🗑️",
+                              onClick: () =>
+                                handleDeleteCompany(company.id, company.name),
+                              variant: "danger",
+                              title: "Удалить",
+                            },
+                          ]}
+                          size="sm"
+                        />
                       </td>
                     </tr>
 
-                    {/* 🔥 Список ЖК компании */}
+                    {/* 🔥 Список пользователей компании - стилизованный как в UsersSection */}
+                    {isUsersExpanded && companyUsers.length > 0 && (
+                      <tr>
+                        <td colSpan={8} style={{ padding: "0.5rem 1rem" }}>
+                          <div className="company-users-list">
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr 1fr 1.2fr 0.8fr",
+                                gap: "0.5rem",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                                color: "#6b7280",
+                                padding: "0.5rem 0",
+                                borderBottom: "1px solid #e5e7eb",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.5px",
+                              }}
+                            >
+                              <span>Пользователь</span>
+                              <span>Роль</span>
+                              <span>Email</span>
+                              <span>Телефон</span>
+                              <span>Статус</span>
+                            </div>
+                            {companyUsers.map((user) => (
+                              <div
+                                key={user.id}
+                                style={{
+                                  display: "grid",
+                                  gridTemplateColumns:
+                                    "1fr 1fr 1fr 1.2fr 0.8fr",
+                                  gap: "0.5rem",
+                                  padding: "0.5rem 0",
+                                  borderBottom: "1px solid #f3f4f6",
+                                  alignItems: "center",
+                                  fontSize: "0.85rem",
+                                }}
+                              >
+                                <span>
+                                  {[user.firstName, user.lastName]
+                                    .filter(Boolean)
+                                    .join(" ") ||
+                                    user.email ||
+                                    "-"}
+                                </span>
+                                <span>
+                                  <span
+                                    className={`role-badge ${getRoleBadgeClass(user.role)}`}
+                                  >
+                                    {getUserRoleLabel(user.role)}
+                                  </span>
+                                </span>
+                                <span
+                                  style={{
+                                    fontSize: "0.8rem",
+                                    color: "#6b7280",
+                                  }}
+                                >
+                                  {user.email}
+                                </span>
+                                <span>{user.phone || "-"}</span>
+                                <span>
+                                  <StatusBadge
+                                    isActive={
+                                      user.isActive !== undefined
+                                        ? user.isActive
+                                        : true
+                                    }
+                                    activeText="Активен"
+                                  />
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+
+                    {/* Список ЖК компании */}
                     {isExpanded && companyComplexes.length > 0 && (
                       <tr>
                         <td colSpan={8} style={{ padding: "0.5rem 1rem" }}>
@@ -580,13 +738,15 @@ export const CompaniesSection: React.FC = () => {
                             <div
                               style={{
                                 display: "grid",
-                                gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr auto",
+                                gridTemplateColumns: "1fr 1fr 1fr 0.8fr 0.8fr",
                                 gap: "0.5rem",
-                                fontSize: "0.8rem",
+                                fontSize: "0.75rem",
                                 fontWeight: 600,
                                 color: "#6b7280",
                                 padding: "0.5rem 0",
                                 borderBottom: "1px solid #e5e7eb",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.5px",
                               }}
                             >
                               <span>Название</span>
@@ -594,7 +754,6 @@ export const CompaniesSection: React.FC = () => {
                               <span>Банки</span>
                               <span>Активен</span>
                               <span>Типы квартир</span>
-                              <span>Действия</span>
                             </div>
                             {companyComplexes.map((complex) => (
                               <div
@@ -602,7 +761,7 @@ export const CompaniesSection: React.FC = () => {
                                 style={{
                                   display: "grid",
                                   gridTemplateColumns:
-                                    "1fr 1fr 1fr 1fr 1fr auto",
+                                    "1fr 1fr 1fr 0.8fr 0.8fr",
                                   gap: "0.5rem",
                                   padding: "0.4rem 0",
                                   borderBottom: "1px solid #f3f4f6",
@@ -617,30 +776,6 @@ export const CompaniesSection: React.FC = () => {
                                 <span>
                                   {complex.apartmentTypes?.length || 0}
                                 </span>
-                                <div className="admin-actions">
-                                  <button
-                                    onClick={() => {
-                                      setEditingComplexId(complex.id);
-                                      setComplexFormData(complex);
-                                    }}
-                                    className="admin-btn admin-btn-primary admin-btn-xs"
-                                    title="Редактировать"
-                                  >
-                                    ✏️
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      handleDeleteComplex(
-                                        complex.id,
-                                        complex.name,
-                                      )
-                                    }
-                                    className="admin-btn admin-btn-danger admin-btn-xs"
-                                    title="Удалить"
-                                  >
-                                    🗑️
-                                  </button>
-                                </div>
                               </div>
                             ))}
                           </div>
@@ -669,7 +804,7 @@ export const CompaniesSection: React.FC = () => {
           </table>
         </div>
 
-        {/* 🔥 МОДАЛЬНОЕ ОКНО СОЗДАНИЯ КОМПАНИИ */}
+        {/* МОДАЛЬНОЕ ОКНО СОЗДАНИЯ КОМПАНИИ */}
         <AdminModal
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
@@ -678,10 +813,28 @@ export const CompaniesSection: React.FC = () => {
           fields={companyFields}
           isSubmitting={isSubmitting}
           saveLabel="Создать компанию"
+          cancelLabel="Отмена"
           size="lg"
         />
 
-        {/* 🔥 МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ЖК */}
+        {/* МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ КОМПАНИИ */}
+        <AdminModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditingCompany(null);
+            setEditForm({});
+          }}
+          onSave={handleUpdateCompany}
+          title={`✏️ Редактирование: ${editingCompany?.name || ""}`}
+          fields={editCompanyFields()}
+          isSubmitting={isSubmitting}
+          saveLabel="Сохранить изменения"
+          cancelLabel="Отмена"
+          size="lg"
+        />
+
+        {/* МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ЖК */}
         <AdminModal
           isOpen={showComplexModal}
           onClose={() => setShowComplexModal(false)}
@@ -690,6 +843,7 @@ export const CompaniesSection: React.FC = () => {
           fields={complexFields}
           isSubmitting={isSubmitting}
           saveLabel="Создать ЖК"
+          cancelLabel="Отмена"
           size="md"
         />
       </AdminLayout>

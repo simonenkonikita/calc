@@ -41,7 +41,7 @@ export interface AdminApartmentType {
 }
 
 // ============================================================
-// 🔥 ADMIN COMPLEX - С ОБЯЗАТЕЛЬНЫМ companyId
+// ADMIN COMPLEX - С ОБЯЗАТЕЛЬНЫМ companyId
 // ============================================================
 export interface AdminComplex {
   id: string;
@@ -56,7 +56,7 @@ export interface AdminComplex {
   materialsLink: string;
   isActive: boolean;
   apartmentTypes: AdminApartmentType[];
-  companyId: string; // 🔥 ОБЯЗАТЕЛЬНОЕ ПОЛЕ (было опциональным)
+  companyId: string;
   company?: AdminCompany;
   createdById?: string;
   createdBy?: AdminUser;
@@ -67,7 +67,7 @@ export interface AdminComplex {
 }
 
 // ============================================================
-// 🔥 DTO ДЛЯ СОЗДАНИЯ ЖК (фронтенд -> бэкенд)
+// DTO ДЛЯ СОЗДАНИЯ ЖК (фронтенд -> бэкенд)
 // ============================================================
 export interface CreateComplexDTO {
   name: string;
@@ -79,15 +79,20 @@ export interface CreateComplexDTO {
   specialOffers?: string[];
   materialsLink?: string;
   isActive?: boolean;
-  companyId: string; // 🔥 ОБЯЗАТЕЛЬНОЕ ПОЛЕ
-  apartmentTypes?: Omit<
-    AdminApartmentType,
-    "id" | "complexId" | "createdAt" | "updatedAt"
-  >[];
+  companyId: string;
+  apartmentTypes?: Array<{
+    type: string;
+    pricePerSquareMeter: number;
+    surcharges?: {
+      withoutDownPayment: number;
+      partialDownPayment: number;
+    };
+    isActive?: boolean;
+  }>;
 }
 
 // ============================================================
-// 🔥 DTO ДЛЯ ОБНОВЛЕНИЯ ЖК (фронтенд -> бэкенд)
+// DTO ДЛЯ ОБНОВЛЕНИЯ ЖК (фронтенд -> бэкенд)
 // ============================================================
 export interface UpdateComplexDTO {
   name?: string;
@@ -99,7 +104,7 @@ export interface UpdateComplexDTO {
   specialOffers?: string[];
   materialsLink?: string;
   isActive?: boolean;
-  companyId?: string; // 🔥 Опционально при обновлении
+  companyId?: string;
 }
 
 export interface AdminProgram {
@@ -116,13 +121,11 @@ export interface AdminProgram {
 }
 
 // ============================================================
-// 🔥 НОВАЯ СТРУКТУРА ДЛЯ ДИНАМИЧЕСКИХ СТАВОК
+// ДИНАМИЧЕСКИЕ СТАВКИ
 // ============================================================
 export interface AdminRate {
   id: string;
   offerId: string;
-
-  // 🔥 ТОЛЬКО conditionMetadata (сложные условия)
   conditionMetadata: {
     amountMin?: number | null;
     amountMax?: number | null;
@@ -131,7 +134,6 @@ export interface AdminRate {
     termMin?: number | null;
     termMax?: number | null;
   };
-
   rate: number;
   priority: number;
   description: string | null;
@@ -141,13 +143,11 @@ export interface AdminRate {
 }
 
 // ============================================================
-// 🔥 НОВАЯ СТРУКТУРА ДЛЯ ДИНАМИЧЕСКИХ СУБСИДИЙ
+// ДИНАМИЧЕСКИЕ СУБСИДИИ
 // ============================================================
 export interface AdminSubsidy {
   id: string;
   offerId: string;
-
-  // 🔥 ТОЛЬКО conditionMetadata (сложные условия)
   conditionMetadata: {
     amountMin?: number | null;
     amountMax?: number | null;
@@ -156,10 +156,7 @@ export interface AdminSubsidy {
     termMin?: number | null;
     termMax?: number | null;
   };
-
-  // 🔥 Пороговая логика (только для субсидий)
-  tolerance: number; // всегда в процентах
-
+  tolerance: number;
   subsidyPercent: number;
   priority: number;
   description: string | null;
@@ -169,7 +166,7 @@ export interface AdminSubsidy {
 }
 
 // ============================================================
-// 🔥 НОВАЯ СТРУКТУРА ДЛЯ OFFER
+// OFFER
 // ============================================================
 export interface AdminOffer {
   id: string;
@@ -233,7 +230,7 @@ export interface AdminConfig {
 }
 
 // ============================================================
-// 🔥 DTO ДЛЯ СОЗДАНИЯ/ОБНОВЛЕНИЯ (фронтенд -> бэкенд)
+// DTO ДЛЯ СОЗДАНИЯ/ОБНОВЛЕНИЯ
 // ============================================================
 
 export interface CreateAdminRateDTO {
@@ -260,7 +257,7 @@ export interface CreateAdminSubsidyDTO {
     termMin?: number | null;
     termMax?: number | null;
   };
-  tolerance?: number; // всегда в процентах
+  tolerance?: number;
   subsidyPercent: number;
   priority?: number;
   description?: string | null;
