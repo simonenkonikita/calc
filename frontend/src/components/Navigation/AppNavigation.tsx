@@ -1,7 +1,9 @@
 // frontend/src/components/Navigation/AppNavigation.tsx
+
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthPanel } from "../Auth/AuthPanel";
+import { NotificationBell } from "../NotificationBell/NotificationBell";
 
 import "./AppNavigation.css";
 import { useAuthExtended } from "../../hooks/ui/useAuth";
@@ -136,6 +138,9 @@ const AppNavigation = () => {
           <div className="nav-actions">
             {isAuthenticated ? (
               <div className="nav-user">
+                {/* 🔥 КОЛОКОЛЬЧИК УВЕДОМЛЕНИЙ */}
+                <NotificationBell />
+
                 <button
                   ref={buttonRef}
                   onClick={toggleDropdown}

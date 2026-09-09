@@ -89,6 +89,10 @@ export interface CreateOfferDTO {
 
 export interface UpdateOfferDTO extends Partial<CreateOfferDTO> {
   id: string;
+  isActive?: boolean;
+  isTwoContracts?: boolean;
+  isExcessLimit?: boolean;
+  isTranche?: boolean;
 }
 
 // ============================================================

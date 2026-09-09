@@ -12,6 +12,7 @@ import {
 } from "typeorm";
 import { Company } from "./Company";
 import { Token } from "./Token";
+import { Notification } from "./Notification";
 
 export type UserRole =
   | "admin"
@@ -102,6 +103,9 @@ export class User {
     onDelete: "SET NULL", // ← Созданные пользователи остаются
   })
   createdUsers: User[];
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
 
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;

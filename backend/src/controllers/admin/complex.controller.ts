@@ -8,9 +8,8 @@ import { BaseController } from "./base.controller";
 import { AuthRequest } from "../../types/auth.types";
 import { ComplexService } from "../../services/ComplexService";
 
-const complexRepository = AppDataSource.getRepository(Complex);
-const apartmentTypeRepository = AppDataSource.getRepository(ApartmentType);
 const complexService = new ComplexService();
+const apartmentTypeRepository = AppDataSource.getRepository(ApartmentType);
 
 export class ComplexController extends BaseController {
   /**
@@ -26,13 +25,15 @@ export class ComplexController extends BaseController {
         where.companyId = user.companyId;
       }
 
-      const complexes = await complexRepository.find({
-        where,
-        relations: ["apartmentTypes", "company"],
-        order: { name: "ASC" },
-      });
+      const complexes = await complexService.getAllComplexes();
 
-      res.json({ success: true, data: complexes });
+      // Фильтруем по компании если не админ
+      const filtered =
+        user?.role === "admin"
+          ? complexes
+          : complexes.filter((c) => c.companyId === user?.companyId);
+
+      res.json({ success: true, data: filtered });
     } catch (error) {
       this.handleError(res, error, "Failed to get complexes");
     }
@@ -46,10 +47,7 @@ export class ComplexController extends BaseController {
       const { id } = req.params;
       const user = req.user;
 
-      const complex = await complexRepository.findOne({
-        where: { id },
-        relations: ["apartmentTypes", "company"],
-      });
+      const complex = await complexService.getComplexById(id);
 
       if (!complex) {
         return this.handleNotFound(res, "Complex");
@@ -101,7 +99,7 @@ export class ComplexController extends BaseController {
         data.companyId = currentUser.companyId;
       }
 
-      // 🔥 ДЛЯ ADMIN - проверяем, что companyId передан
+      // Для ADMIN - проверяем, что companyId передан
       if (currentUser.role === "admin" && !data.companyId) {
         return res.status(400).json({
           success: false,
@@ -124,26 +122,13 @@ export class ComplexController extends BaseController {
         });
       }
 
-      const { generateSlug } = await import("../../utils/slugify");
-      const slug = generateSlug(data.name);
-
-      // Создаем ЖК
-      const complex = complexRepository.create({
-        name: data.name,
-        slug: slug,
-        status: data.status,
-        description: data.description || "",
-        banks: data.banks || [],
-        paymentTerms: data.paymentTerms || [],
-        promotions: data.promotions || [],
-        specialOffers: data.specialOffers || [],
-        materialsLink: data.materialsLink || "",
-        isActive: data.isActive !== undefined ? data.isActive : true,
-        companyId: data.companyId,
-        createdById: currentUser.id,
-      });
-
-      await complexRepository.save(complex);
+      // 🔥 СОЗДАЕМ ЖК ЧЕРЕЗ СЕРВИС
+      const complex = await complexService.createComplex(
+        data,
+        currentUser.id,
+        currentUser.firstName,
+        currentUser.lastName,
+      );
 
       // 🔥 СОЗДАЕМ ТИПЫ КВАРТИР
       if (data.apartmentTypes && data.apartmentTypes.length > 0) {
@@ -163,10 +148,7 @@ export class ComplexController extends BaseController {
       }
 
       // Возвращаем созданный ЖК с отношениями
-      const created = await complexRepository.findOne({
-        where: { id: complex.id },
-        relations: ["apartmentTypes", "company"],
-      });
+      const created = await complexService.getComplexById(complex.id);
 
       res.status(201).json({ success: true, data: created });
     } catch (error) {
@@ -183,10 +165,7 @@ export class ComplexController extends BaseController {
       const data = req.body;
       const currentUser = req.user;
 
-      const existingComplex = await complexRepository.findOne({
-        where: { id },
-        relations: ["company", "apartmentTypes"],
-      });
+      const existingComplex = await complexService.getComplexById(id);
 
       if (!existingComplex) {
         return this.handleNotFound(res, "Complex");
@@ -207,42 +186,18 @@ export class ComplexController extends BaseController {
         });
       }
 
-      // Обновляем поля
-      if (data.name !== undefined) existingComplex.name = data.name;
-      if (data.status !== undefined) existingComplex.status = data.status;
-      if (data.description !== undefined)
-        existingComplex.description = data.description;
-      if (data.banks !== undefined) existingComplex.banks = data.banks;
-      if (data.paymentTerms !== undefined)
-        existingComplex.paymentTerms = data.paymentTerms;
-      if (data.promotions !== undefined)
-        existingComplex.promotions = data.promotions;
-      if (data.specialOffers !== undefined)
-        existingComplex.specialOffers = data.specialOffers;
-      if (data.materialsLink !== undefined)
-        existingComplex.materialsLink = data.materialsLink;
-      if (data.isActive !== undefined) existingComplex.isActive = data.isActive;
-
-      // Только admin может менять компанию
-      if (currentUser?.role === "admin" && data.companyId !== undefined) {
-        existingComplex.companyId = data.companyId;
-      }
-
-      if (data.name && data.name !== existingComplex.name) {
-        const { generateSlug } = await import("../../utils/slugify");
-        existingComplex.slug = generateSlug(data.name);
-      }
-
-      existingComplex.updatedById = currentUser?.id;
-
-      await complexRepository.save(existingComplex);
+      // 🔥 ОБНОВЛЯЕМ ЖК ЧЕРЕЗ СЕРВИС
+      const updated = await complexService.updateComplex(
+        id,
+        data,
+        currentUser.id,
+        currentUser.firstName,
+        currentUser.lastName,
+      );
 
       // 🔥 ОБНОВЛЯЕМ ТИПЫ КВАРТИР (если переданы)
       if (data.apartmentTypes && data.apartmentTypes.length > 0) {
-        // Удаляем старые типы
         await apartmentTypeRepository.delete({ complexId: id });
-
-        // Создаем новые типы
         for (const at of data.apartmentTypes) {
           const apartmentType = apartmentTypeRepository.create({
             type: at.type,
@@ -258,12 +213,10 @@ export class ComplexController extends BaseController {
         }
       }
 
-      const updated = await complexRepository.findOne({
-        where: { id },
-        relations: ["apartmentTypes", "company"],
-      });
+      // Возвращаем обновленный ЖК с отношениями
+      const result = await complexService.getComplexById(id);
 
-      res.json({ success: true, data: updated });
+      res.json({ success: true, data: result });
     } catch (error) {
       this.handleError(res, error, "Failed to update complex");
     }
@@ -277,10 +230,7 @@ export class ComplexController extends BaseController {
       const { id } = req.params;
       const currentUser = req.user;
 
-      const existingComplex = await complexRepository.findOne({
-        where: { id },
-        relations: ["apartmentTypes"],
-      });
+      const existingComplex = await complexService.getComplexById(id);
 
       if (!existingComplex) {
         return this.handleNotFound(res, "Complex");
@@ -301,7 +251,7 @@ export class ComplexController extends BaseController {
         });
       }
 
-      // Удаляем типы квартир
+      // 🔥 УДАЛЯЕМ ТИПЫ КВАРТИР
       if (
         existingComplex.apartmentTypes &&
         existingComplex.apartmentTypes.length > 0
@@ -309,7 +259,18 @@ export class ComplexController extends BaseController {
         await apartmentTypeRepository.delete({ complexId: id });
       }
 
-      await complexRepository.delete(id);
+      // 🔥 УДАЛЯЕМ ЖК ЧЕРЕЗ СЕРВИС
+      const result = await complexService.deleteComplex(
+        id,
+        currentUser.id,
+        currentUser.firstName,
+        currentUser.lastName,
+      );
+
+      if (!result) {
+        return this.handleNotFound(res, "Complex");
+      }
+
       res.json({ success: true, message: "Complex deleted successfully" });
     } catch (error) {
       this.handleError(res, error, "Failed to delete complex");
@@ -320,7 +281,9 @@ export class ComplexController extends BaseController {
   // 🔥 УПРАВЛЕНИЕ УСЛОВИЯМИ ОПЛАТЫ
   // ============================================================
 
-  // Добавить условие оплаты
+  /**
+   * Добавить условие оплаты
+   */
   addPaymentTerm = async (req: AuthRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -345,6 +308,8 @@ export class ComplexController extends BaseController {
         id,
         term.trim(),
         user.id,
+        user.firstName,
+        user.lastName,
       );
 
       if (!complex) {
@@ -368,7 +333,9 @@ export class ComplexController extends BaseController {
     }
   };
 
-  // Удалить условие оплаты
+  /**
+   * Удалить условие оплаты
+   */
   removePaymentTerm = async (req: AuthRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -393,6 +360,8 @@ export class ComplexController extends BaseController {
         id,
         term.trim(),
         user.id,
+        user.firstName,
+        user.lastName,
       );
 
       if (!complex) {
@@ -416,7 +385,9 @@ export class ComplexController extends BaseController {
     }
   };
 
-  // Обновить все условия оплаты
+  /**
+   * Обновить все условия оплаты (массовое обновление)
+   */
   updatePaymentTerms = async (req: AuthRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -441,6 +412,8 @@ export class ComplexController extends BaseController {
         id,
         terms,
         user.id,
+        user.firstName,
+        user.lastName,
       );
 
       if (!complex) {

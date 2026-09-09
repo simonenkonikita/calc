@@ -1,4 +1,5 @@
 // backend/src/controllers/admin/offer.controller.ts
+
 import { Request, Response } from "express";
 import { OfferService } from "../../services/OfferService";
 import { CreateOfferDTO, UpdateOfferDTO } from "../../dtos/OfferDto";
@@ -18,14 +19,11 @@ export class OfferController extends BaseController {
     try {
       const user = req.user;
 
-      // 🔥 ЯВНО УКАЗЫВАЕМ ТИП
       let offers: Offer[] = [];
 
       if (user?.role === "admin") {
-        // Админ видит все
         offers = await offerService.getAllOffersAdmin();
       } else if (user?.role === "developer_admin" && user.companyId) {
-        // Developer Admin видит только свои офферы
         offers = await offerRepository.find({
           where: { companyId: user.companyId, isActive: true },
           relations: [
@@ -38,7 +36,6 @@ export class OfferController extends BaseController {
           order: { createdAt: "DESC" },
         });
       } else if (user?.role === "developer_manager" && user.companyId) {
-        // Manager видит только свои офферы (только чтение)
         offers = await offerRepository.find({
           where: { companyId: user.companyId, isActive: true },
           relations: [
@@ -51,7 +48,6 @@ export class OfferController extends BaseController {
           order: { createdAt: "DESC" },
         });
       }
-      // else offers уже пустой массив
 
       res.json({
         success: true,
@@ -70,7 +66,6 @@ export class OfferController extends BaseController {
       const data: CreateOfferDTO = req.body;
       const currentUser = req.user;
 
-      // Проверяем права
       if (
         !currentUser ||
         (currentUser.role !== "admin" && currentUser.role !== "developer_admin")
@@ -81,7 +76,6 @@ export class OfferController extends BaseController {
         });
       }
 
-      // Если developer_admin, привязываем к его компании
       if (currentUser.role === "developer_admin") {
         if (!currentUser.companyId) {
           return res.status(400).json({
@@ -89,11 +83,16 @@ export class OfferController extends BaseController {
             error: "У вас нет компании",
           });
         }
-        // Передаем companyId в сервис
         data.companyId = currentUser.companyId;
       }
 
-      const offer = await offerService.createOffer(data, currentUser.id);
+      // 🔥 ВЫЗЫВАЕМ СЕРВИС С ПЕРЕДАЧЕЙ ДАННЫХ ПОЛЬЗОВАТЕЛЯ
+      const offer = await offerService.createOffer(
+        data,
+        currentUser.id,
+        currentUser.firstName,
+        currentUser.lastName,
+      );
 
       res.status(201).json({
         success: true,
@@ -113,7 +112,6 @@ export class OfferController extends BaseController {
       const data: UpdateOfferDTO = { id, ...req.body };
       const currentUser = req.user;
 
-      // Проверяем существование
       const existingOffer = await offerRepository.findOne({
         where: { id },
         relations: ["company"],
@@ -123,7 +121,6 @@ export class OfferController extends BaseController {
         return this.handleNotFound(res, "Offer");
       }
 
-      // Проверяем права
       if (currentUser?.role === "developer_admin") {
         if (existingOffer.companyId !== currentUser.companyId) {
           return res.status(403).json({
@@ -139,7 +136,14 @@ export class OfferController extends BaseController {
         });
       }
 
-      const offer = await offerService.updateOffer(id, data);
+      // 🔥 ВЫЗЫВАЕМ СЕРВИС С ПЕРЕДАЧЕЙ ДАННЫХ ПОЛЬЗОВАТЕЛЯ
+      const offer = await offerService.updateOffer(
+        id,
+        data,
+        currentUser.id,
+        currentUser.firstName,
+        currentUser.lastName,
+      );
 
       res.json({
         success: true,
@@ -167,7 +171,6 @@ export class OfferController extends BaseController {
         return this.handleNotFound(res, "Offer");
       }
 
-      // Проверяем права
       if (currentUser?.role === "developer_admin") {
         if (existingOffer.companyId !== currentUser.companyId) {
           return res.status(403).json({
@@ -182,7 +185,14 @@ export class OfferController extends BaseController {
         });
       }
 
-      await offerService.deleteOffer(id);
+      // 🔥 ВЫЗЫВАЕМ СЕРВИС С ПЕРЕДАЧЕЙ ДАННЫХ ПОЛЬЗОВАТЕЛЯ
+      await offerService.deleteOffer(
+        id,
+        currentUser.id,
+        currentUser.firstName,
+        currentUser.lastName,
+      );
+
       res.json({
         success: true,
         message: "Offer deleted successfully",
@@ -260,7 +270,6 @@ export class OfferController extends BaseController {
         return this.handleNotFound(res, "Offer");
       }
 
-      // Проверяем права доступа
       if (currentUser?.role !== "admin") {
         if (offer.companyId !== currentUser?.companyId) {
           return res.status(403).json({
@@ -339,7 +348,6 @@ export class OfferController extends BaseController {
       const { id } = req.params;
       const currentUser = req.user;
 
-      // Проверяем права на копирование
       if (
         !currentUser ||
         (currentUser.role !== "admin" && currentUser.role !== "developer_admin")
@@ -351,7 +359,6 @@ export class OfferController extends BaseController {
         });
       }
 
-      // Проверяем существование
       const existingOffer = await offerRepository.findOne({
         where: { id },
         relations: ["company"],
@@ -361,7 +368,6 @@ export class OfferController extends BaseController {
         return this.handleNotFound(res, "Offer");
       }
 
-      // Проверяем права на копирование
       if (currentUser.role === "developer_admin") {
         if (existingOffer.companyId !== currentUser.companyId) {
           return res.status(403).json({
@@ -392,9 +398,7 @@ export class OfferController extends BaseController {
 
       let offers: Offer[] = [];
 
-      // Если не админ, добавляем фильтр по компании
       if (user?.role !== "admin" && user?.companyId) {
-        // Добавляем companyId в фильтры
         const filterData = {
           bankId: filters.bankId as string,
           programId: filters.programId as string,
@@ -414,7 +418,7 @@ export class OfferController extends BaseController {
             ? parseFloat(filters.maxPVPercent as string)
             : undefined,
           search: filters.search as string,
-          companyId: user.companyId, // 🔥 Добавляем фильтр по компании
+          companyId: user.companyId,
         };
         offers = await offerService.getOffersFiltered(filterData);
       } else {

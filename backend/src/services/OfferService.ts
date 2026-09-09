@@ -14,6 +14,7 @@ import {
   OfferListDTO,
 } from "../dtos/OfferDto";
 import { In, ILike } from "typeorm";
+import { NotificationService } from "./NotificationService";
 
 export class OfferService {
   private offerRepository = AppDataSource.getRepository(Offer);
@@ -21,6 +22,7 @@ export class OfferService {
   private programRepository = AppDataSource.getRepository(Program);
   private rateRepository = AppDataSource.getRepository(DynamicRate);
   private subsidyRepository = AppDataSource.getRepository(DynamicSubsidy);
+  private notificationService = new NotificationService();
 
   /**
    * Получить все офферы (для админки)
@@ -199,7 +201,12 @@ export class OfferService {
   /**
    * Создать оффер
    */
-  async createOffer(data: CreateOfferDTO, userId?: string): Promise<Offer> {
+  async createOffer(
+    data: CreateOfferDTO,
+    userId?: string,
+    userFirstName?: string,
+    userLastName?: string,
+  ): Promise<Offer> {
     // Проверяем банк
     const bank = await this.bankRepository.findOne({
       where: { id: data.bankId },
@@ -248,13 +255,39 @@ export class OfferService {
       createdById: userId,
     });
 
-    return await this.offerRepository.save(offer);
+    const savedOffer = await this.offerRepository.save(offer);
+
+    // 🔥 УВЕДОМЛЕНИЕ О СОЗДАНИИ
+    if (savedOffer.companyId) {
+      await this.notificationService.notifyOfferCreated(
+        {
+          id: savedOffer.id,
+          companyId: savedOffer.companyId,
+          bankName: bank.name,
+          programName: program.label || program.type,
+          rate: savedOffer.rate,
+        },
+        {
+          id: userId || "system",
+          firstName: userFirstName || "Система",
+          lastName: userLastName || "",
+        },
+      );
+    }
+
+    return savedOffer;
   }
 
   /**
    * Обновить оффер
    */
-  async updateOffer(id: string, data: UpdateOfferDTO): Promise<Offer> {
+  async updateOffer(
+    id: string,
+    data: UpdateOfferDTO,
+    userId?: string,
+    userFirstName?: string,
+    userLastName?: string,
+  ): Promise<Offer> {
     const offer = await this.offerRepository.findOne({
       where: { id },
       relations: ["bank", "programEntity"],
@@ -262,6 +295,63 @@ export class OfferService {
 
     if (!offer) {
       throw new Error(`Offer with id ${id} not found`);
+    }
+
+    // 🔥 ОТСЛЕЖИВАЕМ ИЗМЕНЕНИЯ
+    const changes: string[] = [];
+    const oldBankName = offer.bank?.name;
+    const oldProgramName =
+      offer.programEntity?.label || offer.programEntity?.type;
+
+    // Проверяем изменения
+    if (data.rate !== undefined && data.rate !== offer.rate) {
+      changes.push(`ставка с ${offer.rate}% на ${data.rate}%`);
+    }
+    if (
+      data.subsidyPercent !== undefined &&
+      data.subsidyPercent !== offer.subsidyPercent
+    ) {
+      changes.push(
+        `субсидия с ${offer.subsidyPercent}% на ${data.subsidyPercent}%`,
+      );
+    }
+    if (
+      data.minPVPercent !== undefined &&
+      data.minPVPercent !== offer.minPVPercent
+    ) {
+      changes.push(`мин. ПВ с ${offer.minPVPercent}% на ${data.minPVPercent}%`);
+    }
+    if (data.shortRate !== undefined && data.shortRate !== offer.shortRate) {
+      changes.push(
+        `короткая ставка с ${offer.shortRate || "—"}% на ${data.shortRate}%`,
+      );
+    }
+    if (data.twoRate !== undefined && data.twoRate !== offer.twoRate) {
+      changes.push(
+        `ставка по 2-м договорам с ${offer.twoRate || "—"}% на ${data.twoRate}%`,
+      );
+    }
+    if (data.isActive !== undefined && data.isActive !== offer.isActive) {
+      changes.push(data.isActive ? "оффер активирован" : "оффер деактивирован");
+    }
+    if (
+      data.isTwoContracts !== undefined &&
+      data.isTwoContracts !== offer.isTwoContracts
+    ) {
+      changes.push(
+        `два договора: ${data.isTwoContracts ? "включено" : "выключено"}`,
+      );
+    }
+    if (
+      data.isExcessLimit !== undefined &&
+      data.isExcessLimit !== offer.isExcessLimit
+    ) {
+      changes.push(
+        `превышение лимита: ${data.isExcessLimit ? "включено" : "выключено"}`,
+      );
+    }
+    if (data.isTranche !== undefined && data.isTranche !== offer.isTranche) {
+      changes.push(`траншевый: ${data.isTranche ? "включено" : "выключено"}`);
     }
 
     // Обновляем связи
@@ -272,6 +362,9 @@ export class OfferService {
       if (bank) {
         offer.bank = bank;
         offer.bankId = data.bankId;
+        if (bank.name !== oldBankName) {
+          changes.push(`банк с "${oldBankName}" на "${bank.name}"`);
+        }
       }
     }
 
@@ -282,40 +375,98 @@ export class OfferService {
       if (program) {
         offer.programEntity = program;
         offer.programId = data.programId;
+        const newProgramName = program.label || program.type;
+        if (newProgramName !== oldProgramName) {
+          changes.push(
+            `программа с "${oldProgramName}" на "${newProgramName}"`,
+          );
+        }
       }
     }
 
-    // 🔥 Создаем объект для обновления без id
+    // Обновляем остальные поля
     const { id: _, ...updateData } = data as any;
-
-    // Обновляем все поля из updateData
     for (const key of Object.keys(updateData)) {
       if (
         updateData[key] !== undefined &&
         key !== "bankId" &&
         key !== "programId"
       ) {
-        // 🔥 Преобразуем null в undefined для полей, которые могут быть null
         const value = updateData[key] === null ? undefined : updateData[key];
         (offer as any)[key] = value;
       }
     }
 
-    // Убеждаемся, что complexes - массив
     if (data.complexes !== undefined) {
       offer.complexes = data.complexes || [];
     }
 
-    return await this.offerRepository.save(offer);
+    const updatedOffer = await this.offerRepository.save(offer);
+
+    // 🔥 УВЕДОМЛЕНИЕ ОБ ИЗМЕНЕНИЯХ
+    if (changes.length > 0 && updatedOffer.companyId) {
+      await this.notificationService.notifyOfferChanges(
+        {
+          id: updatedOffer.id,
+          companyId: updatedOffer.companyId,
+          bankName: updatedOffer.bank?.name,
+          programName:
+            updatedOffer.programEntity?.label ||
+            updatedOffer.programEntity?.type,
+        },
+        changes,
+        {
+          id: userId || "system",
+          firstName: userFirstName || "Система",
+          lastName: userLastName || "",
+        },
+      );
+    }
+
+    return updatedOffer;
   }
 
   /**
    * Мягкое удаление оффера
    */
-  async deleteOffer(id: string): Promise<void> {
+  async deleteOffer(
+    id: string,
+    userId?: string,
+    userFirstName?: string,
+    userLastName?: string,
+  ): Promise<void> {
+    const offer = await this.offerRepository.findOne({
+      where: { id },
+      relations: ["bank"],
+    });
+
+    if (!offer) {
+      throw new Error(`Offer with id ${id} not found`);
+    }
+
+    const bankName = offer.bank?.name;
+    const companyId = offer.companyId;
+
     const result = await this.offerRepository.update(id, { isActive: false });
+
     if (result.affected === 0) {
       throw new Error(`Offer with id ${id} not found`);
+    }
+
+    // 🔥 УВЕДОМЛЕНИЕ ОБ УДАЛЕНИИ
+    if (companyId) {
+      await this.notificationService.notifyOfferDeleted(
+        {
+          id,
+          companyId,
+          bankName: bankName || undefined,
+        },
+        {
+          id: userId || "system",
+          firstName: userFirstName || "Система",
+          lastName: userLastName || "",
+        },
+      );
     }
   }
 
@@ -349,7 +500,6 @@ export class OfferService {
       throw new Error(`Offer with id ${id} not found`);
     }
 
-    // Создаем копию
     const { id: _, createdAt, updatedAt, ...copyData } = offer;
 
     const copy = this.offerRepository.create({
@@ -386,13 +536,12 @@ export class OfferService {
     bankId?: string;
     programId?: string;
     complexName?: string;
-    companyId?: string; // 🔥 ДОБАВЛЯЕМ
+    companyId?: string;
   }): Promise<{ minRate: number; maxRate: number }> {
     const query = this.offerRepository
       .createQueryBuilder("offer")
       .where("offer.isActive = true");
 
-    // 🔥 ДОБАВЛЯЕМ ФИЛЬТР ПО КОМПАНИИ
     if (filters?.companyId) {
       query.andWhere("offer.companyId = :companyId", {
         companyId: filters.companyId,
@@ -486,7 +635,6 @@ export class OfferService {
             updatedAt: offer.programEntity.updatedAt,
           }
         : (null as any),
-      // 🔥 Исправленный маппинг динамических ставок (только новые поля)
       dynamicRates:
         offer.dynamicRates?.map((rate) => ({
           id: rate.id,
@@ -496,7 +644,6 @@ export class OfferService {
           description: rate.description || null,
           isActive: rate.isActive,
         })) || [],
-      // 🔥 Исправленный маппинг динамических субсидий (только новые поля)
       dynamicSubsidies:
         offer.dynamicSubsidies?.map((subsidy) => ({
           id: subsidy.id,

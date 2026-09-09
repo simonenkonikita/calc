@@ -1,12 +1,11 @@
 // backend/src/controllers/admin/bank.controller.ts
 
 import { Request, Response } from "express";
-import { AppDataSource } from "../../data-source";
-import { Bank } from "../../entities/Bank";
-import { CreateBankDTO, UpdateBankDTO } from "../../dtos/BankDto";
 import { BaseController } from "./base.controller";
+import { AuthRequest } from "../../types/auth.types";
+import { BankService } from "../../services/BankService";
 
-const bankRepository = AppDataSource.getRepository(Bank);
+const bankService = new BankService();
 
 export class BankController extends BaseController {
   /**
@@ -14,9 +13,7 @@ export class BankController extends BaseController {
    */
   async getAll(req: Request, res: Response) {
     try {
-      const banks = await bankRepository.find({
-        order: { displayOrder: "ASC" },
-      });
+      const banks = await bankService.getAllBanks();
       res.json(banks);
     } catch (error) {
       this.handleError(res, error, "Failed to get banks");
@@ -29,7 +26,7 @@ export class BankController extends BaseController {
   async getOne(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const bank = await bankRepository.findOne({ where: { id } });
+      const bank = await bankService.getBankById(id);
 
       if (!bank) {
         return this.handleNotFound(res, "Bank");
@@ -44,13 +41,19 @@ export class BankController extends BaseController {
   /**
    * Создать банк
    */
-  async create(req: Request, res: Response) {
+  async create(req: AuthRequest, res: Response) {
     try {
-      const data: CreateBankDTO = req.body;
+      const data = req.body;
+      const currentUser = req.user;
+
       console.log("📝 Creating bank with data:", data);
 
-      const bank = bankRepository.create(data);
-      await bankRepository.save(bank);
+      const bank = await bankService.createBank(
+        data,
+        currentUser?.id,
+        currentUser?.firstName,
+        currentUser?.lastName,
+      );
 
       console.log("✅ Bank created:", bank);
       res.status(201).json(bank);
@@ -62,38 +65,28 @@ export class BankController extends BaseController {
   /**
    * Обновить банк
    */
-  async update(req: Request, res: Response) {
+  async update(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
-      const data: UpdateBankDTO = req.body;
+      const data = req.body;
+      const currentUser = req.user;
+
       console.log(`📝 Updating bank ${id} with data:`, data);
 
-      const existingBank = await bankRepository.findOne({
-        where: { id },
-      });
+      const bank = await bankService.updateBank(
+        id,
+        data,
+        currentUser?.id,
+        currentUser?.firstName,
+        currentUser?.lastName,
+      );
 
-      if (!existingBank) {
+      if (!bank) {
         return this.handleNotFound(res, "Bank");
       }
 
-      // Обновляем только поля из DTO
-      if (data.name !== undefined) existingBank.name = data.name;
-      if (data.baseRate !== undefined) existingBank.baseRate = data.baseRate;
-      if (data.minPVPercent !== undefined)
-        existingBank.minPVPercent = data.minPVPercent;
-      if (data.displayOrder !== undefined)
-        existingBank.displayOrder = data.displayOrder;
-      if (data.isActive !== undefined) existingBank.isActive = data.isActive;
-
-      // Если изменилось имя, обновляем slug
-      if (data.name && data.name !== existingBank.name) {
-        const { generateSlug } = await import("../../utils/slugify");
-        existingBank.slug = generateSlug(data.name);
-      }
-
-      await bankRepository.save(existingBank);
-      console.log("✅ Bank updated:", existingBank);
-      res.json(existingBank);
+      console.log("✅ Bank updated:", bank);
+      res.json(bank);
     } catch (error) {
       this.handleError(res, error, "Failed to update bank");
     }
@@ -102,14 +95,21 @@ export class BankController extends BaseController {
   /**
    * Удалить банк
    */
-  async delete(req: Request, res: Response) {
+  async delete(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
+      const currentUser = req.user;
+
       console.log(`🗑️ Deleting bank ${id}`);
 
-      const result = await bankRepository.delete(id);
+      const result = await bankService.deleteBank(
+        id,
+        currentUser?.id,
+        currentUser?.firstName,
+        currentUser?.lastName,
+      );
 
-      if (result.affected === 0) {
+      if (!result) {
         return this.handleNotFound(res, "Bank");
       }
 

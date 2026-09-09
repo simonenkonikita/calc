@@ -5,11 +5,13 @@ import { Complex } from "../entities/Complex";
 import { ApartmentType } from "../entities/ApartmentType";
 import { ProgramService } from "./ProgramService";
 import { CreateComplexDTO, UpdateComplexDTO } from "../dtos/ComplexDto";
+import { NotificationService } from "./NotificationService";
 
 export class ComplexService {
   private complexRepository = AppDataSource.getRepository(Complex);
   private apartmentTypeRepository = AppDataSource.getRepository(ApartmentType);
   private programService = new ProgramService();
+  private notificationService = new NotificationService();
 
   async getComplexesByCompany(companyId: string): Promise<Complex[]> {
     return this.complexRepository.find({
@@ -73,12 +75,15 @@ export class ComplexService {
   /**
    * Создать ЖК
    */
-  async createComplex(data: CreateComplexDTO): Promise<Complex> {
-    // Генерируем slug из названия
+  async createComplex(
+    data: CreateComplexDTO,
+    userId?: string,
+    userFirstName?: string,
+    userLastName?: string,
+  ): Promise<Complex> {
     const { generateSlug } = await import("../utils/slugify");
     const slug = generateSlug(data.name);
 
-    // Создаем комплекс
     const complex = this.complexRepository.create({
       name: data.name,
       slug: slug,
@@ -91,18 +96,35 @@ export class ComplexService {
       materialsLink: data.materialsLink || "",
       isActive: data.isActive !== undefined ? data.isActive : true,
       companyId: data.companyId,
+      createdById: userId || null, // 🔥 ИСПРАВЛЕНО: null вместо undefined
     });
 
     await this.complexRepository.save(complex);
 
-    // Возвращаем с отношениями
+    if (complex.companyId) {
+      await this.notificationService.notifyComplexCreated(
+        { id: complex.id, name: complex.name, companyId: complex.companyId },
+        {
+          id: userId || "system",
+          firstName: userFirstName || "Система",
+          lastName: userLastName || "",
+        },
+      );
+    }
+
     return this.getComplexById(complex.id) as Promise<Complex>;
   }
 
   /**
    * Обновить ЖК
    */
-  async updateComplex(id: string, data: UpdateComplexDTO): Promise<Complex> {
+  async updateComplex(
+    id: string,
+    data: UpdateComplexDTO,
+    userId?: string,
+    userFirstName?: string,
+    userLastName?: string,
+  ): Promise<Complex> {
     const complex = await this.complexRepository.findOne({
       where: { id },
       relations: ["apartmentTypes"],
@@ -112,7 +134,43 @@ export class ComplexService {
       throw new Error("Complex not found");
     }
 
-    // Обновляем поля
+    const changes: string[] = [];
+
+    if (data.name !== undefined && data.name !== complex.name) {
+      changes.push(`название с "${complex.name}" на "${data.name}"`);
+    }
+    if (data.status !== undefined && data.status !== complex.status) {
+      changes.push(`статус с "${complex.status}" на "${data.status}"`);
+    }
+    if (
+      data.banks !== undefined &&
+      JSON.stringify(data.banks) !== JSON.stringify(complex.banks)
+    ) {
+      changes.push("список банков");
+    }
+    if (
+      data.paymentTerms !== undefined &&
+      JSON.stringify(data.paymentTerms) !== JSON.stringify(complex.paymentTerms)
+    ) {
+      changes.push("условия оплаты");
+    }
+    if (
+      data.promotions !== undefined &&
+      JSON.stringify(data.promotions) !== JSON.stringify(complex.promotions)
+    ) {
+      changes.push("акции");
+    }
+    if (
+      data.specialOffers !== undefined &&
+      JSON.stringify(data.specialOffers) !==
+        JSON.stringify(complex.specialOffers)
+    ) {
+      changes.push("спецпредложения");
+    }
+    if (data.isActive !== undefined && data.isActive !== complex.isActive) {
+      changes.push(data.isActive ? "ЖК активирован" : "ЖК деактивирован");
+    }
+
     if (data.name !== undefined) complex.name = data.name;
     if (data.status !== undefined) complex.status = data.status;
     if (data.description !== undefined) complex.description = data.description;
@@ -127,23 +185,69 @@ export class ComplexService {
     if (data.isActive !== undefined) complex.isActive = data.isActive;
     if (data.companyId !== undefined) complex.companyId = data.companyId;
 
-    // Если изменилось имя, обновляем slug
     if (data.name && data.name !== complex.name) {
       const { generateSlug } = await import("../utils/slugify");
       complex.slug = generateSlug(data.name);
     }
 
+    complex.updatedById = userId || null; // 🔥 ИСПРАВЛЕНО: null вместо undefined
+
     await this.complexRepository.save(complex);
 
-    // Возвращаем обновленный комплекс с отношениями
+    if (changes.length > 0 && complex.companyId) {
+      await this.notificationService.notifyComplexChanges(
+        { id: complex.id, name: complex.name, companyId: complex.companyId },
+        changes,
+        {
+          id: userId || "system",
+          firstName: userFirstName || "Система",
+          lastName: userLastName || "",
+        },
+      );
+    }
+
     return this.getComplexById(id) as Promise<Complex>;
   }
 
   /**
    * Удалить ЖК
    */
-  async deleteComplex(id: string): Promise<boolean> {
+  async deleteComplex(
+    id: string,
+    userId?: string,
+    userFirstName?: string,
+    userLastName?: string,
+  ): Promise<boolean> {
+    const complex = await this.complexRepository.findOne({
+      where: { id },
+      relations: ["company"],
+    });
+
+    if (!complex) {
+      return false;
+    }
+
+    const complexName = complex.name;
+    const companyId = complex.companyId;
+
     const result = await this.complexRepository.delete(id);
+
+    if (companyId && result.affected && result.affected > 0) {
+      await this.notificationService.notify(companyId, {
+        type: "complex_deleted",
+        title: "🗑️ Жилой комплекс удален",
+        message: `ЖК "${complexName}" был удален`,
+        metadata: {
+          complexId: id,
+          complexName: complexName,
+          userId: userId || "system",
+          userName:
+            `${userFirstName || "Система"} ${userLastName || ""}`.trim(),
+        },
+        isImportant: true,
+      });
+    }
+
     return (result.affected || 0) > 0;
   }
 
@@ -215,7 +319,6 @@ export class ComplexService {
       order: { name: "ASC" },
     });
 
-    // Фильтруем по банкам
     const filtered = complexes.filter(
       (complex) => complex.banks && complex.banks.includes(bankName),
     );
@@ -229,14 +332,15 @@ export class ComplexService {
   }
 
   // ============================================================
-  // 🔥 УПРАВЛЕНИЕ УСЛОВИЯМИ ОПЛАТЫ
+  // 🔥 УПРАВЛЕНИЕ УСЛОВИЯМИ ОПЛАТЫ С УВЕДОМЛЕНИЯМИ
   // ============================================================
 
-  // Добавить условие оплаты
   async addPaymentTerm(
     complexId: string,
     term: string,
     userId: string,
+    userFirstName?: string,
+    userLastName?: string,
   ): Promise<Complex | null> {
     const complex = await this.getComplexById(complexId);
     if (!complex) return null;
@@ -245,46 +349,110 @@ export class ComplexService {
       complex.paymentTerms = [];
     }
 
-    // Проверяем, что такое условие еще не добавлено
     if (!complex.paymentTerms.includes(term)) {
       complex.paymentTerms.push(term);
-      complex.updatedById = userId;
+      complex.updatedById = userId || null; // 🔥 ИСПРАВЛЕНО
       await this.complexRepository.save(complex);
+
+      if (complex.companyId) {
+        await this.notificationService.notifyPaymentTermChange(
+          { id: complex.id, name: complex.name, companyId: complex.companyId },
+          term,
+          "added",
+          {
+            id: userId || "system",
+            firstName: userFirstName || "Система",
+            lastName: userLastName || "",
+          },
+        );
+      }
     }
 
     return complex;
   }
 
-  // Удалить условие оплаты
   async removePaymentTerm(
     complexId: string,
     term: string,
     userId: string,
+    userFirstName?: string,
+    userLastName?: string,
   ): Promise<Complex | null> {
     const complex = await this.getComplexById(complexId);
     if (!complex) return null;
 
     if (complex.paymentTerms) {
       complex.paymentTerms = complex.paymentTerms.filter((t) => t !== term);
-      complex.updatedById = userId;
+      complex.updatedById = userId || null; // 🔥 ИСПРАВЛЕНО
       await this.complexRepository.save(complex);
+
+      if (complex.companyId) {
+        await this.notificationService.notifyPaymentTermChange(
+          { id: complex.id, name: complex.name, companyId: complex.companyId },
+          term,
+          "removed",
+          {
+            id: userId || "system",
+            firstName: userFirstName || "Система",
+            lastName: userLastName || "",
+          },
+        );
+      }
     }
 
     return complex;
   }
 
-  // Обновить все условия оплаты (массовое обновление)
   async updatePaymentTerms(
     complexId: string,
     terms: string[],
     userId: string,
+    userFirstName?: string,
+    userLastName?: string,
   ): Promise<Complex | null> {
     const complex = await this.getComplexById(complexId);
     if (!complex) return null;
 
-    complex.paymentTerms = terms;
-    complex.updatedById = userId;
+    const oldTerms = complex.paymentTerms || [];
+    const newTerms = terms || [];
+
+    complex.paymentTerms = newTerms;
+    complex.updatedById = userId || null; // 🔥 ИСПРАВЛЕНО
     await this.complexRepository.save(complex);
+
+    if (
+      JSON.stringify(oldTerms) !== JSON.stringify(newTerms) &&
+      complex.companyId
+    ) {
+      const added = newTerms.filter((t) => !oldTerms.includes(t));
+      const removed = oldTerms.filter((t) => !newTerms.includes(t));
+      const changes: string[] = [];
+
+      if (added.length > 0) {
+        changes.push(`добавлены: ${added.join(", ")}`);
+      }
+      if (removed.length > 0) {
+        changes.push(`удалены: ${removed.join(", ")}`);
+      }
+
+      if (changes.length > 0) {
+        await this.notificationService.notify(complex.companyId, {
+          type: "complex_updated",
+          title: "📝 Изменение условий оплаты",
+          message: `В ЖК "${complex.name}" обновлены условия оплаты: ${changes.join("; ")}`,
+          metadata: {
+            complexId: complex.id,
+            complexName: complex.name,
+            changes,
+            added,
+            removed,
+            userId: userId || "system",
+            userName:
+              `${userFirstName || "Система"} ${userLastName || ""}`.trim(),
+          },
+        });
+      }
+    }
 
     return complex;
   }
