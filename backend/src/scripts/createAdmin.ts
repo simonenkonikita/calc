@@ -31,8 +31,9 @@ async function createAdmin() {
       firstName: "Администратор",
       lastName: "Системы",
       role: "admin",
-      isVerified: true,
       isActive: true,
+      isEmailVerified: true, 
+      emailVerifiedAt: new Date(),
     });
 
     await userRepository.save(admin);

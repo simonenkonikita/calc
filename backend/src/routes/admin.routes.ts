@@ -20,6 +20,7 @@ import {
   adminOrDeveloperAdmin,
 } from "../middleware/auth.middleware";
 import { companyController } from "../controllers/admin/company.controller";
+import { notificationMiddleware } from "../middleware/notification.middleware"; // 🔥 ДОБАВЛЯЕМ
 
 const router = Router();
 
@@ -63,31 +64,34 @@ router.delete(
 router.get(
   "/banks",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   bankController.getAll.bind(bankController),
 );
 router.get(
   "/banks/:id",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   bankController.getOne.bind(bankController),
 );
 router.post(
   "/banks",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
+  notificationMiddleware("bank", "create"), // 🔥 ДОБАВЛЯЕМ
   bankController.create.bind(bankController),
 );
 router.put(
   "/banks/:id",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
+  notificationMiddleware("bank", "update"), // 🔥 ДОБАВЛЯЕМ
   bankController.update.bind(bankController),
 );
 router.delete(
   "/banks/:id",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
+  notificationMiddleware("bank", "delete"), // 🔥 ДОБАВЛЯЕМ
   bankController.delete.bind(bankController),
 );
 
@@ -97,31 +101,34 @@ router.delete(
 router.get(
   "/complexes",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   complexController.getAll.bind(complexController),
 );
 router.get(
   "/complexes/:id",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   complexController.getOne.bind(complexController),
 );
 router.post(
   "/complexes",
   authMiddleware,
-  checkWriteAccess, // developer_admin может создавать ЖК
+  checkWriteAccess,
+  notificationMiddleware("complex", "create"), // 🔥 ДОБАВЛЯЕМ
   complexController.create.bind(complexController),
 );
 router.put(
   "/complexes/:id",
   authMiddleware,
-  checkWriteAccess, // developer_admin может редактировать ЖК
+  checkWriteAccess,
+  notificationMiddleware("complex", "update"), // 🔥 ДОБАВЛЯЕМ
   complexController.update.bind(complexController),
 );
 router.delete(
   "/complexes/:id",
   authMiddleware,
-  checkWriteAccess, // developer_admin может удалять ЖК
+  checkWriteAccess,
+  notificationMiddleware("complex", "delete"), // 🔥 ДОБАВЛЯЕМ
   complexController.delete.bind(complexController),
 );
 
@@ -131,7 +138,7 @@ router.delete(
 router.get(
   "/complexes/:complexId/apartment-types",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   apartmentTypeController.getByComplex.bind(apartmentTypeController),
 );
 router.post(
@@ -159,25 +166,25 @@ router.delete(
 router.get(
   "/programs",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО - застройщик может видеть программы
+  adminOrDeveloperAdmin,
   programController.getAll.bind(programController),
 );
 router.post(
   "/programs",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
   programController.create.bind(programController),
 );
 router.put(
   "/programs/:id",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
   programController.update.bind(programController),
 );
 router.delete(
   "/programs/:id",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
   programController.delete.bind(programController),
 );
 
@@ -187,61 +194,64 @@ router.delete(
 router.get(
   "/offers",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   offerController.getAll.bind(offerController),
 );
 router.get(
   "/offers/active",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   offerController.getActive.bind(offerController),
 );
 router.get(
   "/offers/filter",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   offerController.getFiltered.bind(offerController),
 );
 router.get(
   "/offers/rate-range",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   offerController.getRateRange.bind(offerController),
 );
 router.get(
   "/offers/:id",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   offerController.getOne.bind(offerController),
 );
 router.post(
   "/offers",
   authMiddleware,
   checkWriteAccess,
+  notificationMiddleware("offer", "create"), // 🔥 ДОБАВЛЯЕМ
   offerController.create.bind(offerController),
 );
 router.put(
   "/offers/:id",
   authMiddleware,
   checkWriteAccess,
+  notificationMiddleware("offer", "update"), // 🔥 ДОБАВЛЯЕМ
   offerController.update.bind(offerController),
 );
 router.delete(
   "/offers/:id",
   authMiddleware,
   checkWriteAccess,
+  notificationMiddleware("offer", "delete"), // 🔥 ДОБАВЛЯЕМ
   offerController.delete.bind(offerController),
 );
 router.post(
   "/offers/:id/restore",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
   offerController.restore.bind(offerController),
 );
 router.delete(
   "/offers/:id/hard",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
   offerController.hardDelete.bind(offerController),
 );
 router.post(
@@ -257,19 +267,19 @@ router.post(
 router.get(
   "/dynamic-rates",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   rateController.getAll.bind(rateController),
 );
 router.get(
   "/dynamic-rates/:id",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   rateController.getOne.bind(rateController),
 );
 router.get(
   "/offers/:offerId/dynamic-rates",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   rateController.getByOffer.bind(rateController),
 );
 router.post(
@@ -293,7 +303,7 @@ router.delete(
 router.delete(
   "/dynamic-rates/:id/hard",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
   rateController.hardDelete.bind(rateController),
 );
 router.put(
@@ -309,19 +319,19 @@ router.put(
 router.get(
   "/dynamic-subsidies",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   subsidyController.getAll.bind(subsidyController),
 );
 router.get(
   "/dynamic-subsidies/:id",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   subsidyController.getOne.bind(subsidyController),
 );
 router.get(
   "/offers/:offerId/dynamic-subsidies",
   authMiddleware,
-  adminOrDeveloperAdmin, // 🔥 ИЗМЕНЕНО
+  adminOrDeveloperAdmin,
   subsidyController.getByOffer.bind(subsidyController),
 );
 router.post(
@@ -345,7 +355,7 @@ router.delete(
 router.delete(
   "/dynamic-subsidies/:id/hard",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
   subsidyController.hardDelete.bind(subsidyController),
 );
 router.put(
@@ -361,55 +371,61 @@ router.post(
   subsidyController.copyFromOffer.bind(subsidyController),
 );
 
+// ============================================================
 // 🔥 УПРАВЛЕНИЕ УСЛОВИЯМИ ОПЛАТЫ
+// ============================================================
 router.post(
-  "/:id/payment-terms",
+  "/complexes/:id/payment-terms", // 🔥 ИСПРАВЛЕН ПУТЬ (было /:id/payment-terms)
+  authMiddleware,                   // 🔥 ДОБАВЛЕН
   adminOrDeveloperAdmin,
   complexController.addPaymentTerm.bind(complexController),
 );
 
 router.delete(
-  "/:id/payment-terms",
+  "/complexes/:id/payment-terms", // 🔥 ИСПРАВЛЕН ПУТЬ
+  authMiddleware,
   adminOrDeveloperAdmin,
   complexController.removePaymentTerm.bind(complexController),
 );
 
 router.put(
-  "/:id/payment-terms",
+  "/complexes/:id/payment-terms", // 🔥 ИСПРАВЛЕН ПУТЬ
+  authMiddleware,
   adminOrDeveloperAdmin,
   complexController.updatePaymentTerms.bind(complexController),
 );
+
 // ============================================================
 // 🔥 КОНФИГУРАЦИЯ - ТОЛЬКО ДЛЯ АДМИНА
 // ============================================================
 router.get(
   "/config",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
   configController.get.bind(configController),
 );
 router.get(
   "/config/check",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
   configController.check.bind(configController),
 );
 router.post(
   "/config",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
   configController.create.bind(configController),
 );
 router.put(
   "/config",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
   configController.update.bind(configController),
 );
 router.patch(
   "/config/:field",
   authMiddleware,
-  adminOnly, // 🔥 ТОЛЬКО АДМИН
+  adminOnly,
   configController.updateField.bind(configController),
 );
 

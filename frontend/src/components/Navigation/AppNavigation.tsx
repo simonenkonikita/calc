@@ -6,6 +6,7 @@ import { AuthPanel } from "../Auth/AuthPanel";
 import "./AppNavigation.css";
 import { useAuthExtended } from "../../hooks/ui/useAuth";
 import ProfileDropdown from "../Auth/ProfileDropdown/ProfileDropdown";
+import NotificationBell from "../NotificationBell/NotificationBell";
 
 const AppNavigation = () => {
   const location = useLocation();
@@ -136,6 +137,7 @@ const AppNavigation = () => {
           <div className="nav-actions">
             {isAuthenticated ? (
               <div className="nav-user">
+                <NotificationBell />
                 <button
                   ref={buttonRef}
                   onClick={toggleDropdown}

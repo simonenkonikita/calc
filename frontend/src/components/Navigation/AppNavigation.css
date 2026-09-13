@@ -125,6 +125,7 @@
 .nav-user {
   position: relative;
   display: flex;
+  gap: 25px;
   align-items: center;
 }
 

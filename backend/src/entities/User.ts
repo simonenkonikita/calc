@@ -12,6 +12,7 @@ import {
 } from "typeorm";
 import { Company } from "./Company";
 import { Token } from "./Token";
+import { Notification } from "./Notification"; // 🔥 ДОБАВЛЯЕМ ИМПОРТ
 
 export type UserRole =
   | "admin"
@@ -74,6 +75,13 @@ export class User {
     onDelete: "CASCADE",
   })
   tokens: Token[];
+
+  // 🔥 УВЕДОМЛЕНИЯ - CASCADE (удаляются с пользователем)
+  @OneToMany(() => Notification, (notification) => notification.user, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
+  notifications: Notification[];
 
   // ✅ КОМПАНИЯ - SET NULL (компания остается)
   @Column({ nullable: true })

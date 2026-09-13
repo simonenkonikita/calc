@@ -19,6 +19,19 @@ export const authMiddleware = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  console.log(`\n🔐 ====================================`);
+  console.log(`🔐 [auth] ${req.method} ${req.originalUrl}`);
+  console.log(`🔐 [auth] Origin:`, req.headers.origin);
+  console.log(
+    `🔐 [auth] Cookie header:`,
+    req.headers.cookie?.slice(0, 50) || "❌",
+  );
+  console.log(`🔐 [auth] Cookies:`, Object.keys(req.cookies || {}));
+  console.log(
+    `🔐 [auth] Authorization:`,
+    req.headers.authorization?.slice(0, 30) || "❌",
+  );
+  console.log(`🔐 ====================================\n`);
   try {
     let token = req.cookies?.token;
 
@@ -27,6 +40,11 @@ export const authMiddleware = async (
       if (authHeader && authHeader.startsWith("Bearer ")) {
         token = authHeader.split(" ")[1];
       }
+    }
+
+    // 🔥 Токен из query-параметра (для SSE)
+    if (!token && req.query.token) {
+      token = req.query.token as string;
     }
 
     if (!token) {

@@ -1,11 +1,13 @@
 // server/src/index.ts
+
+import dotenv from "dotenv";
+dotenv.config();
+
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
-import dotenv from "dotenv";
-
-dotenv.config();
+import cookieParser from "cookie-parser"; // 🔥 ДОБАВЛЕНО
 
 import { AppDataSource } from "./data-source";
 import calculatorRoutes from "./routes/calculator.routes";
@@ -17,6 +19,7 @@ import adminRoutes from "./routes/admin.routes";
 import programsRoutes from "./routes/programs.routes";
 import authRoutes from "./routes/auth.routes";
 import { corsOptions } from "./config/cors";
+import notificationRoutes from "./routes/notification.routes";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -41,6 +44,9 @@ app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
+// 🔥 COOKIE PARSER — ДО РОУТОВ! Иначе req.cookies пустой
+app.use(cookieParser());
+
 // Health check
 app.get("/api/health", (req: Request, res: Response) => {
   res.json({
@@ -59,6 +65,7 @@ app.use("/api/programs", programsRoutes);
 app.use("/api/projects", projectsRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Error handling
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
