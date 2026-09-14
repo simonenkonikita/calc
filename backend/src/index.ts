@@ -1,10 +1,14 @@
 // server/src/index.ts
 
+import dotenv from "dotenv";
+dotenv.config();
+
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
-import dotenv from "dotenv";
+import cookieParser from "cookie-parser"; // 🔥 ДОБАВЛЕНО
+
 import { AppDataSource } from "./data-source";
 import calculatorRoutes from "./routes/calculator.routes";
 import banksRoutes from "./routes/banks.routes";
@@ -13,27 +17,35 @@ import projectsRoutes from "./routes/projects.routes";
 import configRoutes from "./routes/config.routes";
 import adminRoutes from "./routes/admin.routes";
 import programsRoutes from "./routes/programs.routes";
-
-dotenv.config();
+import authRoutes from "./routes/auth.routes";
+import { corsOptions } from "./config/cors";
+import notificationRoutes from "./routes/notification.routes";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
+// ============================================================
+// 🔥 CORS — ПРАВИЛЬНАЯ НАСТРОЙКА
+// ============================================================
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
+app.use(cors(corsOptions));
+
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
   }),
 );
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    credentials: true,
-  }),
-);
 app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
+
+// 🔥 COOKIE PARSER — ДО РОУТОВ! Иначе req.cookies пустой
+app.use(cookieParser());
 
 // Health check
 app.get("/api/health", (req: Request, res: Response) => {
@@ -52,6 +64,8 @@ app.use("/api/limits", limitsRoutes);
 app.use("/api/programs", programsRoutes);
 app.use("/api/projects", projectsRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Error handling
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
@@ -70,7 +84,6 @@ app.use((req: Request, res: Response) => {
 // 🔥 ЗАПУСК СЕРВЕРА С ПРОВЕРКОЙ
 async function startServer() {
   try {
-    // Проверяем, инициализирована ли БД
     if (AppDataSource.isInitialized) {
       console.log("✅ Database already connected");
     } else {
@@ -91,7 +104,6 @@ async function startServer() {
   } catch (error: any) {
     if (error.message?.includes("already established")) {
       console.log("ℹ️ Database connection already established");
-      // Пытаемся получить существующее соединение
       try {
         if (!AppDataSource.isInitialized) {
           await AppDataSource.initialize();

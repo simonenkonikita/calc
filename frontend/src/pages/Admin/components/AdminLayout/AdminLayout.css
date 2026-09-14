@@ -1,0 +1,440 @@
+/* frontend/src/pages/Admin/AdminLayout.css */
+
+@import "../../admin-variables.css";
+
+/* ============================================================
+   🔥 ОСНОВНОЙ КОНТЕЙНЕР
+   ============================================================ */
+
+.admin-section {
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  border: 1px solid var(--gray-200);
+  margin-bottom: 1.5rem;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-section:hover {
+  border-color: var(--gray-300);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================================
+   🔥 ЗАГОЛОВОК СЕКЦИИ
+   ============================================================ */
+
+.admin-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-section-header h2,
+.admin-section-header h3,
+.admin-section-header h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-section-header .section-count {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--gray-400);
+  background: var(--gray-100);
+  padding: 0.1rem 0.6rem;
+  border-radius: 9999px;
+}
+
+/* ============================================================
+   🔥 ТЕЛО СЕКЦИИ - ОТСТУП СВЕРХУ
+   ============================================================ */
+
+.admin-section-body {
+  padding-top: 0.25rem;
+}
+
+/* 🔥 Дополнительный отступ для первого дочернего элемента,
+   чтобы был отступ между заголовком и контентом */
+.admin-section-body > *:first-child {
+  margin-top: 0.5rem;
+}
+
+/* ============================================================
+   🔥 ACTION BUTTONS - ОТСТУПЫ
+   ============================================================ */
+
+.admin-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Отступы между кнопками */
+.admin-actions-gap-xs {
+  gap: 0.15rem;
+}
+
+.admin-actions-gap-sm {
+  gap: 0.25rem;
+}
+
+.admin-actions-gap-md {
+  gap: 0.4rem;
+}
+
+.admin-actions-gap-lg {
+  gap: 0.6rem;
+}
+
+/* По умолчанию (если gap не указан) */
+.admin-actions {
+  gap: 0.25rem;
+}
+
+/* ============================================================
+   🔥 ЕДИНЫЕ КНОПКИ
+   ============================================================ */
+
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  white-space: nowrap;
+  min-height: 36px;
+  min-width: 36px;
+}
+
+.admin-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* 🔥 Размеры */
+.admin-btn-sm {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  min-height: 28px;
+  min-width: 28px;
+  border-radius: var(--radius-sm);
+}
+
+.admin-btn-xs {
+  padding: 0.1rem 0.4rem;
+  font-size: 0.65rem;
+  min-height: 24px;
+  min-width: 24px;
+  border-radius: var(--radius-sm);
+}
+
+.admin-btn-md {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+  min-height: 32px;
+  min-width: 32px;
+  border-radius: var(--radius-sm);
+}
+
+/* 🔥 Primary */
+.admin-btn-primary {
+  background: var(--primary-gradient);
+  color: #ffffff;
+  box-shadow: var(--shadow-primary);
+}
+
+.admin-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(108, 92, 231, 0.4);
+}
+
+/* 🔥 Danger */
+.admin-btn-danger {
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.admin-btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  transform: translateY(-2px);
+}
+
+/* 🔥 Warning */
+.admin-btn-warning {
+  background: var(--warning);
+  color: #ffffff;
+}
+
+.admin-btn-warning:hover:not(:disabled) {
+  background: #d97706;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  transform: translateY(-2px);
+}
+
+/* 🔥 Success */
+.admin-btn-success {
+  background: var(--success);
+  color: #ffffff;
+}
+
+.admin-btn-success:hover:not(:disabled) {
+  background: #059669;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transform: translateY(-2px);
+}
+
+/* 🔥 Secondary */
+.admin-btn-secondary {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+}
+
+.admin-btn-secondary:hover:not(:disabled) {
+  background: var(--gray-200);
+  border-color: var(--gray-300);
+}
+
+/* 🔥 Info */
+.admin-btn-info {
+  background: var(--info);
+  color: #ffffff;
+}
+
+.admin-btn-info:hover:not(:disabled) {
+  background: #2563eb;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   🔥 ЕДИНЫЕ БЕЙДЖИ СТАТУСОВ
+   ============================================================ */
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  line-height: 1.4;
+}
+
+.admin-badge-success {
+  background: var(--success-bg);
+  color: var(--success-text);
+  border-color: var(--success-border);
+}
+
+.admin-badge-danger {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border-color: var(--danger-border);
+}
+
+.admin-badge-warning {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  border-color: var(--warning-border);
+}
+
+.admin-badge-info {
+  background: var(--info-bg);
+  color: var(--info-text);
+  border-color: var(--info-border);
+}
+
+.admin-badge-gray {
+  background: var(--gray-100);
+  color: var(--gray-600);
+  border-color: var(--gray-200);
+}
+
+/* ============================================================
+   🔥 ЕДИНЫЕ ИНПУТЫ
+   ============================================================ */
+
+.admin-input {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  background: var(--bg-white, #ffffff);
+  color: var(--gray-800);
+  transition: var(--transition);
+  width: 100%;
+  min-height: 36px;
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.admin-input::placeholder {
+  color: var(--gray-400);
+}
+
+.admin-input-sm {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.75rem;
+  min-height: 28px;
+}
+
+.admin-input-xs {
+  padding: 0.1rem 0.3rem;
+  font-size: 0.65rem;
+  min-height: 24px;
+}
+
+.admin-input-number {
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.admin-input-number::-webkit-outer-spin-button,
+.admin-input-number::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ============================================================
+   🔥 ЕДИНЫЕ SELECT
+   ============================================================ */
+
+.admin-select {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  background: var(--bg-white, #ffffff);
+  color: var(--gray-800);
+  transition: var(--transition);
+  width: 100%;
+  min-height: 36px;
+  cursor: pointer;
+}
+
+.admin-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.admin-select-sm {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.75rem;
+  min-height: 28px;
+}
+
+/* ============================================================
+   🔥 ЕДИНЫЕ ТАБЛИЦЫ
+   ============================================================ */
+
+.admin-table-wrapper {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.admin-table thead {
+  background: var(--gray-50);
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 0.6rem 0.9rem;
+  font-weight: 500;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gray-500);
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--gray-100);
+  vertical-align: middle;
+  color: var(--gray-800);
+}
+
+.admin-table tbody tr {
+  transition: var(--transition);
+}
+
+.admin-table tbody tr:hover {
+  background: var(--gray-50);
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ============================================================
+   🔥 АДАПТИВ
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .admin-btn {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+    min-height: 32px;
+  }
+
+  .admin-btn-sm {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.65rem;
+    min-height: 24px;
+  }
+
+  .admin-table {
+    font-size: 0.75rem;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .admin-input {
+    min-height: 32px;
+    font-size: 0.75rem;
+  }
+
+  .admin-select {
+    min-height: 32px;
+    font-size: 0.75rem;
+  }
+}

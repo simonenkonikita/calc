@@ -1,0 +1,155 @@
+/* frontend/src/pages/Admin/sections/ProgramsSection.css */
+
+@import "../../admin-variables.css";
+
+/* ============================================================
+   📋 PROGRAMS SECTION - СТИЛЬ ЛЕНДИНГА
+   ============================================================ */
+
+/* ❌ УДАЛЯЕМ ЭТУ ОБЕРТКУ - она лишняя!
+.programs-section .admin-section {
+  ...
+}
+*/
+
+/* Тип программы */
+.programs-section .program-type-code {
+  font-size: 0.8rem;
+  background: var(--gray-100);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  color: var(--gray-600);
+  font-family: monospace;
+}
+
+/* Иконка программы */
+.programs-section .program-icon {
+  font-size: 1.5rem;
+  display: inline-block;
+  text-align: center;
+  min-width: 32px;
+}
+
+/* Цвет программы */
+.programs-section .program-color-preview {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  vertical-align: middle;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Описание */
+.programs-section .program-description {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Порядок */
+.programs-section .program-order {
+  text-align: center;
+}
+
+/* ============================================================
+   🎯 ИНПУТЫ
+   ============================================================ */
+
+.programs-section .admin-input-icon {
+  text-align: center;
+  font-size: 1.2rem;
+  width: 60px;
+}
+
+.programs-section .admin-input-color {
+  padding: 2px;
+  width: 40px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.programs-section .admin-input-order {
+  width: 60px;
+  text-align: center;
+}
+
+/* ============================================================
+   🏷️ СТАТУСЫ
+   ============================================================ */
+
+.programs-section .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.programs-section .status-badge.active {
+  background: var(--success-bg);
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.programs-section .status-badge.inactive {
+  background: var(--danger-bg);
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+/* ============================================================
+   📭 ПУСТОЕ СОСТОЯНИЕ
+   ============================================================ */
+
+.programs-section .empty-state {
+  text-align: center;
+  color: var(--gray-500);
+  padding: 2rem;
+}
+
+/* ============================================================
+   🎯 АДАПТИВ
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .programs-section .program-description {
+    max-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .programs-section .program-description {
+    max-width: 80px;
+  }
+
+  .programs-section .program-icon {
+    font-size: 1.1rem;
+  }
+
+  .programs-section .program-color-preview {
+    width: 18px;
+    height: 18px;
+  }
+
+  .programs-section .admin-input-icon {
+    width: 40px;
+    font-size: 1rem;
+  }
+
+  .programs-section .admin-input-order {
+    width: 40px;
+  }
+
+  .programs-section .admin-input-color {
+    width: 30px;
+    height: 24px;
+  }
+}

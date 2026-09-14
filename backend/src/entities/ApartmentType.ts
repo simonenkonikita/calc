@@ -36,7 +36,9 @@ export class ApartmentType {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Complex, (complex) => complex.apartmentTypes)
+  @ManyToOne(() => Complex, (complex) => complex.apartmentTypes, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "complexId" })
   complex: Complex;
 

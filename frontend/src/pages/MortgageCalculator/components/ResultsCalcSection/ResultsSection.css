@@ -1,0 +1,148 @@
+/* ResultsSection.css */
+
+/* ============================================================
+   ОСНОВНОЙ КОНТЕЙНЕР
+   ============================================================ */
+.results-calc-section {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* ============================================================
+   БЛОК РЕЗУЛЬТАТОВ — ГОРИЗОНТАЛЬНЫЙ
+   ============================================================ */
+.results-calc-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.results-calc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #667eea;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ============================================================
+   ЗАГОЛОВОК
+   ============================================================ */
+.results-calc-title {
+  color: #333;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  padding-bottom: 0;
+}
+
+/* ============================================================
+   ОСНОВНАЯ СУММА
+   ============================================================ */
+.results-calc-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2563eb;
+  padding: 0;
+  line-height: 1.2;
+}
+
+/* ============================================================
+   ДЕТАЛИ — В ОДНУ СТРОКУ
+   ============================================================ */
+.results-calc-details {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  padding-top: 0.25rem;
+  align-items: center;
+}
+
+.results-calc-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0;
+  border-bottom: none;
+  min-width: 140px;
+  flex: 1 1 auto;
+}
+
+/* ============================================================
+   ЛЕЙБЛЫ
+   ============================================================ */
+.detail-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   ЗНАЧЕНИЯ
+   ============================================================ */
+.detail-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  white-space: nowrap;
+}
+
+.detail-percent {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #6b7280;
+  margin-left: 0.35rem;
+}
+
+/* ============================================================
+   АДАПТИВ
+   ============================================================ */
+@media (max-width: 768px) {
+  .results-calc-title {
+    font-size: 1rem;
+  }
+
+  .results-calc-value {
+    font-size: 1.5rem;
+  }
+
+  .results-calc-details {
+    gap: 0.6rem 1.25rem;
+  }
+
+  .results-calc-detail-item {
+    min-width: 110px;
+  }
+
+  .detail-label {
+    font-size: 0.65rem;
+  }
+
+  .detail-value {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .results-calc-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1rem;
+  }
+
+  .results-calc-detail-item {
+    min-width: auto;
+  }
+
+  .results-calc-value {
+    font-size: 1.25rem;
+  }
+}

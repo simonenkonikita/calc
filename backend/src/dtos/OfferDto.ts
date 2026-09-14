@@ -61,6 +61,8 @@ export interface CreateOfferDTO {
   trancheFirstPercent?: number | null;
   trancheSecondDate?: string | null;
 
+  //компания
+  companyId?: string | null;
   // ЖК
   complexes?: string[] | null;
 
@@ -230,6 +232,7 @@ export interface OfferFiltersDTO {
   minPVPercent?: number;
   maxPVPercent?: number;
   search?: string;
+  companyId?: string;
 }
 
 // ============================================================

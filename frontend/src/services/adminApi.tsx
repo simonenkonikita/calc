@@ -9,9 +9,21 @@ import {
   AdminSubsidy,
   AdminConfig,
   AdminOffer,
+  AdminUser,
+  AdminCompany,
+  CreateComplexDTO,
+  UpdateComplexDTO,
 } from "../pages/Admin/types/admin.types";
 
 const API_URL = import.meta.env.VITE_API_URL || "/api";
+
+// 🔥 Получение токена из localStorage
+const getToken = (): string | null => {
+  return localStorage.getItem("token");
+};
+// ============================================================
+// 🔥 ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ============================================================
 
 // Вспомогательная функция для обработки ответов
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -53,162 +65,347 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return data as T;
 }
 
+// 🔥 ЕДИНАЯ ФУНКЦИЯ ДЛЯ FETCH С АВТОРИЗАЦИЕЙ
+async function fetchWithAuth<T>(
+  url: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(url, {
+    ...options,
+    credentials: "include", // 🔥 Передаем cookies
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
+  });
+
+  return handleResponse<T>(response);
+}
+
+// ============================================================
+// 🔥 ADMIN API
+// ============================================================
+
 export const adminApi = {
   // ============================================================
   // БАНКИ
   // ============================================================
   async getBanks(): Promise<AdminBank[]> {
-    const response = await fetch(`${API_URL}/admin/banks`);
-    return handleResponse<AdminBank[]>(response);
+    return fetchWithAuth<AdminBank[]>(`${API_URL}/admin/banks`);
   },
 
   async getBank(id: string): Promise<AdminBank> {
-    const response = await fetch(`${API_URL}/admin/banks/${id}`);
-    return handleResponse<AdminBank>(response);
+    return fetchWithAuth<AdminBank>(`${API_URL}/admin/banks/${id}`);
   },
 
   async createBank(data: Partial<AdminBank>): Promise<AdminBank> {
-    const response = await fetch(`${API_URL}/admin/banks`, {
+    return fetchWithAuth<AdminBank>(`${API_URL}/admin/banks`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminBank>(response);
   },
 
   async updateBank(id: string, data: Partial<AdminBank>): Promise<AdminBank> {
-    const response = await fetch(`${API_URL}/admin/banks/${id}`, {
+    return fetchWithAuth<AdminBank>(`${API_URL}/admin/banks/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminBank>(response);
   },
 
   async deleteBank(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/banks/${id}`, {
+    await fetchWithAuth<void>(`${API_URL}/admin/banks/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete bank");
+  },
+
+  // ============================================================
+  // 🔥 УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ
+  // ============================================================
+
+  async getUsers(): Promise<AdminUser[]> {
+    return fetchWithAuth<AdminUser[]>(`${API_URL}/auth/users`);
+  },
+
+  async getUser(id: string): Promise<AdminUser> {
+    return fetchWithAuth<AdminUser>(`${API_URL}/auth/users/${id}`);
+  },
+
+  async createUserByAdmin(data: {
+    email: string;
+    password: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    companyId?: string;
+    position?: string;
+    role: string;
+  }): Promise<AdminUser> {
+    return fetchWithAuth<AdminUser>(`${API_URL}/auth/admin/users`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateUser(id: string, data: Partial<AdminUser>): Promise<AdminUser> {
+    return fetchWithAuth<AdminUser>(`${API_URL}/auth/users/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteUser(id: string): Promise<void> {
+    await fetchWithAuth<void>(`${API_URL}/auth/users/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  // ============================================================
+  // 🔥 УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ (АДМИНКА)
+  // ============================================================
+
+  /**
+   * Сбросить пароль пользователя (только admin или developer_admin)
+   */
+  async resetUserPassword(
+    id: string,
+    newPassword: string,
+  ): Promise<{ success: boolean; message: string }> {
+    return fetchWithAuth<{ success: boolean; message: string }>(
+      `${API_URL}/auth/admin/users/${id}/reset-password`,
+      {
+        method: "POST",
+        body: JSON.stringify({ newPassword }),
+      },
+    );
+  },
+
+  /**
+   * Отправить ссылку для сброса пароля (только admin или developer_admin)
+   */
+  async sendPasswordResetLink(
+    id: string,
+  ): Promise<{ success: boolean; message: string }> {
+    return fetchWithAuth<{ success: boolean; message: string }>(
+      `${API_URL}/auth/admin/users/${id}/send-reset-link`,
+      {
+        method: "POST",
+      },
+    );
+  },
+
+  // ============================================================
+  // 🔥 УПРАВЛЕНИЕ КОМПАНИЯМИ
+  // ============================================================
+
+  /**
+   * Получить все компании (только для admin)
+   */
+  async getCompanies(): Promise<AdminCompany[]> {
+    // 🔥 ИСПРАВЛЯЕМ URL: /auth/admin/companies -> /admin/companies
+    return fetchWithAuth<AdminCompany[]>(`${API_URL}/admin/companies`);
+  },
+
+  /**
+   * Получить компанию по ID
+   */
+  async getCompany(id: string): Promise<AdminCompany> {
+    // 🔥 ИСПРАВЛЯЕМ URL: /auth/admin/companies -> /admin/companies
+    return fetchWithAuth<AdminCompany>(`${API_URL}/admin/companies/${id}`);
+  },
+
+  /**
+   * Создать компанию с администратором (только для admin)
+   */
+  // frontend/src/services/adminApi.ts
+
+  /**
+   * Создать компанию с администратором (только для admin)
+   */
+  async createCompany(data: {
+    name: string;
+    phone?: string;
+    address?: string;
+    website?: string;
+  }): Promise<AdminCompany> {
+    return fetchWithAuth<AdminCompany>(`${API_URL}/admin/companies`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Обновить компанию (только для admin)
+   */
+  async updateCompany(
+    id: string,
+    data: Partial<AdminCompany>,
+  ): Promise<AdminCompany> {
+    // 🔥 ИСПРАВЛЯЕМ URL: /auth/admin/companies -> /admin/companies
+    return fetchWithAuth<AdminCompany>(`${API_URL}/admin/companies/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Удалить компанию (только для admin)
+   */
+  async deleteCompany(id: string): Promise<void> {
+    // 🔥 ИСПРАВЛЯЕМ URL: /auth/admin/companies -> /admin/companies
+    await fetchWithAuth<void>(`${API_URL}/admin/companies/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  // ============================================================
+  // 🔥 СОЗДАНИЕ МЕНЕДЖЕРА
+  // ============================================================
+
+  async createCompanyManager(data: {
+    email: string;
+    password: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    position?: string;
+    companyId?: string;
+  }): Promise<AdminUser> {
+    return fetchWithAuth<AdminUser>(`${API_URL}/auth/admin/company-managers`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  // ============================================================
+  // 🔥 УПРАВЛЕНИЕ СВОИМ ПРОФИЛЕМ
+  // ============================================================
+
+  async updateProfile(data: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    position?: string;
+  }): Promise<AdminUser> {
+    return fetchWithAuth<AdminUser>(`${API_URL}/auth/profile`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async changePassword(data: {
+    oldPassword: string;
+    newPassword: string;
+  }): Promise<void> {
+    await fetchWithAuth<void>(`${API_URL}/auth/change-password`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   },
 
   // ============================================================
   // ЖК (КОМПЛЕКСЫ)
   // ============================================================
   async getComplexes(): Promise<AdminComplex[]> {
-    const response = await fetch(`${API_URL}/admin/complexes`);
-    return handleResponse<AdminComplex[]>(response);
+    return fetchWithAuth<AdminComplex[]>(`${API_URL}/admin/complexes`);
   },
 
   async getComplex(id: string): Promise<AdminComplex> {
-    const response = await fetch(`${API_URL}/admin/complexes/${id}`);
-    return handleResponse<AdminComplex>(response);
+    return fetchWithAuth<AdminComplex>(`${API_URL}/admin/complexes/${id}`);
   },
 
-  async createComplex(data: Partial<AdminComplex>): Promise<AdminComplex> {
-    const response = await fetch(`${API_URL}/admin/complexes`, {
+  async createComplex(data: CreateComplexDTO): Promise<AdminComplex> {
+    return fetchWithAuth<AdminComplex>(`${API_URL}/admin/complexes`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminComplex>(response);
   },
 
   async updateComplex(
     id: string,
-    data: Partial<AdminComplex>,
+    data: UpdateComplexDTO,
   ): Promise<AdminComplex> {
-    const response = await fetch(`${API_URL}/admin/complexes/${id}`, {
+    return fetchWithAuth<AdminComplex>(`${API_URL}/admin/complexes/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminComplex>(response);
   },
 
   async deleteComplex(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/complexes/${id}`, {
+    await fetchWithAuth<void>(`${API_URL}/admin/complexes/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete complex");
   },
 
   // ============================================================
   // ТИПЫ КВАРТИР
   // ============================================================
   async getApartmentTypes(complexId: string): Promise<AdminApartmentType[]> {
-    const response = await fetch(
+    return fetchWithAuth<AdminApartmentType[]>(
       `${API_URL}/admin/complexes/${complexId}/apartment-types`,
     );
-    return handleResponse<AdminApartmentType[]>(response);
   },
 
   async createApartmentType(
     complexId: string,
     data: Partial<AdminApartmentType>,
   ): Promise<AdminApartmentType> {
-    const response = await fetch(
+    return fetchWithAuth<AdminApartmentType>(
       `${API_URL}/admin/complexes/${complexId}/apartment-types`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       },
     );
-    return handleResponse<AdminApartmentType>(response);
   },
 
   async updateApartmentType(
     id: string,
     data: Partial<AdminApartmentType>,
   ): Promise<AdminApartmentType> {
-    const response = await fetch(`${API_URL}/admin/apartment-types/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    return handleResponse<AdminApartmentType>(response);
+    return fetchWithAuth<AdminApartmentType>(
+      `${API_URL}/admin/apartment-types/${id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+      },
+    );
   },
 
   async deleteApartmentType(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/apartment-types/${id}`, {
+    await fetchWithAuth<void>(`${API_URL}/admin/apartment-types/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete apartment type");
   },
 
   // ============================================================
   // ПРОГРАММЫ
   // ============================================================
   async getPrograms(): Promise<AdminProgram[]> {
-    const response = await fetch(`${API_URL}/admin/programs`);
-    return handleResponse<AdminProgram[]>(response);
+    return fetchWithAuth<AdminProgram[]>(`${API_URL}/admin/programs`);
   },
 
   async getProgram(id: string): Promise<AdminProgram> {
-    const response = await fetch(`${API_URL}/admin/programs/${id}`);
-    return handleResponse<AdminProgram>(response);
+    return fetchWithAuth<AdminProgram>(`${API_URL}/admin/programs/${id}`);
   },
 
   async createProgram(data: Partial<AdminProgram>): Promise<AdminProgram> {
-    const response = await fetch(`${API_URL}/admin/programs`, {
+    return fetchWithAuth<AdminProgram>(`${API_URL}/admin/programs`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminProgram>(response);
   },
 
   async updateProgram(
     id: string,
     data: Partial<AdminProgram>,
   ): Promise<AdminProgram> {
-    const response = await fetch(`${API_URL}/admin/programs/${id}`, {
+    return fetchWithAuth<AdminProgram>(`${API_URL}/admin/programs/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminProgram>(response);
   },
 
   async deleteProgram(
@@ -219,193 +416,143 @@ export const adminApi = {
       ? `${API_URL}/admin/programs/${id}?cascade=true`
       : `${API_URL}/admin/programs/${id}`;
 
-    const response = await fetch(url, {
+    return fetchWithAuth<{ offersDeleted?: number }>(url, {
       method: "DELETE",
     });
-
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = {};
-      }
-
-      if (response.status === 409) {
-        throw {
-          status: 409,
-          message: errorData.error || "Program has associated offers",
-          offersCount: errorData.offersCount || 0,
-          canCascade: errorData.canCascade || false,
-        };
-      }
-
-      throw new Error(
-        errorData.error || errorData.message || "Failed to delete program",
-      );
-    }
-
-    const data = await response.json();
-    return data;
   },
 
   // ============================================================
   // СТАВКИ (старые, для обратной совместимости)
   // ============================================================
   async getRates(): Promise<AdminRate[]> {
-    const response = await fetch(`${API_URL}/admin/rates`);
-    return handleResponse<AdminRate[]>(response);
+    return fetchWithAuth<AdminRate[]>(`${API_URL}/admin/rates`);
   },
 
   async createRate(data: Partial<AdminRate>): Promise<AdminRate> {
-    const response = await fetch(`${API_URL}/admin/rates`, {
+    return fetchWithAuth<AdminRate>(`${API_URL}/admin/rates`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminRate>(response);
   },
 
   async updateRate(id: string, data: Partial<AdminRate>): Promise<AdminRate> {
-    const response = await fetch(`${API_URL}/admin/rates/${id}`, {
+    return fetchWithAuth<AdminRate>(`${API_URL}/admin/rates/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminRate>(response);
   },
 
   async deleteRate(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/rates/${id}`, {
+    await fetchWithAuth<void>(`${API_URL}/admin/rates/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete rate");
   },
 
   // ============================================================
   // СУБСИДИИ (старые, для обратной совместимости)
   // ============================================================
   async getSubsidies(): Promise<AdminSubsidy[]> {
-    const response = await fetch(`${API_URL}/admin/subsidies`);
-    return handleResponse<AdminSubsidy[]>(response);
+    return fetchWithAuth<AdminSubsidy[]>(`${API_URL}/admin/subsidies`);
   },
 
   async createSubsidy(data: Partial<AdminSubsidy>): Promise<AdminSubsidy> {
-    const response = await fetch(`${API_URL}/admin/subsidies`, {
+    return fetchWithAuth<AdminSubsidy>(`${API_URL}/admin/subsidies`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminSubsidy>(response);
   },
 
   async updateSubsidy(
     id: string,
     data: Partial<AdminSubsidy>,
   ): Promise<AdminSubsidy> {
-    const response = await fetch(`${API_URL}/admin/subsidies/${id}`, {
+    return fetchWithAuth<AdminSubsidy>(`${API_URL}/admin/subsidies/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminSubsidy>(response);
   },
 
   async deleteSubsidy(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/subsidies/${id}`, {
+    await fetchWithAuth<void>(`${API_URL}/admin/subsidies/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete subsidy");
   },
 
   // ============================================================
   // КОНФИГУРАЦИЯ
   // ============================================================
   async getConfig(): Promise<AdminConfig> {
-    const response = await fetch(`${API_URL}/admin/config`);
-    return handleResponse<AdminConfig>(response);
+    return fetchWithAuth<AdminConfig>(`${API_URL}/admin/config`);
   },
 
   async updateConfig(data: Partial<AdminConfig>): Promise<AdminConfig> {
-    const response = await fetch(`${API_URL}/admin/config`, {
+    return fetchWithAuth<AdminConfig>(`${API_URL}/admin/config`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminConfig>(response);
   },
 
   // ============================================================
   // ОФФЕРЫ
   // ============================================================
   async getOffers(): Promise<AdminOffer[]> {
-    const response = await fetch(`${API_URL}/admin/offers`);
-    return handleResponse<AdminOffer[]>(response);
+    return fetchWithAuth<AdminOffer[]>(`${API_URL}/admin/offers`);
   },
 
   async getActiveOffers(): Promise<AdminOffer[]> {
-    const response = await fetch(`${API_URL}/admin/offers/active`);
-    return handleResponse<AdminOffer[]>(response);
+    return fetchWithAuth<AdminOffer[]>(`${API_URL}/admin/offers/active`);
   },
 
   async getOffer(id: string): Promise<AdminOffer> {
-    const response = await fetch(`${API_URL}/admin/offers/${id}`);
-    return handleResponse<AdminOffer>(response);
+    return fetchWithAuth<AdminOffer>(`${API_URL}/admin/offers/${id}`);
   },
 
   async createOffer(data: Partial<AdminOffer>): Promise<AdminOffer> {
-    const response = await fetch(`${API_URL}/admin/offers`, {
+    return fetchWithAuth<AdminOffer>(`${API_URL}/admin/offers`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminOffer>(response);
   },
 
   async updateOffer(
     id: string,
     data: Partial<AdminOffer>,
   ): Promise<AdminOffer> {
-    const response = await fetch(`${API_URL}/admin/offers/${id}`, {
+    return fetchWithAuth<AdminOffer>(`${API_URL}/admin/offers/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<AdminOffer>(response);
   },
 
   async deleteOffer(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/offers/${id}`, {
+    await fetchWithAuth<void>(`${API_URL}/admin/offers/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete offer");
   },
 
   async restoreOffer(id: string): Promise<AdminOffer> {
-    const response = await fetch(`${API_URL}/admin/offers/${id}/restore`, {
+    return fetchWithAuth<AdminOffer>(`${API_URL}/admin/offers/${id}/restore`, {
       method: "POST",
     });
-    return handleResponse<AdminOffer>(response);
   },
 
   async hardDeleteOffer(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/offers/${id}/hard`, {
+    await fetchWithAuth<void>(`${API_URL}/admin/offers/${id}/hard`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to hard delete offer");
   },
 
   async copyOffer(id: string): Promise<AdminOffer> {
-    const response = await fetch(`${API_URL}/admin/offers/${id}/copy`, {
+    return fetchWithAuth<AdminOffer>(`${API_URL}/admin/offers/${id}/copy`, {
       method: "POST",
     });
-    return handleResponse<AdminOffer>(response);
   },
 
   async getOffersFiltered(filters: any): Promise<AdminOffer[]> {
     const params = new URLSearchParams(filters).toString();
-    const response = await fetch(`${API_URL}/admin/offers/filter?${params}`);
-    return handleResponse<AdminOffer[]>(response);
+    return fetchWithAuth<AdminOffer[]>(
+      `${API_URL}/admin/offers/filter?${params}`,
+    );
   },
 
   async getRateRange(filters?: {
@@ -414,241 +561,207 @@ export const adminApi = {
     complexName?: string;
   }): Promise<{ minRate: number; maxRate: number }> {
     const params = new URLSearchParams(filters || {}).toString();
-    const response = await fetch(
+    return fetchWithAuth<{ minRate: number; maxRate: number }>(
       `${API_URL}/admin/offers/rate-range?${params}`,
     );
-    return handleResponse<{ minRate: number; maxRate: number }>(response);
   },
 
   // ============================================================
   // ДИНАМИЧЕСКИЕ СТАВКИ ДЛЯ ОФФЕРОВ
   // ============================================================
   async getOfferRates(offerId: string): Promise<any[]> {
-    const response = await fetch(`${API_URL}/admin/offers/${offerId}/rates`);
-    return handleResponse<any[]>(response);
+    return fetchWithAuth<any[]>(`${API_URL}/admin/offers/${offerId}/rates`);
   },
 
   async createOfferRate(offerId: string, data: any): Promise<any> {
-    const response = await fetch(`${API_URL}/admin/offers/${offerId}/rates`, {
+    return fetchWithAuth<any>(`${API_URL}/admin/offers/${offerId}/rates`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<any>(response);
   },
 
   async updateOfferRate(id: string, data: any): Promise<any> {
-    const response = await fetch(`${API_URL}/admin/rates/${id}`, {
+    return fetchWithAuth<any>(`${API_URL}/admin/rates/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<any>(response);
   },
 
   async deleteOfferRate(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/rates/${id}`, {
+    await fetchWithAuth<void>(`${API_URL}/admin/rates/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete rate");
   },
 
   // ============================================================
   // ДИНАМИЧЕСКИЕ СУБСИДИИ ДЛЯ ОФФЕРОВ
   // ============================================================
   async getOfferSubsidies(offerId: string): Promise<any[]> {
-    const response = await fetch(
-      `${API_URL}/admin/offers/${offerId}/subsidies`,
-    );
-    return handleResponse<any[]>(response);
+    return fetchWithAuth<any[]>(`${API_URL}/admin/offers/${offerId}/subsidies`);
   },
 
   async createOfferSubsidy(offerId: string, data: any): Promise<any> {
-    const response = await fetch(
-      `${API_URL}/admin/offers/${offerId}/subsidies`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      },
-    );
-    return handleResponse<any>(response);
+    return fetchWithAuth<any>(`${API_URL}/admin/offers/${offerId}/subsidies`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   },
 
   async updateOfferSubsidy(id: string, data: any): Promise<any> {
-    const response = await fetch(`${API_URL}/admin/subsidies/${id}`, {
+    return fetchWithAuth<any>(`${API_URL}/admin/subsidies/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<any>(response);
   },
 
   async deleteOfferSubsidy(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/subsidies/${id}`, {
+    await fetchWithAuth<void>(`${API_URL}/admin/subsidies/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete subsidy");
   },
 
   // ============================================================
-  // НОВЫЕ ДИНАМИЧЕСКИЕ СТАВКИ (через отдельные эндпоинты)
+  // НОВЫЕ ДИНАМИЧЕСКИЕ СТАВКИ
   // ============================================================
   async getDynamicRates(): Promise<any[]> {
-    const response = await fetch(`${API_URL}/admin/dynamic-rates`);
-    return handleResponse<any[]>(response);
+    return fetchWithAuth<any[]>(`${API_URL}/admin/dynamic-rates`);
   },
 
   async getDynamicRate(id: string): Promise<any> {
-    const response = await fetch(`${API_URL}/admin/dynamic-rates/${id}`);
-    return handleResponse<any>(response);
+    return fetchWithAuth<any>(`${API_URL}/admin/dynamic-rates/${id}`);
   },
 
   async createDynamicRate(offerId: string, data: any): Promise<any> {
-    const response = await fetch(
+    return fetchWithAuth<any>(
       `${API_URL}/admin/offers/${offerId}/dynamic-rates`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       },
     );
-    return handleResponse<any>(response);
   },
 
   async updateDynamicRate(id: string, data: any): Promise<any> {
-    const response = await fetch(`${API_URL}/admin/dynamic-rates/${id}`, {
+    return fetchWithAuth<any>(`${API_URL}/admin/dynamic-rates/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<any>(response);
   },
 
   async deleteDynamicRate(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/dynamic-rates/${id}`, {
+    await fetchWithAuth<void>(`${API_URL}/admin/dynamic-rates/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete rate");
   },
 
   async updateDynamicRatesPriorities(
     rates: { id: string; priority: number }[],
   ): Promise<any[]> {
-    const response = await fetch(`${API_URL}/admin/dynamic-rates/priorities`, {
+    return fetchWithAuth<any[]>(`${API_URL}/admin/dynamic-rates/priorities`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ rates }),
     });
-    return handleResponse<any[]>(response);
   },
 
   // ============================================================
-  // НОВЫЕ ДИНАМИЧЕСКИЕ СУБСИДИИ (через отдельные эндпоинты)
+  // ДИНАМИЧЕСКИЕ СТАВКИ - HARD DELETE
+  // ============================================================
+  async hardDeleteDynamicRate(id: string): Promise<void> {
+    await fetchWithAuth<void>(`${API_URL}/admin/dynamic-rates/${id}/hard`, {
+      method: "DELETE",
+    });
+  },
+
+  // ============================================================
+  // НОВЫЕ ДИНАМИЧЕСКИЕ СУБСИДИИ
   // ============================================================
   async getDynamicSubsidies(): Promise<any[]> {
-    const response = await fetch(`${API_URL}/admin/dynamic-subsidies`);
-    return handleResponse<any[]>(response);
+    return fetchWithAuth<any[]>(`${API_URL}/admin/dynamic-subsidies`);
   },
 
   async getDynamicSubsidy(id: string): Promise<any> {
-    const response = await fetch(`${API_URL}/admin/dynamic-subsidies/${id}`);
-    return handleResponse<any>(response);
+    return fetchWithAuth<any>(`${API_URL}/admin/dynamic-subsidies/${id}`);
   },
 
   async createDynamicSubsidy(offerId: string, data: any): Promise<any> {
-    const response = await fetch(
+    return fetchWithAuth<any>(
       `${API_URL}/admin/offers/${offerId}/dynamic-subsidies`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       },
     );
-    return handleResponse<any>(response);
   },
 
   async updateDynamicSubsidy(id: string, data: any): Promise<any> {
-    const response = await fetch(`${API_URL}/admin/dynamic-subsidies/${id}`, {
+    return fetchWithAuth<any>(`${API_URL}/admin/dynamic-subsidies/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return handleResponse<any>(response);
   },
 
   async deleteDynamicSubsidy(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/dynamic-subsidies/${id}`, {
+    await fetchWithAuth<void>(`${API_URL}/admin/dynamic-subsidies/${id}`, {
       method: "DELETE",
     });
-
-    // 🔥 Проверяем статус ответа
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = {};
-      }
-      throw new Error(
-        errorData.error ||
-          errorData.message ||
-          `HTTP error! status: ${response.status}`,
-      );
-    }
-
-    // 🔥 Для DELETE запросов не нужно парсить тело (или оно может быть пустым)
-    // Просто проверяем, что ответ успешный
-    try {
-      const data = await response.json();
-      // Если ответ имеет структуру { success: true, ... }
-      if (data && typeof data === "object" && "success" in data) {
-        if (!data.success) {
-          throw new Error(data.error || "Delete failed");
-        }
-      }
-    } catch (e) {
-      // Если тело ответа пустое или невалидный JSON - игнорируем
-      // Это нормально для DELETE запросов
-    }
   },
 
   async updateDynamicSubsidiesPriorities(
     subsidies: { id: string; priority: number }[],
   ): Promise<any[]> {
-    const response = await fetch(
+    return fetchWithAuth<any[]>(
       `${API_URL}/admin/dynamic-subsidies/priorities`,
       {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subsidies }),
       },
     );
-    return handleResponse<any[]>(response);
   },
 
+  // ============================================================
+  // ДИНАМИЧЕСКИЕ СУБСИДИИ - HARD DELETE
+  // ============================================================
+  async hardDeleteDynamicSubsidy(id: string): Promise<void> {
+    await fetchWithAuth<void>(`${API_URL}/admin/dynamic-subsidies/${id}/hard`, {
+      method: "DELETE",
+    });
+  },
+
+  // ============================================================
+  // ПОЛУЧЕНИЕ ДИНАМИЧЕСКИХ ДАННЫХ ДЛЯ ОФФЕРА
+  // ============================================================
+  async getOfferDynamicRates(offerId: string): Promise<any[]> {
+    return fetchWithAuth<any[]>(
+      `${API_URL}/admin/offers/${offerId}/dynamic-rates`,
+    );
+  },
+
+  async getOfferDynamicSubsidies(offerId: string): Promise<any[]> {
+    return fetchWithAuth<any[]>(
+      `${API_URL}/admin/offers/${offerId}/dynamic-subsidies`,
+    );
+  },
+
+  // ============================================================
+  // ПРОЧИЕ ДИНАМИЧЕСКИЕ СУБСИДИИ
+  // ============================================================
   async copyDynamicSubsidies(
     sourceOfferId: string,
     targetOfferId: string,
   ): Promise<any[]> {
-    const response = await fetch(`${API_URL}/admin/dynamic-subsidies/copy`, {
+    return fetchWithAuth<any[]>(`${API_URL}/admin/dynamic-subsidies/copy`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sourceOfferId, targetOfferId }),
     });
-    return handleResponse<any[]>(response);
   },
 
   async deleteDynamicSubsidiesByOffer(
     offerId: string,
   ): Promise<{ affected: number }> {
-    const response = await fetch(
+    return fetchWithAuth<{ affected: number }>(
       `${API_URL}/admin/offers/${offerId}/dynamic-subsidies`,
-      {
-        method: "DELETE",
-      },
+      { method: "DELETE" },
     );
-    return handleResponse<{ affected: number }>(response);
   },
 
   async getDynamicSubsidiesStats(): Promise<{
@@ -657,76 +770,79 @@ export const adminApi = {
     inactive: number;
     byOffer: { offerId: string; count: string }[];
   }> {
-    const response = await fetch(`${API_URL}/admin/dynamic-subsidies/stats`);
-    return handleResponse<any>(response);
+    return fetchWithAuth<any>(`${API_URL}/admin/dynamic-subsidies/stats`);
   },
 
   // ============================================================
-  // ПОЛУЧЕНИЕ ДИНАМИЧЕСКИХ ДАННЫХ ДЛЯ ОФФЕРА (для калькулятора)
+  // 🔥 ПОВТОРНАЯ ОТПРАВКА ПИСЬМА ПОДТВЕРЖДЕНИЯ (для админа - по ID пользователя)
   // ============================================================
-  async getOfferDynamicRates(offerId: string): Promise<any[]> {
-    const response = await fetch(
-      `${API_URL}/admin/offers/${offerId}/dynamic-rates`,
-    );
-    return handleResponse<any[]>(response);
-  },
+  resendVerificationByAdmin: async (
+    userId: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    const token = getToken();
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
 
-  async getOfferDynamicSubsidies(offerId: string): Promise<any[]> {
-    const response = await fetch(
-      `${API_URL}/admin/offers/${offerId}/dynamic-subsidies`,
-    );
-    return handleResponse<any[]>(response);
-  },
-
-  // frontend/src/services/adminApi.ts
-
-  // Добавьте эти методы в раздел "ДИНАМИЧЕСКИЕ СТАВКИ ДЛЯ ОФФЕРОВ" или создайте новый раздел
-
-  // ============================================================
-  // ДИНАМИЧЕСКИЕ СТАВКИ - HARD DELETE
-  // ============================================================
-  async hardDeleteDynamicRate(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/admin/dynamic-rates/${id}/hard`, {
-      method: "DELETE",
-    });
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = {};
-      }
-      throw new Error(
-        errorData.error ||
-          errorData.message ||
-          `HTTP error! status: ${response.status}`,
-      );
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
     }
-  },
 
-  // ============================================================
-  // ДИНАМИЧЕСКИЕ СУБСИДИИ - HARD DELETE
-  // ============================================================
-  async hardDeleteDynamicSubsidy(id: string): Promise<void> {
     const response = await fetch(
-      `${API_URL}/admin/dynamic-subsidies/${id}/hard`,
+      `${API_URL}/auth/admin/users/${userId}/resend-verification`,
       {
-        method: "DELETE",
+        method: "POST",
+        headers,
+        credentials: "include",
       },
     );
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = {};
-      }
-      throw new Error(
-        errorData.error ||
-          errorData.message ||
-          `HTTP error! status: ${response.status}`,
-      );
-    }
+    return handleResponse(response);
+  },
+
+  // ============================================================
+  // УПРАВЛЕНИЕ УСЛОВИЯМИ ОПЛАТЫ ДЛЯ ЖК
+  // ============================================================
+
+  // Добавить условие оплаты
+  async addPaymentTerm(
+    complexId: string,
+    term: string,
+  ): Promise<{ success: boolean; data: string[]; message: string }> {
+    return fetchWithAuth<{ success: boolean; data: string[]; message: string }>(
+      `${API_URL}/admin/complexes/${complexId}/payment-terms`,
+      {
+        method: "POST",
+        body: JSON.stringify({ term }),
+      },
+    );
+  },
+
+  // Удалить условие оплаты
+  async removePaymentTerm(
+    complexId: string,
+    term: string,
+  ): Promise<{ success: boolean; data: string[]; message: string }> {
+    return fetchWithAuth<{ success: boolean; data: string[]; message: string }>(
+      `${API_URL}/admin/complexes/${complexId}/payment-terms`,
+      {
+        method: "DELETE",
+        body: JSON.stringify({ term }),
+      },
+    );
+  },
+
+  // Обновить все условия оплаты
+  async updatePaymentTerms(
+    complexId: string,
+    terms: string[],
+  ): Promise<{ success: boolean; data: string[]; message: string }> {
+    return fetchWithAuth<{ success: boolean; data: string[]; message: string }>(
+      `${API_URL}/admin/complexes/${complexId}/payment-terms`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ terms }),
+      },
+    );
   },
 };
 

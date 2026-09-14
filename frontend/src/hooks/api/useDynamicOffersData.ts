@@ -1,7 +1,7 @@
 // src/hooks/useDynamicOffersData.ts
 
 import { useState, useEffect } from "react";
-import { DynamicData } from "../../pages/Admin/sections/offers";
+import { DynamicData } from "../../pages/Admin/sections/OffersSection";
 import { AdminOffer } from "../../pages/Admin/types/admin.types";
 import adminApi from "../../services/adminApi";
 

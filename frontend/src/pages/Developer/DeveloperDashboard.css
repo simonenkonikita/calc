@@ -1,0 +1,104 @@
+/* frontend/src/pages/Developer/DeveloperDashboard.css */
+
+.developer-dashboard {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #f8fafc;
+}
+
+.developer-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.developer-body {
+  flex: 1;
+  padding: 1.5rem 2rem 2rem;
+  overflow-y: auto;
+}
+
+/* Адаптация под существующие компоненты админки */
+.developer-body .admin-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.developer-body .admin-section-header {
+  margin-bottom: 1.25rem;
+}
+
+.developer-body .admin-section-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.developer-body .admin-table-wrapper {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.developer-body .admin-table th {
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.developer-body .admin-table td {
+  color: #1e293b;
+}
+
+.developer-body .admin-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Стили для модальных окон */
+.developer-body .admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.developer-body .admin-modal-content {
+  background: white;
+  border-radius: 20px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* Медиа-запросы */
+@media (max-width: 768px) {
+  .developer-body {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .developer-body {
+    padding: 0.75rem;
+  }
+
+  .developer-body .admin-section {
+    padding: 1rem;
+  }
+}

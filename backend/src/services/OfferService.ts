@@ -199,7 +199,7 @@ export class OfferService {
   /**
    * Создать оффер
    */
-  async createOffer(data: CreateOfferDTO): Promise<Offer> {
+  async createOffer(data: CreateOfferDTO, userId?: string): Promise<Offer> {
     // Проверяем банк
     const bank = await this.bankRepository.findOne({
       where: { id: data.bankId },
@@ -244,6 +244,8 @@ export class OfferService {
       bankId: data.bankId,
       programEntity: program,
       programId: data.programId,
+      companyId: data.companyId || undefined,
+      createdById: userId,
     });
 
     return await this.offerRepository.save(offer);
@@ -293,7 +295,9 @@ export class OfferService {
         key !== "bankId" &&
         key !== "programId"
       ) {
-        (offer as any)[key] = updateData[key];
+        // 🔥 Преобразуем null в undefined для полей, которые могут быть null
+        const value = updateData[key] === null ? undefined : updateData[key];
+        (offer as any)[key] = value;
       }
     }
 
@@ -382,10 +386,18 @@ export class OfferService {
     bankId?: string;
     programId?: string;
     complexName?: string;
+    companyId?: string; // 🔥 ДОБАВЛЯЕМ
   }): Promise<{ minRate: number; maxRate: number }> {
     const query = this.offerRepository
       .createQueryBuilder("offer")
       .where("offer.isActive = true");
+
+    // 🔥 ДОБАВЛЯЕМ ФИЛЬТР ПО КОМПАНИИ
+    if (filters?.companyId) {
+      query.andWhere("offer.companyId = :companyId", {
+        companyId: filters.companyId,
+      });
+    }
 
     if (filters?.bankId) {
       query.andWhere("offer.bankId = :bankId", { bankId: filters.bankId });
@@ -400,10 +412,10 @@ export class OfferService {
     if (filters?.complexName) {
       query.andWhere(
         `(
-          offer.complexes IS NULL OR 
-          offer.complexes = '[]'::jsonb OR 
-          offer.complexes @> to_jsonb(ARRAY[:complexName]::text[])
-        )`,
+        offer.complexes IS NULL OR 
+        offer.complexes = '[]'::jsonb OR 
+        offer.complexes @> to_jsonb(ARRAY[:complexName]::text[])
+      )`,
         { complexName: filters.complexName },
       );
     }
