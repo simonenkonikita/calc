@@ -24,13 +24,6 @@
   flex-shrink: 0;
 }
 
-.brand-logo {
-  height: 36px;
-  width: auto;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
 /* ============================================================
    МЕНЮ (СДВИНУТО ВПРАВО)
    ============================================================ */
@@ -391,8 +384,9 @@
     font-size: 13px;
   }
 
-  .brand-logo {
-    height: 28px;
+  /* Логотип на мобильных — уменьшаем */
+  .nav-brand .logo-text {
+    font-size: 20px;
   }
 
   .nav-actions {
@@ -438,8 +432,9 @@
 }
 
 @media (max-width: 480px) {
-  .brand-logo {
-    height: 24px;
+  /* Логотип на маленьких экранах — ещё меньше */
+  .nav-brand .logo-text {
+    font-size: 18px;
   }
 
   .nav-menu {

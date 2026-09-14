@@ -5,6 +5,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "./AuthPanel.css";
 import { useAuth } from "../../hooks/ui/useAuth";
 import { authApi } from "../../services/auth";
+import { Logo } from "../Logo/Logo";
 
 interface AuthPanelProps {
   isOpen: boolean;
@@ -213,9 +214,7 @@ export const AuthPanel: React.FC<AuthPanelProps> = ({ isOpen, onClose }) => {
             ✕
           </button>
           <div className="auth-panel-logo">
-            <span className="logo-text">
-              Ipoteka<span className="logo-highlight">Partner</span>
-            </span>
+            <Logo size="large" linkTo="/" />
           </div>
         </div>
 

@@ -7,6 +7,7 @@ import "./AppNavigation.css";
 import { useAuthExtended } from "../../hooks/ui/useAuth";
 import ProfileDropdown from "../Auth/ProfileDropdown/ProfileDropdown";
 import NotificationBell from "../NotificationBell/NotificationBell";
+import { Logo } from "../Logo/Logo";
 
 const AppNavigation = () => {
   const location = useLocation();
@@ -101,9 +102,7 @@ const AppNavigation = () => {
       <nav className="navigation">
         <div className="nav-container">
           <div className="nav-brand">
-            <Link to="/" className="brand-link">
-              <img src="/logo.svg" alt="Логотип" className="brand-logo" />
-            </Link>
+            <Logo size="large" linkTo="/" variant="dark" />
           </div>
 
           <ul className="nav-menu">

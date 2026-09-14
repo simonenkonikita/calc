@@ -74,28 +74,6 @@
   color: #1e293b;
 }
 
-.auth-panel-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.auth-panel-logo .logo-icon {
-  font-size: 24px;
-}
-
-.auth-panel-logo .logo-highlight {
-  color: #6c5ce7;
-}
-
-.auth-panel-logo .logo-text {
-  font-size: 20px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
 /* ============================================================
    ТЕЛО
    ============================================================ */

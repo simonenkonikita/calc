@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./LandingPage.css";
+import { Footer } from "../../components/Footer/Footer";
 
 export const LandingPage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -158,18 +159,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="landing-footer">
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-brand">
-              <span className="logo-text">
-                Ipoteka<span className="logo-highlight">Partner</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
