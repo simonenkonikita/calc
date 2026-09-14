@@ -1,7 +1,7 @@
 // src/components/BankCard/BankCardHeader.tsx
 import React from "react";
-import { BankProgramResultWithIndex } from "../../../../utils/types";
-import { safeFormatMoney } from "../../../../utils/formatMoney";
+import { BankProgramResultWithIndex } from "../../../../../../utils/types";
+import { safeFormatMoney } from "../../../../../../utils/formatMoney";
 
 interface BankCardHeaderProps {
   offer: BankProgramResultWithIndex;

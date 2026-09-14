@@ -1,22 +1,25 @@
 // OfferBankSection.tsx
 
 import React, { useMemo, useState, useEffect } from "react";
-import type {
-  BankProgramResultWithIndex,
-  OfferBankSectionProps,
-} from "../../utils/types";
-import "./OfferBankSection.css";
 
-import { getProgramCategory } from "../../utils/category/getProgramCategory";
+import "./OfferBankSection.css";
 
 import { BankFilters } from "./BankFilters/BankFilters";
 import { NoResults } from "./NoResults/NoResults";
 import { BankGroup } from "./BankCard/BankGroup/BankGroup";
 import { FloatingSelectionBar } from "./FloatingSelectionBar/FloatingSelectionBar";
-import { getDisplayRate, getDisplaySubsidy } from "../../utils/offerHelpers";
-import { useDynamicOffersData } from "../../hooks/api/useDynamicOffersData";
-import { useConfig } from "../../hooks/api/useConfig";
-import { usePrograms } from "../../hooks/api/usePrograms";
+import { useConfig } from "../../../../hooks/api/useConfig";
+import { useDynamicOffersData } from "../../../../hooks/api/useDynamicOffersData";
+import { usePrograms } from "../../../../hooks/api/usePrograms";
+import { getProgramCategory } from "../../../../utils/category/getProgramCategory";
+import {
+  getDisplayRate,
+  getDisplaySubsidy,
+} from "../../../../utils/offerHelpers";
+import {
+  OfferBankSectionProps,
+  BankProgramResultWithIndex,
+} from "../../../../utils/types";
 
 export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   bankResults,

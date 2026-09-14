@@ -8,8 +8,8 @@ import { PrintButton } from "./PrintButton/PrintButton";
 import { SelectionCounter } from "./SelectionCounter/SelectionCounter";
 
 import "./FloatingSelectionBar.css";
-import { BankProgramResult } from "../../../utils/types";
-import { printSelectedOffers } from "../../../utils/offers/printSelectedOffers";
+import { printSelectedOffers } from "../../../../../utils/offers/printSelectedOffers";
+import { BankProgramResult } from "../../../../../utils/types";
 
 interface FloatingSelectionBarProps {
   selectedCards: Set<number>;

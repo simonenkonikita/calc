@@ -1,9 +1,10 @@
 // ResultsCalcSection.tsx
 
 import React from "react";
-import type { ObjectCalculationResult } from "../../utils/types";
+
 import "./ResultsSection.css";
-import { calculatePricePerM2 } from "../../utils/pricePerM2/pricePerM2";
+import { ObjectCalculationResult } from "../../../../utils/types";
+import { calculatePricePerM2 } from "../../../../utils/pricePerM2/pricePerM2";
 
 interface ResultsCalcSectionProps {
   objectResult: ObjectCalculationResult;

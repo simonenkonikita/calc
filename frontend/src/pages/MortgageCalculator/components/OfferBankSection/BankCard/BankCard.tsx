@@ -7,16 +7,16 @@ import "./BankExcessWarning.css"; // ✅ Импорт стилей для ове
 import { BankCardBadges } from "./BankCardBadges/BankCardBadges";
 import { BankCardDetails } from "./BankCardDetails/BankCardDetails";
 import { BankCardHeader } from "./BankCardHeader/BankCardHeader";
-import { getBadge } from "../../../utils/badge/getBadge";
-import { getExcessBadge } from "../../../utils/badge/getExcessBadge";
-import { getTermYearsBadge } from "../../../utils/badge/getTermYearsBadge";
-import { getTrancheBadge } from "../../../utils/badge/getTrancheBadge";
-import { BankProgramResultWithIndex } from "../../../utils/types";
-import { getLimitBadge } from "../../../utils/badge/getLimitBadge";
-import { getExcessBadgeTwoContract } from "../../../utils/badge/getExcessBadgeTwoContract";
-import { getLoanTermBadge } from "../../../utils/badge/getLoanTermBadge";
-import { DynamicInfoPopup } from "../../DynamicInfo/DynamicInfoPopup";
-import { useConfig } from "../../../hooks/api/useConfig";
+import { DynamicInfoPopup } from "../../../../../components/DynamicInfo/DynamicInfoPopup";
+import { useConfig } from "../../../../../hooks/api/useConfig";
+import { getBadge } from "../../../../../utils/badge/getBadge";
+import { getExcessBadge } from "../../../../../utils/badge/getExcessBadge";
+import { getExcessBadgeTwoContract } from "../../../../../utils/badge/getExcessBadgeTwoContract";
+import { getLimitBadge } from "../../../../../utils/badge/getLimitBadge";
+import { getLoanTermBadge } from "../../../../../utils/badge/getLoanTermBadge";
+import { getTermYearsBadge } from "../../../../../utils/badge/getTermYearsBadge";
+import { getTrancheBadge } from "../../../../../utils/badge/getTrancheBadge";
+import { BankProgramResultWithIndex } from "../../../../../utils/types";
 
 interface BankCardProps {
   offer: BankProgramResultWithIndex;

@@ -1,13 +1,13 @@
 // FormSection.tsx
 
 import { useMemo, ChangeEvent, useEffect } from "react";
-import { CalculatorFormData } from "../../utils/types";
+import { CalculatorFormData } from "../../../../utils/types";
 import "./FormSection.css";
-import { useConfig } from "../../hooks/api/useConfig";
-import { useComplexData } from "../../hooks/api/useComplexData";
-import { usePriceData } from "../../hooks/api/usePriceData";
-import { useAuthExtended } from "../../hooks/ui/useAuth";
-import { useCompanies } from "../../hooks/api/useCompanies";
+import { useConfig } from "../../../../hooks/api/useConfig";
+import { useComplexData } from "../../../../hooks/api/useComplexData";
+import { usePriceData } from "../../../../hooks/api/usePriceData";
+import { useAuthExtended } from "../../../../hooks/ui/useAuth";
+import { useCompanies } from "../../../../hooks/api/useCompanies";
 
 interface FormSectionProps {
   formData: CalculatorFormData;

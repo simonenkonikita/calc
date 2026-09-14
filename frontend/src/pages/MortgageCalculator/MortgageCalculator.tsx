@@ -2,12 +2,13 @@
 
 import React from "react";
 import "./MortgageCalculator.css";
-import { ResultsCalcSection } from "../../components/ResultsCalcSection/ResultsCalcSection";
-import { OfferBankSection } from "../../components/OfferBankSection/OfferBankSection";
-import { FormSection } from "../../components/FormSection/FormSection";
+
+import { FormSection } from "./components/FormSection/FormSection";
 
 import { useMortgageCalculator } from "../../hooks/ui/useMortgageCalculator";
 import EmptyResults from "./components/EmptyResults/EmptyResults";
+import { OfferBankSection } from "./components/OfferBankSection/OfferBankSection";
+import { ResultsCalcSection } from "./components/ResultsCalcSection/ResultsCalcSection";
 
 export const MortgageCalculator: React.FC = () => {
   const {
@@ -18,6 +19,7 @@ export const MortgageCalculator: React.FC = () => {
     handleInputChange,
     handleSelectOffer,
     formatMoney,
+    formChanged,
     calculateResults,
     clearCache,
     _filtersRef,
@@ -76,7 +78,7 @@ export const MortgageCalculator: React.FC = () => {
     }, 100);
   };
 
-  // 🔥 Определяем, можно ли показывать результаты (исправлено)
+  // 🔥 Определяем, можно ли показывать результаты
   const hasValidData = Boolean(
     formData.complex && formData.apartmentType && formData.area > 0,
   );
@@ -99,59 +101,56 @@ export const MortgageCalculator: React.FC = () => {
   return (
     <div className="mortgage-calculator-page">
       <div className="calculator">
-        {/* Левая колонка - закреплена */}
+        {/* Левая колонка — только форма */}
         <div className="calculator-form-wrapper">
-          <div className="calculator-form-wrapper">
-            {/* 🔥 ResultsCalcSection всегда показывается */}
-            <div className="results-white-card">
-              {isCalculating ? (
-                <div className="loading-state">
-                  <div className="loading-spinner">
-                    <div className="spinner"></div>
-                    <p>Расчёт ипотечных программ...</p>
-                  </div>
-                </div>
-              ) : error ? (
-                <div className="error-state">
-                  <div className="error-content">
-                    <div className="error-icon">⚠️</div>
-                    <div className="error-text">
-                      <strong>Ошибка расчёта</strong>
-                      <p>{error}</p>
-                    </div>
-                    <button
-                      className="error-retry-btn"
-                      onClick={calculateResults}
-                    >
-                      Повторить
-                    </button>
-                  </div>
-                </div>
-              ) : results ? (
-                <ResultsCalcSection
-                  objectResult={results.objectResult}
-                  formatMoney={formatMoney}
-                />
-              ) : (
-                // 🔥 Показываем те же поля, но с прочерками
-                <ResultsCalcSection
-                  objectResult={emptyObjectResult}
-                  formatMoney={formatMoney}
-                />
-              )}
-            </div>
-
-            <FormSection
-              formData={formData}
-              onInputChange={handleInputChange}
-              onCalculate={handleCalculate}
-              isCalculating={isCalculating}
-            />
-          </div>
+          <FormSection
+            formData={formData}
+            onInputChange={handleInputChange}
+            onCalculate={handleCalculate}
+            isCalculating={isCalculating}
+          />
         </div>
 
-        {/* Правая колонка - скроллится */}
+        {/* Правая колонка — результаты + офферы */}
         <div className="calculator-results">
+          {/* 🔥 Секция результатов над офферами */}
+          <div className="results-white-card">
+            {isCalculating ? (
+              <div className="loading-state">
+                <div className="loading-spinner">
+                  <div className="spinner"></div>
+                  <p>Расчёт ипотечных программ...</p>
+                </div>
+              </div>
+            ) : error ? (
+              <div className="error-state">
+                <div className="error-content">
+                  <div className="error-icon">⚠️</div>
+                  <div className="error-text">
+                    <strong>Ошибка расчёта</strong>
+                    <p>{error}</p>
+                  </div>
+                  <button
+                    className="error-retry-btn"
+                    onClick={calculateResults}
+                  >
+                    Повторить
+                  </button>
+                </div>
+              </div>
+            ) : results ? (
+              <ResultsCalcSection
+                objectResult={results.objectResult}
+                formatMoney={formatMoney}
+              />
+            ) : (
+              <ResultsCalcSection
+                objectResult={emptyObjectResult}
+                formatMoney={formatMoney}
+              />
+            )}
+          </div>
+
           {!isCalculating && hasResults ? (
             <OfferBankSection
               bankResults={results.bankResults}
@@ -174,8 +173,11 @@ export const MortgageCalculator: React.FC = () => {
               filtersRef={_filtersRef}
             />
           ) : (
-            // 🔥 Используем вынесенный компонент EmptyResults
-            <EmptyResults hasValidData={hasValidData} formData={formData} />
+            <EmptyResults
+              hasValidData={hasValidData}
+              formChanged={formChanged}
+              formData={formData}
+            />
           )}
         </div>
       </div>
