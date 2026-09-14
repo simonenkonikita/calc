@@ -4,22 +4,39 @@ import { Request, Response } from "express";
 import { ComplexService } from "../services/ComplexService";
 import { ProgramService } from "../services/ProgramService";
 
+interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    role: string;
+    companyId?: string;
+  };
+}
+
 const complexService = new ComplexService();
 const programService = new ProgramService();
 
-export const getProjects = async (req: Request, res: Response) => {
+// ============================================================
+// GET /projects - все проекты с фильтрацией по компании
+// ============================================================
+export const getProjects = async (req: AuthRequest, res: Response) => {
   try {
-    const complexes = await complexService.getAllComplexes();
+    const user = req.user;
+    const isAdmin = user?.role === "admin";
+    const companyId = user?.companyId;
 
-    // Трансформируем в формат, который ожидает фронтенд
+    let complexes;
+
+    if (isAdmin) {
+      complexes = await complexService.getAllComplexes();
+    } else if (companyId) {
+      complexes = await complexService.getComplexesByCompany(companyId);
+    } else {
+      return res.json({ success: true, data: [] });
+    }
+
     const projects = [];
 
     for (const complex of complexes) {
-      // Получаем программы для этого ЖК
-      const eligiblePrograms = await programService.getProgramsForComplex(
-        complex.name,
-      );
-
       if (complex.apartmentTypes && complex.apartmentTypes.length > 0) {
         for (const at of complex.apartmentTypes) {
           projects.push({
@@ -32,7 +49,9 @@ export const getProjects = async (req: Request, res: Response) => {
                 : complex.status === "сдан"
                   ? "🏢"
                   : "🏠",
-            description: complex.description,
+            companyId: complex.companyId,
+            description: complex.description || "",
+            priceInfo: `${at.pricePerSquareMeter.toLocaleString()} ₽/м²`,
             apartmentType: at.type,
             pricePerSquareMeter: at.pricePerSquareMeter,
             surcharges: at.surcharges || {
@@ -43,8 +62,8 @@ export const getProjects = async (req: Request, res: Response) => {
             paymentTerms: complex.paymentTerms || [],
             promotions: complex.promotions || [],
             specialOffers: complex.specialOffers || [],
-            materialsLink: complex.materialsLink,
-            eligiblePrograms: eligiblePrograms, 
+            materialsLink: complex.materialsLink || undefined,
+            eligiblePrograms: [],
           });
         }
       }
@@ -63,9 +82,14 @@ export const getProjects = async (req: Request, res: Response) => {
   }
 };
 
-export const getProjectById = async (req: Request, res: Response) => {
+// ============================================================
+// GET /projects/:id - проект по ID
+// ============================================================
+export const getProjectById = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const user = req.user;
+
     const complex = await complexService.getComplexById(id);
 
     if (!complex) {
@@ -75,10 +99,15 @@ export const getProjectById = async (req: Request, res: Response) => {
       });
     }
 
-    // Получаем программы для этого ЖК
-    const eligiblePrograms = await programService.getProgramsForComplex(
-      complex.name,
-    );
+    const isAdmin = user?.role === "admin";
+    const userCompanyId = user?.companyId;
+
+    if (!isAdmin && complex.companyId !== userCompanyId) {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied: Project does not belong to your company",
+      });
+    }
 
     if (!complex.apartmentTypes || complex.apartmentTypes.length === 0) {
       return res.status(404).json({
@@ -87,8 +116,7 @@ export const getProjectById = async (req: Request, res: Response) => {
       });
     }
 
-    // Трансформируем в формат, который ожидает фронтенд
-    const projects = complex.apartmentTypes.map((at) => ({
+    const projectData = complex.apartmentTypes.map((at) => ({
       id: complex.id,
       complexName: complex.name,
       status: complex.status,
@@ -98,7 +126,9 @@ export const getProjectById = async (req: Request, res: Response) => {
           : complex.status === "сдан"
             ? "🏢"
             : "🏠",
-      description: complex.description,
+      companyId: complex.companyId,
+      description: complex.description || "",
+      priceInfo: `${at.pricePerSquareMeter.toLocaleString()} ₽/м²`,
       apartmentType: at.type,
       pricePerSquareMeter: at.pricePerSquareMeter,
       surcharges: at.surcharges || {
@@ -109,13 +139,13 @@ export const getProjectById = async (req: Request, res: Response) => {
       paymentTerms: complex.paymentTerms || [],
       promotions: complex.promotions || [],
       specialOffers: complex.specialOffers || [],
-      materialsLink: complex.materialsLink,
-      eligiblePrograms: eligiblePrograms,
+      materialsLink: complex.materialsLink || undefined,
+      eligiblePrograms: [],
     }));
 
     res.json({
       success: true,
-      data: projects[0] || null,
+      data: projectData[0] || null,
     });
   } catch (error) {
     console.error("Error getting project:", error);
@@ -126,15 +156,30 @@ export const getProjectById = async (req: Request, res: Response) => {
   }
 };
 
-export const getApartmentTypes = async (req: Request, res: Response) => {
+// ============================================================
+// GET /projects/:id/types - типы квартир
+// ============================================================
+export const getApartmentTypes = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const user = req.user;
+
     const complex = await complexService.getComplexById(id);
 
     if (!complex) {
       return res.status(404).json({
         success: false,
         error: "Project not found",
+      });
+    }
+
+    const isAdmin = user?.role === "admin";
+    const userCompanyId = user?.companyId;
+
+    if (!isAdmin && complex.companyId !== userCompanyId) {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied: Project does not belong to your company",
       });
     }
 
@@ -161,15 +206,30 @@ export const getApartmentTypes = async (req: Request, res: Response) => {
   }
 };
 
-export const getProjectBanks = async (req: Request, res: Response) => {
+// ============================================================
+// GET /projects/:id/banks - банки проекта
+// ============================================================
+export const getProjectBanks = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const user = req.user;
+
     const complex = await complexService.getComplexById(id);
 
     if (!complex) {
       return res.status(404).json({
         success: false,
         error: "Project not found",
+      });
+    }
+
+    const isAdmin = user?.role === "admin";
+    const userCompanyId = user?.companyId;
+
+    if (!isAdmin && complex.companyId !== userCompanyId) {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied: Project does not belong to your company",
       });
     }
 
@@ -186,15 +246,30 @@ export const getProjectBanks = async (req: Request, res: Response) => {
   }
 };
 
-export const getProjectPrograms = async (req: Request, res: Response) => {
+// ============================================================
+// GET /projects/:id/programs - программы для проекта
+// ============================================================
+export const getProjectPrograms = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const user = req.user;
+
     const complex = await complexService.getComplexById(id);
 
     if (!complex) {
       return res.status(404).json({
         success: false,
         error: "Project not found",
+      });
+    }
+
+    const isAdmin = user?.role === "admin";
+    const userCompanyId = user?.companyId;
+
+    if (!isAdmin && complex.companyId !== userCompanyId) {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied: Project does not belong to your company",
       });
     }
 
@@ -210,7 +285,7 @@ export const getProjectPrograms = async (req: Request, res: Response) => {
     console.error("Error getting project programs:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to get project programs",
+      error: error instanceof Error ? error.message : "Failed to get programs",
     });
   }
 };

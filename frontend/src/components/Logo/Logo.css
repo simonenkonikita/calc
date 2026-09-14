@@ -1,0 +1,52 @@
+/* frontend/src/components/Logo/Logo.css */
+
+.logo-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.3s;
+}
+
+.logo-link:hover {
+  opacity: 0.85;
+}
+
+.logo-text {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Размеры */
+.logo-small {
+  font-size: 16px;
+}
+
+.logo-medium {
+  font-size: 20px;
+}
+
+.logo-large {
+  font-size: 28px;
+}
+
+/* ============================================================
+   ВАРИАНТЫ ТЕМЫ
+   ============================================================ */
+
+/* Светлая тема: Ipoteka — чёрный, Partner — фиолетовый */
+.logo-variant-light {
+  color: #000000;
+}
+.logo-variant-light .logo-highlight {
+  color: #6c5ce7;
+}
+
+/* Тёмная тема: Ipoteka — чёрный, Partner — белый */
+.logo-variant-dark {
+  color: #000000;
+}
+.logo-variant-dark .logo-highlight {
+  color: #ffffff;
+}

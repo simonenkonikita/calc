@@ -1,0 +1,48 @@
+/* frontend/src/pages/Admin/sections/UsersSection.css */
+
+@import "../../admin-variables.css";
+
+/* ============================================================
+   👥 USERS SECTION - СТИЛЬ ЛЕНДИНГА
+   ============================================================ */
+
+.users-section .role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.users-section .role-badge.admin {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.users-section .role-badge.developer_admin {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.users-section .role-badge.developer_manager {
+  background: var(--success-bg);
+  color: #065f46;
+}
+
+.users-section .role-badge.agent {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+/* ============================================================
+   📱 АДАПТИВ
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .users-section .role-badge {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.4rem;
+  }
+}

@@ -11,6 +11,14 @@ export class ComplexService {
   private apartmentTypeRepository = AppDataSource.getRepository(ApartmentType);
   private programService = new ProgramService();
 
+  async getComplexesByCompany(companyId: string): Promise<Complex[]> {
+    return this.complexRepository.find({
+      where: { companyId, isActive: true },
+      relations: ["apartmentTypes", "company"],
+      order: { name: "ASC" },
+    });
+  }
+
   /**
    * Получить все ЖК
    */
@@ -82,6 +90,7 @@ export class ComplexService {
       specialOffers: data.specialOffers || [],
       materialsLink: data.materialsLink || "",
       isActive: data.isActive !== undefined ? data.isActive : true,
+      companyId: data.companyId,
     });
 
     await this.complexRepository.save(complex);
@@ -108,11 +117,15 @@ export class ComplexService {
     if (data.status !== undefined) complex.status = data.status;
     if (data.description !== undefined) complex.description = data.description;
     if (data.banks !== undefined) complex.banks = data.banks;
-    if (data.paymentTerms !== undefined) complex.paymentTerms = data.paymentTerms;
+    if (data.paymentTerms !== undefined)
+      complex.paymentTerms = data.paymentTerms;
     if (data.promotions !== undefined) complex.promotions = data.promotions;
-    if (data.specialOffers !== undefined) complex.specialOffers = data.specialOffers;
-    if (data.materialsLink !== undefined) complex.materialsLink = data.materialsLink;
+    if (data.specialOffers !== undefined)
+      complex.specialOffers = data.specialOffers;
+    if (data.materialsLink !== undefined)
+      complex.materialsLink = data.materialsLink;
     if (data.isActive !== undefined) complex.isActive = data.isActive;
+    if (data.companyId !== undefined) complex.companyId = data.companyId;
 
     // Если изменилось имя, обновляем slug
     if (data.name && data.name !== complex.name) {
@@ -204,7 +217,7 @@ export class ComplexService {
 
     // Фильтруем по банкам
     const filtered = complexes.filter(
-      (complex) => complex.banks && complex.banks.includes(bankName)
+      (complex) => complex.banks && complex.banks.includes(bankName),
     );
 
     for (const complex of filtered) {
@@ -213,5 +226,66 @@ export class ComplexService {
     }
 
     return filtered;
+  }
+
+  // ============================================================
+  // 🔥 УПРАВЛЕНИЕ УСЛОВИЯМИ ОПЛАТЫ
+  // ============================================================
+
+  // Добавить условие оплаты
+  async addPaymentTerm(
+    complexId: string,
+    term: string,
+    userId: string,
+  ): Promise<Complex | null> {
+    const complex = await this.getComplexById(complexId);
+    if (!complex) return null;
+
+    if (!complex.paymentTerms) {
+      complex.paymentTerms = [];
+    }
+
+    // Проверяем, что такое условие еще не добавлено
+    if (!complex.paymentTerms.includes(term)) {
+      complex.paymentTerms.push(term);
+      complex.updatedById = userId;
+      await this.complexRepository.save(complex);
+    }
+
+    return complex;
+  }
+
+  // Удалить условие оплаты
+  async removePaymentTerm(
+    complexId: string,
+    term: string,
+    userId: string,
+  ): Promise<Complex | null> {
+    const complex = await this.getComplexById(complexId);
+    if (!complex) return null;
+
+    if (complex.paymentTerms) {
+      complex.paymentTerms = complex.paymentTerms.filter((t) => t !== term);
+      complex.updatedById = userId;
+      await this.complexRepository.save(complex);
+    }
+
+    return complex;
+  }
+
+  // Обновить все условия оплаты (массовое обновление)
+  async updatePaymentTerms(
+    complexId: string,
+    terms: string[],
+    userId: string,
+  ): Promise<Complex | null> {
+    const complex = await this.getComplexById(complexId);
+    if (!complex) return null;
+
+    complex.paymentTerms = terms;
+    complex.updatedById = userId;
+    await this.complexRepository.save(complex);
+
+    return complex;
   }
 }

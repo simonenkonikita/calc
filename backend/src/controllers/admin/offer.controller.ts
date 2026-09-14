@@ -1,23 +1,58 @@
 // backend/src/controllers/admin/offer.controller.ts
-
 import { Request, Response } from "express";
 import { OfferService } from "../../services/OfferService";
 import { CreateOfferDTO, UpdateOfferDTO } from "../../dtos/OfferDto";
 import { BaseController } from "./base.controller";
-// 🔥 Добавляем импорты для работы с БД
+import { AuthRequest } from "../../types/auth.types";
 import { AppDataSource } from "../../data-source";
-import { DynamicRate } from "../../entities/DynamicRate";
-import { DynamicSubsidy } from "../../entities/DynamicSubsidy";
+import { Offer } from "../../entities/Offer";
 
 const offerService = new OfferService();
+const offerRepository = AppDataSource.getRepository(Offer);
 
 export class OfferController extends BaseController {
   /**
-   * Получить все офферы (для админки)
+   * Получить все офферы (с учетом прав пользователя)
    */
-  async getAll(req: Request, res: Response) {
+  async getAll(req: AuthRequest, res: Response) {
     try {
-      const offers = await offerService.getAllOffersAdmin();
+      const user = req.user;
+
+      // 🔥 ЯВНО УКАЗЫВАЕМ ТИП
+      let offers: Offer[] = [];
+
+      if (user?.role === "admin") {
+        // Админ видит все
+        offers = await offerService.getAllOffersAdmin();
+      } else if (user?.role === "developer_admin" && user.companyId) {
+        // Developer Admin видит только свои офферы
+        offers = await offerRepository.find({
+          where: { companyId: user.companyId, isActive: true },
+          relations: [
+            "bank",
+            "programEntity",
+            "dynamicRates",
+            "dynamicSubsidies",
+            "company",
+          ],
+          order: { createdAt: "DESC" },
+        });
+      } else if (user?.role === "developer_manager" && user.companyId) {
+        // Manager видит только свои офферы (только чтение)
+        offers = await offerRepository.find({
+          where: { companyId: user.companyId, isActive: true },
+          relations: [
+            "bank",
+            "programEntity",
+            "dynamicRates",
+            "dynamicSubsidies",
+            "company",
+          ],
+          order: { createdAt: "DESC" },
+        });
+      }
+      // else offers уже пустой массив
+
       res.json({
         success: true,
         data: offers,
@@ -28,11 +63,171 @@ export class OfferController extends BaseController {
   }
 
   /**
+   * Создать оффер (только admin или developer_admin)
+   */
+  async create(req: AuthRequest, res: Response) {
+    try {
+      const data: CreateOfferDTO = req.body;
+      const currentUser = req.user;
+
+      // Проверяем права
+      if (
+        !currentUser ||
+        (currentUser.role !== "admin" && currentUser.role !== "developer_admin")
+      ) {
+        return res.status(403).json({
+          success: false,
+          error: "Доступ запрещен. Только администратор может создавать офферы",
+        });
+      }
+
+      // Если developer_admin, привязываем к его компании
+      if (currentUser.role === "developer_admin") {
+        if (!currentUser.companyId) {
+          return res.status(400).json({
+            success: false,
+            error: "У вас нет компании",
+          });
+        }
+        // Передаем companyId в сервис
+        data.companyId = currentUser.companyId;
+      }
+
+      const offer = await offerService.createOffer(data, currentUser.id);
+
+      res.status(201).json({
+        success: true,
+        data: offer,
+      });
+    } catch (error) {
+      this.handleError(res, error, "Failed to create offer");
+    }
+  }
+
+  /**
+   * Обновить оффер (с проверкой прав)
+   */
+  async update(req: AuthRequest, res: Response) {
+    try {
+      const { id } = req.params;
+      const data: UpdateOfferDTO = { id, ...req.body };
+      const currentUser = req.user;
+
+      // Проверяем существование
+      const existingOffer = await offerRepository.findOne({
+        where: { id },
+        relations: ["company"],
+      });
+
+      if (!existingOffer) {
+        return this.handleNotFound(res, "Offer");
+      }
+
+      // Проверяем права
+      if (currentUser?.role === "developer_admin") {
+        if (existingOffer.companyId !== currentUser.companyId) {
+          return res.status(403).json({
+            success: false,
+            error:
+              "Доступ запрещен. Вы можете редактировать только свои офферы",
+          });
+        }
+      } else if (currentUser?.role !== "admin") {
+        return res.status(403).json({
+          success: false,
+          error: "Доступ запрещен. Недостаточно прав",
+        });
+      }
+
+      const offer = await offerService.updateOffer(id, data);
+
+      res.json({
+        success: true,
+        data: offer,
+      });
+    } catch (error) {
+      this.handleError(res, error, "Failed to update offer");
+    }
+  }
+
+  /**
+   * Удалить оффер (с проверкой прав)
+   */
+  async delete(req: AuthRequest, res: Response) {
+    try {
+      const { id } = req.params;
+      const currentUser = req.user;
+
+      const existingOffer = await offerRepository.findOne({
+        where: { id },
+        relations: ["company"],
+      });
+
+      if (!existingOffer) {
+        return this.handleNotFound(res, "Offer");
+      }
+
+      // Проверяем права
+      if (currentUser?.role === "developer_admin") {
+        if (existingOffer.companyId !== currentUser.companyId) {
+          return res.status(403).json({
+            success: false,
+            error: "Доступ запрещен. Вы можете удалять только свои офферы",
+          });
+        }
+      } else if (currentUser?.role !== "admin") {
+        return res.status(403).json({
+          success: false,
+          error: "Доступ запрещен. Недостаточно прав",
+        });
+      }
+
+      await offerService.deleteOffer(id);
+      res.json({
+        success: true,
+        message: "Offer deleted successfully",
+      });
+    } catch (error) {
+      this.handleError(res, error, "Failed to delete offer");
+    }
+  }
+
+  /**
    * Получить активные офферы
    */
-  async getActive(req: Request, res: Response) {
+  async getActive(req: AuthRequest, res: Response) {
     try {
-      const offers = await offerService.getAllOffers();
+      const user = req.user;
+      let offers: Offer[] = [];
+
+      if (user?.role === "admin") {
+        offers = await offerService.getAllOffers();
+      } else if (user?.role === "developer_admin" && user.companyId) {
+        offers = await offerRepository.find({
+          where: { companyId: user.companyId, isActive: true },
+          relations: [
+            "bank",
+            "programEntity",
+            "dynamicRates",
+            "dynamicSubsidies",
+            "company",
+          ],
+          order: { createdAt: "DESC" },
+        });
+      } else if (user?.role === "developer_manager" && user.companyId) {
+        offers = await offerRepository.find({
+          where: { companyId: user.companyId, isActive: true },
+          relations: [
+            "bank",
+            "programEntity",
+            "dynamicRates",
+            "dynamicSubsidies",
+            "company",
+          ],
+          order: { createdAt: "DESC" },
+        });
+      }
+
       res.json({
         success: true,
         data: offers,
@@ -43,15 +238,36 @@ export class OfferController extends BaseController {
   }
 
   /**
-   * Получить оффер по ID
+   * Получить оффер по ID (с проверкой прав)
    */
-  async getOne(req: Request, res: Response) {
+  async getOne(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
-      const offer = await offerService.getOfferById(id);
+      const currentUser = req.user;
+
+      const offer = await offerRepository.findOne({
+        where: { id },
+        relations: [
+          "bank",
+          "programEntity",
+          "dynamicRates",
+          "dynamicSubsidies",
+          "company",
+        ],
+      });
 
       if (!offer) {
         return this.handleNotFound(res, "Offer");
+      }
+
+      // Проверяем права доступа
+      if (currentUser?.role !== "admin") {
+        if (offer.companyId !== currentUser?.companyId) {
+          return res.status(403).json({
+            success: false,
+            error: "Доступ запрещен. Вы не можете просматривать этот оффер",
+          });
+        }
       }
 
       res.json({
@@ -64,77 +280,22 @@ export class OfferController extends BaseController {
   }
 
   /**
-   * Создать оффер
+   * Восстановить оффер (только admin)
    */
-  async create(req: Request, res: Response) {
-    try {
-      const data: CreateOfferDTO = req.body;
-      console.log("📝 Creating offer with data:", data);
-
-      const offer = await offerService.createOffer(data);
-      console.log("✅ Offer created:", offer.id);
-
-      res.status(201).json({
-        success: true,
-        data: offer,
-      });
-    } catch (error) {
-      this.handleError(res, error, "Failed to create offer");
-    }
-  }
-
-  /**
-   * Обновить оффер
-   */
-  async update(req: Request, res: Response) {
+  async restore(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
-      const data: UpdateOfferDTO = { id, ...req.body };
-      console.log(`📝 Updating offer ${id} with data:`, data);
+      const currentUser = req.user;
 
-      const offer = await offerService.updateOffer(id, data);
-      console.log("✅ Offer updated:", offer.id);
-
-      res.json({
-        success: true,
-        data: offer,
-      });
-    } catch (error) {
-      this.handleError(res, error, "Failed to update offer");
-    }
-  }
-
-  /**
-   * Мягкое удаление оффера
-   */
-  async delete(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      console.log(`🗑️ Soft deleting offer ${id}`);
-
-      await offerService.deleteOffer(id);
-      console.log("✅ Offer soft deleted");
-
-      res.json({
-        success: true,
-        message: "Offer deleted successfully",
-      });
-    } catch (error) {
-      this.handleError(res, error, "Failed to delete offer");
-    }
-  }
-
-  /**
-   * Восстановить оффер
-   */
-  async restore(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      console.log(`🔄 Restoring offer ${id}`);
+      if (currentUser?.role !== "admin") {
+        return res.status(403).json({
+          success: false,
+          error:
+            "Доступ запрещен. Только администратор может восстанавливать офферы",
+        });
+      }
 
       await offerService.restoreOffer(id);
-      console.log("✅ Offer restored");
-
       res.json({
         success: true,
         message: "Offer restored successfully",
@@ -145,73 +306,72 @@ export class OfferController extends BaseController {
   }
 
   /**
-   * Полное удаление оффера (hard delete)
-   * 🔥 Удаляем все связанные записи перед удалением оффера
+   * Полное удаление оффера (hard delete) - только admin
    */
-  async hardDelete(req: Request, res: Response) {
+  async hardDelete(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
-      console.log(`🗑️ Hard deleting offer ${id}`);
+      const currentUser = req.user;
 
-      // 🔥 Проверяем, существует ли оффер
-      const offer = await offerService.getOfferById(id);
-      if (!offer) {
-        return this.handleNotFound(res, "Offer");
+      if (currentUser?.role !== "admin") {
+        return res.status(403).json({
+          success: false,
+          error:
+            "Доступ запрещен. Только администратор может полностью удалять офферы",
+        });
       }
 
-      // 🔥 Получаем репозитории
-      const rateRepository = AppDataSource.getRepository(DynamicRate);
-      const subsidyRepository = AppDataSource.getRepository(DynamicSubsidy);
-
-      // 🔥 1. Удаляем все связанные динамические ставки
-      const rates = await rateRepository.find({ where: { offerId: id } });
-      console.log(`📊 Found ${rates.length} rates to delete`);
-      for (const rate of rates) {
-        await rateRepository.delete(rate.id);
-        console.log(`🗑️ Deleted rate ${rate.id}`);
-      }
-
-      // 🔥 2. Удаляем все связанные динамические субсидии
-      const subsidies = await subsidyRepository.find({
-        where: { offerId: id },
-      });
-      console.log(`📊 Found ${subsidies.length} subsidies to delete`);
-      for (const subsidy of subsidies) {
-        await subsidyRepository.delete(subsidy.id);
-        console.log(`🗑️ Deleted subsidy ${subsidy.id}`);
-      }
-
-      // 🔥 3. Теперь удаляем сам оффер (hard delete)
       await offerService.hardDeleteOffer(id);
-      console.log("✅ Offer hard deleted");
-
       res.json({
         success: true,
         message: "Offer permanently deleted",
       });
     } catch (error) {
-      console.error("❌ Error hard deleting offer:", error);
-      res.status(500).json({
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to hard delete offer",
-      });
+      this.handleError(res, error, "Failed to hard delete offer");
     }
   }
 
   /**
    * Копировать оффер
    */
-  async copy(req: Request, res: Response) {
+  async copy(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
-      console.log(`📋 Copying offer ${id}`);
+      const currentUser = req.user;
+
+      // Проверяем права на копирование
+      if (
+        !currentUser ||
+        (currentUser.role !== "admin" && currentUser.role !== "developer_admin")
+      ) {
+        return res.status(403).json({
+          success: false,
+          error:
+            "Доступ запрещен. Только администратор может копировать офферы",
+        });
+      }
+
+      // Проверяем существование
+      const existingOffer = await offerRepository.findOne({
+        where: { id },
+        relations: ["company"],
+      });
+
+      if (!existingOffer) {
+        return this.handleNotFound(res, "Offer");
+      }
+
+      // Проверяем права на копирование
+      if (currentUser.role === "developer_admin") {
+        if (existingOffer.companyId !== currentUser.companyId) {
+          return res.status(403).json({
+            success: false,
+            error: "Доступ запрещен. Вы можете копировать только свои офферы",
+          });
+        }
+      }
 
       const copy = await offerService.copyOffer(id);
-      console.log("✅ Offer copied:", copy.id);
-
       res.status(201).json({
         success: true,
         data: copy,
@@ -225,31 +385,60 @@ export class OfferController extends BaseController {
   /**
    * Получить офферы с фильтрацией
    */
-  async getFiltered(req: Request, res: Response) {
+  async getFiltered(req: AuthRequest, res: Response) {
     try {
       const filters = req.query;
-      console.log("🔍 Filtering offers with:", filters);
+      const user = req.user;
 
-      const offers = await offerService.getOffersFiltered({
-        bankId: filters.bankId as string,
-        programId: filters.programId as string,
-        programType: filters.programType as string,
-        complexName: filters.complexName as string,
-        isActive: filters.isActive ? filters.isActive === "true" : undefined,
-        minRate: filters.minRate
-          ? parseFloat(filters.minRate as string)
-          : undefined,
-        maxRate: filters.maxRate
-          ? parseFloat(filters.maxRate as string)
-          : undefined,
-        minPVPercent: filters.minPVPercent
-          ? parseFloat(filters.minPVPercent as string)
-          : undefined,
-        maxPVPercent: filters.maxPVPercent
-          ? parseFloat(filters.maxPVPercent as string)
-          : undefined,
-        search: filters.search as string,
-      });
+      let offers: Offer[] = [];
+
+      // Если не админ, добавляем фильтр по компании
+      if (user?.role !== "admin" && user?.companyId) {
+        // Добавляем companyId в фильтры
+        const filterData = {
+          bankId: filters.bankId as string,
+          programId: filters.programId as string,
+          programType: filters.programType as string,
+          complexName: filters.complexName as string,
+          isActive: filters.isActive ? filters.isActive === "true" : undefined,
+          minRate: filters.minRate
+            ? parseFloat(filters.minRate as string)
+            : undefined,
+          maxRate: filters.maxRate
+            ? parseFloat(filters.maxRate as string)
+            : undefined,
+          minPVPercent: filters.minPVPercent
+            ? parseFloat(filters.minPVPercent as string)
+            : undefined,
+          maxPVPercent: filters.maxPVPercent
+            ? parseFloat(filters.maxPVPercent as string)
+            : undefined,
+          search: filters.search as string,
+          companyId: user.companyId, // 🔥 Добавляем фильтр по компании
+        };
+        offers = await offerService.getOffersFiltered(filterData);
+      } else {
+        offers = await offerService.getOffersFiltered({
+          bankId: filters.bankId as string,
+          programId: filters.programId as string,
+          programType: filters.programType as string,
+          complexName: filters.complexName as string,
+          isActive: filters.isActive ? filters.isActive === "true" : undefined,
+          minRate: filters.minRate
+            ? parseFloat(filters.minRate as string)
+            : undefined,
+          maxRate: filters.maxRate
+            ? parseFloat(filters.maxRate as string)
+            : undefined,
+          minPVPercent: filters.minPVPercent
+            ? parseFloat(filters.minPVPercent as string)
+            : undefined,
+          maxPVPercent: filters.maxPVPercent
+            ? parseFloat(filters.maxPVPercent as string)
+            : undefined,
+          search: filters.search as string,
+        });
+      }
 
       res.json({
         success: true,
@@ -264,14 +453,16 @@ export class OfferController extends BaseController {
   /**
    * Получить диапазон ставок
    */
-  async getRateRange(req: Request, res: Response) {
+  async getRateRange(req: AuthRequest, res: Response) {
     try {
       const { bankId, programId, complexName } = req.query;
+      const user = req.user;
 
       const range = await offerService.getRateRange({
         bankId: bankId as string,
         programId: programId as string,
         complexName: complexName as string,
+        companyId: user?.role !== "admin" ? user?.companyId : undefined,
       });
 
       res.json({

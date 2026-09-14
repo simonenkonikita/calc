@@ -71,6 +71,19 @@ export const useMortgageData = () => {
     }
   }, []);
 
+  // 🔥 СБРОС РЕЗУЛЬТАТОВ — возвращаемся к дефолтному состоянию
+  // Используется при изменении формы после расчёта
+  const reset = useCallback(() => {
+    // Отменяем активный запрос, если есть
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setResults(null);
+    setError(null);
+    setIsCalculating(false);
+  }, []);
+
   // 🔥 Очистка кеша (через сервис)
   const clearCache = useCallback(() => {
     mortgageCache.clear();
@@ -97,5 +110,6 @@ export const useMortgageData = () => {
     calculate,
     clearCache,
     getCacheSize,
+    reset, // ← 🔥 добавлено
   };
 };

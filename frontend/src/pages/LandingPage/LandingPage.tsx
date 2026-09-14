@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./LandingPage.css";
+import { Footer } from "../../components/Footer/Footer";
 
 export const LandingPage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -13,33 +14,10 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="landing-page">
-      {/* Навигация */}
-      <nav className="landing-nav">
-        <div className="nav-container">
-          <div className="logo">
-            <span className="logo-icon">🏠</span>
-            <span className="logo-text">
-              Mortgage<span className="logo-highlight">Calc</span>
-            </span>
-          </div>
-          <div className="nav-links">
-            <a href="#features">Возможности</a>
-            <a href="#benefits">Преимущества</a>
-            <Link to="/calculator" className="nav-cta">
-              Начать расчёт
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero секция */}
       <section className="hero">
         <div className="hero-container">
           <div className={`hero-content ${isVisible ? "fade-in-up" : ""}`}>
-            {/* <div className="hero-badge">
-              <span className="badge-dot"></span>
-              Интеллектуальный расчёт ипотеки
-            </div> */}
             <h1 className="hero-title">
               Найдите идеальное ипотечное решение
               <br />
@@ -53,7 +31,6 @@ export const LandingPage: React.FC = () => {
               <Link to="/calculator" className="btn-primary">
                 🚀 Начать расчёт
               </Link>
-              {/*  <button className="btn-secondary">📹 Смотреть демо</button> */}
             </div>
             <div className="hero-stats">
               <div className="stat-item">
@@ -112,7 +89,7 @@ export const LandingPage: React.FC = () => {
           <div className="section-header">
             <h2 className="section-title">Что вы можете</h2>
             <p className="section-subtitle">
-              Все инструменты что вы могли найти верное решение
+              Все инструменты, чтобы найти верное решение
             </p>
           </div>
           <div className="features-grid">
@@ -169,8 +146,8 @@ export const LandingPage: React.FC = () => {
         <div className="container">
           <div className="cta-content">
             <h2 className="cta-title">
-              Готовы узнать идеальный вариант ипоетки <br />
-              для вашего клента?
+              Готовы узнать идеальный вариант ипотеки <br />
+              для вашего клиента?
             </h2>
             <p className="cta-description">
               Введите параметры и получите полный расчёт за 30 секунд
@@ -182,40 +159,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="landing-footer">
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-brand">
-              {/*    <span className="logo-icon">🏠</span> */}
-              <span className="logo-text">
-                {/*  Mortgage<span className="logo-highlight">Calc</span> */}
-                Ipoteka<span className="logo-highlight">Partner</span>
-              </span>
-              {/*      <p className="footer-desc">
-                Умный ипотечный калькулятор для принятия правильных решений
-              </p> */}
-            </div>
-            {/* <div className="footer-links">
-              <div className="footer-column">
-                <h4>Продукт</h4>
-                <a href="#features">Возможности</a>
-                <a href="#">Преимущества</a>
-                <a href="#">Цены</a>
-              </div>
-              <div className="footer-column">
-                <h4>Поддержка</h4>
-                <a href="#">FAQ</a>
-                <a href="#">Контакты</a>
-                <a href="#">Блог</a>
-              </div>
-            </div> */}
-          </div>
-          {/*      <div className="footer-bottom">
-            <span>© 2026 MortgageCalc. Все права защищены.</span>
-          </div> */}
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

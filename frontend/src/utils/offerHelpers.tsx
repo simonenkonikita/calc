@@ -2,7 +2,7 @@
 
 import React from "react";
 import { AdminOffer } from "../pages/Admin/types/admin.types";
-import { DynamicData } from "../pages/Admin/sections/offers/types";
+import { DynamicData } from "../pages/Admin/sections/OffersSection/types";
 
 // 🔥 Новый тип для результата отображения ставок
 export interface DisplayRateResult {

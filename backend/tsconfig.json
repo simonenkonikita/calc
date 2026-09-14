@@ -19,8 +19,9 @@
     // 🔥 ДОБАВИТЬ ДЛЯ TYPEORM
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "types": ["node", "express", "nodemailer"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test-email.js"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }
