@@ -14,6 +14,8 @@ import { Bank } from "./Bank";
 import { Program } from "./Program";
 import { DynamicRate } from "./DynamicRate";
 import { DynamicSubsidy } from "./DynamicSubsidy";
+import { User } from "./User";
+import { Company } from "./Company";
 
 @Entity("offers")
 export class Offer {
@@ -38,24 +40,18 @@ export class Offer {
   @Column({ type: "decimal", precision: 5, scale: 2 })
   minPVPercent: number;
 
-  // ============================================================
-  // 🔥 ИНДИВИДУАЛЬНЫЕ ЛИМИТЫ ОФЕРА
-  // ============================================================
   @Column({ type: "decimal", precision: 15, scale: 2, nullable: true })
-  minLoanAmount: number | null; // Минимальная сумма кредита для этого офера
+  minLoanAmount: number | null;
 
   @Column({ type: "decimal", precision: 15, scale: 2, nullable: true })
-  maxLoanAmount: number | null; // Максимальная сумма кредита для этого офера
+  maxLoanAmount: number | null;
 
   @Column({ type: "int", nullable: true })
-  minLoanTerm: number | null; // Минимальный срок кредита в годах
+  minLoanTerm: number | null;
 
   @Column({ type: "int", nullable: true })
-  maxLoanTerm: number | null; // Максимальный срок кредита в годах
+  maxLoanTerm: number | null;
 
-  // ============================================================
-  // ОСТАЛЬНЫЕ ПОЛЯ
-  // ============================================================
   @Column({ type: "int", nullable: true })
   durationMonths: number | null;
 
@@ -90,7 +86,7 @@ export class Offer {
   roundingStrategy: string | null;
 
   @Column({ type: "int", nullable: true })
-  minLoanTermYears: number | null; // ⚠️ УДАЛИТЬ позже (дубликат)
+  minLoanTermYears: number | null;
 
   @Column({ type: "text", nullable: true })
   description: string | null;
@@ -98,33 +94,84 @@ export class Offer {
   @Column({ type: "boolean", default: true })
   isActive: boolean;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
   // ============================================================
-  // 🔥 СВЯЗИ
+  // 🔥 СВЯЗИ С ПРАВИЛЬНЫМИ onDelete
   // ============================================================
 
-  @ManyToOne(() => Bank, (bank) => bank.offers)
+  // ✅ БАНК - RESTRICT (нельзя удалить банк, если есть офферы)
+  @ManyToOne(() => Bank, (bank) => bank.offers, {
+    onDelete: "RESTRICT", // ← Защита от удаления банка с офферами
+  })
   @JoinColumn({ name: "bankId" })
   bank: Bank;
 
   @Column({ type: "uuid" })
   bankId: string;
 
-  @ManyToOne(() => Program, (program) => program.offers)
+  // ✅ ПРОГРАММА - RESTRICT (нельзя удалить программу, если есть офферы)
+  @ManyToOne(() => Program, (program) => program.offers, {
+    onDelete: "RESTRICT", // ← Защита от удаления программы с офферами
+  })
   @JoinColumn({ name: "programId" })
   programEntity: Program;
 
   @Column({ type: "uuid" })
   programId: string;
 
-  @OneToMany(() => DynamicRate, (rate) => rate.offer)
+  // ✅ ДИНАМИЧЕСКИЕ СТАВКИ - CASCADE (удаляются с оффером)
+  @OneToMany(() => DynamicRate, (rate) => rate.offer, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
   dynamicRates: DynamicRate[];
 
-  @OneToMany(() => DynamicSubsidy, (subsidy) => subsidy.offer)
+  // ✅ ДИНАМИЧЕСКИЕ СУБСИДИИ - CASCADE (удаляются с оффером)
+  @OneToMany(() => DynamicSubsidy, (subsidy) => subsidy.offer, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
   dynamicSubsidies: DynamicSubsidy[];
+
+  // ============================================================
+  // 🔥 ДОПОЛНИТЕЛЬНЫЕ ПОЛЯ ДЛЯ ИЕРАРХИИ
+  // ============================================================
+
+  @Column({ nullable: true })
+  companyId: string;
+
+  // ✅ КОМПАНИЯ - SET NULL (безопасно)
+  @ManyToOne(() => Company, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
+  @JoinColumn({ name: "companyId" })
+  company: Company;
+
+  @Column({ nullable: true })
+  createdById: string;
+
+  // ✅ КТО СОЗДАЛ - SET NULL
+  @ManyToOne(() => User, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
+  @JoinColumn({ name: "createdById" })
+  createdBy: User;
+
+  @Column({ nullable: true })
+  updatedById: string;
+
+  // ✅ КТО ОБНОВИЛ - SET NULL
+  @ManyToOne(() => User, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
+  @JoinColumn({ name: "updatedById" })
+  updatedBy: User;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

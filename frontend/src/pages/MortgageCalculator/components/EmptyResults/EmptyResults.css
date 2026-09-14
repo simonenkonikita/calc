@@ -1,0 +1,88 @@
+/* EmptyResults.css */
+
+.empty-results {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* 🔥 РАСТЯГИВАЕМ НА ВСЮ ВЫСОТУ РОДИТЕЛЯ */
+  height: 100%;
+  min-height: 100%;
+  width: 100%;
+  
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  border: 1px solid #e5e7eb;
+  box-sizing: border-box;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
+
+.empty-results-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+/* ... остальные стили без изменений ... */
+
+/* Иконка */
+.empty-results-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-results-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+}
+
+.empty-results-hint {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.empty-results-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background: #f9fafb;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+
+.progress-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.progress-status {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.progress-label {
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+/* Адаптив */
+@media (max-width: 1200px) {
+  .empty-results {
+    display: none !important;
+  }
+}

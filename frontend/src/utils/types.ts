@@ -1,5 +1,37 @@
 // Типы данных
 
+// ========== КОМПАНИИ ==========
+export interface CompanyData {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  phone?: string;
+  address?: string;
+  website?: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// ========== ЖК С КОМПАНИЕЙ ==========
+export interface ComplexData {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
+  description: string;
+  banks: string[];
+  paymentTerms: string[];
+  promotions: string[];
+  specialOffers: string[];
+  materialsLink: string;
+  isActive: boolean;
+  companyId?: string; // 🔥 ID компании, к которой привязан ЖК
+  company?: CompanyData;
+  apartmentTypes: ApartmentType[];
+}
+
 // Расширенный тип для хранения оригинального индекса
 export interface BankProgramResultWithIndex extends BankProgramResult {
   _originalIndex: number;
@@ -58,9 +90,10 @@ export interface HousingComplexPrice {
 }
 
 export interface ApartmentType {
+  id?: string;
   type: string;
   pricePerSquareMeter: number;
-  surcharges?: {
+  surcharges: {
     withoutDownPayment: number;
     partialDownPayment: number;
   };
@@ -69,42 +102,39 @@ export interface ApartmentType {
 export interface ProjectInfo {
   id: string;
   name: string;
+  slug?: string;
   status: string;
   statusIcon: string;
+  companyId?: string;
+  company?: {
+    id: string;
+    name: string;
+  };
   description?: string;
-  priceInfo: string;
+  priceInfo?: any;
   paymentTerms: string[];
   promotions: string[];
   banks: string[];
-  specialOffers?: string[];
-  materialsLink?: string;
+  specialOffers: string[];
   apartmentTypes: ApartmentType[];
-  eligiblePrograms?: ProgramInfo[];
+  eligiblePrograms?: string[];
+  materialsLink?: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface RawProjectData {
-  id: string;
-  complexName: string;
-  status: string;
-  statusIcon: string;
-  description?: string;
-  priceInfo: string;
-  paymentTerms: string[];
-  promotions: string[];
-  banks: string[];
-  specialOffers?: string[];
-  apartmentType: string;
-  pricePerSquareMeter: number;
-  surcharges?: {
-    withoutDownPayment: number;
-    partialDownPayment: number;
-  };
-  eligiblePrograms?: ProgramInfo[];
-  materialsLink?: string;
+// 🔥 НОВЫЙ ТИП ДЛЯ ОТВЕТА ОТ БЭКЕНДА
+export interface ProjectsResponse {
+  success: boolean;
+  data: ProjectInfo[];
+  error?: string;
 }
 
 // ========== ВХОДНЫЕ ПАРАМЕТРЫ КАЛЬКУЛЯТОРА ==========
 export interface CalculatorFormData {
+  companyId?: string; // ID строительной компании
+  companyName?: string;
   // Параметры объекта
   complex: string; // ЖК/ГК
   apartmentType: string; // Тип квартиры
@@ -128,6 +158,7 @@ export interface ObjectCalculationResult {
   downPayment: number; // ПВ (рассчитанный)
   remainingAmount: number; // Сумма для расчета (objectCost - downPayment)
   pricePerSquareMeter: number; // Цена за м2 (из справочника)
+  area: number;
 }
 
 export interface OfferBankSectionProps {
@@ -251,6 +282,7 @@ export interface BankProgramResult {
 
   // ✅ ДОБАВЛЯЕМ complexes
   complexes?: string[];
+  area?: number;
 
   // Расчет ежемесячного платежа
   monthlyPayment: number;

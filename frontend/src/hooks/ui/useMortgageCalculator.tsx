@@ -23,7 +23,8 @@ const DEFAULT_FORM_DATA: CalculatorFormData = {
 };
 
 export const useMortgageCalculator = () => {
-  const { results, isCalculating, error, calculate, clearCache } =
+  // 🔥 Получаем reset из useMortgageData
+  const { results, isCalculating, error, calculate, clearCache, reset } =
     useMortgageData();
 
   // 🔥 Получаем конфиг
@@ -79,6 +80,41 @@ export const useMortgageCalculator = () => {
     selectedCards: new Set<number>(),
     showOverstatement: false,
   });
+
+  // ============================================================
+  // 🔥 СБРОС РЕЗУЛЬТАТОВ ПРИ ИЗМЕНЕНИИ ФОРМЫ
+  // ============================================================
+
+  // Флаг: был ли выполнен расчёт
+  const [hasCalculated, setHasCalculated] = useState(false);
+
+  // 🔥 Флаг: форма была изменена после расчёта
+  const [formChanged, setFormChanged] = useState(false);
+
+  // Ref с предыдущим сериализованным состоянием формы
+  const prevFormDataRef = useRef<string>("");
+
+  useEffect(() => {
+    const serialized = JSON.stringify(formData);
+
+    // Первый рендер — просто запоминаем
+    if (!prevFormDataRef.current) {
+      prevFormDataRef.current = serialized;
+      return;
+    }
+
+    // Если данные изменились и был расчёт — сбрасываем результаты
+    if (prevFormDataRef.current !== serialized && hasCalculated) {
+      reset();
+      setHasCalculated(false);
+      setFormChanged(true); // 🔥 помечаем, что форма изменена
+      setSelectedOfferIndex(null);
+      selectedOfferRef.current = null;
+      filtersRef.current.selectedCards = new Set();
+    }
+
+    prevFormDataRef.current = serialized;
+  }, [formData, hasCalculated, reset]);
 
   // ============================================================
   // ОБРАБОТЧИКИ
@@ -181,6 +217,8 @@ export const useMortgageCalculator = () => {
       return;
     }
     calculate(formData);
+    setHasCalculated(true); // 🔥 помечаем, что расчёт выполнен
+    setFormChanged(false); // 🔥 сбрасываем "форма изменена" при новом расчёте
   }, [formData, calculate]);
 
   // ============================================================
@@ -214,5 +252,8 @@ export const useMortgageCalculator = () => {
     calculateResults,
     clearCache,
     formatMoney,
+
+    // 🔥 Флаг "форма изменена"
+    formChanged,
   };
 };

@@ -1,0 +1,91 @@
+/* frontend/src/pages/Admin/sections/offers/OffersSection.css */
+
+@import "../../admin-variables.css";
+
+/* ============================================================
+   📄 OFFERS SECTION - СТИЛЬ ЛЕНДИНГА
+   ============================================================ */
+
+.offers-section .offer-program {
+  font-weight: 500;
+  color: var(--gray-800);
+}
+
+.offers-section .offer-rate {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.offers-section .offer-complexes {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+/* ============================================================
+   🏷️ ТЕГИ ЖК
+   ============================================================ */
+
+.offers-section .complex-tag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  font-size: 0.65rem;
+  color: var(--gray-600);
+  margin: 0.1rem;
+  border: 1px solid var(--border-light);
+}
+
+.offers-section .complex-tag.selected {
+  background: var(--primary-bg);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* ============================================================
+   🚫 НЕТ АКТИВНЫХ БАНКОВ
+   ============================================================ */
+
+.offers-section .no-active-banks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--gray-300);
+  margin: 20px 0;
+}
+
+.offers-section .no-active-banks-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.offers-section .no-active-banks h3 {
+  font-size: 20px;
+  color: var(--gray-700);
+  margin-bottom: 8px;
+}
+
+.offers-section .no-active-banks p {
+  font-size: 14px;
+  color: var(--gray-500);
+  text-align: center;
+}
+
+.offers-section .no-active-banks strong {
+  color: var(--primary);
+}
+
+/* ============================================================
+   📱 АДАПТИВ
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .offers-section .admin-table {
+    min-width: 500px;
+  }
+}

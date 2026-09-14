@@ -43,12 +43,17 @@ export const useMortgageData = () => {
     abortControllerRef.current = controller;
 
     try {
+      // 🔥 Логируем отправляемые данные
+      console.log("📤 Отправка данных на сервер:", formData);
+
       const response = await api.calculate(formData);
+
+      // 🔥 Логируем ответ от сервера
+      console.log("📥 Ответ от сервера:", response);
 
       if (controller.signal.aborted) return;
 
       if (response.success) {
-        // 🔥 Сохраняем в кеш (через сервис)
         mortgageCache.set(formData, response.data);
         setResults(response.data);
       } else {
@@ -64,6 +69,19 @@ export const useMortgageData = () => {
         setIsCalculating(false);
       }
     }
+  }, []);
+
+  // 🔥 СБРОС РЕЗУЛЬТАТОВ — возвращаемся к дефолтному состоянию
+  // Используется при изменении формы после расчёта
+  const reset = useCallback(() => {
+    // Отменяем активный запрос, если есть
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setResults(null);
+    setError(null);
+    setIsCalculating(false);
   }, []);
 
   // 🔥 Очистка кеша (через сервис)
@@ -92,5 +110,6 @@ export const useMortgageData = () => {
     calculate,
     clearCache,
     getCacheSize,
+    reset, // ← 🔥 добавлено
   };
 };

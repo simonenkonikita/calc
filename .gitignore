@@ -1,4 +1,3 @@
-cat > .gitignore << 'EOF'
 # ============================================================
 # ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ
 # ============================================================
@@ -7,17 +6,18 @@ cat > .gitignore << 'EOF'
 *.env.local
 *.env.production
 *.env.development
-EOF.env
 .env.prod
+.env.*.local
 backend/.env
+backend/.env.production
 frontend/.env
+frontend/.env.production
 
 # ============================================================
 # SHELL ФАЙЛЫ
 # ============================================================
 .bashrc
-*deepseek_bash_20260825_981fba.sh
-deepseek_bash_20260825_981fba.sh
+*deepseek_bash_*.sh
 *.bashrc
 *.pgpass
 
@@ -96,9 +96,15 @@ coverage/
 .cache/
 
 # ============================================================
-# ИГНОР ФАЙЛОВ
+# ВРЕМЕННЫЕ/БАКАП ФАЙЛЫ
 # ============================================================
+*.bak
+*.backup
+*.old
 
-backend/src/services/calculations/сoefficients/_getDynamicValue.ts
-backend/src/services/calculations/сoefficients/_getThresholdSubsidy.ts
-backend/src/utils/programHelpers.ts
+# ============================================================
+# ИГНОРИРУЕМЫЕ ФАЙЛЫ (опционально)
+# ============================================================
+# backend/src/services/calculations/сoefficients/_getDynamicValue.ts
+# backend/src/services/calculations/сoefficients/_getThresholdSubsidy.ts
+# backend/src/utils/programHelpers.ts

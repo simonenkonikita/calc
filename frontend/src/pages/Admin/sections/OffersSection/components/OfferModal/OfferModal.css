@@ -1,0 +1,643 @@
+/* frontend/src/pages/Admin/sections/offers/components/OfferModal.css */
+
+@import "../../../../admin-variables.css";
+
+/* ============================================================
+   МОДАЛЬНОЕ ОКНО
+   ============================================================ */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   КОНТЕНТ МОДАЛЬНОГО ОКНА
+   ============================================================ */
+
+.modal-content {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 1000px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   ХЕДЕР
+   ============================================================ */
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--gray-200);
+  flex-shrink: 0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--gray-500);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.modal-close:hover {
+  background: var(--gray-100);
+  color: var(--gray-800);
+}
+
+/* ============================================================
+   ТЕЛО
+   ============================================================ */
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ============================================================
+   ФОРМА
+   ============================================================ */
+
+.modal-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.form-label.required::after {
+  content: " *";
+  color: var(--danger);
+}
+
+/* ============================================================
+   ПОЛЯ ВВОДА
+   ============================================================ */
+
+.form-input,
+.form-select,
+.form-textarea {
+  padding: 8px 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  transition: var(--transition);
+  font-family: inherit;
+  background: var(--bg-white);
+  color: var(--gray-800);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.form-input:disabled {
+  background: var(--gray-100);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.form-input.error,
+.form-select.error {
+  border-color: var(--danger);
+}
+
+.form-input.error:focus,
+.form-select.error:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-bg);
+}
+
+.form-error {
+  font-size: 0.75rem;
+  color: var(--danger);
+}
+
+.form-hint {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  font-style: italic;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* ============================================================
+   ПОЛЯ С КНОПКОЙ ДЕЙСТВИЯ
+   ============================================================ */
+
+.field-with-action {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  width: 100%;
+}
+
+.field-with-action-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-with-action-right {
+  flex-shrink: 0;
+  padding-bottom: 2px;
+}
+
+.action-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--bg-white);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gray-500);
+  transition: var(--transition);
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.action-btn:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-300);
+}
+
+.action-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.action-btn.active:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+/* ============================================================
+   ЗАБЛОКИРОВАННОЕ ПОЛЕ БАНКА
+   ============================================================ */
+
+.bank-locked {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  cursor: not-allowed;
+  min-height: 40px;
+}
+
+.bank-locked-icon {
+  font-size: 1.2rem;
+}
+
+.bank-locked-name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--gray-800);
+}
+
+.bank-locked-badge {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  opacity: 0.6;
+}
+
+/* ============================================================
+   ЧЕКБОКСЫ
+   ============================================================ */
+
+.form-checkboxes {
+  grid-column: 1 / -1;
+}
+
+.checkbox-group {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+/* ============================================================
+   ЖИЛЫЕ КОМПЛЕКСЫ
+   ============================================================ */
+
+.complexes-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.complexes-grid .checkbox-label {
+  padding: 4px 12px;
+  background: var(--gray-100);
+  border-radius: 20px;
+  border: 1px solid var(--gray-200);
+  transition: var(--transition);
+}
+
+.complexes-grid .checkbox-label:hover {
+  background: var(--gray-200);
+}
+
+/* ============================================================
+   РАЗДЕЛИТЕЛЬ
+   ============================================================ */
+
+.modal-divider {
+  border-top: 1px solid var(--gray-200);
+  margin: 20px 0;
+}
+
+/* ============================================================
+   ФУТЕР
+   ============================================================ */
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--gray-200);
+  flex-shrink: 0;
+}
+
+/* ❌ УДАЛЯЕМ ПЕРЕОПРЕДЕЛЕНИЯ КНОПОК */
+/* Кнопки используют стили из AdminLayout.css */
+
+/* ============================================================
+   МЕТОД РАСЧЕТА СУБСИДИИ
+   ============================================================ */
+
+.subsidy-method-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--gray-50);
+}
+
+.radio-label:hover {
+  border-color: var(--gray-300);
+  background: var(--gray-100);
+}
+
+.radio-label input[type="radio"] {
+  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.radio-label:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.radio-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.radio-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--gray-800);
+}
+
+.radio-description {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  line-height: 1.4;
+}
+
+/* ============================================================
+   FULLSCREEN MODAL
+   ============================================================ */
+
+.modal-overlay.modal-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 0;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.modal-content.modal-fullscreen-content {
+  background: var(--gray-50);
+  border-radius: 0;
+  width: 100%;
+  height: 100vh;
+  max-width: 100%;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: none;
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+.modal-content.modal-fullscreen-content .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--gray-200);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.modal-content.modal-fullscreen-content .modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.modal-content.modal-fullscreen-content .modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--gray-500);
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.modal-content.modal-fullscreen-content .modal-close:hover {
+  background: var(--gray-100);
+  color: var(--gray-800);
+}
+
+.modal-content.modal-fullscreen-content .modal-body {
+  padding: 32px;
+  overflow-y: auto;
+  flex: 1;
+  background: var(--gray-50);
+}
+
+.modal-content.modal-fullscreen-content .modal-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  background: var(--bg-white);
+  padding: 24px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.modal-content.modal-fullscreen-content .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 32px;
+  background: var(--bg-white);
+  border-top: 1px solid var(--gray-200);
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* ============================================================
+   АДАПТИВ
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .modal-content {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: var(--radius-md);
+  }
+
+  .modal-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-footer {
+    padding: 12px 16px;
+    flex-direction: column;
+  }
+
+  .modal-footer button {
+    width: 100%;
+  }
+
+  .field-with-action {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .field-with-action-right {
+    padding-bottom: 0;
+  }
+
+  .action-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .checkbox-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .complexes-grid .checkbox-label {
+    padding: 2px 10px;
+    font-size: 0.8rem;
+  }
+
+  .bank-locked {
+    padding: 6px 10px;
+    min-height: 36px;
+  }
+
+  .modal-content.modal-fullscreen-content .modal-header {
+    padding: 12px 16px;
+  }
+
+  .modal-content.modal-fullscreen-content .modal-header h2 {
+    font-size: 1rem;
+  }
+
+  .modal-content.modal-fullscreen-content .modal-body {
+    padding: 16px;
+  }
+
+  .modal-content.modal-fullscreen-content .modal-form-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .modal-content.modal-fullscreen-content .modal-footer {
+    padding: 12px 16px;
+    flex-direction: column;
+  }
+
+  .modal-content.modal-fullscreen-content .modal-footer button {
+    width: 100%;
+  }
+
+  .radio-label {
+    padding: 10px 12px;
+  }
+
+  .radio-title {
+    font-size: 0.85rem;
+  }
+
+  .radio-description {
+    font-size: 0.75rem;
+  }
+
+  .iu-rate-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .iu-rate-row input {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 10px;
+  }
+
+  .modal-content.modal-fullscreen-content .modal-body {
+    padding: 8px;
+  }
+
+  .modal-content.modal-fullscreen-content .modal-form-grid {
+    padding: 12px;
+  }
+}

@@ -1,4 +1,5 @@
 // backend/src/entities/Complex.ts
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,8 +7,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from "typeorm";
 import { ApartmentType } from "./ApartmentType";
+import { Company } from "./Company";
+import { User } from "./User";
 
 @Entity("complexes")
 export class Complex {
@@ -44,12 +49,53 @@ export class Complex {
   @Column({ type: "boolean", default: true })
   isActive: boolean;
 
+  // ============================================================
+  // 🔥 СВЯЗИ С ПРАВИЛЬНЫМИ onDelete
+  // ============================================================
+
+  @Column({ nullable: true })
+  companyId: string | null;
+
+  // ✅ КОМПАНИЯ - SET NULL (компания остается)
+  @ManyToOne(() => Company, (company) => company.complexes, {
+    nullable: true,
+    onDelete: "SET NULL", // ← При удалении компании - SET NULL
+  })
+  @JoinColumn({ name: "companyId" })
+  company: Company | null;
+
+  @Column({ nullable: true })
+  createdById: string | null;
+
+  // ✅ КТО СОЗДАЛ - SET NULL (пользователь не удаляется)
+  @ManyToOne(() => User, {
+    nullable: true,
+    onDelete: "SET NULL", // ← При удалении пользователя - SET NULL
+  })
+  @JoinColumn({ name: "createdById" })
+  createdBy: User | null;
+
+  @Column({ nullable: true })
+  updatedById: string | null;
+
+  // ✅ КТО ОБНОВИЛ - SET NULL
+  @ManyToOne(() => User, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
+  @JoinColumn({ name: "updatedById" })
+  updatedBy: User | null;
+
+  // ✅ ТИПЫ КВАРТИР - CASCADE (при удалении ЖК удаляются типы квартир)
+  @OneToMany(() => ApartmentType, (apartmentType) => apartmentType.complex, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
+  apartmentTypes: ApartmentType[];
+
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 
   @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;
-
-  @OneToMany(() => ApartmentType, (apartmentType) => apartmentType.complex)
-  apartmentTypes: ApartmentType[];
 }

@@ -18,5 +18,5 @@
     "types": ["node", "react", "react-dom"]
   },
 
-  "include": ["src"]
+  "include": ["src", "src/pages/Admin/AdminPage/.tsx"]
 }
