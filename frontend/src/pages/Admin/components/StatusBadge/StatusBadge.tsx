@@ -1,5 +1,3 @@
-// frontend/src/components/admin/StatusBadge.tsx
-
 import React from "react";
 
 export interface StatusBadgeProps {

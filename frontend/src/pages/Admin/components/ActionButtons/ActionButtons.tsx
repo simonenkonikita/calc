@@ -1,5 +1,3 @@
-// frontend/src/components/admin/ActionButtons.tsx
-
 import React from "react";
 
 export interface ActionButton {

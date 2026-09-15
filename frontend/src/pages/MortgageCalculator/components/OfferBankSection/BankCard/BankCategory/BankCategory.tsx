@@ -3,7 +3,7 @@
 import React from "react";
 import "./BankCategory.css";
 import { BankCard } from "../BankCard";
-import { BankProgramResultWithIndex } from "../../../../utils/types";
+import { BankProgramResultWithIndex } from "../../../../../../utils/types";
 
 interface BankCategoryProps {
   categoryLabel: string;
