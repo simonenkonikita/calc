@@ -305,4 +305,27 @@ export const api = {
       };
     }
   },
+
+  async getLandingStats(): Promise<{
+    success: boolean;
+    data?: {
+      banks: number;
+      programs: number;
+      complexes: number;
+      offers: number;
+      companies: number;
+    };
+    error?: string;
+  }> {
+    try {
+      const response = await fetch(`${API_URL}/landing/stats`);
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        error: "Failed to load landing stats",
+      };
+    }
+  },
 };

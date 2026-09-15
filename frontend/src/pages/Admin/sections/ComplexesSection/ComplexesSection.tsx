@@ -707,6 +707,100 @@ export const ComplexesSection: React.FC = () => {
           cancelLabel="Отмена"
           size="full"
         >
+          {/* ТИПЫ КВАРТИР */}
+          <div className="apartment-types-in-modal">
+            <div className="apartment-types-header">
+              <h4>🏠 Типы квартир</h4>
+              <button
+                type="button"
+                onClick={addApartmentType}
+                className="admin-btn admin-btn-primary admin-btn-sm"
+              >
+                + Добавить тип
+              </button>
+            </div>
+
+            <div className="apartment-types-list">
+              {formData.apartmentTypes.map((type, index) => (
+                <div key={type.id || index} className="apartment-type-row">
+                  <div className="type-field">
+                    <input
+                      placeholder="Тип (Студия, 1-комн...)"
+                      value={type.type || ""}
+                      onChange={(e) =>
+                        updateApartmentType(index, "type", e.target.value)
+                      }
+                      className="admin-modal-input"
+                    />
+                  </div>
+                  <div className="type-field">
+                    <input
+                      type="number"
+                      placeholder="Цена за м²"
+                      value={type.pricePerSquareMeter || ""}
+                      onChange={(e) =>
+                        updateApartmentType(
+                          index,
+                          "pricePerSquareMeter",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
+                      className="admin-modal-input"
+                    />
+                  </div>
+                  <div className="type-field">
+                    <input
+                      type="number"
+                      placeholder="Надбавка без ПВ"
+                      value={type.surcharges?.withoutDownPayment || ""}
+                      onChange={(e) =>
+                        updateApartmentType(index, "surcharges", {
+                          ...type.surcharges,
+                          withoutDownPayment: parseFloat(e.target.value) || 0,
+                          partialDownPayment:
+                            type.surcharges?.partialDownPayment || 0,
+                        })
+                      }
+                      className="admin-modal-input"
+                    />
+                  </div>
+                  <div className="type-field">
+                    <input
+                      type="number"
+                      placeholder="Надбавка с ПВ"
+                      value={type.surcharges?.partialDownPayment || ""}
+                      onChange={(e) =>
+                        updateApartmentType(index, "surcharges", {
+                          ...type.surcharges,
+                          withoutDownPayment:
+                            type.surcharges?.withoutDownPayment || 0,
+                          partialDownPayment: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="admin-modal-input"
+                    />
+                  </div>
+                  <div className="type-field type-actions">
+                    <button
+                      type="button"
+                      onClick={() => removeApartmentType(index)}
+                      className="admin-btn admin-btn-danger admin-btn-sm"
+                      title="Удалить тип"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {formData.apartmentTypes.length === 0 && (
+              <div className="apartment-types-empty">
+                <p>Нет типов квартир. Нажмите "Добавить тип"</p>
+              </div>
+            )}
+          </div>
+
           {/* 🔥 УСЛОВИЯ ОПЛАТЫ */}
           <div className="payment-terms-in-modal">
             <div className="payment-terms-header">
@@ -870,100 +964,6 @@ export const ComplexesSection: React.FC = () => {
               banks={banks}
               placeholder="Выберите банки..."
             />
-          </div>
-
-          {/* ТИПЫ КВАРТИР */}
-          <div className="apartment-types-in-modal">
-            <div className="apartment-types-header">
-              <h4>🏠 Типы квартир</h4>
-              <button
-                type="button"
-                onClick={addApartmentType}
-                className="admin-btn admin-btn-primary admin-btn-sm"
-              >
-                + Добавить тип
-              </button>
-            </div>
-
-            <div className="apartment-types-list">
-              {formData.apartmentTypes.map((type, index) => (
-                <div key={type.id || index} className="apartment-type-row">
-                  <div className="type-field">
-                    <input
-                      placeholder="Тип (Студия, 1-комн...)"
-                      value={type.type || ""}
-                      onChange={(e) =>
-                        updateApartmentType(index, "type", e.target.value)
-                      }
-                      className="admin-modal-input"
-                    />
-                  </div>
-                  <div className="type-field">
-                    <input
-                      type="number"
-                      placeholder="Цена за м²"
-                      value={type.pricePerSquareMeter || ""}
-                      onChange={(e) =>
-                        updateApartmentType(
-                          index,
-                          "pricePerSquareMeter",
-                          parseFloat(e.target.value) || 0,
-                        )
-                      }
-                      className="admin-modal-input"
-                    />
-                  </div>
-                  <div className="type-field">
-                    <input
-                      type="number"
-                      placeholder="Надбавка без ПВ"
-                      value={type.surcharges?.withoutDownPayment || ""}
-                      onChange={(e) =>
-                        updateApartmentType(index, "surcharges", {
-                          ...type.surcharges,
-                          withoutDownPayment: parseFloat(e.target.value) || 0,
-                          partialDownPayment:
-                            type.surcharges?.partialDownPayment || 0,
-                        })
-                      }
-                      className="admin-modal-input"
-                    />
-                  </div>
-                  <div className="type-field">
-                    <input
-                      type="number"
-                      placeholder="Надбавка с ПВ"
-                      value={type.surcharges?.partialDownPayment || ""}
-                      onChange={(e) =>
-                        updateApartmentType(index, "surcharges", {
-                          ...type.surcharges,
-                          withoutDownPayment:
-                            type.surcharges?.withoutDownPayment || 0,
-                          partialDownPayment: parseFloat(e.target.value) || 0,
-                        })
-                      }
-                      className="admin-modal-input"
-                    />
-                  </div>
-                  <div className="type-field type-actions">
-                    <button
-                      type="button"
-                      onClick={() => removeApartmentType(index)}
-                      className="admin-btn admin-btn-danger admin-btn-sm"
-                      title="Удалить тип"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {formData.apartmentTypes.length === 0 && (
-              <div className="apartment-types-empty">
-                <p>Нет типов квартир. Нажмите "Добавить тип"</p>
-              </div>
-            )}
           </div>
         </AdminModal>
       </AdminLayout>

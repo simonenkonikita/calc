@@ -1,20 +1,69 @@
-// frontend/src/pages/LandingPage.tsx
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./LandingPage.css";
 import { Footer } from "../../components/Footer/Footer";
+import { api } from "../../services/api";
+
+interface LandingStats {
+  banks: number;
+  programs: number;
+  complexes: number;
+  offers: number;
+  companies: number;
+  loaded: boolean;
+}
 
 export const LandingPage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [stats, setStats] = useState<LandingStats>({
+    banks: 0,
+    programs: 0,
+    complexes: 0,
+    offers: 0,
+    companies: 0,
+    loaded: false,
+  });
 
   useEffect(() => {
     setIsVisible(true);
+    loadStats();
   }, []);
+
+  const loadStats = async () => {
+    try {
+      const result = await api.getLandingStats();
+
+      if (result.success && result.data) {
+        setStats({
+          banks: result.data.banks,
+          programs: result.data.programs,
+          complexes: result.data.complexes,
+          offers: result.data.offers,
+          companies: result.data.companies,
+          loaded: true,
+        });
+        console.log("📊 Landing stats loaded:", result.data);
+      } else {
+        console.warn("Landing stats not loaded:", result.error);
+        setStats((prev) => ({ ...prev, loaded: true }));
+      }
+    } catch (error) {
+      console.error("Error loading landing stats:", error);
+      setStats((prev) => ({ ...prev, loaded: true }));
+    }
+  };
+
+  const formatStat = (
+    value: number | undefined | null,
+    fallback: string,
+  ): string => {
+    if (!stats.loaded) return fallback;
+    if (value === undefined || value === null || value === 0) return fallback;
+    return `${value}`;
+  };
 
   return (
     <div className="landing-page">
-      {/* Hero секция */}
       <section className="hero">
         <div className="hero-container">
           <div className={`hero-content ${isVisible ? "fade-in-up" : ""}`}>
@@ -32,20 +81,58 @@ export const LandingPage: React.FC = () => {
                 🚀 Начать расчёт
               </Link>
             </div>
+
+            {/* 🔥 Статистика с реальными данными */}
             <div className="hero-stats">
               <div className="stat-item">
-                <span className="stat-number">9+</span>
-                <span className="stat-label">Банков</span>
+                <span className="stat-number">
+                  {formatStat(stats.banks, "9")}
+                </span>
+                <span className="stat-label">
+                  {stats.banks === 1 ? "Банк" : "Банков"}
+                </span>
               </div>
+
               <div className="stat-divider"></div>
+
               <div className="stat-item">
-                <span className="stat-number">6</span>
-                <span className="stat-label">Программ</span>
+                <span className="stat-number">
+                  {formatStat(stats.programs, "6")}
+                </span>
+                <span className="stat-label">
+                  {stats.programs === 1 ? "Программа" : "Программ"}
+                </span>
               </div>
+
               <div className="stat-divider"></div>
+
               <div className="stat-item">
-                <span className="stat-number">30 сек</span>
-                <span className="stat-label">Средний расчёт</span>
+                <span className="stat-number">
+                  {formatStat(stats.companies, "20+")}
+                </span>
+                <span className="stat-label">
+                  {stats.companies === 1 ? "Застройщик" : "Застройщиков"}
+                </span>
+              </div>
+
+              <div className="stat-divider"></div>
+
+              <div className="stat-item">
+                <span className="stat-number">
+                  {formatStat(stats.complexes, "15")}
+                </span>
+                <span className="stat-label">ЖК</span>
+              </div>
+
+              <div className="stat-divider"></div>
+
+              <div className="stat-item">
+                <span className="stat-number">
+                  {formatStat(stats.offers, "120+")}
+                </span>
+                <span className="stat-label">
+                  {stats.offers === 1 ? "Предложение" : "Предложений"}
+                </span>
               </div>
             </div>
           </div>

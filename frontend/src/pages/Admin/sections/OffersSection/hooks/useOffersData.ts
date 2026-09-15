@@ -8,12 +8,14 @@ import {
   AdminBank,
   AdminProgram,
   AdminComplex,
+  AdminCompany,
 } from "../../../types/admin.types";
 
 export const useOffersData = () => {
   const [offers, setOffers] = useState<AdminOffer[]>([]);
   const [banks, setBanks] = useState<AdminBank[]>([]);
   const [programs, setPrograms] = useState<AdminProgram[]>([]);
+  const [companies, setCompanies] = useState<AdminCompany[]>([]);
   const [complexes, setComplexes] = useState<AdminComplex[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBankId, setSelectedBankId] = useState<string>("");
@@ -25,17 +27,24 @@ export const useOffersData = () => {
     try {
       setLoading(true);
 
-      const [offersData, banksData, programsData, complexesData] =
-        await Promise.all([
-          adminApi.getOffers(),
-          adminApi.getBanks(),
-          adminApi.getPrograms(),
-          adminApi.getComplexes(),
-        ]);
+      const [
+        offersData,
+        banksData,
+        programsData,
+        companiesData,
+        complexesData,
+      ] = await Promise.all([
+        adminApi.getOffers(),
+        adminApi.getBanks(),
+        adminApi.getPrograms(),
+        adminApi.getCompanies(),
+        adminApi.getComplexes(),
+      ]);
 
       setOffers(Array.isArray(offersData) ? offersData : []);
       setBanks(Array.isArray(banksData) ? banksData : []);
       setPrograms(Array.isArray(programsData) ? programsData : []);
+      setCompanies(Array.isArray(companiesData) ? companiesData : []);
       setComplexes(Array.isArray(complexesData) ? complexesData : []);
 
       // 🔥 Выбираем первый активный банк по умолчанию
@@ -117,6 +126,7 @@ export const useOffersData = () => {
     offers,
     banks,
     programs,
+    companies,
     complexes,
     loading,
     selectedBankId,

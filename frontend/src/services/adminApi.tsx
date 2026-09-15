@@ -485,6 +485,17 @@ export const adminApi = {
     return fetchWithAuth<AdminConfig>(`${API_URL}/admin/config`);
   },
 
+  async checkConfig(): Promise<{ exists: boolean }> {
+    return fetchWithAuth<{ exists: boolean }>(`${API_URL}/admin/config/check`);
+  },
+
+  async createConfig(data: Partial<AdminConfig>): Promise<AdminConfig> {
+    return fetchWithAuth<AdminConfig>(`${API_URL}/admin/config`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
   async updateConfig(data: Partial<AdminConfig>): Promise<AdminConfig> {
     return fetchWithAuth<AdminConfig>(`${API_URL}/admin/config`, {
       method: "PUT",
