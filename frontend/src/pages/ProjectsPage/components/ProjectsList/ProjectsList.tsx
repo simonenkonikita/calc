@@ -1,7 +1,7 @@
 // src/pages/ProjectsPage/components/ProjectsList/ProjectsList.tsx
 import React from "react";
 import "./ProjectsList.css";
-import { ProjectInfo } from "../../utils/types";
+import { ProjectInfo } from "../../../../utils/types";
 
 interface ProjectsListProps {
   projects: ProjectInfo[];
