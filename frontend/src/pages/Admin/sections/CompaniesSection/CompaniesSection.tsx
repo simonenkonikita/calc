@@ -29,14 +29,24 @@ export const CompaniesSection: React.FC = () => {
 
   const [showComplexModal, setShowComplexModal] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
-  const [complexForm, setComplexForm] = useState({
+  const [complexForm, setComplexForm] = useState<{
+    name: string;
+    status: "строится" | "сдан" | "проект";
+    description: string;
+    banks: string[];
+    paymentTerms: string[];
+    promotions: string[];
+    specialOffers: string[];
+    materialsLink: string;
+    isActive: boolean;
+  }>({
     name: "",
     status: "строится",
     description: "",
-    banks: [] as string[],
-    paymentTerms: [] as string[],
-    promotions: [] as string[],
-    specialOffers: [] as string[],
+    banks: [],
+    paymentTerms: [],
+    promotions: [],
+    specialOffers: [],
     materialsLink: "",
     isActive: true,
   });
@@ -472,7 +482,11 @@ export const CompaniesSection: React.FC = () => {
       ],
       required: true,
       value: complexForm.status,
-      onChange: (value) => setComplexForm({ ...complexForm, status: value }),
+      onChange: (value) =>
+        setComplexForm({
+          ...complexForm,
+          status: value as "строится" | "сдан" | "проект",
+        }),
     },
     {
       name: "description",

@@ -3,11 +3,10 @@
 import React from "react";
 import { BankCategory } from "../BankCategory/BankCategory";
 import "./BankGroup.css";
-
 import {
   BankProgramResultWithIndex,
   ProgramCategory,
-} from "../../../../utils/types";
+} from "../../../../../../utils/types";
 
 interface BankGroupProps {
   bankName: string;

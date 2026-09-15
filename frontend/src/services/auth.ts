@@ -227,25 +227,4 @@ export const authApi = {
     });
     return handleResponse(response);
   },
-
-  // ============================================================
-  // ПОВТОРНАЯ ОТПРАВКА ПИСЬМА ПОДТВЕРЖДЕНИЯ (АДМИН)
-  // ============================================================
-  resendVerification: async (
-    userId: string,
-  ): Promise<{ success: boolean; message: string }> => {
-    const token = getToken();
-    const response = await fetch(
-      `${API_URL}/auth/admin/users/${userId}/resend-verification`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-        credentials: "include",
-      },
-    );
-    return handleResponse(response);
-  },
 };
