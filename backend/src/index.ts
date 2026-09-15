@@ -20,6 +20,7 @@ import programsRoutes from "./routes/programs.routes";
 import authRoutes from "./routes/auth.routes";
 import { corsOptions } from "./config/cors";
 import notificationRoutes from "./routes/notification.routes";
+import landingRoutes from "./routes/landing.routes";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -66,6 +67,7 @@ app.use("/api/projects", projectsRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/landing", landingRoutes);
 
 // Error handling
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
