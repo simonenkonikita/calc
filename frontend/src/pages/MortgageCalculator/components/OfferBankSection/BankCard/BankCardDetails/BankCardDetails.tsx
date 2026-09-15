@@ -1,6 +1,6 @@
 // src/components/BankCard/BankCardDetails.tsx
 import React from "react";
-import { BankProgramResultWithIndex } from "../../../../utils/types";
+import { BankProgramResultWithIndex } from "../../../../../../utils/types";
 
 interface BankCardDetailsProps {
   offer: BankProgramResultWithIndex;

@@ -4,7 +4,10 @@ import React from "react";
 import { OfferCardProps } from "../../types";
 import "./OfferCard.css";
 import { DynamicInfoPopup } from "../../../../../../components/DynamicInfo/DynamicInfoPopup";
-import ActionButtons from "../../../../components/ActionButtons/ActionButtons";
+
+import ActionButtons, {
+  ActionButton,
+} from "../../../../components/ActionButtons/ActionButtons";
 import StatusBadge from "../../../../components/StatusBadge/StatusBadge";
 
 export const OfferCard: React.FC<OfferCardProps> = ({
@@ -72,18 +75,19 @@ export const OfferCard: React.FC<OfferCardProps> = ({
   };
 
   // 🔥 Определяем кнопки для ActionButtons
-  const getActionButtons = () => {
-    const buttons = [
+  const getActionButtons = (): ActionButton[] => {
+    const buttons: ActionButton[] = [
+      // ← вот это ключевое!
       {
         icon: "✏️",
         onClick: () => onEdit(offer),
-        variant: "primary" as const,
+        variant: "primary",
         title: "Редактировать",
       },
       {
         icon: "📋",
         onClick: () => onCopy(offer.id),
-        variant: "warning" as const,
+        variant: "warning",
         title: "Копировать",
       },
     ];
@@ -92,20 +96,20 @@ export const OfferCard: React.FC<OfferCardProps> = ({
       buttons.push({
         icon: "🗑️",
         onClick: () => onDelete(offer.id),
-        variant: "danger" as const,
+        variant: "danger",
         title: "Удалить",
       });
     } else {
       buttons.push({
         icon: "↩️",
         onClick: () => onRestore(offer.id),
-        variant: "success" as const,
+        variant: "success",
         title: "Восстановить",
       });
       buttons.push({
         icon: "💀",
         onClick: () => onHardDelete(offer.id),
-        variant: "danger" as const,
+        variant: "danger",
         title: "Полностью удалить",
       });
     }
