@@ -120,11 +120,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         thresholdTolerance: null,
         thresholdToleranceType: null,
         roundingStrategy: null,
-        minLoanTermYears: null,
         description: "",
         isActive: true,
         bankId: initialBankId,
         programId: "",
+        minLoanAmount: null,
+        maxLoanAmount: null,
+        minLoanTerm: null,
+        maxLoanTerm: null,
       });
 
       const resetDynamicForms = () => {
@@ -196,11 +199,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         thresholdTolerance: editingOffer.thresholdTolerance,
         thresholdToleranceType: editingOffer.thresholdToleranceType,
         roundingStrategy: editingOffer.roundingStrategy,
-        minLoanTermYears: editingOffer.minLoanTermYears,
         description: editingOffer.description,
         isActive: editingOffer.isActive,
         bankId: editingOffer.bankId,
         programId: editingOffer.programId,
+        minLoanAmount: editingOffer.minLoanAmount,
+        maxLoanAmount: editingOffer.maxLoanAmount,
+        minLoanTerm: editingOffer.minLoanTerm,
+        maxLoanTerm: editingOffer.maxLoanTerm,
       });
 
       loadDynamicDataFromOffer(editingOffer);
@@ -578,11 +584,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         thresholdTolerance: formData.thresholdTolerance || null,
         thresholdToleranceType: formData.thresholdToleranceType || null,
         roundingStrategy: formData.roundingStrategy || null,
-        minLoanTermYears: formData.minLoanTermYears || null,
         description: formData.description || null,
         isActive: formData.isActive !== undefined ? formData.isActive : true,
         bankId: formData.bankId,
         programId: formData.programId,
+        minLoanAmount: formData.minLoanAmount || null,
+        maxLoanAmount: formData.maxLoanAmount || null,
+        minLoanTerm: formData.minLoanTerm || null,
+        maxLoanTerm: formData.maxLoanTerm || null,
       };
 
       if (isCreating) {
@@ -1203,6 +1212,116 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                 </span>
               </div>
             )}
+
+            {/* 🔥 ПАРАМЕТРЫ КРЕДИТА */}
+            <div className="form-group full-width">
+              <label className="form-label">Параметры кредита</label>
+              <div className="loan-params-grid">
+                {/* Сумма от */}
+                <div className="form-group">
+                  <label
+                    htmlFor="minLoanAmount"
+                    className="form-label form-label-sm"
+                  >
+                    Сумма от (₽)
+                  </label>
+                  <input
+                    id="minLoanAmount"
+                    type="number"
+                    min={0}
+                    step={100000}
+                    value={formData.minLoanAmount || ""}
+                    onChange={(e) =>
+                      handleChange(
+                        "minLoanAmount",
+                        e.target.value ? Number(e.target.value) : null,
+                      )
+                    }
+                    className="form-input"
+                    placeholder="Например: 1 000 000"
+                  />
+                </div>
+
+                {/* Сумма до */}
+                <div className="form-group">
+                  <label
+                    htmlFor="maxLoanAmount"
+                    className="form-label form-label-sm"
+                  >
+                    Сумма до (₽)
+                  </label>
+                  <input
+                    id="maxLoanAmount"
+                    type="number"
+                    min={0}
+                    step={100000}
+                    value={formData.maxLoanAmount || ""}
+                    onChange={(e) =>
+                      handleChange(
+                        "maxLoanAmount",
+                        e.target.value ? Number(e.target.value) : null,
+                      )
+                    }
+                    className="form-input"
+                    placeholder="Например: 8 000 000"
+                  />
+                </div>
+
+                {/* Срок от */}
+                <div className="form-group">
+                  <label
+                    htmlFor="minLoanTerm"
+                    className="form-label form-label-sm"
+                  >
+                    Срок от (мес.)
+                  </label>
+                  <input
+                    id="minLoanTerm"
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={formData.minLoanTerm || ""}
+                    onChange={(e) =>
+                      handleChange(
+                        "minLoanTerm",
+                        e.target.value ? Number(e.target.value) : null,
+                      )
+                    }
+                    className="form-input"
+                    placeholder="Например: 12"
+                  />
+                </div>
+
+                {/* Срок до */}
+                <div className="form-group">
+                  <label
+                    htmlFor="maxLoanTerm"
+                    className="form-label form-label-sm"
+                  >
+                    Срок до (мес.)
+                  </label>
+                  <input
+                    id="maxLoanTerm"
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={formData.maxLoanTerm || ""}
+                    onChange={(e) =>
+                      handleChange(
+                        "maxLoanTerm",
+                        e.target.value ? Number(e.target.value) : null,
+                      )
+                    }
+                    className="form-input"
+                    placeholder="Например: 360"
+                  />
+                </div>
+              </div>
+              <span className="form-hint">
+                Укажите диапазон суммы и срока кредита, на который клиент может
+                взять оффер. Оставьте пустым, если ограничений нет.
+              </span>
+            </div>
 
             {/* Описание */}
             <div className="form-group full-width">

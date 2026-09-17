@@ -8,6 +8,8 @@ interface BankCardHeaderProps {
   isShortWithSubsidy: boolean;
   isTwoContracts: boolean;
   formatMoney: (amount: number) => string;
+  /** 🔥 Если true — вместо платежа показываем прочерк */
+  isUnavailable?: boolean;
 }
 
 export const BankCardHeader: React.FC<BankCardHeaderProps> = ({
@@ -15,6 +17,7 @@ export const BankCardHeader: React.FC<BankCardHeaderProps> = ({
   isShortWithSubsidy,
   isTwoContracts,
   formatMoney,
+  isUnavailable = false,
 }) => {
   const getProgramName = () => {
     switch (offer.type) {
@@ -61,6 +64,11 @@ export const BankCardHeader: React.FC<BankCardHeaderProps> = ({
   };
 
   const renderPayment = () => {
+    // 🔥 Если недоступно — прочерк вместо цифр
+    if (isUnavailable) {
+      return <p className="payment-value payment-unavailable">— ₽</p>;
+    }
+
     if (isShortWithSubsidy) {
       return (
         <div className="payment-values-wrapper">

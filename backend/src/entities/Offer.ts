@@ -85,9 +85,6 @@ export class Offer {
   @Column({ type: "varchar", length: 10, nullable: true })
   roundingStrategy: string | null;
 
-  @Column({ type: "int", nullable: true })
-  minLoanTermYears: number | null;
-
   @Column({ type: "text", nullable: true })
   description: string | null;
 

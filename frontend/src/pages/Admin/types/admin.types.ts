@@ -187,7 +187,6 @@ export interface AdminOffer {
   thresholdTolerance: number | null;
   thresholdToleranceType: string | null;
   roundingStrategy: string | null;
-  minLoanTermYears: number | null;
   description: string | null;
   isActive: boolean;
   bankId: string;
@@ -202,6 +201,10 @@ export interface AdminOffer {
   updatedBy?: AdminUser;
   dynamicRates?: AdminRate[];
   dynamicSubsidies?: AdminSubsidy[];
+  minLoanAmount: number | null;
+  maxLoanAmount: number | null;
+  minLoanTerm: number | null;
+  maxLoanTerm: number | null;
   createdAt?: string;
   updatedAt?: string;
 }

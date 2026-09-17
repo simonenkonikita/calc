@@ -722,3 +722,34 @@
   font-size: 0.85rem;
   white-space: nowrap;
 }
+/* ============================================================
+   🔥 ПАРАМЕТРЫ КРЕДИТА
+   ============================================================ */
+
+.loan-params-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+}
+
+.form-label-sm {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .loan-params-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .loan-params-grid {
+    grid-template-columns: 1fr;
+  }
+}

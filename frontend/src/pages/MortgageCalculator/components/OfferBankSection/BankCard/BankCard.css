@@ -64,6 +64,12 @@
   margin: 0;
 }
 
+/* 🔥 Прочерк платежа для недоступных */
+.payment-value.payment-unavailable {
+  color: #d1d5db;
+  font-weight: 500;
+}
+
 /* Ставки для short программ */
 .bank-rates {
   display: flex;
@@ -214,4 +220,133 @@
   font-weight: 300;
   font-size: 0.7rem;
   padding: 0 2px;
+}
+
+/* ============================================================
+   🔥 НЕДОСТУПНО — ВСЯ КАРТОЧКА РОЗОВАЯ
+   ============================================================ */
+
+.bank-card.unavailable {
+  background: #fef2f2;
+  border-color: #fecaca;
+  cursor: not-allowed;
+}
+
+.bank-card.unavailable:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: #fecaca;
+}
+
+.bank-card.unavailable.selected {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+/* 🔥 Список причин — прямо в теле карточки, внизу */
+.unavailable-issues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed #fecaca;
+}
+
+.unavailable-issue {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0.25rem;
+}
+
+/* 🔥 Тонкий разделитель только МЕЖДУ причинами */
+.unavailable-issue + .unavailable-issue {
+  border-top: 1px solid #fecaca;
+}
+
+/* Заголовок: иконка + текст в одну строку */
+.unavailable-issue-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.unavailable-issue-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.unavailable-issue-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #b91c1c;
+  line-height: 1.2;
+}
+
+/* 🔥 Метрики — как в деталях карточки */
+.unavailable-issue-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.unavailable-metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+}
+
+.unavailable-metric-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.unavailable-metric-value {
+  font-weight: 700;
+  color: #1f2937;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.unavailable-metric-value.danger {
+  color: #dc2626;
+}
+
+/* 🔥 Рекомендация — внизу, курсивом, тише */
+.unavailable-issue-recommendation {
+  margin-top: 0.15rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed #fecaca;
+  font-size: 0.72rem;
+  color: #9ca3af;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* 🔥 Адаптив */
+@media (max-width: 480px) {
+  .unavailable-issue-title {
+    font-size: 0.8rem;
+  }
+
+  .unavailable-metric-row {
+    font-size: 0.72rem;
+  }
+
+  .unavailable-issue-recommendation {
+    font-size: 0.68rem;
+  }
+
+  .unavailable-issue {
+    padding: 0.55rem 0.15rem;
+  }
+
+  .unavailable-issue-icon {
+    font-size: 1rem;
+  }
 }

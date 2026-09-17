@@ -1,6 +1,6 @@
 // MortgageCalculator.tsx
 
-import React from "react";
+import React, { useMemo } from "react";
 import "./MortgageCalculator.css";
 
 import { FormSection } from "./components/FormSection/FormSection";
@@ -77,6 +77,15 @@ export const MortgageCalculator: React.FC = () => {
       calculateResults();
     }, 100);
   };
+
+  // ============================================================
+  // 🔥 ПАРАМЕТРЫ ДЛЯ ПРОВЕРКИ ДОСТУПНОСТИ ОФФЕРОВ
+  // ============================================================
+  // Срок ипотеки в месяцах
+  const loanTermMonths = useMemo(
+    () => (formData.loanTerm || 30) * 12,
+    [formData.loanTerm],
+  );
 
   // 🔥 Определяем, можно ли показывать результаты
   const hasValidData = Boolean(
@@ -159,6 +168,8 @@ export const MortgageCalculator: React.FC = () => {
               mortgageWithoutDownPayment={formData.mortgageWithoutDownPayment}
               mortgagePartialDownPayment={formData.mortgagePartialDownPayment}
               loanTermYears={formData.loanTerm || 30}
+              // 🔥 НОВОЕ — прокидываем параметры для проверки доступности
+              loanTermMonths={loanTermMonths}
               area={formData.area}
               complexName={formData.complex}
               selectedBankFilter={currentFilters.selectedBankFilter}

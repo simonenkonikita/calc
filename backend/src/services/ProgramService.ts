@@ -131,7 +131,6 @@ export class ProgramService {
             : null,
           thresholdToleranceType: offer.thresholdToleranceType || null,
           roundingStrategy: offer.roundingStrategy || null,
-          minLoanTermYears: offer.minLoanTermYears || null,
           description: offer.description || null,
           isActive: offer.isActive,
           createdAt: offer.createdAt,

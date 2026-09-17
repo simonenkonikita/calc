@@ -77,7 +77,6 @@ export interface CreateOfferDTO {
   thresholdTolerance?: number | null;
   thresholdToleranceType?: string | null;
   roundingStrategy?: string | null;
-  minLoanTermYears?: number | null;
   description?: string | null;
 
   // 🔥 Динамические ставки
@@ -113,7 +112,6 @@ export interface OfferResponseDTO {
   thresholdTolerance: number | null;
   thresholdToleranceType: string | null;
   roundingStrategy: string | null;
-  minLoanTermYears: number | null;
   description: string | null;
   isActive: boolean;
 

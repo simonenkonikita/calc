@@ -14,6 +14,7 @@ interface BankCategoryProps {
   isSpecialMortgageMode: boolean;
   complexName: string;
   loanTermYears: number;
+  loanTermMonths: number;
   formatMoney: (amount: number) => string;
   onCardClick: (index: number) => void;
   getDynamicDataForOffer?: (offer: BankProgramResultWithIndex) => {
@@ -31,6 +32,7 @@ export const BankCategory: React.FC<BankCategoryProps> = ({
   isSpecialMortgageMode,
   complexName,
   loanTermYears,
+  loanTermMonths,
   formatMoney,
   onCardClick,
   getDynamicDataForOffer,
@@ -72,6 +74,7 @@ export const BankCategory: React.FC<BankCategoryProps> = ({
               isSpecialMortgageMode={isSpecialMortgageMode}
               complexName={complexName}
               loanTermYears={loanTermYears}
+              loanTermMonths={loanTermMonths}
               formatMoney={formatMoney}
               onClick={onCardClick}
               dynamicRateData={dynamicData?.dynamicRateData}

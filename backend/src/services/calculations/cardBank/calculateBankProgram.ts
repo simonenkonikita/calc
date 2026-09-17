@@ -313,8 +313,6 @@ export const calculateBankProgram = (
         ? (offer.durationMonths ?? undefined) // ← null → undefined
         : loanTermMonths,
 
-    minLoanTermYears: offer.minLoanTermYears ?? undefined,
-
     monthlyPayment: Math.ceil(monthlyPayment),
     monthlyPaymentAfter: monthlyPaymentAfter
       ? Math.ceil(monthlyPaymentAfter)
