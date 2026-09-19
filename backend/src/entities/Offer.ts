@@ -73,6 +73,9 @@ export class Offer {
   @Column({ type: "jsonb", nullable: true })
   complexes: string[] | null;
 
+  @Column({ type: "jsonb", default: [] })
+  badges: string[];
+
   @Column({ type: "varchar", length: 20, nullable: true })
   subsidyCalculationMethod: string | null;
 

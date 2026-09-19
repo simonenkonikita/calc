@@ -249,6 +249,7 @@ export interface BankProgramResult {
   loanAmountMismatchReason?: string;
   loanTermMismatchReason?: string;
 
+  badges?: string[];
   complexes?: string[];
   area?: number;
   // Расчет ежемесячного платежа

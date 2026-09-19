@@ -66,6 +66,8 @@ export interface CreateOfferDTO {
   // ЖК
   complexes?: string[] | null;
 
+  // Бейдж
+  badges?: string[];
   // Связи
   bankId: string;
   programId: string;
@@ -108,6 +110,7 @@ export interface OfferResponseDTO {
   trancheFirstPercent: number | null;
   trancheSecondDate: string | null;
   complexes: string[] | null;
+  badges: string[];
   subsidyCalculationMethod: string | null;
   thresholdTolerance: number | null;
   thresholdToleranceType: string | null;
@@ -199,6 +202,7 @@ export interface OfferListDTO {
   isExcessLimit: boolean;
   isTranche: boolean;
   complexes: string[] | null;
+  badges: string[];
   isActive: boolean;
   bank: {
     id: string;

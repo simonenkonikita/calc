@@ -233,6 +233,7 @@ export class OfferService {
       trancheFirstPercent: data.trancheFirstPercent ?? null,
       trancheSecondDate: data.trancheSecondDate ?? null,
       complexes: data.complexes ?? [],
+      badges: data.badges || [],
       subsidyCalculationMethod: data.subsidyCalculationMethod ?? null,
       thresholdTolerance: data.thresholdTolerance ?? null,
       thresholdToleranceType: data.thresholdToleranceType ?? null,
@@ -449,6 +450,7 @@ export class OfferService {
       trancheFirstPercent: offer.trancheFirstPercent,
       trancheSecondDate: offer.trancheSecondDate,
       complexes: offer.complexes,
+      badges: offer.badges || [],
       subsidyCalculationMethod: offer.subsidyCalculationMethod,
       thresholdTolerance: offer.thresholdTolerance,
       thresholdToleranceType: offer.thresholdToleranceType,
@@ -527,6 +529,7 @@ export class OfferService {
       isExcessLimit: offer.isExcessLimit,
       isTranche: offer.isTranche,
       complexes: offer.complexes,
+      badges: offer.badges || [],
       isActive: offer.isActive,
       bank: offer.bank
         ? {

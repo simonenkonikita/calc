@@ -32,7 +32,6 @@ const pluralYears = (n: number): string => {
   return "лет";
 };
 
-/** 🔥 Форматирование срока: "20 лет", "1 год", "2 года" */
 const formatYears = (years: number): string => `${years} ${pluralYears(years)}`;
 
 interface GetAvailabilityParams {
@@ -79,6 +78,16 @@ export const getAvailabilityIssues = ({
       mortgageAmount > offer.maxLoanAmount
     ) {
       const diff = mortgageAmount - offer.maxLoanAmount;
+
+      // 🔥 Проверяем, есть ли субсидия у оффера
+      const subsidyAmount = offer.subsidyAmount ?? 0;
+      const hasSubsidy = subsidyAmount > 0;
+
+      // 🔥 Формируем строку с превышением и субсидией
+      const exceedValue = hasSubsidy
+        ? `${formatMoney(diff)} из них ${formatMoney(subsidyAmount)} — субсидия`
+        : formatMoney(diff);
+
       issues.push({
         icon: "💰",
         title: "Сумма кредита не подходит",
@@ -89,18 +98,19 @@ export const getAvailabilityIssues = ({
           },
           {
             label: "Ваша сумма превышена на",
-            value: formatMoney(diff),
+            value: exceedValue,
             variant: "danger",
           },
         ],
-        recommendation:
-          "Уменьшите сумму кредита или увеличьте первоначальный взнос.",
+        recommendation: hasSubsidy
+          ? "Уменьшите сумму кредита, увеличьте первоначальный взнос или отключите субсидию."
+          : "Уменьшите сумму кредита или увеличьте первоначальный взнос.",
       });
     }
   }
 
   // ============================================================
-  // 🔥 СРОК КРЕДИТА — всё в годах
+  // 🔥 СРОК КРЕДИТА
   // ============================================================
   if (offer.minLoanTerm != null && loanTermMonths < offer.minLoanTerm) {
     const minYears = Math.ceil(offer.minLoanTerm / 12);
@@ -111,10 +121,7 @@ export const getAvailabilityIssues = ({
       icon: "⏳",
       title: "Срок ипотеки не подходит",
       metrics: [
-        {
-          label: "Минимальный срок",
-          value: formatYears(minYears),
-        },
+        { label: "Минимальный срок", value: formatYears(minYears) },
         {
           label: "Ваш срок меньше на",
           value: formatYears(diffYears),
@@ -132,10 +139,7 @@ export const getAvailabilityIssues = ({
       icon: "⏳",
       title: "Срок ипотеки не подходит",
       metrics: [
-        {
-          label: "Максимальный срок",
-          value: formatYears(maxYears),
-        },
+        { label: "Максимальный срок", value: formatYears(maxYears) },
         {
           label: "Ваш срок больше на",
           value: formatYears(diffYears),

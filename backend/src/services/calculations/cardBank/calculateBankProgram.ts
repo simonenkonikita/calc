@@ -294,6 +294,7 @@ export const calculateBankProgram = (
     minLoanTerm: offer.minLoanTerm ?? undefined,
     maxLoanTerm: offer.maxLoanTerm ?? undefined,
 
+    badges: offer.badges || [],
     complexes: offer.complexes ?? undefined,
 
     rate: actualRateResult,
