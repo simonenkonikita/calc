@@ -1,5 +1,6 @@
 import { Offer } from "../../../../../entities/Offer";
 import { Variables } from "../../../../../types/types";
+import { getMortgageLimits } from "../../../utils/limits/getMortgageLimits";
 import { calculateMonthlyPayment } from "../calculateMonthlyPayment";
 
 // ========== РАСЧЕТ ЕЖЕМЕСЯЧНОГО ПЛАТЕЖА ПО 2 ДОГОВОРАМ ==========
@@ -15,12 +16,7 @@ export const calculateTwoContractsMonthlyPayment = (
   secondContractPayment: number;
   totalMonthlyPayment: number;
 } => {
-  // Лимит для первого договора (льготная ставка)
-  const isIt = offer.programEntity?.type === "it";
-
-  const limit = isIt
-    ? variables.itMortgageLimit || 9000000
-    : variables.familyMortgageLimit || 6000000;
+  const { limit, maxLimit } = getMortgageLimits(offer, variables);
 
   // Проверка на корректность данных
   if (mortgageAmount <= 0 || loanTermMonths <= 0) {

@@ -4,6 +4,7 @@ import {
   Variables,
   BankOffer,
 } from "../../../../../types/types";
+import { getMortgageLimits } from "../../../utils/limits/getMortgageLimits";
 
 interface calculateFamilyExcessLimitDownPayment {
   objectCost: number;
@@ -35,19 +36,7 @@ export const calculateFamilyExcessLimitDownPayment = (
     remainingAmount,
   } = params;
 
-  const isIt = offer.programEntity?.type === "it";
-
-  const limit = offer.minLoanAmount
-    ? offer.minLoanAmount
-    : isIt
-      ? 9000000
-      : 6000000;
-
-  const maxLimit = offer.maxLoanAmount
-    ? offer.maxLoanAmount
-    : isIt
-      ? 18000000
-      : 15000000;
+  const { limit, maxLimit } = getMortgageLimits(offer, variables);
 
   const cafsummCred = 1 - userDownPaymentPercent / 100;
   const cafsummPV = userDownPaymentPercent / 100;

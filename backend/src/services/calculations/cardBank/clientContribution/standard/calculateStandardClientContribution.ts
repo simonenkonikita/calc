@@ -4,6 +4,7 @@ import {
   Variables,
   BankCoefficients,
 } from "../../../../../types/types";
+import { getMortgageLimits } from "../../../utils/limits/getMortgageLimits";
 
 interface clientContribution {
   objectCost: number; // $B$7
@@ -32,15 +33,7 @@ export const clientContribution = (params: clientContribution): number => {
     coefficients,
   } = params;
 
-  const isIt = offer.programEntity?.type === "it";
-
-  const limit = isIt
-    ? variables.itMortgageLimit || 9000000
-    : variables.familyMortgageLimit || 6000000;
-
-  const maxLimit = isIt
-    ? variables.maxItMortgageLimit || 18000000
-    : variables.maxFamilyMortgageLimit || 15000000;
+  const { limit, maxLimit } = getMortgageLimits(offer, variables);
 
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
   const cafsummCred = 1 - userDownPaymentPercent / 100;

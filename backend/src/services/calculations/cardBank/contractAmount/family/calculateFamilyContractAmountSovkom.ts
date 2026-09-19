@@ -5,6 +5,7 @@ import {
   BankCoefficients,
   ContractAmountResult,
 } from "../../../../../types/types";
+import { getMortgageLimits } from "../../../utils/limits/getMortgageLimits";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ (ЗАВЫШЕНИЕ) ДЛЯ СЕМЕЙНОЙ ==========
 export const calculateFamilyContractAmount = (
@@ -19,15 +20,7 @@ export const calculateFamilyContractAmount = (
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
 ): ContractAmountResult => {
-  const isIt = offer.programEntity?.type === "it";
-
-  const limit = isIt
-    ? variables.itMortgageLimit || 9000000
-    : variables.familyMortgageLimit || 6000000;
-
-  const maxLimit = isIt
-    ? variables.maxItMortgageLimit || 18000000
-    : variables.maxFamilyMortgageLimit || 15000000;
+  const { limit, maxLimit } = getMortgageLimits(offer, variables);
 
   const subsidyPercent = bankOffer.subsidyPercent;
 

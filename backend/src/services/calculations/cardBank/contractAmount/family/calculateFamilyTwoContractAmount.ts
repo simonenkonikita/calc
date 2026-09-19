@@ -7,6 +7,7 @@ import {
   BankCoefficients,
   ContractAmountResult,
 } from "../../../../../types/types";
+import { getMortgageLimits } from "../../../utils/limits/getMortgageLimits";
 import { getDynamicSubsidy } from "../../../сoefficients/getDynamicSubsidy";
 
 // ========== РАСЧЕТ СУММЫ В ДОГОВОРЕ ДЛЯ 2 ДОГОВОРОВ ==========
@@ -21,15 +22,7 @@ export const calculateFamilyTwoContractAmount = (
   isSpecialMortgageMode: boolean,
   coefficients: BankCoefficients,
 ): ContractAmountResult => {
-  const isIt = offer.programEntity?.type === "it";
-
-  const limit = isIt
-    ? variables.itMortgageLimit || 9000000
-    : variables.familyMortgageLimit || 6000000;
-
-  const maxLimit = isIt
-    ? variables.maxItMortgageLimit || 18000000
-    : variables.maxFamilyMortgageLimit || 15000000;
+  const { limit, maxLimit } = getMortgageLimits(offer, variables);
 
   const userDesiredDownPayment = objectCost * (userDownPaymentPercent / 100);
   const cafsummCred = 1 - userDownPaymentPercent / 100;
