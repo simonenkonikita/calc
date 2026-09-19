@@ -52,6 +52,13 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [initialOfferId, setInitialOfferId] = useState<string | null>(null);
+  const [newBadge, setNewBadge] = useState("");
+  const [draggedBadgeIndex, setDraggedBadgeIndex] = useState<number | null>(
+    null,
+  );
+  const [dragOverBadgeIndex, setDragOverBadgeIndex] = useState<number | null>(
+    null,
+  );
 
   // 🔥 НОВОЕ: выбранная компания для табов ЖК
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
@@ -69,7 +76,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   // 🔥 ТАБЫ КОМПАНИЙ
   // ============================================================
 
-  // Компании, у которых есть хотя бы один ЖК
   const companiesWithComplexes = useMemo(() => {
     const companyIds = new Set(complexes.map((c) => c.companyId));
     return companies.filter(
@@ -77,7 +83,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     );
   }, [companies, complexes]);
 
-  // Табы для UI
   const companyTabs = useMemo(() => {
     return companiesWithComplexes.map((company) => ({
       id: company.id,
@@ -88,7 +93,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     }));
   }, [companiesWithComplexes, complexes]);
 
-  // ЖК только выбранной компании
   const complexesByCompany = useMemo(() => {
     if (!selectedCompanyId) return [];
     return complexes.filter((c) => c.companyId === selectedCompanyId);
@@ -116,6 +120,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         trancheFirstPercent: null,
         trancheSecondDate: null,
         complexes: [],
+        badges: [],
         subsidyCalculationMethod: "standard",
         thresholdTolerance: null,
         thresholdToleranceType: null,
@@ -174,8 +179,8 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       setSubsidiesEditMode(false);
       setErrors({});
       setInitialOfferId(null);
+      setNewBadge("");
 
-      // 🔥 Устанавливаем первую активную компанию с ЖК
       if (companiesWithComplexes.length > 0) {
         setSelectedCompanyId(companiesWithComplexes[0].id);
       }
@@ -194,6 +199,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         trancheFirstPercent: editingOffer.trancheFirstPercent,
         trancheSecondDate: editingOffer.trancheSecondDate,
         complexes: editingOffer.complexes || [],
+        badges: editingOffer.badges || [],
         subsidyCalculationMethod:
           editingOffer.subsidyCalculationMethod || "standard",
         thresholdTolerance: editingOffer.thresholdTolerance,
@@ -214,8 +220,8 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       setInitialOfferId(editingOffer.id);
       setRatesEditMode(false);
       setSubsidiesEditMode(false);
+      setNewBadge("");
 
-      // 🔥 Устанавливаем компанию первого выбранного ЖК
       if (editingOffer.complexes && editingOffer.complexes.length > 0) {
         const firstComplexName = editingOffer.complexes[0];
         const firstComplex = complexes.find((c) => c.name === firstComplexName);
@@ -294,7 +300,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
       setDynamicRates(rates);
       setShowRatesForm(true);
-      console.log(`📊 Loaded ${rates.length} dynamic rates`);
     } else {
       setDynamicRates([
         {
@@ -341,7 +346,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
       setDynamicSubsidies(subsidies);
       setShowSubsidiesForm(true);
-      console.log(`📊 Loaded ${subsidies.length} dynamic subsidies`);
     } else {
       setDynamicSubsidies([
         {
@@ -390,26 +394,22 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     }
   };
 
-  // 🔥 НОВОЕ: выбраны ли все ЖК выбранной компании
   const isAllCompanyComplexesSelected = useMemo(() => {
     if (complexesByCompany.length === 0) return false;
     const selected = formData.complexes || [];
     return complexesByCompany.every((c) => selected.includes(c.name));
   }, [complexesByCompany, formData.complexes]);
 
-  // 🔥 НОВОЕ: выбрать/снять все ЖК выбранной компании
   const handleToggleAllCompanyComplexes = () => {
     const selected = formData.complexes || [];
     const companyNames = complexesByCompany.map((c) => c.name);
 
     if (isAllCompanyComplexesSelected) {
-      // Снять все ЖК компании
       setFormData({
         ...formData,
         complexes: selected.filter((name) => !companyNames.includes(name)),
       });
     } else {
-      // Выбрать все ЖК компании
       const newSelected = new Set([...selected, ...companyNames]);
       setFormData({
         ...formData,
@@ -417,6 +417,94 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       });
     }
   };
+
+  // ============================================================
+  // 🔥 БЕЙДЖИ ОФФЕРА
+  // ============================================================
+
+  const addBadge = () => {
+    if (!newBadge.trim()) return;
+    const badges = formData.badges || [];
+    if (badges.includes(newBadge.trim())) {
+      alert("Такой бейдж уже добавлен");
+      return;
+    }
+    setFormData({
+      ...formData,
+      badges: [...badges, newBadge.trim()],
+    });
+    setNewBadge("");
+  };
+
+  const removeBadge = (badgeToRemove: string) => {
+    setFormData({
+      ...formData,
+      badges: (formData.badges || []).filter((b) => b !== badgeToRemove),
+    });
+  };
+
+  const handleBadgeKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addBadge();
+    }
+  };
+
+  const addPresetBadge = (preset: string) => {
+    const badges = formData.badges || [];
+    if (badges.includes(preset)) return;
+    setFormData({
+      ...formData,
+      badges: [...badges, preset],
+    });
+  };
+
+  // ============================================================
+  // 🔥 DRAG-AND-DROP БЕЙДЖЕЙ
+  // ============================================================
+
+  const handleBadgeDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedBadgeIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(index));
+  };
+
+  const handleBadgeDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverBadgeIndex(index);
+  };
+
+  const handleBadgeDragLeave = () => {
+    setDragOverBadgeIndex(null);
+  };
+
+  const handleBadgeDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+
+    if (draggedBadgeIndex === null || draggedBadgeIndex === dropIndex) {
+      setDraggedBadgeIndex(null);
+      setDragOverBadgeIndex(null);
+      return;
+    }
+
+    const badges = [...(formData.badges || [])];
+    const [draggedItem] = badges.splice(draggedBadgeIndex, 1);
+    badges.splice(dropIndex, 0, draggedItem);
+
+    setFormData({ ...formData, badges });
+    setDraggedBadgeIndex(null);
+    setDragOverBadgeIndex(null);
+  };
+
+  const handleBadgeDragEnd = () => {
+    setDraggedBadgeIndex(null);
+    setDragOverBadgeIndex(null);
+  };
+
+  // ============================================================
+  // ДИНАМИЧЕСКИЕ СТАВКИ/СУБСИДИИ
+  // ============================================================
 
   const handleRateDelete = (rate: DynamicRate) => {
     if (rate.id) {
@@ -580,6 +668,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         trancheFirstPercent: formData.trancheFirstPercent || null,
         trancheSecondDate: formData.trancheSecondDate || null,
         complexes: formData.complexes || [],
+        badges: formData.badges || [],
         subsidyCalculationMethod: formData.subsidyCalculationMethod || null,
         thresholdTolerance: formData.thresholdTolerance || null,
         thresholdToleranceType: formData.thresholdToleranceType || null,
@@ -617,9 +706,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     try {
       console.log("💾 Starting saveDynamicData for offer:", offerId);
 
-      // ============================================================
-      // 1. СОХРАНЯЕМ СТАВКИ
-      // ============================================================
       if (showRatesForm) {
         const existingRates = await adminApi.getOfferDynamicRates(offerId);
         const keptRateIds = dynamicRates.filter((r) => r.id).map((r) => r.id);
@@ -628,14 +714,12 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           if (rate.id && !keptRateIds.includes(rate.id)) {
             try {
               await adminApi.hardDeleteDynamicRate(rate.id);
-              console.log(`🗑️ Deleted orphan rate ${rate.id}`);
             } catch (error) {
               console.error(`❌ Failed to delete rate ${rate.id}:`, error);
             }
           }
         }
 
-        let createdCount = 0;
         for (const rate of dynamicRates) {
           const isValid =
             rate.rate > 0 ||
@@ -653,33 +737,23 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           if (rate.id) {
             try {
               await adminApi.updateDynamicRate(rate.id, rateData);
-              console.log(`✅ Updated rate ${rate.id}: ${rate.rate}%`);
             } catch (error) {
               console.error(`❌ Failed to update rate ${rate.id}:`, error);
             }
           } else {
             try {
-              const created = await adminApi.createDynamicRate(
-                offerId,
-                rateData,
-              );
-              createdCount++;
-              console.log(`✅ Created rate ${created.id}: ${rate.rate}%`);
+              await adminApi.createDynamicRate(offerId, rateData);
             } catch (error) {
               console.error(`❌ Failed to create rate:`, error);
             }
           }
         }
-        console.log(
-          `📊 Processed rates: ${createdCount} new, ${dynamicRates.filter((r) => r.id).length} existing`,
-        );
       } else {
         const existingRates = await adminApi.getOfferDynamicRates(offerId);
         for (const rate of existingRates) {
           if (rate.id) {
             try {
               await adminApi.hardDeleteDynamicRate(rate.id);
-              console.log(`🗑️ Deleted rate ${rate.id}`);
             } catch (error) {
               console.error(`❌ Failed to delete rate ${rate.id}:`, error);
             }
@@ -687,9 +761,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         }
       }
 
-      // ============================================================
-      // 2. СОХРАНЯЕМ СУБСИДИИ
-      // ============================================================
       if (showSubsidiesForm) {
         const existingSubsidies =
           await adminApi.getOfferDynamicSubsidies(offerId);
@@ -701,7 +772,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           if (subsidy.id && !keptSubsidyIds.includes(subsidy.id)) {
             try {
               await adminApi.hardDeleteDynamicSubsidy(subsidy.id);
-              console.log(`🗑️ Deleted orphan subsidy ${subsidy.id}`);
             } catch (error) {
               console.error(
                 `❌ Failed to delete subsidy ${subsidy.id}:`,
@@ -711,7 +781,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           }
         }
 
-        let createdCount = 0;
         for (const subsidy of dynamicSubsidies) {
           const isValid =
             subsidy.subsidyPercent > 0 ||
@@ -730,9 +799,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           if (subsidy.id) {
             try {
               await adminApi.updateDynamicSubsidy(subsidy.id, subsidyData);
-              console.log(
-                `✅ Updated subsidy ${subsidy.id}: ${subsidy.subsidyPercent}%`,
-              );
             } catch (error) {
               console.error(
                 `❌ Failed to update subsidy ${subsidy.id}:`,
@@ -741,22 +807,12 @@ export const OfferModal: React.FC<OfferModalProps> = ({
             }
           } else {
             try {
-              const created = await adminApi.createDynamicSubsidy(
-                offerId,
-                subsidyData,
-              );
-              createdCount++;
-              console.log(
-                `✅ Created subsidy ${created.id}: ${subsidy.subsidyPercent}%`,
-              );
+              await adminApi.createDynamicSubsidy(offerId, subsidyData);
             } catch (error) {
               console.error(`❌ Failed to create subsidy:`, error);
             }
           }
         }
-        console.log(
-          `📊 Processed subsidies: ${createdCount} new, ${dynamicSubsidies.filter((s) => s.id).length} existing`,
-        );
       } else {
         const existingSubsidies =
           await adminApi.getOfferDynamicSubsidies(offerId);
@@ -764,7 +820,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           if (subsidy.id) {
             try {
               await adminApi.hardDeleteDynamicSubsidy(subsidy.id);
-              console.log(`🗑️ Deleted subsidy ${subsidy.id}`);
             } catch (error) {
               console.error(
                 `❌ Failed to delete subsidy ${subsidy.id}:`,
@@ -800,6 +855,15 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   };
 
   const selectedComplexesCount = (formData.complexes || []).length;
+  const badgesCount = (formData.badges || []).length;
+
+  const presetBadges = [
+    "🔥 Акции",
+    "⭐ Спецпредложение",
+    "🎁 Бонус",
+    "⚡ Ограниченное время",
+    "🏆 Лучшая ставка",
+  ];
 
   return (
     <div className="modal-overlay modal-fullscreen" onClick={onClose}>
@@ -1217,7 +1281,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
             <div className="form-group full-width">
               <label className="form-label">Параметры кредита</label>
               <div className="loan-params-grid">
-                {/* Сумма от */}
                 <div className="form-group">
                   <label
                     htmlFor="minLoanAmount"
@@ -1242,7 +1305,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                   />
                 </div>
 
-                {/* Сумма до */}
                 <div className="form-group">
                   <label
                     htmlFor="maxLoanAmount"
@@ -1267,7 +1329,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                   />
                 </div>
 
-                {/* Срок от */}
                 <div className="form-group">
                   <label
                     htmlFor="minLoanTerm"
@@ -1292,7 +1353,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                   />
                 </div>
 
-                {/* Срок до */}
                 <div className="form-group">
                   <label
                     htmlFor="maxLoanTerm"
@@ -1350,7 +1410,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                 )}
               </label>
 
-              {/* Табы компаний */}
               {companiesWithComplexes.length > 0 ? (
                 <>
                   <Tabs
@@ -1361,10 +1420,8 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                     emptyHint="Создайте компанию и ЖК в соответствующих разделах"
                   />
 
-                  {/* Список ЖК выбранной компании */}
                   {complexesByCompany.length > 0 ? (
                     <div className="complexes-grid">
-                      {/* 🔥 Кнопка "Выбрать все" — первым элементом списка */}
                       <label
                         className={`checkbox-label checkbox-label-all ${
                           isAllCompanyComplexesSelected ? "checked" : ""
@@ -1384,7 +1441,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                         </span>
                       </label>
 
-                      {/* Остальные ЖК */}
                       {complexesByCompany.map((complex) => (
                         <label
                           key={complex.id}
@@ -1417,11 +1473,107 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                 </div>
               )}
             </div>
+
+            {/* 🔥 БЕЙДЖИ ОФФЕРА */}
+            <div className="form-group full-width badges-in-modal">
+              <div className="badges-header">
+                <label className="form-label">
+                  🏷️ Бейджи оффера
+                  {badgesCount > 0 && (
+                    <span className="complexes-selected-count">
+                      {" "}
+                      (добавлено: {badgesCount})
+                    </span>
+                  )}
+                </label>
+              </div>
+
+              <div className="badges-input">
+                <input
+                  type="text"
+                  value={newBadge}
+                  onChange={(e) => setNewBadge(e.target.value)}
+                  onKeyPress={handleBadgeKeyPress}
+                  placeholder="Например: 💳 Условия оплаты"
+                  className="form-input"
+                  maxLength={100}
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={addBadge}
+                  disabled={!newBadge.trim() || loading}
+                  className="admin-btn admin-btn-primary admin-btn-sm"
+                >
+                  Добавить
+                </button>
+              </div>
+
+              {formData.badges && formData.badges.length > 0 ? (
+                <div className="badges-list">
+                  {formData.badges.map((badge, index) => (
+                    <div
+                      key={`${badge}-${index}`}
+                      className={`badge-item ${
+                        draggedBadgeIndex === index ? "dragging" : ""
+                      } ${dragOverBadgeIndex === index ? "drag-over" : ""}`}
+                      draggable
+                      onDragStart={(e) => handleBadgeDragStart(e, index)}
+                      onDragOver={(e) => handleBadgeDragOver(e, index)}
+                      onDragLeave={handleBadgeDragLeave}
+                      onDrop={(e) => handleBadgeDrop(e, index)}
+                      onDragEnd={handleBadgeDragEnd}
+                      title="Перетащите, чтобы изменить порядок"
+                    >
+                      <span className="badge-drag-handle" title="Перетащить">
+                        ⠿
+                      </span>
+                      <span className="badge-order">{index + 1}</span>
+                      <span className="badge-text">{badge}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeBadge(badge);
+                        }}
+                        className="badge-remove"
+                        title="Удалить бейдж"
+                        disabled={loading}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="badges-empty">
+                  <p>
+                    Нет бейджей. Добавьте вручную или выберите из пресетов ниже.
+                  </p>
+                </div>
+              )}
+
+              <div className="badges-presets">
+                <span className="presets-label">Быстрый выбор:</span>
+                {presetBadges.map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => addPresetBadge(preset)}
+                    disabled={
+                      (formData.badges || []).includes(preset) || loading
+                    }
+                    className="badge-preset-btn"
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="modal-divider" />
 
-          {/* Динамические формы с режимами редактирования */}
           {showRatesForm && (
             <DynamicRatesForm
               rates={dynamicRates}

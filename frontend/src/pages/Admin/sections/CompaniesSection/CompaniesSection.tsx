@@ -61,6 +61,7 @@ export const CompaniesSection: React.FC = () => {
     phone: "",
     address: "",
     website: "",
+    deposit: 30000,
     isActive: true,
   });
 
@@ -69,6 +70,7 @@ export const CompaniesSection: React.FC = () => {
     phone: "",
     address: "",
     website: "",
+    deposit: 30000,
     isActive: true,
   });
 
@@ -123,6 +125,7 @@ export const CompaniesSection: React.FC = () => {
       phone: "",
       address: "",
       website: "",
+      deposit: 30000,
       isActive: true,
     });
     setShowCreateModal(true);
@@ -135,6 +138,7 @@ export const CompaniesSection: React.FC = () => {
       phone: company.phone || "",
       address: company.address || "",
       website: company.website || "",
+      deposit: company.deposit ?? 0,
       isActive: company.isActive !== undefined ? company.isActive : true,
     });
     setShowEditModal(true);
@@ -154,6 +158,7 @@ export const CompaniesSection: React.FC = () => {
         phone: companyForm.phone?.trim() || "",
         address: companyForm.address?.trim() || "",
         website: companyForm.website?.trim() || "",
+        deposit: companyForm.deposit,
       });
 
       if (!result || !result.name) {
@@ -168,6 +173,7 @@ export const CompaniesSection: React.FC = () => {
         phone: "",
         address: "",
         website: "",
+        deposit: 30000,
         isActive: true,
       });
 
@@ -197,6 +203,7 @@ export const CompaniesSection: React.FC = () => {
         phone: editForm.phone?.trim() || "",
         address: editForm.address?.trim() || "",
         website: editForm.website?.trim() || "",
+        deposit: editForm.deposit,
         isActive: editForm.isActive,
       });
 
@@ -393,6 +400,20 @@ export const CompaniesSection: React.FC = () => {
       fullWidth: true,
     },
     {
+      name: "deposit",
+      label: "Сумма брони (₽)",
+      type: "number",
+      placeholder: "Например: 30000",
+      value: companyForm.deposit,
+      onChange: (value) =>
+        setCompanyForm({
+          ...companyForm,
+          deposit: value === "" ? 0 : Number(value),
+        }),
+      hint: "Сумма, которая вычитается из стоимости объекта",
+      fullWidth: true,
+    },
+    {
       name: "isActive",
       label: "Активна",
       type: "select",
@@ -443,6 +464,20 @@ export const CompaniesSection: React.FC = () => {
         placeholder: "г. Москва, ул. Примерная, д. 1",
         value: editForm.address || "",
         onChange: (value) => setEditForm({ ...editForm, address: value }),
+        fullWidth: true,
+      },
+      {
+        name: "deposit",
+        label: "Сумма брони (₽)",
+        type: "number",
+        placeholder: "Например: 30000",
+        value: editForm.deposit ?? 0,
+        onChange: (value) =>
+          setEditForm({
+            ...editForm,
+            deposit: value === "" ? 0 : Number(value),
+          }),
+        hint: "Сумма, которая вычитается из стоимости объекта",
         fullWidth: true,
       },
       {

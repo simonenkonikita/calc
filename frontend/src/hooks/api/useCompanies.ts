@@ -35,6 +35,7 @@ export const useCompanies = (): UseCompaniesReturn => {
           id: c.id,
           name: c.name,
           slug: c.slug,
+          deposit: c.deposit ?? null,
           isActive: c.isActive !== undefined ? c.isActive : true,
         }));
       } else if (companyId) {
@@ -45,6 +46,7 @@ export const useCompanies = (): UseCompaniesReturn => {
             id: response.id,
             name: response.name,
             slug: response.slug,
+            deposit: response.deposit ?? null,
             isActive:
               response.isActive !== undefined ? response.isActive : true,
           },

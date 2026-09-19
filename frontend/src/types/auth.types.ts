@@ -60,6 +60,7 @@ export interface Company {
   website?: string;
   phone?: string;
   address?: string;
+  deposit?: number | null;
   metadata?: Record<string, any>;
   isActive: boolean;
   adminId?: string;

@@ -159,6 +159,16 @@ export const OfferCard: React.FC<OfferCardProps> = ({
           </div>
         </div>
 
+        {offer.badges && offer.badges.length > 0 && (
+          <div className="offer-badges-row">
+            {offer.badges.map((badge, index) => (
+              <span key={index} className="offer-badge">
+                {badge}
+              </span>
+            ))}
+          </div>
+        )}
+
         {offer.description && (
           <div className="offer-description">
             <span className="detail-label">Описание:</span>

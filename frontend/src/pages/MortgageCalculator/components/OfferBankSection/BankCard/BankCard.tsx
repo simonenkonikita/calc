@@ -4,17 +4,9 @@ import React from "react";
 import "./BankCard.css";
 import "./BankExcessWarning.css";
 
-import { BankCardBadges } from "./BankCardBadges/BankCardBadges";
 import { BankCardHeader } from "./BankCardHeader/BankCardHeader";
 import { DynamicInfoPopup } from "../../../../../components/DynamicInfo/DynamicInfoPopup";
-import { useConfig } from "../../../../../hooks/api/useConfig";
-import { getBadge } from "../../../../../utils/badge/getBadge";
-import { getExcessBadge } from "../../../../../utils/badge/getExcessBadge";
-import { getExcessBadgeTwoContract } from "../../../../../utils/badge/getExcessBadgeTwoContract";
-import { getLimitBadge } from "../../../../../utils/badge/getLimitBadge";
 import { getAvailabilityIssues } from "../../../../../utils/badge/getAvailabilityBadge";
-import { getTermYearsBadge } from "../../../../../utils/badge/getTermYearsBadge";
-import { getTrancheBadge } from "../../../../../utils/badge/getTrancheBadge";
 import { BankProgramResultWithIndex } from "../../../../../utils/types";
 import { BankCardDetails } from "./BankCardDetails/BankCardDetails";
 
@@ -60,24 +52,12 @@ export const BankCard: React.FC<BankCardProps> = ({
   isTrancheUnavailable,
   showOverstatement,
   isSpecialMortgageMode,
-  complexName,
   formatMoney,
   onClick,
   loanTermMonths,
   dynamicRateData,
   dynamicSubsidyData,
 }) => {
-  const { config: configData } = useConfig();
-  const badge = getBadge(offer);
-  const excessBadge = getExcessBadge(offer);
-  const limitBadge = getLimitBadge(offer, configData);
-  const termBadge = getTermYearsBadge(offer);
-  const trancheBadge = getTrancheBadge(offer, complexName);
-  const badgeTwoContract = getExcessBadgeTwoContract(
-    offer,
-    isSpecialMortgageMode,
-  );
-
   // 🔥 Причины недоступности
   const availabilityIssues = getAvailabilityIssues({
     offer,
@@ -95,15 +75,6 @@ export const BankCard: React.FC<BankCardProps> = ({
         onClick(offer._originalIndex);
       }}
     >
-      <BankCardBadges
-        badge={badge}
-        limitBadge={limitBadge}
-        excessBadge={excessBadge}
-        termBadge={termBadge}
-        trancheBadge={trancheBadge}
-        badgeTwoContract={badgeTwoContract}
-      />
-
       {/* 🔥 ШАПКА всегда видна — программа, ставка, платёж */}
       <BankCardHeader
         offer={offer}
@@ -112,6 +83,17 @@ export const BankCard: React.FC<BankCardProps> = ({
         formatMoney={formatMoney}
         isUnavailable={isUnavailable}
       />
+
+      {/* 🔥 Кастомные бейджи из админки */}
+      {offer.badges && offer.badges.length > 0 && (
+        <div className="bank-card-custom-badges">
+          {offer.badges.map((badge, index) => (
+            <span key={index} className="bank-card-custom-badge">
+              {badge}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* 🔥 Динамические данные — тоже показываем */}
       {(dynamicRateData || dynamicSubsidyData) && (
