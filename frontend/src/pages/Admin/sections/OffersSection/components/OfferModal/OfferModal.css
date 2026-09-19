@@ -31,10 +31,6 @@
   }
 }
 
-/* ============================================================
-   КОНТЕНТ МОДАЛЬНОГО ОКНА
-   ============================================================ */
-
 .modal-content {
   background: var(--bg-white);
   border-radius: var(--radius-lg);
@@ -94,10 +90,6 @@
   color: var(--gray-800);
 }
 
-/* ============================================================
-   ТЕЛО
-   ============================================================ */
-
 .modal-body {
   padding: 24px;
   overflow-y: auto;
@@ -133,6 +125,12 @@
 .form-label.required::after {
   content: " *";
   color: var(--danger);
+}
+
+.form-label-sm {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  font-weight: 500;
 }
 
 /* ============================================================
@@ -340,6 +338,318 @@
   font-weight: 500;
 }
 
+.complexes-selected-count {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.complexes-empty {
+  text-align: center;
+  color: var(--gray-500);
+  padding: 1rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--gray-300);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.complexes-empty p {
+  margin: 0;
+}
+
+/* Кнопка "Выбрать все" */
+.complexes-grid .checkbox-label-all {
+  background: var(--primary-bg);
+  border: 1px dashed var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  gap: 8px;
+  font-family: inherit;
+}
+
+.complexes-grid .checkbox-label-all:hover {
+  background: #dbeafe;
+  border-style: solid;
+  border-color: var(--primary);
+}
+
+.complexes-grid .checkbox-label-all.checked {
+  background: var(--primary);
+  color: white;
+  border-style: solid;
+  border-color: var(--primary);
+}
+
+.complexes-grid .checkbox-label-all.checked:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.select-all-icon {
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
+}
+
+.select-all-text {
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   🔥 БЕЙДЖИ ОФФЕРА (с drag-and-drop)
+   ============================================================ */
+
+.badges-in-modal {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.badges-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.badges-input {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.badges-input .form-input {
+  flex: 1;
+}
+
+.badges-input .admin-btn {
+  min-width: 100px;
+  height: 38px;
+}
+
+.badges-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.badges-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.badges-list::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 3px;
+}
+
+.badges-list::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 3px;
+}
+
+.badges-list::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+
+/* 🔥 Элемент бейджа — теперь draggable */
+.badge-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  background: var(--primary-bg);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--primary);
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    transform 0.15s,
+    box-shadow 0.15s,
+    opacity 0.15s;
+  cursor: grab;
+  user-select: none;
+}
+
+.badge-item:hover {
+  background: #dbeafe;
+}
+
+.badge-item:active {
+  cursor: grabbing;
+}
+
+/* 🔥 Drag handle */
+.badge-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  opacity: 0.55;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: grab;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.badge-item:hover .badge-drag-handle {
+  opacity: 1;
+}
+
+.badge-item:active .badge-drag-handle {
+  cursor: grabbing;
+}
+
+/* 🔥 Порядковый номер */
+.badge-order {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: var(--primary);
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.badge-text {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: grab;
+}
+
+.badge-item:active .badge-text {
+  cursor: grabbing;
+}
+
+/* 🔥 Состояние: перетаскиваем */
+.badge-item.dragging {
+  opacity: 0.4;
+  transform: scale(0.95);
+  cursor: grabbing;
+  box-shadow: 0 0 12px rgba(79, 70, 229, 0.3);
+}
+
+/* 🔥 Состояние: цель перетаскивания */
+.badge-item.drag-over {
+  border-color: var(--primary-dark, #1e40af);
+  background: #bfdbfe;
+  box-shadow: 0 0 0 3px var(--primary-bg);
+  transform: scale(1.03);
+}
+
+.badge-remove {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.badge-remove:hover:not(:disabled) {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.badge-remove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.badges-empty {
+  text-align: center;
+  color: var(--gray-500);
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--gray-300);
+  margin-bottom: 0.75rem;
+}
+
+.badges-empty p {
+  margin: 0;
+}
+
+.badges-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--gray-200);
+}
+
+.presets-label {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  margin-right: 0.25rem;
+}
+
+.badge-preset-btn {
+  padding: 0.25rem 0.6rem;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.badge-preset-btn:hover:not(:disabled) {
+  background: var(--primary-bg);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.badge-preset-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* ============================================================
+   🔥 ПАРАМЕТРЫ КРЕДИТА
+   ============================================================ */
+
+.loan-params-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+}
+
 /* ============================================================
    РАЗДЕЛИТЕЛЬ
    ============================================================ */
@@ -361,9 +671,6 @@
   border-top: 1px solid var(--gray-200);
   flex-shrink: 0;
 }
-
-/* ❌ УДАЛЯЕМ ПЕРЕОПРЕДЕЛЕНИЯ КНОПОК */
-/* Кнопки используют стили из AdminLayout.css */
 
 /* ============================================================
    МЕТОД РАСЧЕТА СУБСИДИИ
@@ -626,13 +933,18 @@
     font-size: 0.75rem;
   }
 
-  .iu-rate-row {
+  .loan-params-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .badges-input {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .iu-rate-row input {
-    width: 100% !important;
+  .badges-input .admin-btn {
+    width: 100%;
+    min-width: unset;
   }
 }
 
@@ -648,107 +960,7 @@
   .modal-content.modal-fullscreen-content .modal-form-grid {
     padding: 12px;
   }
-}
 
-/* ============================================================
-   🔥 ТАБЫ КОМПАНИЙ И ЖК
-   ============================================================ */
-
-.complexes-selected-count {
-  color: var(--primary);
-  font-weight: 600;
-  font-size: 0.8rem;
-}
-
-.complexes-empty {
-  text-align: center;
-  color: var(--gray-500);
-  padding: 1rem;
-  background: var(--gray-50);
-  border-radius: var(--radius-sm);
-  border: 1px dashed var(--gray-300);
-  font-size: 0.85rem;
-  margin-top: 0.5rem;
-}
-
-.complexes-empty p {
-  margin: 0;
-}
-
-/* ============================================================
-   🔥 КНОПКА "ВЫБРАТЬ ВСЕ" — ПЕРВЫЙ ЭЛЕМЕНТ СПИСКА ЖК
-   ============================================================ */
-
-.complexes-grid .checkbox-label-all {
-  background: var(--primary-bg);
-  border: 1px dashed var(--primary);
-  color: var(--primary);
-  font-weight: 600;
-  cursor: pointer;
-  user-select: none;
-  gap: 8px;
-  font-family: inherit;
-}
-
-.complexes-grid .checkbox-label-all:hover {
-  background: #dbeafe;
-  border-style: solid;
-  border-color: var(--primary);
-}
-
-.complexes-grid .checkbox-label-all.checked {
-  background: var(--primary);
-  color: white;
-  border-style: solid;
-  border-color: var(--primary);
-}
-
-.complexes-grid .checkbox-label-all.checked:hover {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
-}
-
-.select-all-icon {
-  font-size: 1rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  line-height: 1;
-}
-
-.select-all-text {
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-/* ============================================================
-   🔥 ПАРАМЕТРЫ КРЕДИТА
-   ============================================================ */
-
-.loan-params-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem;
-  padding: 0.75rem;
-  background: var(--gray-50);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-sm);
-}
-
-.form-label-sm {
-  font-size: 0.75rem;
-  color: var(--gray-500);
-  font-weight: 500;
-}
-
-@media (max-width: 768px) {
-  .loan-params-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
   .loan-params-grid {
     grid-template-columns: 1fr;
   }

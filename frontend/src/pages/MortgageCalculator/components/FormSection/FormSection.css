@@ -240,3 +240,15 @@
     text-align: center;
   }
 }
+.checkbox-field .deposit-amount {
+  color: #059669;
+  font-weight: 600;
+  margin-left: 0.35rem;
+}
+
+.checkbox-field .deposit-none {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  margin-left: 0.35rem;
+  font-style: italic;
+}

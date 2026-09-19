@@ -9,6 +9,7 @@ export interface CompanyData {
   phone?: string;
   address?: string;
   website?: string;
+  deposit?: number | null;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -63,8 +64,6 @@ export interface Variables {
   minLoanTerm: number;
   maxLoanTerm: number;
 
-  // Дополнительные настройки
-  deposit: number;
   bankOrder: BankOrderItem[];
 }
 
@@ -280,6 +279,8 @@ export interface BankProgramResult {
   minLoanTerm?: number; // в месяцах
   maxLoanTerm?: number; // в месяцах
 
+  // бейджи
+  badges?: string[];
   // ✅ ДОБАВЛЯЕМ complexes
   complexes?: string[];
   area?: number;
@@ -445,7 +446,6 @@ export interface Limits {
   maxFamilyMortgageSum: number;
   itMortgageLimit: number;
   maxItMortgageSum: number;
-  deposit: number;
   minExcessAmounts: Record<string, number>;
 }
 
@@ -466,7 +466,6 @@ export interface ConfigData {
   maxDownPaymentPercent: number;
   minLoanTerm: number;
   maxLoanTerm: number;
-  deposit: number;
   bankOrder: BankOrderItem[];
   createdAt: string;
   updatedAt: string;

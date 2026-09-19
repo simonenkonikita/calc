@@ -183,6 +183,7 @@ export interface AdminOffer {
   trancheFirstPercent: number | null;
   trancheSecondDate: string | null;
   complexes: string[];
+  badges: string[];
   subsidyCalculationMethod: string | null;
   thresholdTolerance: number | null;
   thresholdToleranceType: string | null;
@@ -226,7 +227,6 @@ export interface AdminConfig {
   maxDownPaymentPercent: number;
   minLoanTerm: number;
   maxLoanTerm: number;
-  deposit: number;
   bankOrder: BankOrderItem[];
   createdAt: string;
   updatedAt: string;

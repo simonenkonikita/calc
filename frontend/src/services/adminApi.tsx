@@ -229,6 +229,7 @@ export const adminApi = {
     phone?: string;
     address?: string;
     website?: string;
+    deposit?: number | null;
   }): Promise<AdminCompany> {
     return fetchWithAuth<AdminCompany>(`${API_URL}/admin/companies`, {
       method: "POST",

@@ -21,7 +21,6 @@ const DEFAULT_CONFIG: Omit<AdminConfig, "id" | "createdAt" | "updatedAt"> = {
   maxDownPaymentPercent: 99.9,
   minLoanTerm: 1,
   maxLoanTerm: 30,
-  deposit: 30000,
   bankOrder: [{ name: "Сбербанк", displayOrder: 1 }],
 };
 
@@ -121,7 +120,6 @@ export const ConfigSection: React.FC = () => {
         maxDownPaymentPercent: Number(config.maxDownPaymentPercent),
         minLoanTerm: Number(config.minLoanTerm),
         maxLoanTerm: Number(config.maxLoanTerm),
-        deposit: Number(config.deposit),
         bankOrder: config.bankOrder,
       };
 
@@ -363,23 +361,6 @@ export const ConfigSection: React.FC = () => {
           </div>
 
           <h3>Дополнительные настройки</h3>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Сумма брони (₽)</label>
-              <input
-                type="number"
-                value={config.deposit}
-                onChange={(e) =>
-                  handleFieldChange(
-                    "deposit",
-                    e.target.value === "" ? 0 : Number(e.target.value),
-                  )
-                }
-              />
-              <small>Сумма, которая вычитается из стоимости объекта</small>
-            </div>
-          </div>
 
           <div className="form-group full-width">
             <label>Порядок банков (через запятую)</label>

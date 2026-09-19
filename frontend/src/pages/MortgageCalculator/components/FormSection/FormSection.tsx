@@ -43,7 +43,16 @@ export const FormSection: React.FC<FormSectionProps> = ({
   const { priceData, loading: priceLoading, fetchPrice } = usePriceData();
 
   // ✅ Значения с дефолтами (используются, пока config загружается)
-  const DEPOSIT_AMOUNT = config?.deposit ?? 30000;
+  const DEPOSIT_AMOUNT = useMemo(() => {
+    const effectiveCompanyId = isAdmin ? formData.companyId : user?.companyId;
+    if (!effectiveCompanyId) return 0;
+    const company = companies.find((c) => c.id === effectiveCompanyId);
+    const rawDeposit = company?.deposit;
+    if (rawDeposit === undefined || rawDeposit === null) return 0;
+    const numericDeposit = Number(rawDeposit);
+    return isNaN(numericDeposit) ? 0 : numericDeposit;
+  }, [companies, isAdmin, formData.companyId, user?.companyId]);
+
   const MIN_DOWN_PAYMENT_PERCENT = config?.minDownPaymentPercent ?? 20.1;
   const MAX_DOWN_PAYMENT_PERCENT = config?.maxDownPaymentPercent ?? 99.9;
   const MIN_AREA = config?.minArea ?? 1;
@@ -602,10 +611,23 @@ export const FormSection: React.FC<FormSectionProps> = ({
                 id="considerDeposit"
                 checked={formData.considerDepositInCost}
                 onChange={handleConsiderDepositChange}
+                disabled={DEPOSIT_AMOUNT === 0}
               />
-              <label htmlFor="considerDeposit">
-                Учитывать бронь в стоимости (-{DEPOSIT_AMOUNT.toLocaleString()}{" "}
-                ₽)
+              <label
+                htmlFor="considerDeposit"
+                style={{
+                  opacity: DEPOSIT_AMOUNT === 0 ? 0.5 : 1,
+                  cursor: DEPOSIT_AMOUNT === 0 ? "not-allowed" : "pointer",
+                }}
+              >
+                Учитывать бронь в стоимости
+                {DEPOSIT_AMOUNT > 0 ? (
+                  <span className="deposit-amount">
+                    (−{DEPOSIT_AMOUNT.toLocaleString("ru-RU")} ₽)
+                  </span>
+                ) : (
+                  <span className="deposit-none">(Нет суммы брони)</span>
+                )}
               </label>
             </div>
 
