@@ -38,6 +38,12 @@ export const ResultsCalcSection: React.FC<ResultsCalcSectionProps> = ({
 
         <div className="results-calc-details">
           <div className="results-calc-detail-item">
+            <span className="detail-label">Сумма ипотеки:</span>
+            <span className="detail-value">
+              {hasData ? formatMoney(objectResult.remainingAmount) : "—"}
+            </span>
+          </div>
+          <div className="results-calc-detail-item">
             <span className="detail-label">Первоначальный взнос:</span>
             <span className="detail-value">
               {hasData ? (
@@ -57,12 +63,7 @@ export const ResultsCalcSection: React.FC<ResultsCalcSectionProps> = ({
               )}
             </span>
           </div>
-          <div className="results-calc-detail-item">
-            <span className="detail-label">Сумма ипотеки:</span>
-            <span className="detail-value">
-              {hasData ? formatMoney(objectResult.remainingAmount) : "—"}
-            </span>
-          </div>
+
           <div className="results-calc-detail-item">
             <span className="detail-label">Цена за м²:</span>
             <span className="detail-value">

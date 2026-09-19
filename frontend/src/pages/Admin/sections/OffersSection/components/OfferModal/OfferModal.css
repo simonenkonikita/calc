@@ -318,6 +318,7 @@
   flex-wrap: wrap;
   gap: 8px;
   padding-top: 4px;
+  align-items: center;
 }
 
 .complexes-grid .checkbox-label {
@@ -330,6 +331,13 @@
 
 .complexes-grid .checkbox-label:hover {
   background: var(--gray-200);
+}
+
+.complexes-grid .checkbox-label.checked {
+  background: var(--primary-bg);
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 500;
 }
 
 /* ============================================================
@@ -639,5 +647,109 @@
 
   .modal-content.modal-fullscreen-content .modal-form-grid {
     padding: 12px;
+  }
+}
+
+/* ============================================================
+   🔥 ТАБЫ КОМПАНИЙ И ЖК
+   ============================================================ */
+
+.complexes-selected-count {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.complexes-empty {
+  text-align: center;
+  color: var(--gray-500);
+  padding: 1rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--gray-300);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.complexes-empty p {
+  margin: 0;
+}
+
+/* ============================================================
+   🔥 КНОПКА "ВЫБРАТЬ ВСЕ" — ПЕРВЫЙ ЭЛЕМЕНТ СПИСКА ЖК
+   ============================================================ */
+
+.complexes-grid .checkbox-label-all {
+  background: var(--primary-bg);
+  border: 1px dashed var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  gap: 8px;
+  font-family: inherit;
+}
+
+.complexes-grid .checkbox-label-all:hover {
+  background: #dbeafe;
+  border-style: solid;
+  border-color: var(--primary);
+}
+
+.complexes-grid .checkbox-label-all.checked {
+  background: var(--primary);
+  color: white;
+  border-style: solid;
+  border-color: var(--primary);
+}
+
+.complexes-grid .checkbox-label-all.checked:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.select-all-icon {
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
+}
+
+.select-all-text {
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+/* ============================================================
+   🔥 ПАРАМЕТРЫ КРЕДИТА
+   ============================================================ */
+
+.loan-params-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+}
+
+.form-label-sm {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .loan-params-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .loan-params-grid {
+    grid-template-columns: 1fr;
   }
 }

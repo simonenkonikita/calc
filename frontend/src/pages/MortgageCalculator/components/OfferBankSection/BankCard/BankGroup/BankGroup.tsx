@@ -17,6 +17,7 @@ interface BankGroupProps {
   isSpecialMortgageMode: boolean;
   complexName: string;
   loanTermYears: number;
+  loanTermMonths: number;
   formatMoney: (amount: number) => string;
   onCardClick: (index: number) => void;
   hasProgramsInCategory: (
@@ -44,7 +45,8 @@ export const BankGroup: React.FC<BankGroupProps> = ({
   onCardClick,
   hasProgramsInCategory,
   getDynamicDataForOffer,
-  categories, // ✅ Получаем из пропсов
+  categories,
+  loanTermMonths,
 }) => {
   const hasAnyPrograms = Object.values(bankData).some((arr) => arr.length > 0);
 
@@ -86,6 +88,7 @@ export const BankGroup: React.FC<BankGroupProps> = ({
               formatMoney={formatMoney}
               onCardClick={onCardClick}
               getDynamicDataForOffer={getDynamicDataForOffer}
+              loanTermMonths={loanTermMonths}
             />
           );
         })}

@@ -73,6 +73,9 @@ export class Offer {
   @Column({ type: "jsonb", nullable: true })
   complexes: string[] | null;
 
+  @Column({ type: "jsonb", default: [] })
+  badges: string[];
+
   @Column({ type: "varchar", length: 20, nullable: true })
   subsidyCalculationMethod: string | null;
 
@@ -84,9 +87,6 @@ export class Offer {
 
   @Column({ type: "varchar", length: 10, nullable: true })
   roundingStrategy: string | null;
-
-  @Column({ type: "int", nullable: true })
-  minLoanTermYears: number | null;
 
   @Column({ type: "text", nullable: true })
   description: string | null;

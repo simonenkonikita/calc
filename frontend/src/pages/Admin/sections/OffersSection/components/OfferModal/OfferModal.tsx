@@ -1,12 +1,14 @@
 // frontend/src/pages/Admin/sections/offers/components/OfferModal.tsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   AdminOffer,
   AdminBank,
   AdminProgram,
+  AdminCompany,
   AdminComplex,
 } from "../../../../types/admin.types";
+import Tabs from "../../../../components/Tabs/Tabs";
 import { DynamicRate, DynamicSubsidy } from "../../types";
 import { DynamicRatesForm } from "../DynamicRatesForm/DynamicRatesForm";
 import { DynamicSubsidiesForm } from "../DynamicSubsidiesForm/DynamicSubsidiesForm";
@@ -20,6 +22,7 @@ interface OfferModalProps {
   editingOffer: AdminOffer | null;
   banks: AdminBank[];
   programs: AdminProgram[];
+  companies: AdminCompany[];
   complexes: AdminComplex[];
   onRefresh: () => void;
   selectedBankId?: string | null;
@@ -32,6 +35,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   editingOffer,
   banks,
   programs,
+  companies,
   complexes,
   onRefresh,
   selectedBankId,
@@ -49,6 +53,9 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [initialOfferId, setInitialOfferId] = useState<string | null>(null);
 
+  // 🔥 НОВОЕ: выбранная компания для табов ЖК
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+
   const selectedProgram = programs.find((p) => p.id === formData.programId);
   const programType = selectedProgram?.type || "";
   const isFamily = programType === "family";
@@ -57,6 +64,35 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   const isShortTerm = programType === "short";
   const isTranche = programType === "tranche";
   const isTwoContracts = formData.isTwoContracts || false;
+
+  // ============================================================
+  // 🔥 ТАБЫ КОМПАНИЙ
+  // ============================================================
+
+  // Компании, у которых есть хотя бы один ЖК
+  const companiesWithComplexes = useMemo(() => {
+    const companyIds = new Set(complexes.map((c) => c.companyId));
+    return companies.filter(
+      (company) => companyIds.has(company.id) && company.isActive,
+    );
+  }, [companies, complexes]);
+
+  // Табы для UI
+  const companyTabs = useMemo(() => {
+    return companiesWithComplexes.map((company) => ({
+      id: company.id,
+      label: company.name,
+      icon: "🏢",
+      count: complexes.filter((c) => c.companyId === company.id).length,
+      isActive: company.isActive,
+    }));
+  }, [companiesWithComplexes, complexes]);
+
+  // ЖК только выбранной компании
+  const complexesByCompany = useMemo(() => {
+    if (!selectedCompanyId) return [];
+    return complexes.filter((c) => c.companyId === selectedCompanyId);
+  }, [complexes, selectedCompanyId]);
 
   // ============================================================
   // ИНИЦИАЛИЗАЦИЯ
@@ -84,11 +120,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         thresholdTolerance: null,
         thresholdToleranceType: null,
         roundingStrategy: null,
-        minLoanTermYears: null,
         description: "",
         isActive: true,
         bankId: initialBankId,
         programId: "",
+        minLoanAmount: null,
+        maxLoanAmount: null,
+        minLoanTerm: null,
+        maxLoanTerm: null,
       });
 
       const resetDynamicForms = () => {
@@ -135,6 +174,11 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       setSubsidiesEditMode(false);
       setErrors({});
       setInitialOfferId(null);
+
+      // 🔥 Устанавливаем первую активную компанию с ЖК
+      if (companiesWithComplexes.length > 0) {
+        setSelectedCompanyId(companiesWithComplexes[0].id);
+      }
     } else if (editingOffer) {
       setFormData({
         program: editingOffer.program,
@@ -155,21 +199,42 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         thresholdTolerance: editingOffer.thresholdTolerance,
         thresholdToleranceType: editingOffer.thresholdToleranceType,
         roundingStrategy: editingOffer.roundingStrategy,
-        minLoanTermYears: editingOffer.minLoanTermYears,
         description: editingOffer.description,
         isActive: editingOffer.isActive,
         bankId: editingOffer.bankId,
         programId: editingOffer.programId,
+        minLoanAmount: editingOffer.minLoanAmount,
+        maxLoanAmount: editingOffer.maxLoanAmount,
+        minLoanTerm: editingOffer.minLoanTerm,
+        maxLoanTerm: editingOffer.maxLoanTerm,
       });
 
       loadDynamicDataFromOffer(editingOffer);
       setErrors({});
       setInitialOfferId(editingOffer.id);
-      // По умолчанию открываем в режиме просмотра
       setRatesEditMode(false);
       setSubsidiesEditMode(false);
+
+      // 🔥 Устанавливаем компанию первого выбранного ЖК
+      if (editingOffer.complexes && editingOffer.complexes.length > 0) {
+        const firstComplexName = editingOffer.complexes[0];
+        const firstComplex = complexes.find((c) => c.name === firstComplexName);
+        if (firstComplex) {
+          setSelectedCompanyId(firstComplex.companyId);
+        } else if (companiesWithComplexes.length > 0) {
+          setSelectedCompanyId(companiesWithComplexes[0].id);
+        }
+      } else if (companiesWithComplexes.length > 0) {
+        setSelectedCompanyId(companiesWithComplexes[0].id);
+      }
     }
-  }, [isCreating, editingOffer, selectedBankId]);
+  }, [
+    isCreating,
+    editingOffer,
+    selectedBankId,
+    companiesWithComplexes,
+    complexes,
+  ]);
 
   // Сброс флагов при смене программы
   useEffect(() => {
@@ -204,7 +269,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   const loadDynamicDataFromOffer = (offer: AdminOffer) => {
     console.log("📊 Loading dynamic data from offer:", offer);
 
-    // 1. Загружаем динамические ставки - СОРТИРУЕМ ПО PRIORITY
     if (
       offer.dynamicRates &&
       Array.isArray(offer.dynamicRates) &&
@@ -226,7 +290,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           description: rate.description || "",
           isActive: rate.isActive !== undefined ? rate.isActive : true,
         }))
-        // 🔥 СОРТИРУЕМ ПО PRIORITY (по возрастанию)
         .sort((a, b) => (a.priority || 0) - (b.priority || 0));
 
       setDynamicRates(rates);
@@ -252,7 +315,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       setShowRatesForm(false);
     }
 
-    // 2. Загружаем динамические субсидии - СОРТИРУЕМ ПО PRIORITY
     if (
       offer.dynamicSubsidies &&
       Array.isArray(offer.dynamicSubsidies) &&
@@ -275,7 +337,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           description: subsidy.description || "",
           isActive: subsidy.isActive !== undefined ? subsidy.isActive : true,
         }))
-        // 🔥 СОРТИРУЕМ ПО PRIORITY (по возрастанию)
         .sort((a, b) => (a.priority || 0) - (b.priority || 0));
 
       setDynamicSubsidies(subsidies);
@@ -302,6 +363,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       setShowSubsidiesForm(false);
     }
   };
+
   // ============================================================
   // ОБРАБОТЧИКИ
   // ============================================================
@@ -324,6 +386,34 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       setFormData({
         ...formData,
         complexes: [...currentComplexes, complexName],
+      });
+    }
+  };
+
+  // 🔥 НОВОЕ: выбраны ли все ЖК выбранной компании
+  const isAllCompanyComplexesSelected = useMemo(() => {
+    if (complexesByCompany.length === 0) return false;
+    const selected = formData.complexes || [];
+    return complexesByCompany.every((c) => selected.includes(c.name));
+  }, [complexesByCompany, formData.complexes]);
+
+  // 🔥 НОВОЕ: выбрать/снять все ЖК выбранной компании
+  const handleToggleAllCompanyComplexes = () => {
+    const selected = formData.complexes || [];
+    const companyNames = complexesByCompany.map((c) => c.name);
+
+    if (isAllCompanyComplexesSelected) {
+      // Снять все ЖК компании
+      setFormData({
+        ...formData,
+        complexes: selected.filter((name) => !companyNames.includes(name)),
+      });
+    } else {
+      // Выбрать все ЖК компании
+      const newSelected = new Set([...selected, ...companyNames]);
+      setFormData({
+        ...formData,
+        complexes: Array.from(newSelected),
       });
     }
   };
@@ -354,7 +444,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
   const handleToggleRatesForm = () => {
     if (showRatesForm) {
-      // При закрытии формы удаляем все ставки из БД
       const rateIds = dynamicRates.filter((r) => r.id).map((r) => r.id);
       for (const id of rateIds) {
         if (id) {
@@ -387,7 +476,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           },
         ]);
       }
-      // Если есть данные, открываем в режиме просмотра
       setRatesEditMode(false);
     }
     setShowRatesForm(!showRatesForm);
@@ -395,7 +483,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
   const handleToggleSubsidiesForm = () => {
     if (showSubsidiesForm) {
-      // При закрытии формы удаляем все субсидии из БД
       const subsidyIds = dynamicSubsidies.filter((s) => s.id).map((s) => s.id);
       for (const id of subsidyIds) {
         if (id) {
@@ -434,7 +521,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     setShowSubsidiesForm(!showSubsidiesForm);
   };
 
-  // 🔥 Обработчики переключения режимов редактирования для динамических форм
   const handleRatesEditToggle = () => {
     setRatesEditMode(!ratesEditMode);
   };
@@ -498,11 +584,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         thresholdTolerance: formData.thresholdTolerance || null,
         thresholdToleranceType: formData.thresholdToleranceType || null,
         roundingStrategy: formData.roundingStrategy || null,
-        minLoanTermYears: formData.minLoanTermYears || null,
         description: formData.description || null,
         isActive: formData.isActive !== undefined ? formData.isActive : true,
         bankId: formData.bankId,
         programId: formData.programId,
+        minLoanAmount: formData.minLoanAmount || null,
+        maxLoanAmount: formData.maxLoanAmount || null,
+        minLoanTerm: formData.minLoanTerm || null,
+        maxLoanTerm: formData.maxLoanTerm || null,
       };
 
       if (isCreating) {
@@ -709,6 +798,8 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     if (isIT) return "ИТ ипотека (2 договора)";
     return "2 договора";
   };
+
+  const selectedComplexesCount = (formData.complexes || []).length;
 
   return (
     <div className="modal-overlay modal-fullscreen" onClick={onClose}>
@@ -1122,6 +1213,116 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               </div>
             )}
 
+            {/* 🔥 ПАРАМЕТРЫ КРЕДИТА */}
+            <div className="form-group full-width">
+              <label className="form-label">Параметры кредита</label>
+              <div className="loan-params-grid">
+                {/* Сумма от */}
+                <div className="form-group">
+                  <label
+                    htmlFor="minLoanAmount"
+                    className="form-label form-label-sm"
+                  >
+                    Сумма от (₽)
+                  </label>
+                  <input
+                    id="minLoanAmount"
+                    type="number"
+                    min={0}
+                    step={100000}
+                    value={formData.minLoanAmount || ""}
+                    onChange={(e) =>
+                      handleChange(
+                        "minLoanAmount",
+                        e.target.value ? Number(e.target.value) : null,
+                      )
+                    }
+                    className="form-input"
+                    placeholder="Например: 1 000 000"
+                  />
+                </div>
+
+                {/* Сумма до */}
+                <div className="form-group">
+                  <label
+                    htmlFor="maxLoanAmount"
+                    className="form-label form-label-sm"
+                  >
+                    Сумма до (₽)
+                  </label>
+                  <input
+                    id="maxLoanAmount"
+                    type="number"
+                    min={0}
+                    step={100000}
+                    value={formData.maxLoanAmount || ""}
+                    onChange={(e) =>
+                      handleChange(
+                        "maxLoanAmount",
+                        e.target.value ? Number(e.target.value) : null,
+                      )
+                    }
+                    className="form-input"
+                    placeholder="Например: 8 000 000"
+                  />
+                </div>
+
+                {/* Срок от */}
+                <div className="form-group">
+                  <label
+                    htmlFor="minLoanTerm"
+                    className="form-label form-label-sm"
+                  >
+                    Срок от (мес.)
+                  </label>
+                  <input
+                    id="minLoanTerm"
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={formData.minLoanTerm || ""}
+                    onChange={(e) =>
+                      handleChange(
+                        "minLoanTerm",
+                        e.target.value ? Number(e.target.value) : null,
+                      )
+                    }
+                    className="form-input"
+                    placeholder="Например: 12"
+                  />
+                </div>
+
+                {/* Срок до */}
+                <div className="form-group">
+                  <label
+                    htmlFor="maxLoanTerm"
+                    className="form-label form-label-sm"
+                  >
+                    Срок до (мес.)
+                  </label>
+                  <input
+                    id="maxLoanTerm"
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={formData.maxLoanTerm || ""}
+                    onChange={(e) =>
+                      handleChange(
+                        "maxLoanTerm",
+                        e.target.value ? Number(e.target.value) : null,
+                      )
+                    }
+                    className="form-input"
+                    placeholder="Например: 360"
+                  />
+                </div>
+              </div>
+              <span className="form-hint">
+                Укажите диапазон суммы и срока кредита, на который клиент может
+                взять оффер. Оставьте пустым, если ограничений нет.
+              </span>
+            </div>
+
             {/* Описание */}
             <div className="form-group full-width">
               <label htmlFor="description" className="form-label">
@@ -1137,23 +1338,84 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               />
             </div>
 
-            {/* Жилые комплексы */}
+            {/* 🔥 ЖИЛЫЕ КОМПЛЕКСЫ С ТАБАМИ ПО КОМПАНИЯМ */}
             <div className="form-group full-width">
-              <label className="form-label">Жилые комплексы</label>
-              <div className="complexes-grid">
-                {complexes.map((complex) => (
-                  <label key={complex.id} className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={(formData.complexes || []).includes(
-                        complex.name,
-                      )}
-                      onChange={() => handleComplexToggle(complex.name)}
-                    />
-                    {complex.name}
-                  </label>
-                ))}
-              </div>
+              <label className="form-label">
+                Жилые комплексы
+                {selectedComplexesCount > 0 && (
+                  <span className="complexes-selected-count">
+                    {" "}
+                    (выбрано: {selectedComplexesCount})
+                  </span>
+                )}
+              </label>
+
+              {/* Табы компаний */}
+              {companiesWithComplexes.length > 0 ? (
+                <>
+                  <Tabs
+                    tabs={companyTabs}
+                    selectedId={selectedCompanyId}
+                    onSelect={setSelectedCompanyId}
+                    emptyMessage="😕 Нет компаний с ЖК"
+                    emptyHint="Создайте компанию и ЖК в соответствующих разделах"
+                  />
+
+                  {/* Список ЖК выбранной компании */}
+                  {complexesByCompany.length > 0 ? (
+                    <div className="complexes-grid">
+                      {/* 🔥 Кнопка "Выбрать все" — первым элементом списка */}
+                      <label
+                        className={`checkbox-label checkbox-label-all ${
+                          isAllCompanyComplexesSelected ? "checked" : ""
+                        }`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleToggleAllCompanyComplexes();
+                        }}
+                      >
+                        <span className="select-all-icon">
+                          {isAllCompanyComplexesSelected ? "☑️" : "☐"}
+                        </span>
+                        <span className="select-all-text">
+                          {isAllCompanyComplexesSelected
+                            ? "Снять все"
+                            : "Выбрать все"}
+                        </span>
+                      </label>
+
+                      {/* Остальные ЖК */}
+                      {complexesByCompany.map((complex) => (
+                        <label
+                          key={complex.id}
+                          className={`checkbox-label ${
+                            (formData.complexes || []).includes(complex.name)
+                              ? "checked"
+                              : ""
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={(formData.complexes || []).includes(
+                              complex.name,
+                            )}
+                            onChange={() => handleComplexToggle(complex.name)}
+                          />
+                          {complex.name}
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="complexes-empty">
+                      <p>У этой компании нет ЖК</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="complexes-empty">
+                  <p>Нет доступных жилых комплексов</p>
+                </div>
+              )}
             </div>
           </div>
 

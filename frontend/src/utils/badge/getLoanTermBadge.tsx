@@ -1,4 +1,4 @@
-// src/utils/badge/getLoanTermBadge.ts
+/* // src/utils/badge/getLoanTermBadge.ts
 
 import { BankProgramResultWithIndex } from "../types";
 
@@ -16,3 +16,4 @@ export const getLoanTermBadge = (
   }
   return null;
 };
+ */

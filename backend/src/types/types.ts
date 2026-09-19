@@ -213,7 +213,6 @@ export interface BankOffer {
   /** Глобальный коэффициент погрешности (по умолчанию 100000) */
   thresholdTolerance?: number;
   complexes?: string[];
-  minLoanTermYears?: number;
   description?: string;
 }
 
@@ -244,6 +243,13 @@ export interface BankProgramResult {
   minLoanTerm?: number; // Минимальный срок (в годах)
   maxLoanTerm?: number; // Максимальный срок (в годах)
 
+  // 🔥 причины недоступности по сумме/сроку
+  isLoanAmountMismatch?: boolean;
+  isLoanTermMismatch?: boolean;
+  loanAmountMismatchReason?: string;
+  loanTermMismatchReason?: string;
+
+  badges?: string[];
   complexes?: string[];
   area?: number;
   // Расчет ежемесячного платежа
@@ -292,7 +298,6 @@ export interface BankProgramResult {
   secondTranchePayment?: number;
   trancheSecondDate?: string;
   monthsUntilSecondTranche?: number;
-  minLoanTermYears?: number;
 }
 
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========

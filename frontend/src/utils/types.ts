@@ -168,6 +168,7 @@ export interface OfferBankSectionProps {
   mortgageWithoutDownPayment?: boolean;
   mortgagePartialDownPayment?: boolean;
   loanTermYears: number;
+  loanTermMonths: number;
   area: number;
   complexName: string;
 
@@ -251,7 +252,6 @@ export interface BankOffer {
   /** Глобальная стратегия округления (по умолчанию 'up') */
   roundingStrategy?: "up" | "down";
   complexes?: string[];
-  minLoanTermYears?: number;
 }
 
 export interface TranchePaymentsResult {
@@ -274,11 +274,11 @@ export interface BankProgramResult {
   shortRate?: number;
   durationMonths?: number;
 
-  // ✅ ЛИМИТЫ ОФЕРА (добавляем)
-  minLoanAmount?: number; // Минимальная сумма кредита
-  maxLoanAmount?: number; // Максимальная сумма кредита
-  minLoanTerm?: number; // Минимальный срок (в годах)
-  maxLoanTerm?: number; // Максимальный срок (в годах)
+  // 🔥 ЛИМИТЫ ОФФЕРА (для проверки доступности на фронте)
+  minLoanAmount?: number;
+  maxLoanAmount?: number;
+  minLoanTerm?: number; // в месяцах
+  maxLoanTerm?: number; // в месяцах
 
   // ✅ ДОБАВЛЯЕМ complexes
   complexes?: string[];
@@ -330,7 +330,6 @@ export interface BankProgramResult {
   secondTranchePayment?: number;
   trancheSecondDate?: string;
   monthsUntilSecondTranche?: number;
-  minLoanTermYears?: number;
 }
 
 // ========== ПОЛНЫЙ РЕЗУЛЬТАТ КАЛЬКУЛЯТОРА ==========

@@ -212,3 +212,13 @@
     width: 100%;
   }
 }
+
+.config-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  color: #856404;
+  font-weight: 500;
+}

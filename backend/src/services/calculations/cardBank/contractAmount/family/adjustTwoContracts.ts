@@ -2,6 +2,7 @@
 
 import { Offer } from "../../../../../entities/Offer";
 import { BankOffer, Variables } from "../../../../../types/types";
+import { getMortgageLimits } from "../../../utils/limits/getMortgageLimits";
 import { getDynamicSubsidy } from "../../../сoefficients/getDynamicSubsidy";
 
 interface AdjustTwoContractsParams {
@@ -51,15 +52,7 @@ export const adjustTwoContracts = (
     minPVPercent,
   } = params;
 
-  const isIt = offer.programEntity?.type === "it";
-
-  const limit = isIt
-    ? variables.itMortgageLimit || 9000000
-    : variables.familyMortgageLimit || 6000000;
-
-  const maxLimit = isIt
-    ? variables.maxItMortgageLimit || 18000000
-    : variables.maxFamilyMortgageLimit || 15000000;
+  const { limit, maxLimit } = getMortgageLimits(offer, variables);
 
   let secondContract = secondContractAmount || 0;
 

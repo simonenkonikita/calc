@@ -24,6 +24,7 @@ export const OffersSection: React.FC = () => {
     offers,
     banks,
     programs,
+    companies,
     complexes,
     loading,
     selectedBankId,
@@ -264,6 +265,7 @@ export const OffersSection: React.FC = () => {
           editingOffer={editingOffer}
           banks={banks}
           programs={programs}
+          companies={companies}
           complexes={complexes}
           onRefresh={refresh}
         />

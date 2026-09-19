@@ -294,6 +294,7 @@ export const calculateBankProgram = (
     minLoanTerm: offer.minLoanTerm ?? undefined,
     maxLoanTerm: offer.maxLoanTerm ?? undefined,
 
+    badges: offer.badges || [],
     complexes: offer.complexes ?? undefined,
 
     rate: actualRateResult,
@@ -312,8 +313,6 @@ export const calculateBankProgram = (
       programType === "short"
         ? (offer.durationMonths ?? undefined) // ← null → undefined
         : loanTermMonths,
-
-    minLoanTermYears: offer.minLoanTermYears ?? undefined,
 
     monthlyPayment: Math.ceil(monthlyPayment),
     monthlyPaymentAfter: monthlyPaymentAfter

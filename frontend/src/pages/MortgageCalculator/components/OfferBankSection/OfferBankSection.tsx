@@ -28,6 +28,7 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
   mortgageWithoutDownPayment = false,
   mortgagePartialDownPayment = false,
   loanTermYears,
+  loanTermMonths,
   area,
   complexName,
   selectedBankFilter,
@@ -320,11 +321,12 @@ export const OfferBankSection: React.FC<OfferBankSectionProps> = ({
             isSpecialMortgageMode={isSpecialMortgageMode}
             complexName={complexName}
             loanTermYears={loanTermYears}
+            loanTermMonths={loanTermMonths}
             formatMoney={formatMoney}
             onCardClick={handleCardClick}
             hasProgramsInCategory={hasProgramsInCategory}
             getDynamicDataForOffer={getDynamicDataForOffer}
-            categories={categories} // ✅ Передаём категории
+            categories={categories} //
           />
         ))
       )}

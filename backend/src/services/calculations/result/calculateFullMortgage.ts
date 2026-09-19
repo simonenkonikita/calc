@@ -41,7 +41,7 @@ export const calculateFullMortgage = (
   const downPayment = calculateDownPayment(
     objectCost,
     formData,
-    minDownPaymentPercent, // ✅ Передаём из контроллера
+    minDownPaymentPercent,
   );
 
   const remainingAmount = objectCost - downPayment;

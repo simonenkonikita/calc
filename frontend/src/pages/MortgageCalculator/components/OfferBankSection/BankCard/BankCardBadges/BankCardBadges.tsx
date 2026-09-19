@@ -9,7 +9,6 @@ interface BankCardBadgesProps {
   termBadge: { text: string; icon: string } | null;
   trancheBadge: { text: string; icon: string } | null;
   badgeTwoContract: { text: string; icon: string } | null;
-  loanTermBadge: { text: string; icon: string } | null;
 }
 
 export const BankCardBadges: React.FC<BankCardBadgesProps> = ({
@@ -19,7 +18,6 @@ export const BankCardBadges: React.FC<BankCardBadgesProps> = ({
   termBadge,
   trancheBadge,
   badgeTwoContract,
-  loanTermBadge,
 }) => {
   const badges = [
     {
@@ -50,11 +48,6 @@ export const BankCardBadges: React.FC<BankCardBadgesProps> = ({
     {
       id: "trancheBadge",
       data: trancheBadge,
-      className: "badge-unavailable",
-    },
-    {
-      id: "loanTermBadge",
-      data: loanTermBadge,
       className: "badge-unavailable",
     },
   ];
